@@ -2,13 +2,12 @@
 \usepackage[utf8]{luainputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amsfonts,amssymb} 
-\usepackage{mathtools, thmtools}
-\usepackage[margin=1in]{geometry}
+\usepackage{mathtools}
 \usepackage[onehalfspacing]{setspace}
 \usepackage{xcolor, graphicx}
+\usepackage[margin=1in]{geometry}
 \usepackage{caption}
-\usepackage{subcaption}
-\usepackage[colorlinks, citecolor=blue]{hyperref}
+\usepackage[pdfencoding=auto, naturalnames, psdextra, colorlinks, citecolor=blue]{hyperref}
 \usepackage[noabbrev, capitalize, nameinlink]{cleveref}
 \usepackage{csquotes}
 
@@ -18,18 +17,24 @@
 \newtheorem{Lemma}{Lemma}[section]
 \newtheorem{Assumption}{Assumption}[section]
 
+\newcommand{\red}[1]{\textcolor{red}{#1}}
 \newcommand*{\R}{\mathbb{R}}
+\newcommand*{\F}{\mathcal{F}}
+\newcommand*{\W}{\mathcal{W}}
 \newcommand*{\E}{\mathbb{E}}
 \newcommand*{\N}{N}
 \newcommand*{\Var}{\mathbb{V}ar}
-\newcommand*{\pto}{\stackrel{p}{\to}}
-\newcommand*{\dto}{\stackrel{d}{\to}}
+\newcommand*{\pto}{\ensuremath{\rightarrow_p}}
+\newcommand*{\dto}{\ensuremath{\rightarrow_d}}
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\let\oldforall\forall
+\let\forall\undefined
+\DeclareMathOperator{\forall}{\oldforall}
+\DeclareMathOperator{\diag}{diag}
 \newcommand{\mvert}[1][\middle]{\ensuremath{\,#1\vert\,}}
-\renewcommand{\arraystretch}{1.4}
 
-\usepackage[backend=biber, autopunct=true, authordate, hyperref=true]{biblatex-chicago} 
+\usepackage[backend=biber, autopunct=true, authordate, hyperref=true, doi=false]{biblatex-chicago} 
 \addbibresource{riskpriceinference.bib}
 \graphicspath{{figures/}}
 
@@ -58,19 +63,19 @@ Moving forward, we sketch the model developed in \textcite{khrapov2016affine} an
 conditions.
 We then provide a series of sufficient conditions for valid inference. 
 We have a pricing kernel $M_{t, t+1}(\theta)$ which allows us to characterize the price $P_t$ at time $t$ of any
-payoff at time $t+1$ of a function $f$ and information set $I_t$, $f\left(r_{t+1}, \sigma^2(t+1) \mvert
-I_t\right)$. 
+payoff at time $t+1$ of a function $f$ and information set $\F_t$, $f\left(r_{t+1}, \sigma^2(t+1) \mvert
+\F_t\right)$. 
 We use $*$'s to denote the risk neutral measure.
 
 \begin{equation}
-    P_t  = \E\left[M_{t,t+1}(\theta) f\left(r_{t+1}, \sigma^2(t+1) \mvert  I_t\right) \mvert I_t \right] =
-    \E^{*}\left[H(r_{t+1}, \sigma^2(t+1),  I_t) \mvert I_t \right] 
+    P_t  = \E\left[M_{t,t+1}(\theta) f\left(r_{t+1}, \sigma^2(t+1) \mvert  \F_t\right) \mvert \F_t \right] =
+    \E^{*}\left[H(r_{t+1}, \sigma^2(t+1),  \F_t) \mvert \F_t \right] 
 \end{equation}
 
 
 To make the problem tractable, we assume that the problem is Markov and that there is no Granger causality from
 return to volatility. 
-This implies the conditional probability distribution of $\sigma^2_{t+1} \vert I_t$ equals the conditional
+This implies the conditional probability distribution of $\sigma^2_{t+1} \vert \F_t$ equals the conditional
 probability distribution of $\sigma^2_{t+1} \vert \sigma^2_t$.
 Consequently, we can write down our model in the risk-neutral measure using some functions, $a^{*}(u), b^{*}(u)$,
 and $\alpha^{*}(v), \beta^{*}(v), \& \gamma^{*}(v)$, as the following two equations in terms of the Laplace
@@ -106,7 +111,7 @@ can be seen in the formula for $\sigma^2_{t+1}$'s conditional mean.
 Assuming the measure change preserves the general structure between the risk-neutral and physical measures implies
 \cref{eqn:cond_characterisitc_func}.
 We also assume that $\left[ \frac{\psi}{\phi} \right]^2 \approx \frac{\E \left[\sigma^2_{t+1} \mvert
-I_t\right]}{\Var\left[r_{t+1} \mvert I_t\right]}$, which enables our approximation of $\sigma^2_{t+1}$ by the
+\F_t\right]}{\Var\left[r_{t+1} \mvert \F_t\right]}$, which enables our approximation of $\sigma^2_{t+1}$ by the
 realized volatility.
 
 \begin{equation}
@@ -140,7 +145,7 @@ The SDF satisfies the following equation for some functions $m_0(\cdot)$ and $m_
     \intertext{Then by the law of iterated expectations and some algebra.}
     \E \left[\exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \theta_1 \sigma^2_{t+1} - \theta_2 r_{t+1}\right)
     \exp\left(- \alpha(\theta_2) \sigma^2_{t+1} - \beta (\theta_2) \sigma^2_{t+1} - \gamma(\theta_2)\right) \mvert
-    I_t \right] = 1
+    \F_t \right] = 1
 \end{gather}
 
 This implies the two unspecified functions are as follows.
@@ -246,7 +251,7 @@ In addition, $g$ is continuous at each $\omega$, given the restrictions above an
 functions imply that $g$ is uniformly bounded. 
 For convenience, we assume that the space of $\omega$ is compact.
 This should not be an issue here because the parameters  are either a priori bounded, such as $\phi$ or we have
-substantial a priori knowledge an their plausible magnitudes.
+substantial a priori knowledge on their plausible magnitudes.
 Hence, \textcite[Theroem 2.6]{newey1994large} implies our estimator is consistent.
 
 By the above arguments, we have a consistent estimator for $\omega$ and the optimal weight matrix $\Omega^{-1}
@@ -254,7 +259,8 @@ By the above arguments, we have a consistent estimator for $\omega$ and the opti
 Let $G \coloneqq \E\left[\nabla g\right]$
 Clearly, $g$ is continuously differentiable, and its derivative $G$ is continuous.
 In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
-The only real question is whether $\sqrt{T} g_n(\omega_0) \dto \N(0, \Xi)$ for some matrix $\Xi$.
+The only real question is whether $\sqrt{T} g_n(\omega_0) \dto \N(0, \aleph)$ for some positive-definite matrix
+$\aleph$.
 
 \begin{Assumption}[Weak Dependence]
     \label{assumption:weak_dependence}
@@ -264,7 +270,7 @@ The only real question is whether $\sqrt{T} g_n(\omega_0) \dto \N(0, \Xi)$ for s
 
 Since, $\norm*{g_n}$ is almost surely bounded by $1$ it has all of its moments and $z_n$ being $\alpha$-mixing
 implies $g_n$ is as well by the central limit theorem for strongly mixing process 
-$\sqrt{n} g_n(\omega_0) \dto \N(0,\Xi)$ as required. 
+$\sqrt{n} g_n(\omega_0) \dto \N(0,\aleph)$ as required. 
 Consequently, by \textcite[Theorem 3.2]{newey1994large} we have convergence in distribution as well as convergence
 in probability.
 
@@ -279,7 +285,218 @@ in probability.
 \end{Theorem}
 
 
+\section{Partial Identification Setup}
+
+In this section, take the model described in the previous sections and place it in the setup of
+\textcite{andrewsGmm2014} so that we ca analyze the effects of possible lack of identification in the model in a
+nice clean way.
+The goal here is to perform valid inference for $\theta_1, \theta_2$ even when $\phi$ might be zero. 
+To do this effectively, we are going to switch from the notation we were using above to notation used in
+\textcite{andrewsGmm2014}. 
+
+
+From the discussion above, we can collect the parameters discussed above into a parameter vector of the following
+form,i.e.\@ recall the following.
+
+\begin{equation}
+    \omega = \lbrace \rho, c, \delta, \phi, \theta_1, \theta_2 \rbrace
+\end{equation}
+
+To write it in the notation of \textcite{andrewsGmm2014}, we partition $\omega$ into three parts.
+
+
+\begin{align}
+    \beta &\coloneqq \phi  \in (-1, 1) \\ 
+    \zeta &\coloneqq \lbrace \rho, c, \delta, \theta_1 \rbrace \in [0,1) \otimes \R_{++} \otimes \R_{++} \otimes
+    \R  \\
+    \pi &\coloneqq \theta_2 \in \R 
+\end{align}
+
+Let $\Omega$ be the set of possible $\omega$, that as defined above.
+It is worth noting that the parameter space has a product form, i.e.\@ the values do not affect the valid values
+of the other parameters.
+
+In this environment, $\pi$ is not identified when $\beta = 0$.
+Both $\beta$ and $\zeta$ are always identified.
+$\zeta$ does not affect the identification of $\pi$.
+
+Let $Q_n(\omega)$ be the GMM criterion function, then the GMM estimator $\hat{\omega}_n$ satisfies the following.
+
+
+\begin{equation}
+    \hat{\omega}_n \in \Omega\ \text{and}\ Q_n(\hat{\omega}_n) = \inf_{\omega \in \Omega} Q_n(\omega) +
+    o\left(n^{-1}\right) 
+\end{equation}
+
+
+Now that we have defined the parameters, we can characterize the set of assumptions necessary for valid inference.
+We will work through the assumptions described in \textcite{andrewsGmm2014}.
+The set of necessary assumptions is relatively complicated because we have to characterize the asymptotic
+distribution under several different estimation strengths simultaneously, and the assumptions required to do that
+  differ in the various cases. 
+In what follows, we will use 
+
+\subsection{Assumption GMM1\label{Section GMM}}
+
+The first assumption specifies the basic identification
+problem. It also provides conditions that are used to determine the
+probability limit of the GMM estimator, when it exists, under all categories
+of drifting sequences of distributions.
+Let $\xi$ index the part of the distribution of the data $x_t$ that is not determined by the moment equations.
+In general, it is a (likely infinite-dimensional) nuisance parameter that affects the distribution of the data. 
+
+
+We collect the parameters that we are estimating $\omega$ and the nuisance parameter $\xi$ into one parameter,
+$\gamma$ and associated parameter space $\Gamma$.
+In the previous discussion we characterized the parameter spaces in a non-compact fashion, let $\Omega^{*}$ be a
+compact subset of $\Omega$, where the true parameter values live.
+%TODO Does the set of possible nuisance parameters depend upon the estimated parameters in our model?
+
+\begin{equation}
+    \Gamma \coloneqq \left\lbrace \gamma \coloneqq (\omega, \xi) \mvert \omega \in \Omega^{*}, \phi \in
+    \Phi^{*}(\omega) \right\rbrace 
+\end{equation}
+
+We characterize these drifting sequences of distributions by sequences of true parameters $\gamma_n \coloneqq
+(\omega_n, \phi_n)$.
+
+In what follows, three sets of drifting sequences $\lbrace \gamma_n \rbrace$ are key. 
+
+\begin{align}
+    \Gamma\left(\gamma_0\right) &\coloneqq \left\lbrace \left\lbrace \gamma_n \in \Gamma n \geq 1 \right\rbrace
+        \mvert \gamma_n \to \gamma_0 \in \Gamma \right\rbrace\\ 
+    \Gamma(\gamma_0, 0, b) &\coloneqq \left\lbrace \lbrace \gamma_n \rbrace \in \Gamma(\gamma_0) \mvert \beta_0 =
+        0 \text{and}\ n^{1/2} \beta_n \to b \in (\R \Cup \lbrace \pm \infty) \right\rbrace \\
+    \Gamma(\gamma_0, \infty, \eta_0) &\coloneqq \left\lbrace \lbrace \gamma_n \rbrace \in \Gamma (\gamma_0) \mvert
+        n^{1/2} \beta_n \to \infty \text{and}\ \beta_n \to \eta_0 \right\rbrace 
+\end{align}
+
+\subsection{Assumption GMM1}
+
+These are the standard GMM regularity conditions appropriately adjusted for the lack of identification when $\beta
+=0$.
+
+\begin{enumerate}
+    \item If $\beta=0, \overline{g}_{n}(\omega )$ and $\W_{n}(\omega)$ do not depend on $\pi, 
+        \forall \omega \in \Omega, \forall n\geq1$, for any true parameter $\gamma^{\ast}\in \Gamma.$
+    \item Under $\lbrace \gamma_{n} \rbrace \in \Gamma\left(\gamma _{0}\right), \sup_{\omega \in \Omega}
+        \norm*{\overline{g}_{n}(\omega) - g_{0}(\omega; \gamma_{0})} \pto 0$ and $\sup_{\omega \in
+        \Omega} \norm{\W_{n}(\omega)-\W(\omega; \gamma _{0})} \pto 0$ for some
+        non-random functions $g_{0}(\omega; \gamma_{0}):\Omega \times \Gamma \rightarrow R^{k}$ and
+        $\W(\omega; \gamma _{0}):\Omega \times \Gamma \rightarrow R^{k\times k}.$
+\item When $\beta_{0}=0,  g_{0}(\xi ,\pi ;\gamma _{0})=0$ if and only if $\xi =\xi _{0} \forall \pi \in
+    \Pi \forall \gamma _{0}\in \Gamma.$
+\item When $\beta_{0}\neq 0, g_{0}(\omega; \gamma _{0})=0$ if and only if $\omega =\omega _{0} \forall \gamma
+    _{0}\in \Gamma.$
+\item  $g_{0}(\omega ;\gamma _{0})$ is continuously differentiable in $\omega $ on $\Omega,$ with its partial
+    derivatives w.r.t.\@ $\theta$ and $\xi$ denoted by $g_{\omega }(\theta ;\gamma _{0})\in R^{k\times
+    d_{\omega }}$ and $g_{\xi }(\omega ;\gamma _{0})\in R^{k\times d_{\xi }},$ respectively.
+\item $\W(\omega ;\gamma _{0})$ is continuous in $\omega$ on $\Omega$ $\forall \gamma _{0}\in \Gamma.$
+\item $0 < \lambda _{\min}(\W(\xi_{0}, \pi ;\gamma _{0}))\leq \lambda _{\max }(\W(\xi
+    _{0},\pi ;\gamma _{0})) < \infty, \forall \pi \in \Pi ,$ $\forall \gamma _{0}\in \Gamma .$
+\item $\lambda _{\min} (g_{\xi}(\xi_{0},\pi ;\gamma _{0})^{\prime }\W(\xi _{0},\pi ;\gamma _{0})g_{\xi
+    }(\xi _{0},\pi ;\gamma _{0}))>0,$ $\forall \pi \in \Pi ,$ $\forall \gamma _{0}\in \Gamma $ with $\beta_{0}=0.$
+\item$\xi (\pi)$ is compact $\forall \pi \in \Pi ,$ and $\Pi $ and $\Omega $ are compact.
+    %FIXME This is not the correct statement.
+\item $\forall \varepsilon > 0, \exists \delta > 0$ such that $d_{H}\left(\xi \left(\pi _{1}\right) ,\xi \left(
+    \pi _{2}\right) \right) < \varepsilon \forall \pi_{1}, \pi_{2}\in \Pi$ with $\norm*{\pi _{1}-\pi
+    _{2}} <\delta$, where $d_{H}\left( \cdot \right) $ is the Hausdorff metric.
+\end{enumerate}
+
+
+
+\subsection{Assumption GMM2*}
+
+
+\begin{enumerate}
+    \item Under $\{\gamma_n\} \in \Gamma\left(\gamma_0, 0, b\right),\, \sup_{\left. \omega \in \Omega \mvert
+        \norm*{(\beta, \zeta')' - (\beta, \zeta')_{0,n}'\leq \delta_n}\right.} \norm*{\frac{\partial}{\partial \xi'}
+        \overline{g}_n(\omega) - g_{\xi}\left(\omega ; \gamma_0 \right)} = o_p(1)$  for all constants $\delta_n
+        \to 0$.
+    \item Under $\{\gamma_n \} \in \Gamma\left(\gamma_0, \infty, \eta_0\right),\,  \sup_{\omega \in
+        \Omega_{n}(\delta_n)} \norm*{\left(\frac{\partial}{\partial \omega'} \overline{g}_n - g_{\omega}(\omega ;
+            \gamma_0)\right) \diag(1_{1+d_\zeta}', (1/\beta)_{d_{\pi}}'}  = o_p(1)$ for all constants $\delta_n \to 0$.
+\end{enumerate}
+
+Since, our moment conditions, $\overline{g}_n(\omega)$ are sample averages, we can specify this using a uniform
+law of large numbers and the dominate convergence theory to interchange integration and differentiation.
+\textcite{andrewsGmm2014} show that this is a sufficient condition for their Assumption GMM2 that we actually
+need.
+
+
+\subsection{Assumption GMM3}
+
+This assumption is actually about how the matrix of partial derivatives is evolving of the criterion function is
+evolving over time. 
+
+\begin{equation}
+    K_{n,g}(\omega, \gamma^{*}) \coloneqq  \frac{1}{n} \sum_{i=1}^n \frac{\partial}{\partial {\beta^{*}}'}
+    \E_{\gamma^{*}} g(W_i, \omega)
+\end{equation}
+
+
+
+\begin{enumerate}
+    \item $\overline{g}_n(\omega) = \frac{1}{n} \sum_{i=1}^n g(W_i, \omega)$  for some function $g(W_i, \omega)
+        \in \R^k \forall \omega \in \Omega$.
+    \item $\E_{\gamma^{*}} g(W_i, \xi^{*}, \pi) = 0 \forall \pi \in \Pi, \forall i \geq 1$, where the true
+        parameters $\gamma^{*}$ satisfies $\gamma^{*} = (0,\zeta^{*}, \pi^{*}, \xi^{*}) \in \Gamma$.
+    \item Under $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b), \frac{1}{\sqrt{n}} \sum_{i=1}^n \left(g(W_i, \xi_{0,n},
+        \pi_n) - \E_{\gamma_n} g(W_i, \psi_{0,n}, \pi_n)\right) \dto \N\left(0, \aleph_g(\gamma_0)\right)$, where
+        $\aleph_{g}(\gamma_0)$ is a $k \times k$ matrix.
+    \item 
+        \begin{enumerate}
+            \item  $K_{n,g}(\omega ; \gamma^{*})$ exists $\forall (\omega, \gamma^{*}) \in \left(\Omega_{\delta}
+                \times \Gamma_{0}\right) \forall n \geq 1$.
+            \item $K_{n,g}(\psi_n, \pi, \tilde{\gamma}_n)$ uniformly converges to some non-stochastic matrix-valued
+                function  $K_{g}(\psi_0, \pi, \gamma_0)$  over $\pi \in \Pi$ for all non-stochastic sequences $\{
+                \psi_n \}$ and $\{ \tilde{\gamma}_n \}$ such that $\tilde{\gamma}_n \in \Gamma$, $\tilde{\gamma_n}
+                \to \gamma_0 \coloneqq (0, \zeta_0, \pi_0, \xi), \{ \beta_n, \zeta_n, \pi \} \in \Omega$ and
+                $\{\beta_n, \zeta_n \} \to (0, \zeta_0)$.
+                \label{item:asymptotic_valid_cov}
+            \item $K_g(\beta_0, \zeta_0, \pi ; \gamma_0)$ is continuous on $\Pi \forall \gamma_0 \in \Gamma$ with
+                $\beta_0 = 0$.
+        \end{enumerate}
+        %Since \dim(\beta) = 1$, we can assume wlog that \eta_0 = 1.
+        \item $K(\beta_0, \zeta_0, \pi: \gamma_0) \eta_0 = g_{\beta, \zeta}\left(\beta_0, \pi; \gamma_0\right)$ S
+            for some S $\in \R^{1+d_{\zeta}}$ if and only $\pi = \pi_0$.
+        \item Under $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{n} \sum_{i=1}^n
+            \frac{\partial}{\partial (\beta, \zeta')'}  \E_{\gamma_n} g\left(W_i, \beta, \zeta, \pi\right)
+            \vert_{\beta, \zeta, \pi = \omega_n} \to g_{\beta, \zeta}(\omega_0 ; \gamma_0)$.
+\end{enumerate}
+
+
+
+
+\subsection{Assumption GMM4*}
+
+
+First, start by defining $g^{*}$ as follows, where (as used above?) $g_{x}$ refers to the derivative of $g$ with
+respect to $x$.
+Note, Assumptions GMM1(i) and Assumption GMM3(i) imply that when $\beta_0 = 0, g_{\zeta}\left(\beta_0, \zeta_0,
+\pi ; \gamma_0\right)$, does not depend upon $\pi$.
+
+\begin{equation}
+    g_{\beta, \zeta}^{*}\left(\beta_0, \zeta_0, \pi_1, \pi_2 ; \gamma_0\right)  = \left[g_{\beta}\left(\beta_0,
+    \zeta_0, \pi_1 ; \gamma_0\right)  : g_{\beta}\left(\beta_0, \zeta_0, \pi_2 ; \gamma_0\right) : g_{\zeta}
+    \left(\beta_0, \zeta_0 ; \gamma_0\right)  \right]  \in \R^{k \times (d_{\zeta} + 2)}
+\end{equation}
+
+
+\begin{itemize}
+    \item $\beta$ is a scalar.
+    \item $g_{\beta, \zeta}^{*}(\beta_0, \zeta_0, \pi_1 \pi_2 ; \gamma_0)$ has full column rank. 
+    \item $\aleph_g(\gamma_0)$ is positive definite $\forall \gamma_0 \in \gamma $ with $\beta_0 = 0$. 
+\end{itemize}
+
+
+
+
+
+
 \printbibliography
+
+
 
 
 
