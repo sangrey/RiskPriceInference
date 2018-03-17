@@ -9,7 +9,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{caption}
 \usepackage[pdfencoding=auto, naturalnames, psdextra, colorlinks, citecolor=blue]{hyperref}
-\usepackage[noabbrev, capitalize, nameinlink]{cleveref}
+\usepackage[noabbrev, capitalise, nameinlink]{cleveref}
 \usepackage{csquotes}
 
 
@@ -22,7 +22,7 @@
 
 \usepackage{enumitem}
 \newlist{assumplist}{enumerate}{1}
-\setlist[assumplist]{label=(\roman{assumplisti}), ref=\theassump.\roman{assumplisti},noitemsep}
+\setlist[assumplist]{label=(\roman{assumplisti}), ref=\roman{assumplisti},noitemsep}
 
 \declaretheorem[style=definition, name=Assumption, refname={assumption,assumptions},
     Refname={Assumption,Assumptions}, numberwithin=section]{assump}
@@ -30,13 +30,13 @@
 \Crefname{assumplisti}{Assumption}{Assumptions}
 
 \addtotheorempostheadhook[assump]{\crefalias{assumplisti}{assump}}
-\newcommand*{\fullref}[1]{\hyperref[{#1}]{\cref{#1} (\nameref*{#1})}}
-\newcommand*{\Fullref}[1]{\hyperref[{#1}]{\Cref{#1} (\nameref*{#1})}}
-\newcommand*{\fullrefs}[1]{\hyperref[{#1}]{\cref{#1} (\nameref*{#1})}}
+\newcommand*{\fullref}[1]{\hyperref[{#1}]{\namecref{#1} \nameref*{#1}(\labelcref{#1})}}
+\newcommand*{\namedref}[1]{\hyperref[{#1}]{\nameref*{#1}(\labelcref{#1})}}
+\newcommand*{\Fullref}[1]{\hyperref[{#1}]{\nameCref{#1} \nameref*{#1}(\labelcref{#1})}}
 
 
 \newcommand{\red}[1]{\textcolor{red}{#1}}
-\newcommand{\orange}[1]{\textcolor{OrangeRed1}{#1}}
+\newcommand{\purple}[1]{\textcolor{purple}{#1}}
 \newcommand*{\R}{\mathbb{R}}
 \newcommand*{\F}{\mathcal{F}}
 \newcommand*{\W}{\mathcal{W}}
@@ -68,7 +68,7 @@
 
 \maketitle
 
-Two key questions at the very heart of fiance are what are the risks investors face and what are the prices of
+Two key questions at the very heart of finance are what are the risks investors face and what are the prices of
 those risks.
 Two leading risks are equity risk and volatility risk.
 Although the literature has shown that volatility risk clearly matters, constructing beliefs concerning the price
@@ -394,7 +394,8 @@ In what follows, three sets of drifting sequences $\lbrace \gamma_n \rbrace$ are
 These are the standard GMM regularity conditions appropriately adjusted for the lack of identification when $\phi
 =0$.
 
-\orange{Question (Xu):}
+%TODO
+\purple{Question (Xu):}
 What is the difference between $g_0\left(\cdot \mvert \gamma_0\right)$ and $g\left(\cdot \mvert \gamma_0\right)$?
 
 \begin{assump}[GMM 1]\label{ass:GMM1}
@@ -438,61 +439,77 @@ What is the difference between $g_0\left(\cdot \mvert \gamma_0\right)$ and $g\le
 \end{assump}
 
 To verify the conditions above, we break them down into three subsections.
-Assumptions \labelcref{ass:GMM1a}, \labelcref{ass:GMM1b}, \labelcref{ass:GMM1c}, and \labelcref{ass:GMM1d}
+Assumptions \namedref{ass:GMM1a}, \namedref{ass:GMM1b}, \namedref{ass:GMM1c}, and \namedref{ass:GMM1d}
 state that when $\phi = 0$, the moment conditions contain no information regarding $\pi$, but when $\phi \neq 0$,
 the model is identified.
 
-\orange{TODO (Paul):} 
+%TODO
+\purple{TODO (Paul): 
 Relate those assumptions to the discussion in \cref{sec:spectral_GMM}
-We need to show that \cref{ass:GMM1b} holds; we showed it holds pointwise in \cref{sec:spectral_GMM} but not in a
-functional sense. (At least I think so.)
+We need to show that \namedref{ass:GMM1b} holds; we showed it holds pointwise in \cref{sec:spectral_GMM} but not
+in a functional sense. (At least I think so.)}
 
-The next two assumptions (\labelcref{ass:GMM1e} and \labelcref{ass:GMM1f} are  technical conditions regarding the
+The next two assumptions (\namedref{ass:GMM1e} and \namedref{ass:GMM1f} are  technical conditions regarding the
 behavior of the moment conditions and weight matrix. 
-\orange{TODO: (Paul) Is this true?} 
+%TODO
+\purple{TODO: (Paul) Is this true?} 
 Since our moment conditions are derived from an infinitely-differentiable  characteristic function and the weight
 matrix is the optimal one, they both hold trivially.
 
-The third subsection of \cref{ass:GMM1} concerns the weight matrix.
-Since we are using the inverse covariance matrix of valid non-redundant model, assumptions \labelcref{ass:GMM1g}
-and \labelcref{ass:GMM1h} automatically hold.
+The third subsection of Assumption \nameref{ass:GMM1} concerns the weight matrix.
+Since we are using the inverse covariance matrix of valid non-redundant model, assumptions \namedref{ass:GMM1g}
+and \namedref{ass:GMM1h} automatically hold.
 
-The last two assumptions, \labelcref{ass:GMM1i} and \labelcref{ass:GMM1j} require that the parameter spaces do not
+The last two assumptions, \namedref{ass:GMM1i} and \namedref{ass:GMM1j} require that the parameter spaces do not
 vary too much with the parameters and are compact.
-Since the parameter space here has a product form, \cref{ass:GMM1j}  holds trivially.
-\Cref{ass:GMM1i} does not hold.
-However, since there do exist compact sets that contain the parameters. 
----Even the parameters whose domain is theoretically unbounded have bounds on the apriori believable
+Since the parameter space here has a product form, \namedref{ass:GMM1j}  holds trivially.
+\namedref{ass:GMM1i} does not hold.
+However, since there exists compact sets that contain the parameters---Even the parameters whose domain is
+theoretically unbounded have bounds on the apriori believable
 estimates---and $(\phi, \zeta)$ are identified this is not an issue in practice. 
 
+
+%TODO
+\purple{Question: (Xu) What is $\Eta_n(\delta_n)$. Is the domain the same in \namedref{ass:GMM2b} and
+\namedref{ass:GMM2c}?}
 
 
 \begin{assump}[GMM 2*]\label{ass:GMM2}
 \begin{assumplist}
-    \item If $\{\gamma_n\} \in \Gamma\left(\gamma_0, 0, b\right)$, \newline $\sup_{\left\lbrace \eta \in \Eta
+    \item $\sampmom(\eta)$ is continuously differentiable in $\eta$ for all $n \geq 1$. 
+        \label{ass:GMM2a}
+    \item If $\{\gamma_n\} \in \Gamma\left(\gamma_0, 0, b\right)$, $\sup_{\left\lbrace \eta \in \Eta
         \mvert \norm*{(\phi, \zeta')' - (\phi, \zeta')_{0,n}'} \leq \delta_n \right\rbrace}
         \norm*{\frac{\partial}{\partial \xi'} \sampmom(\eta) - \popmom_{\xi}\left(\eta \mvert \gamma_0 \right)} =
         o_p(1)$  for all deterministic sequences  $\delta_n \to 0$.
+        \label{ass:GMM2b}
     \item If $\{\gamma_n \} \in \Gamma\left(\gamma_0, \infty, \eta_0\right)$, $\sup_{\eta \in \Eta_{n}(\delta_n)}
         \norm*{\left(\frac{\partial}{\partial \eta'} \overline{g}_n - g_{\eta}\left(\eta \mvert
-        \gamma_0\right)\right) \diag\left(1_{1+d_\zeta}', (1/\phi)_{d_{\pi}}'\right)}  = o_p(1)$ for all
+        \gamma_0\right)\right) \diag\left(1_{1+d_\zeta}', (1/\phi_n)_{d_{\pi}}'\right)}  = o_p(1)$ for all
         deterministic sequences $\delta_n \to 0$.
+        \label{ass:GMM2c}
 \end{assumplist}
 \end{assump}
 
-Since, our moment conditions, $\sampmom(\eta)$ are sample averages, we can specify this using a uniform
-law of large numbers and the dominate convergence theory to interchange integration and differentiation.
-\textcite{andrewsGmm2014} show that this is a sufficient condition for their Assumption GMM2 that we actually
-need.
 
-This assumption is actually about how the matrix of partial derivatives of the criterion function is
-evolving over time. 
+Since our moment conditions are sample average of the characteristic function, they satisfy \namedref{ass:GMM2a}
+automatically. 
+%TODO
+\purple{TODO: We need to show that \namedref{ass:GMM2b} and \namedref{ass:GMM2c} are satisfied (they are) using a
+uniform law of large numbers and the dominated convergence theorem.}
+\textcite{andrewsGmm2014} show that this is a sufficient condition for their Assumption GMM2, which is what we
+actually need. 
+
+Once we have \nameref{ass:GMM1} and \nameref{ass:GMM2}, we use \nameref{ass:GMM3} to derive the asymptotic
+distribution under weak and semi-strong identification.
+These conditions will be characterized using the expected derivative of the population moment conditions. 
+
 
 \begin{defn}
     \label{defn:moment_derivative_func}
     \begin{equation}
-        K_{n,g}(\eta, \gamma^{*}) \coloneqq  \frac{1}{n} \sum_{i=1}^n \frac{\partial}{\partial \phi^{*}} \E \left[
-        \popmom(W_i, \eta) \mvert \gamma^{*} \right]
+        K_{n,g}\left(\eta \mvert \gamma^{*}\right) \coloneqq  \frac{1}{n} \sum_{i=1}^n \frac{\partial}{\partial
+        \phi^{*}} \E \left[ \popmom(W_i, \eta) \mvert \gamma^{*} \right]
     \end{equation}
 \end{defn}
 
@@ -500,60 +517,72 @@ evolving over time.
 \begin{assump}[GMM 3]\label{ass:GMM3}
 \begin{assumplist}
     \item $\sampmom(\eta) = \frac{1}{n} \sum_{i=1}^n \popmom(W_i, \eta)$  for some function $\popmom(W_i,
-        \eta) \in \R^k$ for all $\eta \in \Eta$.
+        \eta) : \R^{k \times k} \times \Eta \to \R^k$.
         \label{ass:GMM3a}
-        %Should i \geq 1 be an n \geq 1?
     \item $\E\left[\popmom(W_i, \beta_0, \zeta^{*}, \pi) \mvert \gamma^{*} \right] = 0$ for all $\pi \in \Pi$ and
-        for all $i \geq 1$, where the true parameter $\gamma^{*} = \left(0,\zeta^{*}, \pi^{*}, \xi^{*}
-        \right) \in \Gamma$.
+        for all $i \geq 1$ if $\gamma^{*} = \left(0,\zeta^{*}, \pi^{*}, \xi^{*} \right) \in \Gamma$.
         \label{ass:GMM3b}
     \item If $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{\sqrt{n}} \sum_{i=1}^n \left(g(W_i,
-        \xi_{0,n}, \pi_n) - \E \left[g(W_i, \zeta_{0,n}, \pi_n)\mvert \gamma_n \right]\right)  \dto \N\left(0,
+        \zeta_{0,n}, \pi_n) - \E \left[g(W_i, \zeta_{0,n}, \pi_n)\mvert \gamma_n \right]\right)  \dto \N\left(0,
         \aleph_g(\gamma_0)\right)$, where $\aleph_{g}(\gamma_0)$ is a $k \times k$ matrix.
-    \item 
         \label{ass:GMM3c}
+    \item 
+        \label{ass:GMM3d}
         \begin{enumerate}
             \item  $K_{n,g}\left(\eta \mvert \gamma^{*}\right)$ exists for all $\{\eta, \gamma^{*} \} \in
-                \left(\Eta_{\delta} \times \Gamma_{0}\right)$ for all $n \geq 1$.
-            \item $K_{n,g}(\psi_n, \pi, \tilde{\gamma}_n)$ uniformly converges to some non-stochastic matrix-valued
-                function  $K_{g}(\psi_0, \pi, \gamma_0)$  over $\pi \in \Pi$ for all non-stochastic sequences $\{
-                \psi_n \}$ and $\{ \tilde{\gamma}_n \}$ such that $\tilde{\gamma}_n \in \Gamma$, $\tilde{\gamma_n}
-                \to \gamma_0 \coloneqq (0, \zeta_0, \pi_0, \xi), \{ \phi_n, \zeta_n, \pi \} \in \Eta$ and
-                $\{\phi_n, \zeta_n \} \to (0, \zeta_0)$.
-                \label{item:asymptotic_valid_cov}
+                \left(\Eta_{\delta} \times \Gamma_{0}\right)$ and for all $n \geq 1$.
+            %TODO
+            \item[] \purple{Question (Xu): What is $\tilde{\gamma}$, i.e.\@ why does $\gamma$ have a tilde when
+                the other parameters do not?}
+            \item $K_{n,g}\left(\phi_n, \zeta_n, \pi \mvert \tilde{\gamma}_n\right)$ uniformly converges to some
+                non-stochastic matrix-valued function  $K_{g}\left(0, \zeta_0, \pi \mvert \gamma_0\right)$  over
+                $\pi \in \Pi$ for all deterministic sequences $\{\phi_n, \zeta_n, \tilde{\gamma}_n \}$ satisfying
+                $\tilde{\gamma}_n \in \Gamma$, $\tilde{\gamma_n} \to \gamma_0 \coloneqq (0, \zeta_0, \pi_0, \xi)$,
+                $\{\phi_n, \zeta_n, \pi \} \in \Eta$ and $\{\phi_n, \zeta_n \} \to (0, \zeta_0)$.
             \item $K_g\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right)$ is continuous on $\Pi$ for all  $\gamma_0
                 \in \Gamma$ with $\phi_0 = 0$.
         \end{enumerate}
-        %TODO Double check the notation in the footnote.
-        \item $K\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right) \eta_0 = \popmom_{\phi, \zeta}\left(\phi_0,
-            \pi\mvert \gamma_0\right) x$ for some $x \in \R^{1+d_{\zeta}}$ if and only $\pi =
-            \pi_0$.\footnote{Since $\dim(\phi) = 1$, we can assume without loss of generality that the $\omega_0$
-            from AK equals $1$.}
-        \label{ass:GMM3d}
+        \item $K\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right) = \popmom_{\phi, \zeta}\left(\phi_0, \pi\mvert
+            \gamma_0\right) x$ for some $x \in \R^{1+d_{\zeta}}$ if and only $\pi = \pi_0$.\footnote{Since
+                $\dim(\phi) = 1$, we can assume without loss of generality that the $\omega_0$ from
+            \textcite{andrewsGmm2014} equals $1$.}
+        \label{ass:GMM3e}
+        %TODO
+        \item[] \purple{Question (Xu): What is the difference between $g(W_i, \eta)$ evaluated at $\eta = \eta_n$
+            and $g(W_i, \eta_n)$?}
         \item If $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b)$, $\left. \frac{1}{n} \sum_{i=1}^n
             \frac{\partial}{\partial \eta}  \E \left[ \popmom\left(W_i, \eta\right ) \mvert \gamma_n \right]
             \right\rvert_{\eta = \eta_n} \to \popmom_{\eta}\left(\eta_0 \mvert \gamma_0\right)$.
-        \label{ass:GMM3e}
+        \label{ass:GMM3f}
 \end{assumplist}
 \end{assump}
 
-First, start by defining $g^{*}$ as follows, where (as used above?) $g_{x}$ refers to the derivative of $g$ with
-respect to $x$.
-Note, Assumptions GMM1(i) and Assumption GMM3(i) imply that when $\phi_0 = 0$, $g_{\zeta}\left(\phi_0, \zeta_0,
-\pi \mvert \gamma_0\right)$, does not depend upon $\pi$.
+Assumption \namedref{ass:GMM3a} is trivially satisifed,  and we showed that \namedref{ass:GMM3b} is satisfied in
+\cref{sec:spectral_GMM}.
+%TODO
+\purple{TODO: Show that \nameref{ass:GMM3c} is sasfied by using a triangular CLT}
 
-\begin{equation}
-    g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)  =
-    \left[g_{\phi}\left(\phi_0, \zeta_0, \pi_1 \mvert \gamma_0\right)  , g_{\phi}\left(\phi_0, \zeta_0, \pi_2
-    \mvert \gamma_0\right) , g_{\zeta} \left(\phi_0, \zeta_0 \mvert \gamma_0\right)  \right]  \in \R^{k \times
-    (d_{\zeta} + 2)}
-\end{equation}
+
+First, start by defining $g^{*}$ as follows, where (as used above) $g_{x}$ refers to the derivative of $g$ with
+respect to $x$.
+Note, assumptions \namedref{ass:GMM1a} and \namedref{ass:GMM3a}  imply that when $\phi_0 = 0$,
+$g_{\zeta}\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right)$, does not depend upon $\pi$.
+
+
+\begin{defn}{\popmom*}
+    \begin{equation}
+        g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)  =
+        \left[g_{\phi}\left(\phi_0, \zeta_0, \pi_1 \mvert \gamma_0\right)  , g_{\phi}\left(\phi_0, \zeta_0, \pi_2
+        \mvert \gamma_0\right) , g_{\zeta} \left(\phi_0, \zeta_0 \mvert \gamma_0\right)  \right]  \in \R^{k \times
+        (d_{\zeta} + 2)}
+    \end{equation}
+\end{defn}
 
 \begin{assump}[GMM 4]\label{ass:GMM4}
 \begin{assumplist}
     \item $\phi$ is a scalar.
     \item $g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)$ has full column rank. 
-    \item $\aleph_g(\gamma_0)$ is positive definite $\forall \gamma_0 \in \gamma $ with $\phi_0 = 0$. 
+    \item $\aleph_g(\gamma_0)$ is positive definite for all $\gamma_0 \in \gamma $ with $\phi_0 = 0$. 
 \end{assumplist}
 \end{assump}
 
