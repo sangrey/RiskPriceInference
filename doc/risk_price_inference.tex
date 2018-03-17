@@ -1,10 +1,11 @@
 \documentclass[11pt]{article}
 \usepackage[utf8]{luainputenc}
 \usepackage[T1]{fontenc}
-\usepackage{amsmath,amsfonts,amssymb} 
-\usepackage{mathtools}
+\usepackage{amsmath,amsfonts,amssymb, amsthm} 
+\usepackage{mathtools, thmtools}
 \usepackage[onehalfspacing]{setspace}
-\usepackage{xcolor, graphicx}
+\usepackage[x11names]{xcolor} 
+\usepackage{graphicx}
 \usepackage[margin=1in]{geometry}
 \usepackage{caption}
 \usepackage[pdfencoding=auto, naturalnames, psdextra, colorlinks, citecolor=blue]{hyperref}
@@ -16,9 +17,26 @@
 \newtheorem{Corollary}[Theorem]{Corollary}
 \newtheorem{Proposition}[Theorem]{Proposition}
 \newtheorem{Lemma}{Lemma}[section]
-\newtheorem{Assumption}{Assumption}[section]
+
+\declaretheorem[style=definition, name=Definition, refname={definition,definitions}, numberwithin=section]{defn}
+
+\usepackage{enumitem}
+\newlist{assumplist}{enumerate}{1}
+\setlist[assumplist]{label=(\roman{assumplisti}), ref=\theassump.\roman{assumplisti},noitemsep}
+
+\declaretheorem[style=definition, name=Assumption, refname={assumption,assumptions},
+    Refname={Assumption,Assumptions}, numberwithin=section]{assump}
+\Crefname{assump}{Assumption}{Assumptions}
+\Crefname{assumplisti}{Assumption}{Assumptions}
+
+\addtotheorempostheadhook[assump]{\crefalias{assumplisti}{assump}}
+\newcommand*{\fullref}[1]{\hyperref[{#1}]{\cref{#1} (\nameref*{#1})}}
+\newcommand*{\Fullref}[1]{\hyperref[{#1}]{\Cref{#1} (\nameref*{#1})}}
+\newcommand*{\fullrefs}[1]{\hyperref[{#1}]{\cref{#1} (\nameref*{#1})}}
+
 
 \newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\orange}[1]{\textcolor{OrangeRed1}{#1}}
 \newcommand*{\R}{\mathbb{R}}
 \newcommand*{\F}{\mathcal{F}}
 \newcommand*{\W}{\mathcal{W}}
@@ -182,6 +200,7 @@ The set of parameters we want to estimate is $\eta \coloneqq \lbrace c, \rho, \d
 \theta_2\rbrace$.
 
 \section{Spectral GMM}
+\label{sec:spectral_GMM}
 
 We derive a set of moment conditions from the characteristic function above by evaluating it at a grid of points
 in $[0,1] \times i [0,1]$. 
@@ -266,11 +285,11 @@ In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
 The only real question is whether $\sqrt{T} g_n(\eta_0) \dto \N(0, \aleph)$ for some positive-definite matrix
 $\aleph$.
 
-\begin{Assumption}[Weak Dependence]
+\begin{assump}[Weak Dependence]
     \label{assumption:weak_dependence}
     $z_t \coloneqq \begin{pmatrix} r_{t+1} \\ \sigma^2_{t+1} \end{pmatrix}$ are $\alpha$-mixing with $\alpha_n =
        O\left(n^{-5}\right)$
-\end{Assumption}
+\end{assump}
 
 Since, $\norm*{g_n}$ is almost surely bounded by $1$ it has all of its moments and $z_n$ being $\alpha$-mixing
 implies $g_n$ is as well by the central limit theorem for strongly mixing process 
@@ -339,8 +358,6 @@ distribution under several different estimation strengths simultaneously, and th
   differ in the various cases. 
 In what follows, we will use 
 
-\subsection{Assumption GMM1\label{Section GMM}}
-
 The first assumption specifies the basic identification
 problem. It also provides conditions that are used to determine the
 probability limit of the GMM estimator, when it exists, under all categories
@@ -368,93 +385,133 @@ In what follows, three sets of drifting sequences $\lbrace \gamma_n \rbrace$ are
     \Gamma\left(\gamma_0\right) &\coloneqq \left\lbrace \left\lbrace \gamma_n \in \Gamma \right\rbrace \mvert
         \gamma_n \to \gamma_0 \in \Gamma \right\rbrace\\ 
     \Gamma(\gamma_0, 0, b) &\coloneqq \left\lbrace \lbrace \gamma_n \rbrace \in \Gamma(\gamma_0) \mvert \phi_0 =
-        0\ \text{and}\ n^{1/2} \phi_n \to b \in (\R \Cup \lbrace \pm \infty) \right\rbrace \\
+        0\ \text{and}\ n^{1/2} \phi_n \to b \in (\R \cup \lbrace \pm \infty) \right\rbrace \\
     \Gamma(\gamma_0, \infty, b_0) &\coloneqq \left\lbrace \lbrace \gamma_n \rbrace \in \Gamma (\gamma_0) \mvert
         n^{1/2} \phi_n \to \infty\ \text{and}\ \phi_n \to b_0 \right\rbrace 
 \end{align}
 
-\subsection{Assumption GMM1}
 
 These are the standard GMM regularity conditions appropriately adjusted for the lack of identification when $\phi
 =0$.
 
-\red{Question}
+\orange{Question (Xu):}
 What is the difference between $g_0\left(\cdot \mvert \gamma_0\right)$ and $g\left(\cdot \mvert \gamma_0\right)$?
 
-
-\begin{enumerate}
-    \item If $\phi=0$, $\sampmom(\eta)$ and $\W_{n}(\eta)$ do not depend on $\pi$, 
-        $\forall \eta \in \Eta$, $\forall n \geq 1$, for any true parameter $\gamma^{\ast}\in \Gamma.$
+\begin{assump}[GMM 1]\label{ass:GMM1}
+\begin{assumplist}
+    \item If $\phi=0$, $\sampmom(\eta)$ and $\W_{n}(\eta)$ do not depend on $\pi$ for all $\eta \in \Eta$, for
+        all $n \geq 1$, and for all $\gamma^{*}\in \Gamma.$ 
+        \label{ass:GMM1a}
     \item If $\lbrace \gamma_{n} \rbrace \in \Gamma\left(\gamma_0\right)$, $\sup_{\eta \in \Eta}
         \norm*{\sampmom(\eta) - g_0\left(\eta \mvert \gamma_0\right)} \pto 0$ and $\sup_{\eta
         \in \Eta} \norm{\W_{n}(\eta)-\W\left(\eta \mvert \gamma_0\right)} \pto 0$ for some deterministic
         functions $g_0\left(\eta \mvert \gamma_0\right) : \Eta \times \Gamma \to \R^{k}$ and
         $\W\left(\eta \mvert \gamma_0\right) : \Eta \times \Gamma \to \R^{k\times k}.$
-    \item When $\phi_0=0$,  $g_0\left(\xi ,\pi \mvert \gamma_0\right) = 0$ if and only if $\xi =\xi_0 \forall
-        \pi \in \Pi$ and  $\forall \gamma_0\in \Gamma.$
-    \item When $\phi_0 \neq 0$, $g_0\left(\eta \mvert \gamma_0\right)=0$ if and only if $\eta =\eta_0
-        \forall \gamma_0 \in \Gamma.$
-    \item  $g_0\left(\eta \mvert \gamma_0\right)$ is continuously differentiable in $\eta $ on $\Eta,$ with its
-        partial derivatives with respect to $\theta$ and $\xi$ denoted by $g_{\eta }\left(\theta \mvert
+        \label{ass:GMM1b}
+    \item When $\phi_0=0$,  $g_0\left(\phi, \zeta ,\pi \mvert \gamma_0\right) = 0$ if and only if $\phi =\phi_0$
+        and $\zeta = \zeta_0$ for all $\pi \in \Pi$ and for all $\gamma_0 \in \Gamma.$
+        \label{ass:GMM1c}
+    \item When $\phi_0 \neq 0$, $g_0\left(\eta \mvert \gamma_0\right)=0$ if and only if $\eta =\eta_0$ for all 
+        $\gamma_0 \in \Gamma.$
+        \label{ass:GMM1d}
+    \item  $g_0\left(\eta \mvert \gamma_0\right)$ is continuously differentiable in $\eta $ on $\Eta$ with partial
+        derivatives with respect to $\theta$ and $\xi$ denoted by $g_{\eta }\left(\theta \mvert
         \gamma_0\right) \in R^{k\times d_{\eta }}$ and $g_{\xi }\left(\eta \mvert \gamma_0\right)\in R^{k\times
         d_{\xi }}$, respectively.
-    \item $\W\left(\eta \mvert \gamma_0\right)$ is continuous in $\eta$ on $\Eta$ $\forall \gamma_0\in \Gamma$.
+        \label{ass:GMM1e}
+    \item $\W\left(\eta \mvert \gamma_0\right)$ is continuous in $\eta$ on $\Eta$ for all $\gamma_0\in \Gamma$.
+        \label{ass:GMM1f}
     \item $0 < \lambda_{\min}(\W\left(\xi_0, \pi \mvert \gamma_0\right))\leq \lambda_{\max }(\W\left(\xi_0,\pi
-        \mvert \gamma_0\right)) < \infty$, $\forall \pi \in \Pi$, $\forall \gamma_0\in \Gamma .$
+        \mvert \gamma_0\right)) < \infty$, $\forall \pi \in \Pi$, for all $\gamma_0 \in \Gamma$.
+        \label{ass:GMM1g}
     \item $\lambda_{\min} (g_{\xi}\left(\xi_0,\pi \mvert \gamma_0\right)^{\prime} \W\left(\xi_0,\pi \mvert
-        \gamma_0\right)g_{\xi }\left(\xi_0,\pi \mvert \gamma_0\right))>0,$ $\forall \pi \in \Pi ,$ $\forall
-        \gamma_0\in \Gamma $ with $\phi_0=0.$
-    \item$\Xi(\pi)$ is compact $\forall \pi \in \Pi ,$ and $\Pi $ and $\Eta $ are compact.
-    \item $\forall \varepsilon > 0, \exists \delta > 0$ such that $d_{H}\left(\Xi \left(\pi_{1}\right), \Xi \left(
-        \pi_{2}\right) \right) < \varepsilon \forall \pi_{1}, \pi_{2}\in \Pi$ with $\norm*{\pi_{1}-\pi_{2}} <
-        \delta$, where $d_{H}\left( \cdot \right) $ is the Hausdorff metric.
-\end{enumerate}
+        \gamma_0\right)g_{\xi }\left(\xi_0,\pi \mvert \gamma_0\right))>0$, for all $\pi \in \Pi$,  and for all 
+        $\gamma_0 \in \Gamma$ with $\phi_0=0.$
+        \label{ass:GMM1h}
+    \item$\Xi(\pi)$ is compact for all $\pi \in \Pi$, and both $\Pi$ and $\Eta$ are compact.
+        \label{ass:GMM1i}
+    \item For all $\epsilon > 0$, there exits a $\delta > 0$ such that $d_{H}\left(\Xi \left(\pi_{1}\right), \Xi
+        \left( \pi_{2}\right) \right) < \epsilon$ for $\pi_{1}, \pi_{2} \in \Pi$ with $\norm*{\pi_{1}-\pi_{2}} <
+        \delta$, where $d_{H}\left( \cdot \right)$ is the Hausdorff metric.
+        \label{ass:GMM1j}
+\end{assumplist}
+\end{assump}
+
+To verify the conditions above, we break them down into three subsections.
+Assumptions \labelcref{ass:GMM1a}, \labelcref{ass:GMM1b}, \labelcref{ass:GMM1c}, and \labelcref{ass:GMM1d}
+state that when $\phi = 0$, the moment conditions contain no information regarding $\pi$, but when $\phi \neq 0$,
+the model is identified.
+
+\orange{TODO (Paul):} 
+Relate those assumptions to the discussion in \cref{sec:spectral_GMM}
+We need to show that \cref{ass:GMM1b} holds; we showed it holds pointwise in \cref{sec:spectral_GMM} but not in a
+functional sense. (At least I think so.)
+
+The next two assumptions (\labelcref{ass:GMM1e} and \labelcref{ass:GMM1f} are  technical conditions regarding the
+behavior of the moment conditions and weight matrix. 
+\orange{TODO: (Paul) Is this true?} 
+Since our moment conditions are derived from an infinitely-differentiable  characteristic function and the weight
+matrix is the optimal one, they both hold trivially.
+
+The third subsection of \cref{ass:GMM1} concerns the weight matrix.
+Since we are using the inverse covariance matrix of valid non-redundant model, assumptions \labelcref{ass:GMM1g}
+and \labelcref{ass:GMM1h} automatically hold.
+
+The last two assumptions, \labelcref{ass:GMM1i} and \labelcref{ass:GMM1j} require that the parameter spaces do not
+vary too much with the parameters and are compact.
+Since the parameter space here has a product form, \cref{ass:GMM1j}  holds trivially.
+\Cref{ass:GMM1i} does not hold.
+However, since there do exist compact sets that contain the parameters. 
+---Even the parameters whose domain is theoretically unbounded have bounds on the apriori believable
+estimates---and $(\phi, \zeta)$ are identified this is not an issue in practice. 
 
 
 
-\subsection{Assumption GMM2*}
-
-
-\begin{enumerate}
-    \item If $\{\gamma_n\} \in \Gamma\left(\gamma_0, 0, b\right),\, \sup_{\left. \eta \in \Eta \mvert
-        \norm*{(\phi, \zeta')' - (\phi, \zeta')_{0,n}'\leq \delta_n}\right.} \norm*{\frac{\partial}{\partial
-        \xi'} \sampmom(\eta) - \popmom_{\xi}\left(\eta \mvert \gamma_0 \right)} = o_p(1)$  for all deterministic
-        sequences  $\delta_n
-        \to 0$.
-    \item If $\{\gamma_n \} \in \Gamma\left(\gamma_0, \infty, \eta_0\right),\,  \sup_{\eta \in
-        \Eta_{n}(\delta_n)} \norm*{\left(\frac{\partial}{\partial \eta'} \overline{g}_n - g_{\eta}(\eta ;
-        \gamma_0)\right) \diag\left(1_{1+d_\zeta}', (1/\phi)_{d_{\pi}}'\right)}  = o_p(1)$ for all deterministic
-        sequences $\delta_n \to 0$.
-\end{enumerate}
+\begin{assump}[GMM 2*]\label{ass:GMM2}
+\begin{assumplist}
+    \item If $\{\gamma_n\} \in \Gamma\left(\gamma_0, 0, b\right)$, \newline $\sup_{\left\lbrace \eta \in \Eta
+        \mvert \norm*{(\phi, \zeta')' - (\phi, \zeta')_{0,n}'} \leq \delta_n \right\rbrace}
+        \norm*{\frac{\partial}{\partial \xi'} \sampmom(\eta) - \popmom_{\xi}\left(\eta \mvert \gamma_0 \right)} =
+        o_p(1)$  for all deterministic sequences  $\delta_n \to 0$.
+    \item If $\{\gamma_n \} \in \Gamma\left(\gamma_0, \infty, \eta_0\right)$, $\sup_{\eta \in \Eta_{n}(\delta_n)}
+        \norm*{\left(\frac{\partial}{\partial \eta'} \overline{g}_n - g_{\eta}\left(\eta \mvert
+        \gamma_0\right)\right) \diag\left(1_{1+d_\zeta}', (1/\phi)_{d_{\pi}}'\right)}  = o_p(1)$ for all
+        deterministic sequences $\delta_n \to 0$.
+\end{assumplist}
+\end{assump}
 
 Since, our moment conditions, $\sampmom(\eta)$ are sample averages, we can specify this using a uniform
 law of large numbers and the dominate convergence theory to interchange integration and differentiation.
 \textcite{andrewsGmm2014} show that this is a sufficient condition for their Assumption GMM2 that we actually
 need.
 
-
-\subsection{Assumption GMM3}
-
 This assumption is actually about how the matrix of partial derivatives of the criterion function is
 evolving over time. 
 
-\begin{equation}
-    K_{n,g}(\eta, \gamma^{*}) \coloneqq  \frac{1}{n} \sum_{i=1}^n \frac{\partial}{\partial \phi^{*}} \E \left[
-    \popmom(W_i, \eta) \mvert \gamma^{*} \right]
-\end{equation}
+\begin{defn}
+    \label{defn:moment_derivative_func}
+    \begin{equation}
+        K_{n,g}(\eta, \gamma^{*}) \coloneqq  \frac{1}{n} \sum_{i=1}^n \frac{\partial}{\partial \phi^{*}} \E \left[
+        \popmom(W_i, \eta) \mvert \gamma^{*} \right]
+    \end{equation}
+\end{defn}
 
 
-
-\begin{enumerate}
+\begin{assump}[GMM 3]\label{ass:GMM3}
+\begin{assumplist}
     \item $\sampmom(\eta) = \frac{1}{n} \sum_{i=1}^n \popmom(W_i, \eta)$  for some function $\popmom(W_i,
         \eta) \in \R^k$ for all $\eta \in \Eta$.
+        \label{ass:GMM3a}
         %Should i \geq 1 be an n \geq 1?
-    \item $\E\left[\popmom(W_i, \xi^{*}, \pi) \mvert \gamma^{*} \right] = 0$ for all $\pi \in \Pi$ and for all $i
-        \geq 1$, where the true parameter $\gamma^{*} = (0,\zeta^{*}, \pi^{*}, \xi^{*}) \in \Gamma$.
+    \item $\E\left[\popmom(W_i, \beta_0, \zeta^{*}, \pi) \mvert \gamma^{*} \right] = 0$ for all $\pi \in \Pi$ and
+        for all $i \geq 1$, where the true parameter $\gamma^{*} = \left(0,\zeta^{*}, \pi^{*}, \xi^{*}
+        \right) \in \Gamma$.
+        \label{ass:GMM3b}
     \item If $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{\sqrt{n}} \sum_{i=1}^n \left(g(W_i,
-        \xi_{0,n}, \pi_n) - \E \left[g(W_i, \psi_{0,n}, \pi_n)\mvert \gamma_n \right]\right)  \dto \N\left(0,
+        \xi_{0,n}, \pi_n) - \E \left[g(W_i, \zeta_{0,n}, \pi_n)\mvert \gamma_n \right]\right)  \dto \N\left(0,
         \aleph_g(\gamma_0)\right)$, where $\aleph_{g}(\gamma_0)$ is a $k \times k$ matrix.
     \item 
+        \label{ass:GMM3c}
         \begin{enumerate}
             \item  $K_{n,g}\left(\eta \mvert \gamma^{*}\right)$ exists for all $\{\eta, \gamma^{*} \} \in
                 \left(\Eta_{\delta} \times \Gamma_{0}\right)$ for all $n \geq 1$.
@@ -472,21 +529,18 @@ evolving over time.
             \pi\mvert \gamma_0\right) x$ for some $x \in \R^{1+d_{\zeta}}$ if and only $\pi =
             \pi_0$.\footnote{Since $\dim(\phi) = 1$, we can assume without loss of generality that the $\omega_0$
             from AK equals $1$.}
+        \label{ass:GMM3d}
         \item If $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b)$, $\left. \frac{1}{n} \sum_{i=1}^n
             \frac{\partial}{\partial \eta}  \E \left[ \popmom\left(W_i, \eta\right ) \mvert \gamma_n \right]
             \right\rvert_{\eta = \eta_n} \to \popmom_{\eta}\left(\eta_0 \mvert \gamma_0\right)$.
-\end{enumerate}
-
-
-
-
-\subsection{Assumption GMM4*}
-
+        \label{ass:GMM3e}
+\end{assumplist}
+\end{assump}
 
 First, start by defining $g^{*}$ as follows, where (as used above?) $g_{x}$ refers to the derivative of $g$ with
 respect to $x$.
-Note, Assumptions GMM1(i) and Assumption GMM3(i) imply that when $\phi_0 = 0, g_{\zeta}\left(\phi_0, \zeta_0,
-\pi ; \gamma_0\right)$, does not depend upon $\pi$.
+Note, Assumptions GMM1(i) and Assumption GMM3(i) imply that when $\phi_0 = 0$, $g_{\zeta}\left(\phi_0, \zeta_0,
+\pi \mvert \gamma_0\right)$, does not depend upon $\pi$.
 
 \begin{equation}
     g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)  =
@@ -495,13 +549,13 @@ Note, Assumptions GMM1(i) and Assumption GMM3(i) imply that when $\phi_0 = 0, g_
     (d_{\zeta} + 2)}
 \end{equation}
 
-
-\begin{enumerate}
+\begin{assump}[GMM 4]\label{ass:GMM4}
+\begin{assumplist}
     \item $\phi$ is a scalar.
     \item $g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)$ has full column rank. 
     \item $\aleph_g(\gamma_0)$ is positive definite $\forall \gamma_0 \in \gamma $ with $\phi_0 = 0$. 
-\end{enumerate}
-
+\end{assumplist}
+\end{assump}
 
 
 
