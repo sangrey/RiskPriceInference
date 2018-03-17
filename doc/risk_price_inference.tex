@@ -39,6 +39,8 @@
 \newcommand{\purple}[1]{\textcolor{purple}{#1}}
 \newcommand*{\R}{\mathbb{R}}
 \newcommand*{\F}{\mathcal{F}}
+\newcommand*{\Q}{\mathbb{Q}}
+\newcommand*{\Phys}{\mathbb{P}}
 \newcommand*{\W}{\mathcal{W}}
 \newcommand*{\E}{\mathbb{E}}
 \newcommand*{\N}{N}
@@ -47,7 +49,7 @@
 \newcommand*{\dto}{\ensuremath{\to_d}}
 \newcommand*{\Eta}{H} 
 \newcommand*{\popmom}{\ensuremath{g}} 
-\newcommand*{\sampmom}{\ensuremath{\overline{g}_n}}
+\newcommand*{\sampmom}{\ensuremath{\overline{g}_t}}
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \DeclarePairedDelimiter\norm{\lVert}{\rVert}
 \let\oldforall\forall
@@ -60,7 +62,7 @@
 \addbibresource{riskpriceinference.bib}
 \graphicspath{{figures/}}
 
-\author{Xu Cheng, Eric Renault, \& Paul Sangrey}
+\author{Xu Cheng, Eric Renault, and Paul Sangrey}
 \title{Inference for the Price of Volatility Risk Under Weak Identification}
 \date{\today}
 
@@ -77,54 +79,58 @@ What we want is a good estimator for this parameter and a strategy for credible 
 
 We take the model from \textcite{khrapov2016affine} and use it to estimate the relevant
 parameters, which we derive below. 
-We use spectral GMM, which forms moment conditions from the characteristic function.
+We use a finite version of spectral GMM, which forms moment conditions from the characteristic function.
 Out data we use are the bivariate series $\begin{pmatrix} r_{t+1}, \sigma^2_{t+1} \end{pmatrix}$.
 $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$.
 
 Moving forward, we sketch the model developed in \textcite{khrapov2016affine} and derive the associated moment
 conditions.
 We then provide a series of sufficient conditions for valid inference. 
+
+\section{The Model}
+
 We have a pricing kernel $M_{t, t+1}(\theta)$ which allows us to characterize the price $P_t$ at time $t$ of any
 payoff at time $t+1$ of a function $f$ and information set $\F_t$, $f\left(r_{t+1}, \sigma^2(t+1) \mvert
 \F_t\right)$. 
-We use $*$'s to denote the risk neutral measure.
+We use $\Q$ to denote the risk-neutral measure.
 
-\begin{equation}
-    P_t  = \E\left[M_{t,t+1}(\theta) f\left(r_{t+1}, \sigma^2(t+1) \mvert  \F_t\right) \mvert \F_t \right] =
-    \E^{*}\left[H(r_{t+1}, \sigma^2(t+1),  \F_t) \mvert \F_t \right] 
-\end{equation}
-
+\begin{defn}{The Model Setup}
+    \begin{equation}
+        P_t  = \E\left[M_{t,t+1}(\theta) f\left(r_{t+1}, \sigma^2_{t+1} \mvert  \F_t\right) \mvert \F_t \right] =
+        \E_{\Q}\left[f\left(r_{t+1}, \sigma^2_{t+1} \mvert  \F_t\right) \mvert \F_t \right] 
+    \end{equation}
+\end{defn}
 
 To make the problem tractable, we assume that the problem is Markov and that there is no Granger causality from
 return to volatility. 
 This implies the conditional probability distribution of $\sigma^2_{t+1} \vert \F_t$ equals the conditional
 probability distribution of $\sigma^2_{t+1} \vert \sigma^2_t$.
-Consequently, we can write down our model in the risk-neutral measure using some functions, $a^{*}(u), b^{*}(u)$,
-and $\alpha^{*}(v), \phi^{*}(v), \& \gamma^{*}(v)$, as the following two equations in terms of the Laplace
-transforms of the probability distributions.
+Consequently, we can write down our model in the risk-neutral measure using some functions, $a_{\Q}(u),
+b_{\Q}(u)$, and $\alpha_{\Q}(v), \beta_{\Q}(v), \& \gamma_{\Q}(v)$, as the following two equations in terms of the
+Laplace transforms of the probability distributions.
 
+
+\begin{defn}{The Risk-Neutral Model}
 \begin{align}
-    \E^{*}\left[\exp\left(-x \cdot \sigma^2_{t+1}\right) \mvert \sigma^2_t\right] &= \exp\left(-a^{*}(x)
-    \sigma_t^2 - b^{*}(x)\right) \\
-    \E^{*}\left[\exp\left(-x \cdot r_{t+1} \right)\mvert \sigma^2_t \sigma^2_{t+1}\right] &=
-    \exp\left(-\alpha^{*}(x) \sigma^2_{t+1} - \phi^{*}(x) \sigma^2_t - \gamma^{*}(x)\right)
+    \E_{\Q}\left[\exp\left(-x  \sigma^2_{t+1}\right) \mvert \sigma^2_t\right] &= \exp\left(-a_{\Q}(x)
+    \sigma_t^2 - b_{\Q}(x)\right) \\
+    \E_{\Q}\left[\exp\left(-x  r_{t+1} \right)\mvert \sigma^2_t \sigma^2_{t+1}\right] &=
+    \exp\left(-\alpha_{\Q}(x) \sigma^2_{t+1} - \beta_{\Q}(x) \sigma^2_t - \gamma_{\Q}(x)\right)
 \end{align}
-
-
-\section{The Model}
+\end{defn}
 
 
 We assume that the volatility follows an autoregressive gamma process---ARG(1), and so its physical measure
 dynamics are governed by following equations.
 
 \begin{gather}
-    a(x) = \frac{\rho x}{1 + c x}  \\
-    b(x) = \delta \log \left(1 + c x\right) \\
+    a_{\Phys}(x) = \frac{\rho x}{1 + c x}  \\
+    b_{\Phys}(x) = \delta \log \left(1 + c x\right) \\
     \rho \in [0, 1), c > 0, \delta > 0 
 \end{gather}
 
-The persistence is governed by $\rho$, and the mean by $\delta$, and $c$ is a scaling factor for the volatility as
-can be seen in the formula for $\sigma^2_{t+1}$'s conditional mean.
+The persistence is governed by $\rho$, the mean by $\delta$, and $c$ is a scaling factor for the volatility as can
+be seen in the formula for $\sigma^2_{t+1}$'s conditional mean.
 
 \begin{equation}
     \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right] = c \delta + \rho \sigma^2_t
@@ -136,10 +142,12 @@ We also assume that $\left[ \frac{\psi}{\phi} \right]^2 \approx \frac{\E \left[\
 \F_t\right]}{\Var\left[r_{t+1} \mvert \F_t\right]}$, which enables our approximation of $\sigma^2_{t+1}$ by the
 realized volatility.
 
+%TODO
+\purple{TODO (Paul): Check this.}
 \begin{equation}
     \label{eqn:cond_characterisitc_func}
-    \E\left[\exp\left(- x \cdot r_{t+1}\right) \mvert \sigma_t^2, \sigma^2_{t+1}\right] = \exp\left(- a(x)
-    \alpha^2_{t+1} - \phi(x) \sigma^2_t - \gamma(x) \right) 
+    \E_{\Phys}\left[\exp\left(- x r_{t+1}\right) \mvert \sigma_t^2, \sigma^2_{t+1}\right] = \exp\left(- a(x)
+    r^2_{t+1} - \beta(x) \sigma^2_t - \gamma(x) \right) 
 \end{equation}
 
 To estimate this equation, we need to know all of the relevant functions.
@@ -150,20 +158,21 @@ The parametric structure of the problem and some algebra implies the following.
     b(x) &= \delta \log \left(1 + c x\right) \\
     \alpha(x) &= \psi x - \frac{1}{2} x^2 (1 - \phi^2) \\
     \label{eqn:beta_defn}
-    \phi(x)  &= x \alpha^{*}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}} \right) \\
+    \phi(x)  &= x \alpha_{\Q}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}} \right) \\
     \label{eqn:gamma_defn}
-    \gamma(x) &= x b^{*}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}}\right) 
+    \gamma(x) &= x b_{\Q}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}}\right) 
 \end{align}
 
-In last two of the above equations we have the risk-neutral $\alpha^{*}(x)$ and $\phi^{*}(x)$ functions which we
+In last two of the above equations we have the risk-neutral $\alpha_{\Q}(x)$ and $\beta_{\Q}(x)$ functions which we
 have not defined.
 To solve for them we drive the implied stochastic discount factor and make the appropriate measure change.
-We parameterize the SDF in terms of price of volatility risk---$\theta_1$---and the price of equity risk---$\theta_2$.
+We parameterize the SDF in terms of price of volatility risk---$\theta_1$---and the price of equity
+risk---$\theta_2$.  
 The SDF satisfies the following equation for some functions $m_0(\cdot)$ and $m_1(\cdot)$.
 
 \begin{gather}
-    M_{t,t+1}(\theta) = \exp(-r_{f,t}) \exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \theta_1 \sigma^2_{t+1}
-    - \theta_2 r_{t+1}\right) \\
+    M_{t,t+1}(\theta) = \exp\left(-r_{f,t}\right) \exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \theta_1
+    \sigma^2_{t+1} - \theta_2 r_{t+1}\right) \\
     \intertext{Then by the law of iterated expectations and some algebra.}
     \E \left[\exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \theta_1 \sigma^2_{t+1} - \theta_2 r_{t+1}\right)
     \exp\left(- \alpha(\theta_2) \sigma^2_{t+1} - \phi (\theta_2) \sigma^2_{t+1} - \gamma(\theta_2)\right) \mvert
@@ -175,22 +184,22 @@ This implies the two unspecified functions are as follows.
 \begin{align}
     m_{0}(\theta) &= \gamma(\theta_2) + b\left(\alpha\left(\theta_2\right) + \theta_1\right) \\
     m_{1}(\theta) &= \phi(\theta_2) + a\left(\alpha(\theta_2) + \theta_1\right) 
-    \intertext{Now we can solve for $\alpha^{*}(x)$ and $\phi^{*}(x)$.}
-    a^{*}(x) &= a\left(x + \theta_1 + \alpha(\theta_2)\right) - a\left(\theta_1 + \alpha(\theta_2)\right) \\
-    b^{*}(x) &= b\left(x + \theta_1 + \alpha(\theta_2)\right) - b\left(\theta_1 + \alpha(\theta_2)\right) 
+    \intertext{Now we can solve for $\alpha_{\Q}(x)$ and $\beta_{\Q}(x)$.}
+    a_{\Q}(x) &= a\left(x + \theta_1 + \alpha(\theta_2)\right) - a\left(\theta_1 + \alpha(\theta_2)\right) \\
+    b_{\Q}(x) &= b\left(x + \theta_1 + \alpha(\theta_2)\right) - b\left(\theta_1 + \alpha(\theta_2)\right) 
 \end{align}
 
-
-We substitute them back into \cref{eqn:beta_defn} and \cref{eqn:gamma_defn} eliminating $\alpha^{*}(x)$ and
-$\phi^{*}(x)$.
+We substitute them back into \cref{eqn:beta_defn} and \cref{eqn:gamma_defn} eliminating $\alpha_{\Q}(x)$ and
+$\beta_{\Q}(x)$.
 
 \begin{align}
     a(x) &= \frac{\rho x}{1 + c x} \\ \label{eqn:a(x)}
     b(x) &= \delta \log \left(1 + c x\right) \\ \label{eqn:b(x)}
     \alpha(x) &= x \left(\frac{\phi}{\sqrt{c (1 + \phi)}}  + (1 - \phi^2)\left(\theta_2 - \frac{1}{2}\right)\right)
     - \frac{1}{2} x^2 (1 - \phi^2) \\ \label{eqn:alpha(x)}
-    \phi(x)  &= x \left(a\left(-\frac{\phi}{\sqrt{c(1+ \rho)}} + \theta_1 + \alpha(\theta_2)\right) -
-        a\left(\theta_1 + \alpha(\theta_2)\right)\right) \\ \label{eqn:beta(x)}
+    \beta(x)  &= x \left(a\left(-\frac{\phi}{\sqrt{c(1+ \rho)}} + \theta_1 + \alpha(\theta_2)\right) -
+        a\left(\theta_1 + \alpha(\theta_2)\right)\right) \\ 
+        \label{eqn:beta(x)}
     \gamma(x) &= x \left(b\left(-\frac{\phi}{\sqrt{c(1+\rho)}} + \theta_1 + \alpha(\theta_2)\right) -
         b\left(\theta_1 + \alpha(\theta_2)\right) \right)
 \end{align}
@@ -206,18 +215,22 @@ We derive a set of moment conditions from the characteristic function above by e
 in $[0,1] \times i [0,1]$. 
 That is we can define a function $g_t(x, \eta)$
 
-\begin{equation}
-g_t(x, \eta) = Z_t \otimes \begin{bmatrix} \exp(- x \sigma^2_{t+1}) - \exp\left( - a(x) \sigma_t^2 - b(x)
-    \right) \\ \exp\left(- x r_{t+1}\right) - \exp\left(- \alpha(x) \sigma^2_{t+1} - \phi(x) \sigma_2^t -
-    \gamma(x)\right) \end{bmatrix}
-\end{equation}
+\begin{defn}{Moment Conditions}
+    \begin{equation}
+        g_t(x, \eta) \coloneqq Z_t \otimes \begin{bmatrix} \exp(- x \sigma^2_{t+1}) - \exp\left( - a(x) \sigma_t^2
+        - b(x) \right) \\ \exp\left(- x r_{t+1}\right) - \exp\left(- \alpha(x) \sigma^2_{t+1} - \beta(x)
+        \sigma^2_t - \gamma(x)\right) \end{bmatrix}
+    \end{equation}
+\end{defn}
 
-Where the instruments are given by \cref{eqn:instruments} for complex unit $i$. 
+Where the instruments are given by \cref{defn:instruments} for complex unit $i$. 
 
-\begin{equation}
-    \label{eqn:instruments}
-    Z_t = \left[1, \exp\left(- i \sigma_t^2\right), \exp\left(-i \sigma^2_{t-2}\right)\right] 
-\end{equation}
+\begin{defn}{Instruments}
+    \label{defn:instruments}
+    \begin{equation}
+        Z_t = \left[1, \exp\left(- i \sigma_{t-1}^2\right), \exp\left(-i \sigma^2_{t-2}\right)\right] 
+    \end{equation}
+\end{defn}
 
 The implied unconditional moment restrictions are the following.  
 
@@ -232,7 +245,7 @@ If we use the entire continuum, handling the weights becomes more delicate.
 So we use only finitely many moments for now.
 Since the exponential function is a strictly positive function, and we are considering a grid of $x$ values, a
 sufficient condition for $\rho, \delta, \& c$ to be identified is for the relevant rows of $\nabla a(x)$ and
-$\nabla b(x)$ to equal zero only at $\eta_0$ which are satisfied if $\rho, c, \delta > 0$.
+$\nabla b(x)$ to equal zero only at $\eta^{*}$ which are satisfied if $\rho, c, \delta > 0$.
 Testing if if $\phi$ and $\theta_2$ are identified is somewhat trickier. 
 Consider $\nabla \alpha(x)$. 
 %TODO Reword this.
@@ -241,10 +254,10 @@ nonlinear function of $x$, the first two rows of the \cref{eqn:alpha_gradient} i
 
 \begin{equation}
     \label{eqn:alpha_gradient}
-    \nabla_{\phi, \theta_2, c}  \alpha(x) = \begin{bmatrix} \phi x^{2} + x \left(- 2 \phi \left(\theta_{2} -
-    \frac{1}{2}\right) - \frac{\phi}{2 \sqrt{c} \left(\phi + 1\right)^{\frac{3}{2}}} + \frac{1}{\sqrt{c}
-    \sqrt{\phi + 1}}\right) \\ x \left(- \phi^{2} + 1\right) \\ \frac{\phi x}{2 c^{\frac{3}{2}} \sqrt{\phi + 1}}
-\end{bmatrix} 
+    \frac{\partial \alpha(x)}{\partial (\phi, \theta_2, c)'}  = \begin{bmatrix} \phi x^{2} + x \left(- 2 \beta
+    \left(\theta_{2} - \frac{1}{2}\right) - \frac{\phi}{2 \sqrt{c} \left(\phi + 1\right)^{\frac{3}{2}}} +
+    \frac{1}{\sqrt{c} \sqrt{\phi + 1}}\right) \\ x \left(- \phi^{2} + 1\right) \\ \frac{\phi x}{2 c^{\frac{3}{2}}
+    \sqrt{\phi + 1}} \end{bmatrix} 
 \end{equation}
 
 The top line of \cref{eqn:alpha_gradient} can be solved for $\theta_2$, which would create a local lack of
@@ -267,33 +280,36 @@ As can clearly be seen in \cref{fig:fig:gamma_diff_theta2}, there is a zero when
 
 
 For now, we will assume that $\phi \neq 0$, and hence the model is identified.
-Hence, for any positive definite weight-matrix by \textcite[Lemma 2.3]{newey1994large} we are identified.
+Hence, for any positive definite weight-matrix by \textcite[Lemma 2.3]{newey1994large} our criterion function has
+a unique optimum.
 The data, $\sigma^2_{t+1}, r_{t+1}$, are ergodic and stationary.
-Since the moment conditions are not redundant the optimal (GMM) weight matrix $W$ is positive definite. 
-In addition, $g$ is continuous at each $\eta$, given the restrictions above and properties of characteristic
-functions imply that $g$ is uniformly bounded. 
+Since the moment conditions are not redundant the optimal (GMM) weight matrix $\W$ is positive definite. 
+In addition, $\popmom$ is continuous at each $\eta$, given the restrictions above and properties of characteristic
+functions imply that $\popmom$ is uniformly bounded. 
 For convenience, we assume that the space of $\eta$ is compact.
 This should not be an issue here because the parameters  are either a priori bounded, such as $\phi$ or we have
 substantial a priori knowledge on their plausible magnitudes.
 Hence, \textcite[Theroem 2.6]{newey1994large} implies our estimator is consistent.
 
-By the above arguments, we have a consistent estimator for $\eta$ and the optimal weight matrix $\eta^{-1}
-\coloneqq (\E\left[g g'\right])^{-1}$, and we will assume that $\eta_0$ is in the interior of $\Eta$.
-Let $G \coloneqq \E\left[\nabla g\right]$
+By the above arguments, we have a consistent estimator for $\eta$ and the optimal weight matrix $\W \coloneqq
+(\E\left[g g'\right])^{-1}$, and we will assume that the true value $\eta^{*}$ is in the interior of its sample
+space $\Eta$.\footnote{Throughout we will use $*$'s to denote true values for parameters.}
+Let $G \coloneqq \E\left[\frac{\partial}{\partial \eta} \popmom \right]$
 Clearly, $g$ is continuously differentiable, and its derivative $G$ is continuous.
 In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
-The only real question is whether $\sqrt{T} g_n(\eta_0) \dto \N(0, \aleph)$ for some positive-definite matrix
-$\aleph$.
+\purple{TODO: (Paul) Why should this be mentioned here?}
+Hence, the question is does $\sqrt{T} \left(\sampmom - \popmom(\eta^{*})\right) \dto \N(0, \aleph)$ for some
+positive-definite matrix $\aleph$.
 
 \begin{assump}[Weak Dependence]
     \label{assumption:weak_dependence}
-    $z_t \coloneqq \begin{pmatrix} r_{t+1} \\ \sigma^2_{t+1} \end{pmatrix}$ are $\alpha$-mixing with $\alpha_n =
-       O\left(n^{-5}\right)$
+    $z_t \coloneqq \begin{pmatrix} r_{t+1} \\ \sigma^2_{t+1} \end{pmatrix}$ are $\alpha$-mixing with $\alpha_t =
+       O\left(T^{-5}\right)$
 \end{assump}
 
-Since, $\norm*{g_n}$ is almost surely bounded by $1$ it has all of its moments and $z_n$ being $\alpha$-mixing
-implies $g_n$ is as well by the central limit theorem for strongly mixing process 
-$\sqrt{n} g_n(\eta_0) \dto \N(0,\aleph)$ as required. 
+Since, $\norm*{g_t}$ is almost surely bounded by $1$ it has all of its moments and $z_t$ being $\alpha$-mixing
+implies $g_t$ is as well by the central limit theorem for strongly mixing process 
+$\sqrt{T} \left(\sampmom - \popmom(\eta^{*})\right) \dto \N(0, \aleph)$ as required. 
 Consequently, by \textcite[Theorem 3.2]{newey1994large} we have convergence in distribution as well as convergence
 in probability.
 
@@ -303,7 +319,7 @@ in probability.
     Then the following convergence in distribution holds.
 
     \begin{equation}
-        \sqrt{T} (\widehat{\eta}_n - \eta_{0}) \dto \N\left(0, \left(G' \Eta^{-1} G\right)^{-1}\right)
+    \sqrt{T} (\widehat{\eta}_t - \eta^{*}) \dto \N\left(0, \left(G' \E[\W] G\right)^{-1}\right)
     \end{equation}
 \end{Theorem}
 
@@ -314,22 +330,15 @@ In this section, take the model described in the previous sections and place it 
 \textcite{andrewsGmm2014} so that we ca analyze the effects of possible lack of identification in the model in a
 nice clean way.
 The goal here is to perform valid inference for $\theta_1, \theta_2$ even when $\phi$ might be zero. 
-To do this effectively, we are going to switch from the notation we were using above to notation used in
-\textcite{andrewsGmm2014}. 
 
 
 From the discussion above, we can collect the parameters discussed above into a parameter vector of the following
-form,i.e.\@ recall the following.
-
-\begin{equation}
-    \eta \coloneqq \lbrace \rho, c, \delta, \phi, \theta_1, \theta_2 \rbrace
-\end{equation}
-
-To write it in the notation of \textcite{andrewsGmm2014}, we partition $\eta$ into three parts.
+form,i.e.\@ recall the following: $\eta = \lbrace \rho, c, \delta, \phi, \theta_1, \theta_2 \rbrace$
+To write it in the notation of \textcite{andrewsGmm2014}, we partition $\eta$ into three subsets.
 
 \begin{align}
     \phi &\coloneqq \phi  \in (-1, 1) \\ 
-    \zeta &\coloneqq \lbrace \rho, c, \delta, \theta_1 \rbrace \in [0,1) \otimes \R_{++} \otimes \R_{++} \otimes
+    \zeta &\coloneqq \lbrace \rho, c, \delta, \theta_1 \rbrace \in [0,1) \times \R_{++} \times \R_{++} \times
     \R  \\
     \pi &\coloneqq \theta_2 \in \R 
 \end{align}
@@ -339,15 +348,14 @@ It is worth noting that the parameter space has a product form, i.e.\@ the value
 of the other parameters.
 
 In this environment, $\pi$ is not identified when $\phi = 0$.
-Both $\phi$ and $\zeta$ are always identified.
-$\zeta$ does not affect the identification of $\pi$.
+Both $\phi$ and $\zeta$ are always identified, and $\zeta$ does not affect the identification of $\pi$.
 
-Let $Q_n(\eta)$ be the GMM criterion function, then the GMM estimator $\hat{\eta}_n$ satisfies the following.
+Let $Q_t(\eta)$ be the GMM criterion function, then the GMM estimator $\hat{\eta}_t$ satisfies the following.
 
 
 \begin{equation}
-    \hat{\eta}_n \in \Eta\ \text{and}\ Q_n(\hat{\eta}_n) = \inf_{\eta \in \Eta} Q_n(\eta) +
-    o\left(n^{-1}\right) 
+    \hat{\eta}_T \in \Eta\ \text{and}\ Q_T(\hat{\eta}_T) = \inf_{\eta \in \Eta} Q_T(\eta) +
+    o\left(T^{-1}\right) 
 \end{equation}
 
 
@@ -362,7 +370,8 @@ The first assumption specifies the basic identification
 problem. It also provides conditions that are used to determine the
 probability limit of the GMM estimator, when it exists, under all categories
 of drifting sequences of distributions.
-Let $\xi$ index the part of the distribution of the data $x_t$ that is not determined by the moment equations.
+Let $\xi$ index the part of the distribution of the data $r_{t+1}, \sigma^2_{t+1}$ that is not determined by the
+moment equations.
 In general, it is a (likely infinite-dimensional) nuisance parameter that affects the distribution of the data. 
 
 
@@ -372,24 +381,27 @@ In the previous discussion we characterized the parameter spaces in a non-compac
 compact subset of $\Eta$, where the true parameter values live.
 %TODO Does the set of possible nuisance parameters depend upon the estimated parameters in our model?
 
-\begin{equation}
-\Gamma \coloneqq \left\lbrace \gamma = (\eta, \xi) \mvert \eta \in \Eta^{*}, \phi \in \Phi^{*}) \right\rbrace 
-\end{equation}
+\begin{defn}{Complete Parameter Space}
+    \begin{equation}
+        \Gamma \coloneqq \left\lbrace \gamma = (\eta, \xi) \mvert \eta \in \Eta, \xi \in \Xi \right\rbrace 
+    \end{equation}
+\end{defn}
 
-We characterize these drifting sequences of distributions by sequences of true parameters $\gamma_n \coloneqq
-(\eta_n, \phi_n)$.
+We characterize these drifting sequences of distributions by sequences of true parameters $\gamma_T \coloneqq
+(\eta_t, \phi_t)$.
 
-In what follows, three sets of drifting sequences $\lbrace \gamma_n \rbrace$ are key. 
+In what follows, three sets of drifting sequences $\lbrace \gamma_T \rbrace$ are key. 
 
-\begin{align}
-    \Gamma\left(\gamma_0\right) &\coloneqq \left\lbrace \left\lbrace \gamma_n \in \Gamma \right\rbrace \mvert
-        \gamma_n \to \gamma_0 \in \Gamma \right\rbrace\\ 
-    \Gamma(\gamma_0, 0, b) &\coloneqq \left\lbrace \lbrace \gamma_n \rbrace \in \Gamma(\gamma_0) \mvert \phi_0 =
-        0\ \text{and}\ n^{1/2} \phi_n \to b \in (\R \cup \lbrace \pm \infty) \right\rbrace \\
-    \Gamma(\gamma_0, \infty, b_0) &\coloneqq \left\lbrace \lbrace \gamma_n \rbrace \in \Gamma (\gamma_0) \mvert
-        n^{1/2} \phi_n \to \infty\ \text{and}\ \phi_n \to b_0 \right\rbrace 
-\end{align}
-
+\begin{defn}{Drifting Sequence Parameter Spaces}
+    \begin{align}
+        \Gamma\left(\gamma_0\right) &\coloneqq \left\lbrace \left\lbrace \gamma_T \in \Gamma \right\rbrace \mvert
+            \gamma_T \to \gamma_0 \in \Gamma \right\rbrace\\ 
+        \Gamma(\gamma_0, 0, b) &\coloneqq \left\lbrace \lbrace \gamma_T \rbrace \in \Gamma(\gamma_0) \mvert \phi_0 =
+        0\ \text{and}\ \sqrt{T} \phi_T \to b \in (\R \cup \lbrace \pm \infty) \right\rbrace \\
+        \Gamma(\gamma_0, \infty, b_0) &\coloneqq \left\lbrace \lbrace \gamma_T \rbrace \in \Gamma (\gamma_0) \mvert
+        \sqrt{T} \phi_T \to \infty\ \text{and}\ \phi_T \to b_0 \right\rbrace 
+    \end{align}
+\end{defn}
 
 These are the standard GMM regularity conditions appropriately adjusted for the lack of identification when $\phi
 =0$.
@@ -401,8 +413,10 @@ What is the difference between $g_0\left(\cdot \mvert \gamma_0\right)$ and $g\le
 \begin{assump}[GMM 1]\label{ass:GMM1}
 \begin{assumplist}
     \item If $\phi=0$, $\sampmom(\eta)$ and $\W_{n}(\eta)$ do not depend on $\pi$ for all $\eta \in \Eta$, for
-        all $n \geq 1$, and for all $\gamma^{*}\in \Gamma.$ 
+        all $T \geq 1$, and for all $\gamma^{*}\in \Gamma.$ 
         \label{ass:GMM1a}
+    \item[] \purple{Question (Xu) : Why do we need to assume that this holds for all $T$, not just
+        asymptotically?}
     \item If $\lbrace \gamma_{n} \rbrace \in \Gamma\left(\gamma_0\right)$, $\sup_{\eta \in \Eta}
         \norm*{\sampmom(\eta) - g_0\left(\eta \mvert \gamma_0\right)} \pto 0$ and $\sup_{\eta
         \in \Eta} \norm{\W_{n}(\eta)-\W\left(\eta \mvert \gamma_0\right)} \pto 0$ for some deterministic
@@ -470,7 +484,7 @@ estimates---and $(\phi, \zeta)$ are identified this is not an issue in practice.
 
 
 %TODO
-\purple{Question: (Xu) What is $\Eta_n(\delta_n)$. Is the domain the same in \namedref{ass:GMM2b} and
+\purple{Question: (Xu) What is $\eta_t(\delta_T)$. Is the domain the same in \namedref{ass:GMM2b} and
 \namedref{ass:GMM2c}?}
 
 
@@ -478,15 +492,15 @@ estimates---and $(\phi, \zeta)$ are identified this is not an issue in practice.
 \begin{assumplist}
     \item $\sampmom(\eta)$ is continuously differentiable in $\eta$ for all $n \geq 1$. 
         \label{ass:GMM2a}
-    \item If $\{\gamma_n\} \in \Gamma\left(\gamma_0, 0, b\right)$, $\sup_{\left\lbrace \eta \in \Eta
-        \mvert \norm*{(\phi, \zeta')' - (\phi, \zeta')_{0,n}'} \leq \delta_n \right\rbrace}
+    \item If $\{\gamma_T\} \in \Gamma\left(\gamma_0, 0, b\right)$, $\sup_{\left\lbrace \eta \in \Eta
+        \mvert \norm*{(\phi, \zeta')' - (\phi, \zeta')_{0,n}'} \leq \delta_T \right\rbrace}
         \norm*{\frac{\partial}{\partial \xi'} \sampmom(\eta) - \popmom_{\xi}\left(\eta \mvert \gamma_0 \right)} =
-        o_p(1)$  for all deterministic sequences  $\delta_n \to 0$.
+        o_p(1)$  for all deterministic sequences  $\delta_T \to 0$.
         \label{ass:GMM2b}
-    \item If $\{\gamma_n \} \in \Gamma\left(\gamma_0, \infty, \eta_0\right)$, $\sup_{\eta \in \Eta_{n}(\delta_n)}
-        \norm*{\left(\frac{\partial}{\partial \eta'} \overline{g}_n - g_{\eta}\left(\eta \mvert
-        \gamma_0\right)\right) \diag\left(1_{1+d_\zeta}', (1/\phi_n)_{d_{\pi}}'\right)}  = o_p(1)$ for all
-        deterministic sequences $\delta_n \to 0$.
+    \item If $\{\gamma_T \} \in \Gamma\left(\gamma_0, \infty, \eta_0\right)$, $\sup_{\eta \in \Eta_{n}(\delta_T)}
+        \norm*{\left(\frac{\partial}{\partial \eta'} \overline{g}_T - g_{\eta}\left(\eta \mvert
+        \gamma_0\right)\right) \diag\left(1_{1+d_\zeta}', (1/\phi_T)_{d_{\pi}}'\right)}  = o_p(1)$ for all
+        deterministic sequences $\delta_T \to 0$.
         \label{ass:GMM2c}
 \end{assumplist}
 \end{assump}
@@ -508,37 +522,37 @@ These conditions will be characterized using the expected derivative of the popu
 \begin{defn}
     \label{defn:moment_derivative_func}
     \begin{equation}
-        K_{n,g}\left(\eta \mvert \gamma^{*}\right) \coloneqq  \frac{1}{n} \sum_{i=1}^n \frac{\partial}{\partial
-        \phi^{*}} \E \left[ \popmom(W_i, \eta) \mvert \gamma^{*} \right]
+        K_{T,g}\left(\eta \mvert \gamma^{*}\right) \coloneqq  \frac{1}{T} \sum_{i=1}^T \frac{\partial}{\partial
+        \phi^{*}} \E \left[ \popmom(W_t, \eta) \mvert \gamma^{*} \right]
     \end{equation}
 \end{defn}
 
 
 \begin{assump}[GMM 3]\label{ass:GMM3}
 \begin{assumplist}
-    \item $\sampmom(\eta) = \frac{1}{n} \sum_{i=1}^n \popmom(W_i, \eta)$  for some function $\popmom(W_i,
+    \item $\sampmom(\eta) = \frac{1}{T} \sum_{i=1}^T \popmom(W_t, \eta)$  for some function $\popmom(W_t,
         \eta) : \R^{k \times k} \times \Eta \to \R^k$.
         \label{ass:GMM3a}
-    \item $\E\left[\popmom(W_i, \beta_0, \zeta^{*}, \pi) \mvert \gamma^{*} \right] = 0$ for all $\pi \in \Pi$ and
+    \item $\E\left[\popmom(W_t, \beta_0, \zeta^{*}, \pi) \mvert \gamma^{*} \right] = 0$ for all $\pi \in \Pi$ and
         for all $i \geq 1$ if $\gamma^{*} = \left(0,\zeta^{*}, \pi^{*}, \xi^{*} \right) \in \Gamma$.
         \label{ass:GMM3b}
-    \item If $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{\sqrt{n}} \sum_{i=1}^n \left(g(W_i,
-        \zeta_{0,n}, \pi_n) - \E \left[g(W_i, \zeta_{0,n}, \pi_n)\mvert \gamma_n \right]\right)  \dto \N\left(0,
-        \aleph_g(\gamma_0)\right)$, where $\aleph_{g}(\gamma_0)$ is a $k \times k$ matrix.
+    \item If $\{ \gamma_T \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{\sqrt{T}} \sum_{i=1}^T \left(g(W_t,
+        \zeta_{0,T}, \pi_T) - \E \left[g(W_t, \zeta_{0,T}, \pi_T)\mvert \gamma_T \right]\right)  \dto \N\left(0,
+        \aleph(\gamma_0)\right)$, where $\aleph(\gamma_0)$ is a $k \times k$ matrix.
         \label{ass:GMM3c}
     \item 
         \label{ass:GMM3d}
         \begin{enumerate}
-            \item  $K_{n,g}\left(\eta \mvert \gamma^{*}\right)$ exists for all $\{\eta, \gamma^{*} \} \in
-                \left(\Eta_{\delta} \times \Gamma_{0}\right)$ and for all $n \geq 1$.
+            \item  $K_{T,g}\left(\eta \mvert \gamma^{*}\right)$ exists for all $\{\eta, \gamma^{*} \} \in
+                \left(\Eta_{\delta} \times \Gamma_{0}\right)$ and for all $T \geq 1$.
             %TODO
             \item[] \purple{Question (Xu): What is $\tilde{\gamma}$, i.e.\@ why does $\gamma$ have a tilde when
                 the other parameters do not?}
-            \item $K_{n,g}\left(\phi_n, \zeta_n, \pi \mvert \tilde{\gamma}_n\right)$ uniformly converges to some
+            \item $K_{T,g}\left(\phi_T, \zeta_T, \pi \mvert \tilde{\gamma}_T\right)$ uniformly converges to some
                 non-stochastic matrix-valued function  $K_{g}\left(0, \zeta_0, \pi \mvert \gamma_0\right)$  over
-                $\pi \in \Pi$ for all deterministic sequences $\{\phi_n, \zeta_n, \tilde{\gamma}_n \}$ satisfying
-                $\tilde{\gamma}_n \in \Gamma$, $\tilde{\gamma_n} \to \gamma_0 \coloneqq (0, \zeta_0, \pi_0, \xi)$,
-                $\{\phi_n, \zeta_n, \pi \} \in \Eta$ and $\{\phi_n, \zeta_n \} \to (0, \zeta_0)$.
+                $\pi \in \Pi$ for all deterministic sequences $\{\phi_T, \zeta_T, \tilde{\gamma}_T \}$ satisfying
+                $\tilde{\gamma}_T \in \Gamma$, $\tilde{\gamma_T} \to \gamma_0 \coloneqq (0, \zeta_0, \pi_0, \xi)$,
+                $\{\phi_T, \zeta_T, \pi \} \in \Eta$ and $\{\phi_T, \zeta_T \} \to (0, \zeta_0)$.
             \item $K_g\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right)$ is continuous on $\Pi$ for all  $\gamma_0
                 \in \Gamma$ with $\phi_0 = 0$.
         \end{enumerate}
@@ -548,11 +562,11 @@ These conditions will be characterized using the expected derivative of the popu
             \textcite{andrewsGmm2014} equals $1$.}
         \label{ass:GMM3e}
         %TODO
-        \item[] \purple{Question (Xu): What is the difference between $g(W_i, \eta)$ evaluated at $\eta = \eta_n$
-            and $g(W_i, \eta_n)$?}
-        \item If $\{ \gamma_n \} \in \Gamma(\gamma_0, 0, b)$, $\left. \frac{1}{n} \sum_{i=1}^n
-            \frac{\partial}{\partial \eta}  \E \left[ \popmom\left(W_i, \eta\right ) \mvert \gamma_n \right]
-            \right\rvert_{\eta = \eta_n} \to \popmom_{\eta}\left(\eta_0 \mvert \gamma_0\right)$.
+        \item[] \purple{Question (Xu): What is the difference between $g(W_t, \eta)$ evaluated at $\eta = \eta_t$
+            and $g(W_t, \eta_t)$?}
+        \item If $\{ \gamma_T \} \in \Gamma(\gamma_0, 0, b)$, $\left. \frac{1}{T} \sum_{i=1}^T
+            \frac{\partial}{\partial \eta}  \E \left[ \popmom\left(W_t, \eta\right ) \mvert \gamma_T \right]
+            \right\rvert_{\eta = \eta_t} \to \popmom_{\eta}\left(\eta_0 \mvert \gamma_0\right)$.
         \label{ass:GMM3f}
 \end{assumplist}
 \end{assump}
@@ -582,7 +596,7 @@ $g_{\zeta}\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right)$, does not depend up
 \begin{assumplist}
     \item $\phi$ is a scalar.
     \item $g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)$ has full column rank. 
-    \item $\aleph_g(\gamma_0)$ is positive definite for all $\gamma_0 \in \gamma $ with $\phi_0 = 0$. 
+    \item $\aleph(\gamma_0)$ is positive definite for all $\gamma_0 \in \gamma $ with $\phi_0 = 0$. 
 \end{assumplist}
 \end{assump}
 
