@@ -208,7 +208,7 @@ $\beta_{\Q}(x)$.
 The set of parameters we want to estimate is $\eta \coloneqq \lbrace c, \rho, \delta, \phi, \theta_1,
 \theta_2\rbrace$.
 
-\section{Spectral GMM}
+\section{Finite Spectral GMM}
 \label{sec:spectral_GMM}
 
 We derive a set of moment conditions from the characteristic function above by evaluating it at a grid of points
@@ -248,9 +248,8 @@ sufficient condition for $\rho, \delta, \& c$ to be identified is for the releva
 $\nabla b(x)$ to equal zero only at $\eta^{*}$ which are satisfied if $\rho, c, \delta > 0$.
 Testing if if $\phi$ and $\theta_2$ are identified is somewhat trickier. 
 Consider $\nabla \alpha(x)$. 
-%TODO Reword this.
-Since we are using a grid of $x$'s, and the gradient of $\alpha$ is a
-nonlinear function of $x$, the first two rows of the \cref{eqn:alpha_gradient} imply $\phi$ is identified.
+Since we are using a grid of $x$'s, and the gradient of $\alpha$ is a nonlinear function of $x$, the first two
+rows of the \cref{eqn:alpha_gradient} imply $\phi$ is identified.
 
 \begin{equation}
     \label{eqn:alpha_gradient}
@@ -291,15 +290,24 @@ This should not be an issue here because the parameters  are either a priori bou
 substantial a priori knowledge on their plausible magnitudes.
 Hence, \textcite[Theroem 2.6]{newey1994large} implies our estimator is consistent.
 
+However, when we allow for weak identification late on, we need this convergence to be uniform. 
+One straightforward way to show this is to show that our criterion function is globally Lipschitz in a set of high
+probability. 
+
+\purple{The main issue is that this does not hold. We do not have uniform convergence for all $\phi \in [-1,1]$.
+The moment conditions diverge as $\phi \to -1$. Now, the point of lack of identification is when $\phi = 0$, and
+the moment conditions are bounded for all $\phi in (-1,1)$. So we think the conclusions should still go through
+fine, but we'll have to be more careful.}
+
+
+%TODO where does this go?
 By the above arguments, we have a consistent estimator for $\eta$ and the optimal weight matrix $\W \coloneqq
 (\E\left[g g'\right])^{-1}$, and we will assume that the true value $\eta^{*}$ is in the interior of its sample
 space $\Eta$.\footnote{Throughout we will use $*$'s to denote true values for parameters.}
 Let $G \coloneqq \E\left[\frac{\partial}{\partial \eta} \popmom \right]$
 Clearly, $g$ is continuously differentiable, and its derivative $G$ is continuous.
 In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
-\purple{TODO: (Paul) Why should this be mentioned here?}
-Hence, the question is does $\sqrt{T} \left(\sampmom - \popmom(\eta^{*})\right) \dto \N(0, \aleph)$ for some
-positive-definite matrix $\aleph$.
+
 
 \begin{assump}[Weak Dependence]
     \label{assumption:weak_dependence}
@@ -309,7 +317,7 @@ positive-definite matrix $\aleph$.
 
 Since, $\norm*{g_t}$ is almost surely bounded by $1$ it has all of its moments and $z_t$ being $\alpha$-mixing
 implies $g_t$ is as well by the central limit theorem for strongly mixing process 
-$\sqrt{T} \left(\sampmom - \popmom(\eta^{*})\right) \dto \N(0, \aleph)$ as required. 
+$\sqrt{T} \sampmom(\eta^{*}) \dto \N\left(0, \E\left[\W\right]^{-1}\right)$ as required. 
 Consequently, by \textcite[Theorem 3.2]{newey1994large} we have convergence in distribution as well as convergence
 in probability.
 
