@@ -1,0 +1,66 @@
+\usepackage[utf8]{luainputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amsfonts,amssymb, amsthm} 
+\usepackage{mathtools, thmtools}
+\usepackage[onehalfspacing]{setspace}
+\usepackage[x11names]{xcolor} 
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{caption}
+\usepackage[pdfencoding=auto, naturalnames, psdextra, colorlinks, citecolor=blue]{hyperref}
+\usepackage[noabbrev, capitalise, nameinlink]{cleveref}
+\usepackage{csquotes}
+\usepackage{siunitx}
+\usepackage[title,titletoc,toc]{appendix}
+
+\declaretheorem[name=Theorem, style=plain]{theorem}
+\declaretheoremstyle[headfont=\normalfont\itshape, bodyfont=\normalfont]{partsytle} 
+
+\declaretheorem[name=Part, style=partsytle, parent=theorem]{proofpart}
+\declaretheorem[name=Corollary, style=plain, parent=theorem]{corollary}
+\declaretheorem[name=Lemma, style=plain, sibling=theorem]{lemma}
+
+\declaretheorem[style=definition, name=Definition, refname={definition,definitions}]{defn}
+
+\usepackage{enumitem}
+\newlist{assumplist}{enumerate}{1}
+\setlist[assumplist]{label=(\roman{assumplisti}), ref=\roman{assumplisti},noitemsep}
+
+\declaretheorem[style=definition, name=Assumption, refname={assumption,assumptions},
+    Refname={Assumption,Assumptions}]{assump}
+\Crefname{assump}{Assumption}{Assumptions}
+\Crefname{assumplisti}{Assumption}{Assumptions}
+
+\addtotheorempostheadhook[assump]{\crefalias{assumplisti}{assump}}
+\newcommand*{\fullref}[1]{\hyperref[{#1}]{\namecref{#1} \nameref*{#1}(\labelcref{#1})}}
+\newcommand*{\namedref}[1]{\hyperref[{#1}]{\nameref*{#1}(\labelcref{#1})}}
+\newcommand*{\Fullref}[1]{\hyperref[{#1}]{\nameCref{#1} \nameref*{#1}(\labelcref{#1})}}
+
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\purple}[1]{\textcolor{purple}{#1}}
+\newcommand*{\R}{\mathbb{R}}
+\newcommand*{\F}{\mathcal{F}}
+\newcommand*{\Q}{\mathbb{Q}}
+\newcommand*{\Phys}{\mathbb{P}}
+\newcommand*{\W}{\mathcal{W}}
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\N}{N}
+\newcommand*{\Var}{\mathbb{V}ar}
+\newcommand*{\pto}{\ensuremath{\to_p}}
+\newcommand*{\dto}{\ensuremath{\to_d}}
+\newcommand*{\Eta}{H} 
+\newcommand*{\popmom}{\ensuremath{g}} 
+\newcommand*{\sampmom}{\ensuremath{\overline{g}_T}}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\let\oldforall\forall
+\let\forall\undefined
+\DeclareMathOperator{\forall}{\oldforall}
+\DeclareMathOperator{\diag}{diag}
+\newcommand{\mvert}[1][\middle]{\ensuremath{\,#1\vert\,}}
+
+\usepackage[backend=biber, autopunct=true, authordate, hyperref=true, doi=false, isbn=false,
+    url=false]{biblatex-chicago} 
+\graphicspath{{figures/}}
+
