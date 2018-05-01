@@ -84,8 +84,6 @@ We also assume that $\left[ \frac{\psi}{\phi} \right]^2 \approx \frac{\E \left[\
 \F_t\right]}{\Var\left[r_{t+1} \mvert \F_t\right]}$, which enables our approximation of $\sigma^2_{t+1}$ by the
 realized volatility.
 
-%TODO
-\purple{TODO (Paul): Check this.}
 \begin{equation}
     \label{eqn:cond_characterisitc_func}
     \E_{\Phys}\left[\exp\left(- x r_{t+1}\right) \mvert \sigma_t^2, \sigma^2_{t+1}\right] = \exp\left(- a(x)
@@ -253,6 +251,8 @@ Let $G \coloneqq \E\left[\frac{\partial}{\partial \eta} \popmom \right]$
 Clearly, $g$ is continuously differentiable, and its derivative $G$ is continuous.
 In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
 
+%TODO Replace this with strong (alpha) mixing of order (1+\epsilon). 
+%Don't you need a lot more than this...?
 
 \begin{assump}[Weak Dependence]
     \label{assumption:weak_dependence}
@@ -283,14 +283,14 @@ in probability.
 \section{Weak Identification Setup}
 
 In this section, take the model described in the previous sections and place it in the setup of
-\textcite{andrewsGmm2014} so that we ca analyze the effects of possible lack of identification in the model in a
+\textcite{andrews2014Gmm} so that we ca analyze the effects of possible lack of identification in the model in a
 nice clean way.
 The goal here is to perform valid inference for $\pi, \theta$ even when $\phi$ might be zero. 
 
 
 From the discussion above, we can collect the parameters discussed above into a parameter vector of the following
 form,i.e.\@ recall the following: $\eta = \lbrace \rho, c, \delta, \phi, \pi, \theta \rbrace$
-To write it in the notation of \textcite{andrewsGmm2014}, we partition $\eta$ into three subsets.
+To write it in the notation of \textcite{andrews2014Gmm}, we partition $\eta$ into three subsets.
 
 \begin{align}
     \phi &\coloneqq \phi  \in (-1, 1) \\ 
@@ -316,7 +316,7 @@ Let $Q_T(\eta)$ be the GMM criterion function, then the GMM estimator $\hat{\eta
 
 
 Now that we have defined the parameters, we can characterize the set of assumptions necessary for valid inference.
-We will work through the assumptions described in \textcite{andrewsGmm2014}.
+We will work through the assumptions described in \textcite{andrews2014Gmm}.
 The set of necessary assumptions is relatively complicated because we have to characterize the asymptotic
 distribution under several different estimation strengths simultaneously, and the assumptions required to do that
   differ in the various cases. 
@@ -382,9 +382,8 @@ We characterize these drifting sequences of distributions by sequences of true p
         \end{align}
     \end{defn}
     
-    These are the standard GMM regularity conditions appropriately adjusted for the lack of identification when $\phi
-    =0$.
-    
+    These are the standard GMM regularity conditions appropriately adjusted for the lack of identification when
+    $\phi =0$.
     
     \begin{assump}[GMM 1]\label{ass:GMM1}
     \begin{assumplist}
@@ -488,7 +487,7 @@ We characterize these drifting sequences of distributions by sequences of true p
             \item $K\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right) = \popmom_{\phi, \zeta}\left(\phi_0,
                 \pi\mvert \gamma_0\right) x$ for some $x \in \R^{1+d_{\zeta}}$ if and only $\pi =
                 \pi_0$.\footnote{Since $\dim(\phi) = 1$, we can assume without loss of generality that the
-                $\omega_0$ from \textcite{andrewsGmm2014} equals $1$.}
+                $\omega_0$ from \textcite{andrews2014Gmm} equals $1$.}
                 \label{ass:GMM3e}
             \item If $\{ \gamma_T \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{T} \sum_{i=1}^T
                 \frac{\partial}{\partial \eta}  \E\left[ \popmom\left(W_T, \eta_T \right ) \mvert \gamma_T \right]
@@ -510,9 +509,12 @@ We characterize these drifting sequences of distributions by sequences of true p
     \begin{assump}[GMM 4]\label{ass:GMM4}
     \begin{assumplist}
         \item $\phi$ is a scalar.
+            \label{ass:GMM4a}
         \item $g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)$ has full column
             rank. 
+            \label{ass:GMM4b}
         \item $\aleph(\gamma_0)$ is positive definite for all $\gamma_0 \in \gamma $ with $\phi_0 = 0$. 
+            \label{ass:GMM4c}
     \end{assumplist}
     \end{assump}
 
@@ -622,22 +624,21 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
 
 
 \begin{proofpart}
+    \label{part:mainTheoremProofPart2}
+
     In this section, we show that the derivatives of the moment conditions have the correct behavior locally to
     the true parameters.
     We have to do this for the different classes of drifting sequences.
 
     Since our moment conditions are sample averages of the characteristic function, they satisfy
     \namedref{ass:GMM2a} automatically. 
-
-    \purple{TODO: We need to show that \namedref{ass:GMM2b} and \namedref{ass:GMM2c} are satisfied (they are)
-    using a uniform law of large numbers and the dominated convergence theorem.}
-    \textcite{andrewsGmm2014} show that this is a sufficient condition for their Assumption GMM2, which is what we
+    \textcite{andrews2014Gmm} show that this is a sufficient condition for their Assumption GMM2, which is what we
     actually need. 
 
     Since characteristic functions are uniformly bounded, by the dominated convergence theorem we can interchange the 
     expectation and derivative operators. 
-    Hence \namedref{ass:GMM3b} and \namedref{ass:GMM3c} are equivalent to the statements in terms of the moment
-    conditions them selves mutatis mutandis.  
+    Hence \namedref{ass:GMM2b} and \namedref{ass:GMM2c} are equivalent to the statements in terms of the moment
+    conditions themselves mutatis mutandis.  
     In addition, sice the derivate is a linear operator, we can pull it outside of the norm.
     The reason that the uniform law of large numbers in \cref{part:main_theorem_proof_part1} does not trivially
     imply this result is because we are not considering sequences $\phi_T \to \phi_0$. 
@@ -710,24 +711,74 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
     This applies that the difference between the two derivatives evaluated at different $\pi$ converges to zero.
     Consequently, \cref{eqn:pi_derivative_norm_bound} is $o_p(1)$ and we have shown \namedref{ass:GMM2b}.
 
+    \begin{equation}
+        \norm*{\abs*{\frac{\partial}{\partial \pi}\sampmom(\widetilde{\phi}^s, \widetilde{\zeta}^s,
+        \widetilde{\pi}^s) - \frac{\partial}{\partial \pi} \E\left[\popmom(\widetilde{\phi}^p,
+        \widetilde{\zeta}^p, \widetilde{\pi}^p)\mvert \gamma_0\right]} (1, 1, T)} \norm*{\pi_0 - \pi} 
+        \label{eqn:pi_derivative_rescaled_bound}
+    \end{equation}
+
     If we consider the setup in \namedref{ass:GMM2c}, $\tilde{\pi}^s$ and $\tilde{\pi}^p$ are now close together.
-    However, we need to show that \cref{eqn:pi_derivative_norm_bound} is $o_p(\frac{1}{T}$.
-
-    
-
+    However, we need to show that \cref{eqn:pi_derivative_rescaled_bound} is $o_p(1)$.
+    Since we are considering the limiting behavior of a function with a continuous derivative, we can assume that
+    the derivative is uniformly bounded without loss of generality. 
+    (The constant might depend upon the true value, but not $T$.)
+    By a Taylor series expansion of $\sampmom$ around the true value, and $\frac{\widetilde{\pi}^p}{\sqrt{T}} \to
+    0$ and $\norm{\pi_0 - \pi} \propto \delta_T$ the result follows.
 
 \end{proofpart}
 
-Assumption \namedref{ass:GMM3a} is trivially satisfied,  and we showed that \namedref{ass:GMM3b} is satisfied in
-\cref{sec:spectral_GMM}.
-    \purple{TODO: Show that \nameref{ass:GMM3c} is sasfied by using a triangular CLT}
+\begin{proofpart}
+    \label{part:mainTheoremProofPart3}
 
+    Assumption \namedref{ass:GMM3a} is trivially satisfied,  and we showed that \namedref{ass:GMM3b} is satisfied
+    in \cref{sec:spectral_GMM}.  
+        
+    The idea here is that the moment conditions for each $T$ minus their conditional exceptions converge to a
+    normal random variable.
+    In other words, we are almost in a standard triangular C.L.T.\@ setup.
+    We do have weak dependence across time.
 
+    In particular, both $\sigma^2_t$ and $r_t$ are infinitely differentiable functions of the innovations to
+    the volatility and return processes and $\popmom$ are infinitely differentiable functions of $r_{t+1}$ and
+    $r_t$ and the innovations are i.i.d.\@ across time by assumption.
+    (Note, i.i.d.\@ implies strong mixing of any size.)
+    Consequently, $\popmom$ is near epoch dependent (NED) of any size as defined in
+    \textcite{andrews1991empirical}.  
+    (Take $s>2.$) 
+    
+    Then by \textcite[Theorem 3]{andrews1991empirical}, we have the necessary finite-dimensional convergence in
+    distribution to a Gaussian random variable. 
 
-First, start by defining $g^{*}$ as follows, where (as used above) $g_{x}$ refers to the derivative of $g$ with
-respect to $x$.
-Note, assumptions \namedref{ass:GMM1a} and \namedref{ass:GMM3a}  imply that when $\phi_0 = 0$,
-$g_{\zeta}\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right)$, does not depend upon $\pi$.
+    We now show that \namedref{ass:GMM3d} holds.
+    Clearly, $K_{t,g}\left(\eta \mvert \gamma^{*}\right)$ always exists.
+    It uniformly converges because the derivatives of the moments are continuous functions of the data and the
+    parameters, the process is ergodic, and the characteristic function lives on a compact set.
+    It is also clearly continuous.
+    By the dominated convergence theorem we can exchange the derivative and expectations.
+    In addition, since \popmom\ does not depend upon $\phi_T$, the limiting behavior is independent of the value
+    of $\phi_T$.
+    Hence \namedref{ass:GMM1d} holds.
+    
+    \namedref{ass:GMM3e} is saying that the derivative of the moment function does not depend the true parameter
+    $\phi$ if and only if  $\pi =  \pi_0$. 
+    We showed this in the proof of \label{mainTheoremProofPart2}.
+
+    \namedref{ass:GMM3f} follows directly from the compactness of the parameter space and the continuity of the
+    cross derivatives of \popmom\ by the dominated convergence theorem.
+
+\end{proofpart}
+
+\begin{proofpart}
+    \label{mainTheoremProofPart4}.
+   
+    \namedref{ass:GMM4a} holds trivially.
+    We verified \namedref{ass:GMM4b} when we showed that $\pi$ and $\zeta$ are strongly identified
+    (\cref{lemma:IdentifiedSet}).
+    \namedref{ass:GMM4c} holds because the identification conditions do not create any singularity in the
+    asymptotic covariance matrix. 
+
+\end{proofpart}
 
 \end{proof}
 
