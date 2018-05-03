@@ -31,6 +31,8 @@ We then provide a series of sufficient conditions for valid inference.
 
 \section{The Model}
 
+\purple{Add discussion of the dynamics of the process.}
+
 We have a pricing kernel $M_{t, t+1}(\theta)$ which allows us to characterize the price $P_t$ at time $t$ of any
 payoff at time $t+1$ of a function $f$ and information set $\F_t$, $f\left(r_{t+1}, \sigma^2(t+1) \mvert
 \F_t\right)$. 
@@ -346,14 +348,15 @@ compact subset of $\Eta$, where the true parameter values live.
 We characterize these drifting sequences of distributions by sequences of true parameters $\gamma_T \coloneqq
 (\eta_T, \phi_T)$.
 
+\purple{TODO Add discussion of the limiting process.}
+\purple{Verify that the assumptions on the parameter space hold.}
+\purple{Discuss what happens if we lack identification and hence cannot consistently estimate the parameter.}
 
 \begin{restatable}[Inference for $\eta$ under Weak Identification]{theorem}{InferenceWeakID}
     Let that $\phi_0  \in (\underline{\phi}_0,1)$, for some $\underline{\phi}_0 > -1$. 
     $\rho_0 \in [0,1)$, and $c_0 > 0$. 
-    Further assume that the data are ergodic, stationary, and satisfy \cref{assumption:weak_dependence}.
-    Then the following convergence in distribution holds.
 
-    \purple{TODO Add Conclusion}
+    \purple{TODO  Add Conclusion}
 \end{restatable}
 
 
@@ -606,8 +609,8 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
     We further showed the relevant uniform convergence to verity \namedref{ass:GMM1b} in
     \cref{lemma:UniformConvergenceStrongID}.
     
-    The next two assumptions (\namedref{ass:GMM1e} and \namedref{ass:GMM1f} are  technical conditions regarding the
-    behavior of the moment conditions and weight matrix. 
+    The next two assumptions (\namedref{ass:GMM1e} and \namedref{ass:GMM1f}) are  technical conditions regarding
+    the behavior of the moment conditions and weight matrix. 
     Since our moment conditions are derived from an infinitely-differentiable  characteristic function and the
     weight matrix is the optimal one, they both hold trivially.
     
@@ -629,12 +632,12 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
     In this section, we show that the derivatives of the moment conditions have the correct behavior locally to
     the true parameters.
     We have to do this for the different classes of drifting sequences.
+    We will do this by verifitying \cref{ass:GMM2}.
+    This is valid since \textcite{andrews2014Gmm} show that this is a sufficient condition for their Assumption
+    GMM2, which is what we actually need. 
 
-    Since our moment conditions are sample averages of the characteristic function, they satisfy
-    \namedref{ass:GMM2a} automatically. 
-    \textcite{andrews2014Gmm} show that this is a sufficient condition for their Assumption GMM2, which is what we
-    actually need. 
-
+    Our moment conditions are sample averages of the characteristic function, they satisfy \namedref{ass:GMM2a}
+    automatically. 
     Since characteristic functions are uniformly bounded, by the dominated convergence theorem we can interchange the 
     expectation and derivative operators. 
     Hence \namedref{ass:GMM2b} and \namedref{ass:GMM2c} are equivalent to the statements in terms of the moment
@@ -645,11 +648,12 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
 
 
     We create a mean value expansions around around $(\phi_0, \zeta_T, \pi_T)$ of the sample moment condition and
-    around $\phi_0, \zeta_0, \pi_0$ for the population moment condition.
+    around $(\phi_0, \zeta_0, \pi_0)$ for the population moment condition.
     (This is not the same in both cases, not is it the true parameter for the drifting sequence in the case of the
     sample moment condition.)
-    In addition, also since we are considering continuous functions of compact spaces, The $\delta_T$ ball in
-    $\R^{\dim(\eta)}$, convergence implies uniform convergence, and so we only need to show convergence below.
+    In addition, also since we are considering continuous functions of compact spaces --- the $\delta_T$ ball in
+    $\R^{\dim(\eta)}$ --- pointwise convergence implies uniform convergence, and so we only need to show pointwise
+    convergence below.
 
     \begin{alignat}{2}
         & &&\norm*{\sampmom(\phi_T, \zeta_T, \pi_T) -  \E\left[\popmom(\phi_T, \zeta_T, \pi_T) \mvert
@@ -723,8 +727,8 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
     Since we are considering the limiting behavior of a function with a continuous derivative, we can assume that
     the derivative is uniformly bounded without loss of generality. 
     (The constant might depend upon the true value, but not $T$.)
-    By a Taylor series expansion of $\sampmom$ around the true value, and $\frac{\widetilde{\pi}^p}{\sqrt{T}} \to
-    0$ and $\norm{\pi_0 - \pi} \propto \delta_T$ the result follows.
+    By a Taylor series expansion of $\sampmom$ around the true value, $\frac{\widetilde{\pi}^p}{\sqrt{T}} \to 0$,
+    and $\norm{\pi_0 - \pi} \propto \delta_T$ the result follows.
 
 \end{proofpart}
 
@@ -734,10 +738,9 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
     Assumption \namedref{ass:GMM3a} is trivially satisfied,  and we showed that \namedref{ass:GMM3b} is satisfied
     in \cref{sec:spectral_GMM}.  
         
-    The idea here is that the moment conditions for each $T$ minus their conditional exceptions converge to a
-    normal random variable.
-    In other words, we are almost in a standard triangular C.L.T.\@ setup.
-    We do have weak dependence across time.
+    The conceptual idea driving the reulsts this section is that moment conditions for each $T$ minus their
+    conditional exceptions converge to a normal random variable.
+    In other words, we are almost in a standard triangular C.L.T.\@ setup with weak time-dependence.
 
     In particular, both $\sigma^2_t$ and $r_t$ are infinitely differentiable functions of the innovations to
     the volatility and return processes and $\popmom$ are infinitely differentiable functions of $r_{t+1}$ and
@@ -746,8 +749,7 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
     Consequently, $\popmom$ is near epoch dependent (NED) of any size as defined in
     \textcite{andrews1991empirical}.  
     (Take $s>2.$) 
-    
-    Then by \textcite[Theorem 3]{andrews1991empirical}, we have the necessary finite-dimensional convergence in
+    By \textcite[Theorem 3]{andrews1991empirical}, we have the necessary finite-dimensional convergence in
     distribution to a Gaussian random variable. 
 
     We now show that \namedref{ass:GMM3d} holds.
@@ -755,22 +757,21 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
     It uniformly converges because the derivatives of the moments are continuous functions of the data and the
     parameters, the process is ergodic, and the characteristic function lives on a compact set.
     It is also clearly continuous.
-    By the dominated convergence theorem we can exchange the derivative and expectations.
+    By the dominated convergence theorem, we can exchange the derivative and expectations.
     In addition, since \popmom\ does not depend upon $\phi_T$, the limiting behavior is independent of the value
     of $\phi_T$.
     Hence \namedref{ass:GMM1d} holds.
     
-    \namedref{ass:GMM3e} is saying that the derivative of the moment function does not depend the true parameter
-    $\phi$ if and only if  $\pi =  \pi_0$. 
-    We showed this in the proof of \label{mainTheoremProofPart2}.
-
+    \namedref{ass:GMM3e} says the derivative of the moment function does not depend the true parameter $\phi$ if
+    and only if  $\pi =  \pi_0$. 
+    We showed this in the proof of \cref{part:mainTheoremProofPart2}.
     \namedref{ass:GMM3f} follows directly from the compactness of the parameter space and the continuity of the
     cross derivatives of \popmom\ by the dominated convergence theorem.
 
 \end{proofpart}
 
 \begin{proofpart}
-    \label{mainTheoremProofPart4}.
+    \label{mainTheoremProofPart4}
    
     \namedref{ass:GMM4a} holds trivially.
     We verified \namedref{ass:GMM4b} when we showed that $\pi$ and $\zeta$ are strongly identified
