@@ -2,32 +2,138 @@
 \usepackage{risk_price_inference}
 \addbibresource{riskpriceinference.bib}
 
-\author{Xu Cheng, Eric Renault, and Paul Sangrey}
+\author{Xu Cheng\thanks{University of Pennsylvania, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}}
+    \and 
+    Eric Renault\thanks{Brown University, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}}
+    \and 
+    Paul Sangrey\thanks{University of Pennsylvania, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
+    
 \title{Inference for the Price of Volatility Risk Under Weak Identification}
+
 \date{\today}
 
 \begin{document}
 
+\begin{titlepage}
 
-\maketitle
+
+    \maketitle
+    \thispagestyle{empty}
+    \addtocounter{page}{-1}
+
+    \begin{abstract} \singlespacing \noindent 
+        The risk-return trade off is a central question in modern asset pricing. 
+        Even though the theoretical literature cohesively argues there should be a strong positive correlation
+        between expected returns and volatility, empirically measuring it has proven difficult. 
+        In addition, the option pricing literature shows that volatility enters as its own risk factor, not just
+        as a predictor of returns.
+        Even obtaining point estimates of these risk prices in the presence of contemporaneous correlation between
+        returns and volatility, the  volatility feedback effect, has proven delicate.
+        We develop methods to provide  valid confidence intervals for the price of volatility and equity risk from
+        equity data directly that account for this weak identification of the various parameters. 
+        We do this by adapting the results in weak identification literature that uses drifting sequences in order
+        to be robust to the data's identification strength. 
+    \end{abstract}
+
+\end{titlepage}
+
+\phantomsection
+\addcontentsline{toc}{section}{Introduction}
+
+Modern finance is all about the risk return trade offs that investors face and how to optimally respond to them. 
+In particular, the central question of asset pricing is what drives expected returns.
+Standard economic theory predicts you must compensate investors with higher expected returns when they face more
+risk.
+In other words, we would expect a positive relationship between the mean and volatility of returns.
+In fact, in \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected
+return varies proportionally with the volatility. 
+In other words, we have a constant price of volatility risk and expected returns are perfectly correlated with
+volatility.
+Even in more complicated models such as the long-run risk model and rare disasters models find a very close
+relationship between variance and mean of returns \parencite{bansal2014volatility, wachter2013can}.
+
+Consequently, an important empirical question is what is the precise magnitude of this relationship.
+However, unlike the consensus in the theoretical literature, the empirical literature has found pinning down this
+relationship quite difficult.
+Not only has its magnitude proven difficult to determine, but various estimates even differ in sign,
+\parencite{lettau2010measuring}, .
+
+The empirical literature, which we examine in more detail in the literature review, has focused on point estimates
+of this magnitude. 
+However, if individual investors are ambiguity averse as in \textcite{hansen2001robust, jiu2012ambiguity}, they
+will care not just about how the representative investor prices volatility but also their uncertainty regarding
+this estimate. 
+Furthermore, when economists calibrate models, they need to know how precisely the data determine the parameters
+they are calibrating.
+If the need to alter the parameter value slightly in order to make their model perform well, are they bringing in
+more restrictions or data to more precisely determine the parameter of interest or are they using a value that the
+data tell us is incorrect?
+
+Clearly, as obtaining precise believable point estimates of the price of volatility risk has proven quite
+difficult, we should expect doing valid inference to be even more delicate.
+To the best of our knowledge, this is the first paper to directly tackle this question.
+Various authors report confidence intervals as well as their point estimates.
+However, they do not take into account the weak identification that makes getting the point estimate difficult in
+computing these estimates.
+
+Why is it that measuring this price is so difficult when the theoretical literature is so cohesive?
+Econometrically, it is because the volatility price is weakly identified, as in \textcite{andrews2012estimation},
+in that the strength of the identification of the price depends upon the value of other parameters. 
+This obviously begs the question --- what are these parameters? 
+
+To estimate the risk prices, there are three different phenomena that must be distinguished.
+First, the econometrician must disentangle the volatility feedback effect (leverage) which is a contemporaneous
+relationship between the volatility and returns from the risk premium, which is a relationship between volatility
+and expected returns. 
+It is not a contemporaneous relationship, but rather a predictable one. 
+
+Second, and just as important.
+In the papers estimating the volatility expected-return relationship such as
+\textcite{brandt2004relationship,lettau2010measuring} are implicitly using a one-factor model where volatility
+is that factor.
+However, the option pricing literature, such as  \textcite{christoffersen2013capturing}, has argued that in order
+to match the option pricing data we need to include another factor.
+In other there are two sources of risk that the investors face: what returns will do and what the volatility
+will do.
+One can view the loading on the equity risk to itself be a function of the volatility.
+The econometrician can rewrite this as a two factor model with equity and volatility risk up to higher order
+terms.
+Since, the econometrician must disentangle these two effects, their ability to do this will depend upon various
+other parameters.
+As mentioned in the introduction,in CAPM we only have factor, and so clearly we cannot disentangle them.
+However, most models of interest to economists nest CAPM as a special case. 
+Consequently, for certain values of the parameters, the model has only one factor. 
+This directly implies that we cannot separately identify the two risks for some values of the other parameters.
+More generally, the identification strength of the risk prices depends upon the other parameters.
+The weak identification literature shows that in these scenarios, the finite-sample distributions of the estimates
+are highly nonstandard, and the usual asymptotic approximations do not perform well.
 
 
-Two key questions at the very heart of finance are what are the risks investors face and what are the prices of
-those risks.
-Two leading risks are equity risk and volatility risk.
-Although the literature has shown that volatility risk clearly matters, constructing beliefs concerning the price
-of volatility risk from the data has proven quite difficult.
-What we want is a good estimator for this parameter and a strategy for credible inference regarding it.  
+Hopefully, the reader has a high-level understanding of the issue in at hand, and why simple econometric
+procedures does not provide a useful guide to the true uncertainty regarding the parameters.
+The obvious next step is considering how we need to do this in practice.
+Since the contribution of this paper is in terms of methodology and empirical results, we will take a model from
+the literature that has the various components, instead of developing our own asset or option pricing model.
+In particular, we take the model from \textcite{khrapov2016affine} and use it to estimate the relevant parameters. 
 
-We take the model from \textcite{khrapov2016affine} and use it to estimate the relevant
-parameters, which we derive below. 
-We use a finite version of spectral GMM, which forms moment conditions from the characteristic function.
-Out data we use are the bivariate series $\begin{pmatrix} r_{t+1}, \sigma^2_{t+1} \end{pmatrix}$.
+This model has a few nice features. 
+First, it has both equity and volatility prices and a leverage effect. 
+As such, it is the natural discrete time analogue of the \textcite{heston1993closedform} option pricing model. 
+It has an exponentially affine stochastic discount factor  and shares with \textcite{heston1993closedform} the
+advantage of having a structure preserving change of measure between the physical and risk-neutral models.
+By doing our analysis in discrete-time we are able to more directly compare our results to risk-premia estimates
+outside of the option pricing literature and the jumps in high-frequency innovations will not dramatically affect
+our results.  
+If we were to use a diffusion process in continuous time, we would be severely counterfactually constraining the
+higher-order  moments of the process in way that would likely bias our inference. 
+
+As far as estimation is concerned, we follow \textcite{khrapov2016affine} in using a finite version of spectral
+General Method of Moments (GMM).
+Effectively, we take some moments implied by the characteristic function of returns and use them in a standard GMM
+setup.
+
+Our data we use are the bivariate series $\begin{pmatrix} r_{t+1}, \sigma^2_{t+1} \end{pmatrix}$.
 $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$.
-
-Moving forward, we sketch the model developed in \textcite{khrapov2016affine} and derive the associated moment
-conditions.
-We then provide a series of sufficient conditions for valid inference. 
 
 \section{The Model}
 
