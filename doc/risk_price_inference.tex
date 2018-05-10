@@ -282,6 +282,30 @@ that we can use.}
     \F_t \right] = 1
 \end{gather}
 
+\subsection{Leverage Effect vs Volatlity Feedback Effect}
+
+As mentioned above the relationship between the volatilty and the return comes from two places: the
+contemporaneous or volatilty feedback effect and the leverage or risk premium effect.
+In this section, we decompose those two effects and explain how our estimates speak to them. 
+
+Recall the conditional Laplace transform under the physical measure. 
+
+\begin{equation}
+        \E\left[\exp(-u r_{t+1}) \mvert \sigma^2_{t},  \sigma^2_{t+1}\right] = \exp\left(- \alpha_{\PP}(u)
+        \sigma^2_{t+1} - \beta_{\PP}(u)\sigma^2_{t} - \gamma_{\PP}(u) \right) 
+\end{equation}
+
+Since the Laplace transform is a generalization of the characteristic function, we can compute the conditional
+moments by taking a Taylor series expansion at zero.
+In particular, the first two conditional moments have the following form. 
+
+\begin{align}
+    \E\left[r_{t+1} \mvert \sigma^2_{t},  \sigma^2_{t+1}\right] &=  \alpha_{\PP}'(0)
+        \sigma^2_{t+1} - \beta_{\PP}'(0)\sigma^2_{t} - \gamma_{\PP}'(0) 
+    \E\left[r_{t+1} \mvert \sigma^2_{t},  \sigma^2_{t+1}\right] &=  \alpha_{\PP}'(0)
+        \sigma^2_{t+1} - \beta_{\PP}'(0)\sigma^2_{t} - \gamma_{\PP}'(0) 
+\end{align}
+
 To estimate this equation, we need to know all of the relevant functions.
 The parametric structure of the problem and some algebra implies the following.
 
