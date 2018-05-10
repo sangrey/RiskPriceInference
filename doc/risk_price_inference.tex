@@ -131,72 +131,156 @@ As far as estimation is concerned, we follow \textcite{khrapov2016affine} in usi
 General Method of Moments (GMM).
 Effectively, we take some moments implied by the characteristic function of returns and use them in a standard GMM
 setup.
-
-Our data we use are the bivariate series $\begin{pmatrix} r_{t+1}, \sigma^2_{t+1} \end{pmatrix}$.
+The data we use are the bivariate series $\begin{pmatrix} r_{t+1}, \sigma^2_{t+1} \end{pmatrix}$.
 $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$.
+We go into further detail in \cref{sec:data} regarding how we obtained it, the time-span covered, and so on.
 
-\section{The Model}
+\section{Literature Review}\label{sec:lit_review}
 
-\purple{Add discussion of the dynamics of the process.}
 
-We have a pricing kernel $M_{t, t+1}(\theta)$ which allows us to characterize the price $P_t$ at time $t$ of any
-payoff at time $t+1$ of a function $f$ and information set $\F_t$, $f\left(r_{t+1}, \sigma^2(t+1) \mvert
-\F_t\right)$. 
-We use $\Q$ to denote the risk-neutral measure.
+\section{The Model}\label{sec:model}
 
-\begin{defn}{The Model Setup}
+\addtocounter{subsection}{1}
+
+We estimate the prices of some factors using moment conditions derived from an option pricing model. 
+As is standard in that literature, we will do  this by specifying the physical and risk-neutral measures and their
+relationship, i.e.\@ the stochastic discount factor or pricing kernel.
+Let $\F_t$ be the representative investor's information set, and $P_t$ be the price on the asset in question, with
+associated return $r_{t+1}$ and volatility  $\sigma^2_{t+1}$.
+
+Given $\F_{t}$, the vector $\left( r_{t+1},  \sigma^2_{t+1}\right)$ is drawn from some process --- $\PP$ --- the
+physical measure. 
+We can further define the risk neutral measure --- $\QQ$ ---  as the process that makes $P_t$ a martingale, i.e.\@
+the following holds. 
+The advantage of defining $\QQ$ is that for some payoff function --- $f$  -- that is a function of future return
+--- $r_{t+1}$ and volatility $\sigma^{t+1}$ and potentially depends upon the current information available --
+$\F_t$, we can price this payoff as its expectation with respect to $\QQ$.
+In other  words, the price of $f(r_{t+1}, \sigma^2_{t+1}, \F_t)$ satisfies for all $t$ and for all $f$.
+This is useful because we can choose $f$ as a convenient function for our estimation. 
+
+\begin{equation}
+    P_t(f) = \E_{\QQ}\left[ f\left(r_{t+1}, \sigma^2_{t+1}, \F_{t}\right)  \mvert \F_{t}\right]
+\end{equation}
+
+Since $P_t(f), r_{t+1}$ and $\sigma_t^2$ are observable, if we specify a model for $\F_t$ in terms of observable
+(to the econometrician) variables, this provides a moment condition that we can use. 
+However, this condition does not identify everything we wish to estimate, in particular it does not identify the
+risk prices. 
+
+
+To see this, we complete the model by defining the stochastic discount factor --- $M_{t, t+1}$ --- as the
+Radon-Nikodym derivative between the $\PP$ and $\QQ$ measures. 
+No arbitrage guarantees that this will exist, \parencite{harrison1978martingales}.
+Since risk prices arise from investors' demand for compensation to hold risk, i.e.\@ their risk-aversion, here is
+where they show up in the $\QQ$ measure. 
+(We collect the parameter of interest into a vector --- $\eta$.)
+
+
+\begin{defn}{Asset Pricing Moments}
     \begin{equation}
-        P_t  = \E\left[M_{t,t+1}(\theta) f\left(r_{t+1}, \sigma^2_{t+1} \mvert  \F_t\right) \mvert \F_t \right] =
-        \E_{\Q}\left[f\left(r_{t+1}, \sigma^2_{t+1} \mvert  \F_t\right) \mvert \F_t \right] 
+        P_t(f)  = \E_{\QQ} \left[f\left(r_{t+1}, \sigma^2_{t+1} , \F_t\right) \mvert \F_t \right] =
+        \E_{\PP}\left[M_{t,t+1}(\eta)f\left(r_{t+1}, \sigma^2_{t+1}, \F_t\right) \mvert \F_t \right] 
     \end{equation}
 \end{defn}
 
-To make the problem tractable, we assume that the problem is Markov and that there is no Granger causality from
-return to volatility. 
-This implies the conditional probability distribution of $\sigma^2_{t+1} \vert \F_t$ equals the conditional
-probability distribution of $\sigma^2_{t+1} \vert \sigma^2_t$.
-Consequently, we can write down our model in the risk-neutral measure using some functions, $a_{\Q}(u),
-b_{\Q}(u)$, and $\alpha_{\Q}(v), \beta_{\Q}(v), \& \gamma_{\Q}(v)$, as the following two equations in terms of the
-Laplace transforms of the probability distributions.
+\subsection{Dynamics}
 
+To specify the model we must specify what the $\PP$ and $\QQ$ measures are and what $M_{t, t+1}(\eta)$ is.
+We start by specifying the $\PP$ measure.
 
-\begin{defn}{The Risk-Neutral Model}
-\begin{align}
-    \E_{\Q}\left[\exp\left(-x  \sigma^2_{t+1}\right) \mvert \sigma^2_t\right] &= \exp\left(-a_{\Q}(x)
-    \sigma_t^2 - b_{\Q}(x)\right) \\
-    \E_{\Q}\left[\exp\left(-x  r_{t+1} \right)\mvert \sigma^2_t \sigma^2_{t+1}\right] &=
-    \exp\left(-\alpha_{\Q}(x) \sigma^2_{t+1} - \beta_{\Q}(x) \sigma^2_t - \gamma_{\Q}(x)\right)
-\end{align}
+Following \textcite{khrapov2016affine}, we specify the joint dynamics of $\left(r_{t+1}, \sigma^2_{t+1}\right)$
+under $\PP$ using Compound Autoregressive models (Car) of \textcite{darolles2006structural}.
+These models are autoregressive models for the Laplace transform of the process.
+The leading parameterization is the autoregressive gamma process (ARG) of \textcite{gourieroux2006autoregressive}.
+
+In particular, we assume that the variables are first-order Markov and there is no Granger causality from return
+to the volatility and that returns are serially independent given the volatility path.
+In other words, the volatility drives all of the dynamics of the process.
+Note, we do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated.
+They are in the data.
+
+Since the Laplace transform is an expectation of a specific function, by assuming the data are jointly CAR(1), we
+can represent out model under the physical  as follows for some functions $a_{\PP}, b_{\PP}, \alpha_{\PP},
+    \beta_{\PP}$, and $\gamma_{\PP}$ for all $u$ in its domain.
+
+\begin{defn}{The Model under the Physical Measure}
+    \label{defn:physical_model}
+    \begin{align}
+        \E_{\PP} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t\right] &= \exp\left( - a_{\PP}(u)
+            \sigma^2_{t} - b_{\PP}(u) \right) \\
+        \E\left[\exp(-u r_{t+1}) \mvert \sigma^2_{t},  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\PP}(u)
+        \sigma^2_{t+1} - \beta_{\PP}(u)\sigma^2_{t} - \gamma_{\PP}(u) \right) 
+    \end{align}
 \end{defn}
 
+The model in \cref{defn:physical_model} is parameterized using the functions mentioned and at this level of
+generality fully nonparametric. 
+To gain tractability, we will specify these function below obtaining a parametric model.
+In other words, we replace the infinite degrees of freedom in \cref{defn:physical_model} with a parameter vector
+with finite degrees of freedom.
 
-We assume that the volatility follows an autoregressive gamma process---ARG(1), and so its physical measure
+First, we assume that the volatility follows an autoregressive gamma process---ARG(1), and so its physical measure
 dynamics are governed by following equations.
 
 \begin{gather}
-    a_{\Phys}(x) = \frac{\rho x}{1 + c x}  \\
-    b_{\Phys}(x) = \delta \log \left(1 + c x\right) \\
+    a_{\PP}(x) = \frac{\rho x}{1 + c x}  \\
+    b_{\PP}(x) = \delta \log \left(1 + c x\right) \\
     \rho \in [0, 1), c > 0, \delta > 0 
 \end{gather}
 
-The persistence is governed by $\rho$, the mean by $\delta$, and $c$ is a scaling factor for the volatility as can
-be seen in the formula for $\sigma^2_{t+1}$'s conditional mean.
+In order to interpret these parameters, it is useful to note the formula for the conditional mean
+\parencite[8]{khrapov2016affine}.
+As we can see, $\rho$ is a persistence parameter, and $\delta$ is a drift.
+The parameter $c$ scales the volatility.
 
 \begin{equation}
     \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right] = c \delta + \rho \sigma^2_t
 \end{equation}
 
-Assuming the measure change preserves the general structure between the risk-neutral and physical measures implies
-\cref{eqn:cond_characterisitc_func}.
-We also assume that $\left[ \frac{\psi}{\phi} \right]^2 \approx \frac{\E \left[\sigma^2_{t+1} \mvert
-\F_t\right]}{\Var\left[r_{t+1} \mvert \F_t\right]}$, which enables our approximation of $\sigma^2_{t+1}$ by the
-realized volatility.
+Before, we discuss how we parameterize the Laplace function for the return process, we will consider the $\QQ$
+measure.
+We will assume that the risk-neutral measure is structure preserving.
+In other words, the Laplace functions maintain the same structure for some functions some functions $a_{\QQ},
+b_{\QQ}, \alpha_{\QQ}, \beta_{\QQ}$, and $\gamma_{\QQ}$.
+This is a relatively weak assumption because the absolute continuity of the two measures places strong
+restrictions on deviations from this case.
+For example, in the continuous-time limit this structure-preserving relationship would always hold.
 
-\begin{equation}
-    \label{eqn:cond_characterisitc_func}
-    \E_{\Phys}\left[\exp\left(- x r_{t+1}\right) \mvert \sigma_t^2, \sigma^2_{t+1}\right] = \exp\left(- a(x)
-    r^2_{t+1} - \beta(x) \sigma^2_t - \gamma(x) \right) 
-\end{equation}
+
+\begin{defn}{The Model under the Risk-Neutral Measure}
+    \label{defn:risk_neutral_model}
+    \begin{align}
+        \E_{\QQ} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t\right] &= \exp\left( - a_{\QQ}(u)
+            \sigma^2_{t} - b_{\QQ}(u) \right) \\
+        \E\left[\exp(-u r_{t+1}) \mvert \sigma^2_{t},  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\QQ}(u)
+        \sigma^2_{t+1} - \beta_{\QQ}(u)\sigma^2_{t} - \gamma_{\QQ}(u) \right) 
+    \end{align}
+\end{defn}
+
+Since the Laplace transform for $r_{t+1}$  is exponentially affine under both $\PP$ and $\QQ$, the measure change
+between them is also exponentially affine.
+If we let $\pi$ be the price of volatility risk and $\theta$ be the price of equity risk, we can write down the
+change of measure as follows.
+We let $r_{f,t}$ be the risk-free rate.
+It deterministically discounts the prices but plays no further role in the analysis.
+
+
+\begin{defn}{The Stochastic Discount Factor}
+    \begin{equation}
+        M_{t,t+1}(\pi, \theta) = \exp\left(-r_{f,t}\right) \exp\left(m_{0}(\pi, \theta) + m_1(\pi, \theta)
+        \sigma_t^2 - \pi \sigma^2_{t+1} - \theta r_{t+1}\right) 
+    \end{equation}
+\end{defn}
+
+\purple{The next thing to do is to show how we replace the unspecified functions and convert them to some moments
+that we can use.}
+
+\begin{gather}
+    \intertext{Then by the law of iterated expectations and some algebra.}
+    \E \left[\exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \pi \sigma^2_{t+1} - \theta r_{t+1}\right)
+    \exp\left(- \alpha(\theta) \sigma^2_{t+1} - \phi (\theta) \sigma^2_{t+1} - \gamma(\theta)\right) \mvert
+    \F_t \right] = 1
+\end{gather}
 
 To estimate this equation, we need to know all of the relevant functions.
 The parametric structure of the problem and some algebra implies the following.
@@ -206,39 +290,31 @@ The parametric structure of the problem and some algebra implies the following.
     b(x) &= \delta \log \left(1 + c x\right) \\
     \alpha(x) &= \psi x - \frac{1}{2} x^2 (1 - \phi^2) \\
     \label{eqn:beta_defn}
-    \phi(x)  &= x \alpha_{\Q}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}} \right) \\
+    \beta(x)  &= x \alpha_{\QQ}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}} \right) \\
     \label{eqn:gamma_defn}
-    \gamma(x) &= x b_{\Q}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}}\right) 
+    \gamma(x) &= x b_{\QQ}\left(- \frac{\phi}{\sqrt{c [1 + \rho]}}\right) 
 \end{align}
 
-In last two of the above equations we have the risk-neutral $\alpha_{\Q}(x)$ and $\beta_{\Q}(x)$ functions which we
-have not defined.
+In last two of the above equations we have the risk-neutral $\alpha_{\QQ}(x)$ and $\beta_{\QQ}(x)$ functions which
+we have not defined.
 To solve for them we drive the implied stochastic discount factor and make the appropriate measure change.
 We parameterize the SDF in terms of price of volatility risk---$\pi$---and the price of equity
 risk---$\theta$.  
 The SDF satisfies the following equation for some functions $m_0(\cdot)$ and $m_1(\cdot)$.
 
-\begin{gather}
-    M_{t,t+1}(\theta) = \exp\left(-r_{f,t}\right) \exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \pi
-    \sigma^2_{t+1} - \theta r_{t+1}\right) \\
-    \intertext{Then by the law of iterated expectations and some algebra.}
-    \E \left[\exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \pi \sigma^2_{t+1} - \theta r_{t+1}\right)
-    \exp\left(- \alpha(\theta) \sigma^2_{t+1} - \phi (\theta) \sigma^2_{t+1} - \gamma(\theta)\right) \mvert
-    \F_t \right] = 1
-\end{gather}
 
 This implies the two unspecified functions are as follows.
 
 \begin{align}
     m_{0}(\theta) &= \gamma(\theta) + b\left(\alpha\left(\theta\right) + \pi\right) \\
     m_{1}(\theta) &= \phi(\theta) + a\left(\alpha(\theta) + \pi\right) 
-    \intertext{Now we can solve for $\alpha_{\Q}(x)$ and $\beta_{\Q}(x)$.}
-    a_{\Q}(x) &= a\left(x + \pi + \alpha(\theta)\right) - a\left(\pi + \alpha(\theta)\right) \\
-    b_{\Q}(x) &= b\left(x + \pi + \alpha(\theta)\right) - b\left(\pi + \alpha(\theta)\right) 
+    \intertext{Now we can solve for $\alpha_{\QQ}(x)$ and $\beta_{\QQ}(x)$.}
+    a_{\QQ}(x) &= a\left(x + \pi + \alpha(\theta)\right) - a\left(\pi + \alpha(\theta)\right) \\
+    b_{\QQ}(x) &= b\left(x + \pi + \alpha(\theta)\right) - b\left(\pi + \alpha(\theta)\right) 
 \end{align}
 
-We substitute them back into \cref{eqn:beta_defn} and \cref{eqn:gamma_defn} eliminating $\alpha_{\Q}(x)$ and
-$\beta_{\Q}(x)$.
+We substitute them back into \cref{eqn:beta_defn} and \cref{eqn:gamma_defn} eliminating $\alpha_{\QQ}(x)$ and
+$\beta_{\QQ}(x)$.
 
 \begin{align}
     a(x) &= \frac{\rho x}{1 + c x} \\ \label{eqn:a(x)}
@@ -465,6 +541,18 @@ We characterize these drifting sequences of distributions by sequences of true p
     \purple{TODO  Add Conclusion}
 \end{restatable}
 
+
+\section{Simulations}
+
+\section{Data}\label{sec:data}
+
+We also assume that $\left[ \frac{\psi}{\phi} \right]^2 \approx \frac{\E \left[\sigma^2_{t+1} \mvert
+\F_t\right]}{\Var\left[r_{t+1} \mvert \F_t\right]}$, which enables our approximation of $\sigma^2_{t+1}$ by the
+realized volatility.
+
+\section{Empirical Results}
+
+\section{Conclusion}
 
 \clearpage
 
