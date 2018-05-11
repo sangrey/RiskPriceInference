@@ -1023,62 +1023,79 @@ The negative signs on the mean, but the not the 2nd moment come from the negativ
 the right-hand side canceling for the negative signs in the Taylor series expansion of the left-hand side for the
 mean but not the 2nd moment. 
 
-We start by deriving the first two conditional moments of $r_{t+1}$.
-These formulas disagree with those in \textcite[5]{khrapov2016affine} because the Laplace transform is a
-generating functions for the moments, not the centered moments.   
-Their derivation is incorrect.
+We start by deriving the first two conditional moments of $r_{t+1}$ by viewing the log of the Laplace transform as
+a cumulant generating function.
+$K\left(-t \right) \coloneqq \log \E\left[\exp(-t X) \right]$. 
+This is useful because the first two derivatives of $K(-t)$ evaluated at zero are the centered moments.
 
 \begin{align}
     \E\left[r_{t+1} \mvert \F_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
     \sigma^2_{t} - \gamma_{\PP}'(0) \\
-    \E\left[r_{t+1}^2 \mvert \F_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  - \beta_{\PP}''(0)
-    \sigma^2_{t} - \gamma_{\PP}''(0)
+    \Var\left[r_{t+1}^2 \mvert \F_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
+    \beta_{\PP}''(0) \sigma^2_{t} - \gamma_{\PP}''(0)
 \end{align}
-
-We can then solve for the conditional variance of $r_{t+1}$.
-To understand the intuition, we would generally expect the second derivatives of the various functions to be
-negative  here.
-
-\begin{equation}
-    \Var\left[r_{t+1} \mvert \F_t, \sigma^2_{t+1}\right]  = - \left[\alpha_{\PP}''(0) + {\alpha_{\PP}'(0)}^2\right]
-    \sigma^2_{t+1} - \left[\beta_{\PP}''(0) + {\beta_{\PP}'(0)}^2\right] \sigma^2_t - \left[\gamma_{\PP}''(0) +
-    {\gamma_{\PP}'(0)}^2\right]
-\end{equation}
 
 We can then use the law of total variance to compute $\Var\left[r_{t+1} \mvert \F_t\right]$.
 
 \begin{equation}
-    \begin{alignedat}{2}
-        \Var\left[r_{t+1} \mvert \F_t\right]  &= &&-\left[\alpha_{\PP}''(0) + {\alpha_{\PP}'(0)}^2\right]
-            \E\left[\sigma^2_{t+1} \mvert \F_t\right] - \left[\beta_{\PP}''(0) + {\beta_{\PP}'(0)}^2\right]
-            \sigma^2_t - \left[\gamma_{\PP}''(0) + {\gamma_{\PP}'(0)}^2\right]  \\
-        & &&+ \alpha_{\PP}''(0) \Var\left[\sigma^2_{t+1} \mvert \F_t\right]
-    \end{alignedat}
+    \Var\left[r_{t+1} \mvert \F_t\right]  = -\left( \alpha_{\PP}''(0) \E \left[\sigma^2_{t+1} \mvert \F_t \right]
+    + \beta_{\PP}''(0) \sigma^2_{t} + \gamma_{\PP}''(0)\right) + {\alpha_{\PP}'(0)}^2 \Var\left[\sigma^2_{t+1}
+    \mvert \F_{t} \right]
 \end{equation}
 
-Clearly, we need to compute $\Var\left[\sigma^2_{t+1} \mvert \F_t\right]$.
-Again, we differentiate the relevant conditional Laplace transform.
+We computing $\E\left[\sigma^2_{t+1} \mvert \F_t\right]$ and $\Var\left[\sigma^2_{t+1} \mvert
+\F_t\right]$
 
 
 \begin{align}
     \E\left[\sigma^2_{t+1} \mvert \F_t \right]  &= a_{\PP}'(0) \sigma^2_{t}  + b_{\PP}'(0) \\
-    \E\left[\sigma^4_{t+1} \mvert \F_t \right]  &= -a_{\PP}''(0) \sigma^2_{t}  - b_{\PP}''(0) \\
-    \Var\left[\sigma^2_{t+1} \mvert \F_t \right]  &= - \left[a_{\PP}''(0) + {a_{\PP}'(0)}^2\right] \sigma^2_{t}  -
-        \left[b_{\PP}''(0) + {b_{\PP}'(0)}^2\right]
+    \Var\left[\sigma^2_{t+1} \mvert \F_t \right]  &= -a_{\PP}''(0) \sigma^2_{t}  - b_{\PP}''(0) \\
 \end{align}
 
+Before we show how the risk prices $\pi, \theta$ show up in the equations above, we will introduce some parameters
+that govern the dynamics of the volatility process.
 
 
-That implies that the variance of $r_{t+1}$ is as follows.
+\begin{defn}{Volatility Dynamics Parameters}
+    \begin{align}
+        \rho &\coloneqq a_{\PP}'(0) \in (0,1) \\
+        c &\coloneqq - \frac{a_{\PP}''(0)}{2 a_{\PP}'(0)} > 0 \\
+        \delta &\coloneqq -2 \frac{a_{\PP}'(0) b_{\PP}'(0)}{a_{\PP}''(0)} > 0 \\
+        \omega &\coloneqq -4 \frac{b_{\PP}''(0) [a_{\PP}'(0)]^2}{[a_{\PP}''(0)]^2}
+    \end{align}
+\end{defn}
+
+To interpret these factors, can derive the conditional conditional moments. 
+$\rho$ is a persistence parameter.
+$c$ is a scaling parameter.
+
+
+\begin{align}
+    \E\left[\sigma^2_{t+1} \mvert \F_t \right]  &= \rho \sigma^2_{t}  + c \delta\\
+    \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
+    \Var\left[\sigma^2_{t+1} \mvert \F_t \right]  &=  2 c \rho \sigma^2_{t}  + c^2 \omega \\
+    \Var\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2} \left(\frac{2 \rho \delta}{1 - \rho}  +
+        \omega \right) 
+\end{align}
+
+Clearly, we can identify all four of these parameters from the volatility data as long as the parameters are in
+the interior of their domains.
+
+\subsection{\texorpdfstring{Parameterizing the mean and variance of $r_{t+1}$}{Parameterizing the return's
+mean and variance}}
+
+
+In this section, we derive the formulas for the mean and variance of the expected return in terms of the risk
+prices.
 
 \begin{equation}
-    \begin{alignedat}{2}
-        \Var\left[r_{t+1} \mvert \F_t\right]  &= &&-\left[\alpha_{\PP}''(0) + {\alpha_{\PP}'(0)}^2\right]
-            \E\left[\sigma^2_{t+1} \mvert \F_t\right] - \left[\beta_{\PP}''(0) + {\beta_{\PP}'(0)}^2\right]
-            \sigma^2_t - \left[\gamma_{\PP}''(0) + {\gamma_{\PP}'(0)}^2\right]  \\
-        & &&+ \alpha_{\PP}''(0) \Var\left[\sigma^2_{t+1} \mvert \F_t\right]
-    \end{alignedat}
+    M_{t,t+1}(\pi, \theta) = \exp(-r_{f,t}) \exp \left( m_0(\theta, \pi) + m_1(\theta, \pi) \sigma_t^2 - \pi
+    \sigma^2_{t+1} - \theta r_{t+1}\right)
 \end{equation}
+
+Since the SDF must integrate to $1$ once we discount using the risk-free rate $r_{f,t}$\, we have the following
+restrictions.
+
 
 
 
