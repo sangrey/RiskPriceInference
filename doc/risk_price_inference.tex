@@ -203,7 +203,7 @@ Since the Laplace transform is an expectation of a specific function, by assumin
 can represent out model under the physical  as follows for some functions $a_{\PP}, b_{\PP}, \alpha_{\PP},
     \beta_{\PP}$, and $\gamma_{\PP}$ for all $u$ in its domain.
 
-\begin{defn}{The Model under the Physical Measure}
+\begin{restatable}[The Model under the Physical Measure]{defn}{physicalMeasureModel}
     \label{defn:physical_model}
     \begin{align}
         \E_{\PP} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t\right] &= \exp\left( - a_{\PP}(u)
@@ -211,7 +211,7 @@ can represent out model under the physical  as follows for some functions $a_{\P
         \E\left[\exp(-u r_{t+1}) \mvert \sigma^2_{t},  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\PP}(u)
         \sigma^2_{t+1} - \beta_{\PP}(u)\sigma^2_{t} - \gamma_{\PP}(u) \right) 
     \end{align}
-\end{defn}
+\end{restatable}
 
 The model in \cref{defn:physical_model} is parameterized using the functions mentioned and at this level of
 generality fully nonparametric. 
@@ -275,14 +275,15 @@ It deterministically discounts the prices but plays no further role in the analy
 \purple{The next thing to do is to show how we replace the unspecified functions and convert them to some moments
 that we can use.}
 
-\begin{gather}
-    \intertext{Then by the law of iterated expectations and some algebra.}
-    \E \left[\exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \pi \sigma^2_{t+1} - \theta r_{t+1}\right)
-    \exp\left(- \alpha(\theta) \sigma^2_{t+1} - \phi (\theta) \sigma^2_{t+1} - \gamma(\theta)\right) \mvert
-    \F_t \right] = 1
-\end{gather}
 
-\subsection{Leverage Effect vs Volatlity Feedback Effect}
+% \begin{gather}
+%     \intertext{Then by the law of iterated expectations and some algebra.}
+%     \E \left[\exp\left(m_{0}(\theta) + m_1(\theta) \sigma_t^2 - \pi \sigma^2_{t+1} - \theta r_{t+1}\right)
+%     \exp\left(- \alpha(\theta) \sigma^2_{t+1} - \phi (\theta) \sigma^2_{t+1} - \gamma(\theta)\right) \mvert
+%     \F_t \right] = 1
+% \end{gather}
+
+\subsection{Leverage Effect vs Volatility Feedback Effect}
 
 As mentioned above the relationship between the volatilty and the return comes from two places: the
 contemporaneous or volatilty feedback effect and the leverage or risk premium effect.
@@ -1000,6 +1001,85 @@ We prove this result by showing that Assumptions GMM 1-4 are satisfied.
 \end{proofpart}
 
 \end{proof}
+
+
+\section{Derivation of the Moment Conditions}
+
+In this section, we derive the moment conditions that we use to identify the model.
+We follow \textcite{khrapov2016affine} closely.
+Recall the model under the physical measure. 
+
+
+\physicalMeasureModel*
+
+By definition, we have the following. 
+
+\begin{equation}
+    a_{\PP}(0) = b_{\PP}(0) = \alpha_{\PP}(0) = \beta_{\PP}(0) = \gamma_{\PP}(0) 
+\end{equation}
+
+We can differentiate the Laplace transform at zero to compute the moments.
+The negative signs on the mean, but the not the 2nd moment come from the negative signs inside the exponential on
+the right-hand side canceling for the negative signs in the Taylor series expansion of the left-hand side for the
+mean but not the 2nd moment. 
+
+We start by deriving the first two conditional moments of $r_{t+1}$.
+These formulas disagree with those in \textcite[5]{khrapov2016affine} because the Laplace transform is a
+generating functions for the moments, not the centered moments.   
+Their derivation is incorrect.
+
+\begin{align}
+    \E\left[r_{t+1} \mvert \F_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
+    \sigma^2_{t} - \gamma_{\PP}'(0) \\
+    \E\left[r_{t+1}^2 \mvert \F_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  - \beta_{\PP}''(0)
+    \sigma^2_{t} - \gamma_{\PP}''(0)
+\end{align}
+
+We can then solve for the conditional variance of $r_{t+1}$.
+To understand the intuition, we would generally expect the second derivatives of the various functions to be
+negative  here.
+
+\begin{equation}
+    \Var\left[r_{t+1} \mvert \F_t, \sigma^2_{t+1}\right]  = - \left[\alpha_{\PP}''(0) + {\alpha_{\PP}'(0)}^2\right]
+    \sigma^2_{t+1} - \left[\beta_{\PP}''(0) + {\beta_{\PP}'(0)}^2\right] \sigma^2_t - \left[\gamma_{\PP}''(0) +
+    {\gamma_{\PP}'(0)}^2\right]
+\end{equation}
+
+We can then use the law of total variance to compute $\Var\left[r_{t+1} \mvert \F_t\right]$.
+
+\begin{equation}
+    \begin{alignedat}{2}
+        \Var\left[r_{t+1} \mvert \F_t\right]  &= &&-\left[\alpha_{\PP}''(0) + {\alpha_{\PP}'(0)}^2\right]
+            \E\left[\sigma^2_{t+1} \mvert \F_t\right] - \left[\beta_{\PP}''(0) + {\beta_{\PP}'(0)}^2\right]
+            \sigma^2_t - \left[\gamma_{\PP}''(0) + {\gamma_{\PP}'(0)}^2\right]  \\
+        & &&+ \alpha_{\PP}''(0) \Var\left[\sigma^2_{t+1} \mvert \F_t\right]
+    \end{alignedat}
+\end{equation}
+
+Clearly, we need to compute $\Var\left[\sigma^2_{t+1} \mvert \F_t\right]$.
+Again, we differentiate the relevant conditional Laplace transform.
+
+
+\begin{align}
+    \E\left[\sigma^2_{t+1} \mvert \F_t \right]  &= a_{\PP}'(0) \sigma^2_{t}  + b_{\PP}'(0) \\
+    \E\left[\sigma^4_{t+1} \mvert \F_t \right]  &= -a_{\PP}''(0) \sigma^2_{t}  - b_{\PP}''(0) \\
+    \Var\left[\sigma^2_{t+1} \mvert \F_t \right]  &= - \left[a_{\PP}''(0) + {a_{\PP}'(0)}^2\right] \sigma^2_{t}  -
+        \left[b_{\PP}''(0) + {b_{\PP}'(0)}^2\right]
+\end{align}
+
+
+
+That implies that the variance of $r_{t+1}$ is as follows.
+
+\begin{equation}
+    \begin{alignedat}{2}
+        \Var\left[r_{t+1} \mvert \F_t\right]  &= &&-\left[\alpha_{\PP}''(0) + {\alpha_{\PP}'(0)}^2\right]
+            \E\left[\sigma^2_{t+1} \mvert \F_t\right] - \left[\beta_{\PP}''(0) + {\beta_{\PP}'(0)}^2\right]
+            \sigma^2_t - \left[\gamma_{\PP}''(0) + {\gamma_{\PP}'(0)}^2\right]  \\
+        & &&+ \alpha_{\PP}''(0) \Var\left[\sigma^2_{t+1} \mvert \F_t\right]
+    \end{alignedat}
+\end{equation}
+
 
 
 \end{appendices}
