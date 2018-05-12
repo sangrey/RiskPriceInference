@@ -53,8 +53,9 @@
 \newcommand*{\Eta}{H} 
 \newcommand*{\popmom}{\ensuremath{g}} 
 \newcommand*{\sampmom}{\ensuremath{\overline{g}_T}}
-\DeclarePairedDelimiter\abs{\lvert}{\rvert}
-\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\DeclarePairedDelimiterXPP{\exps}[1]{\exp}{\lparen}{\rparen}{}{#1}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
 \let\oldforall\forall
 \let\forall\undefined
 \DeclareMathOperator{\forall}{\oldforall}

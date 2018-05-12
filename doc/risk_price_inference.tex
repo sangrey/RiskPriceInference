@@ -1097,6 +1097,72 @@ Since the SDF must integrate to $1$ once we discount using the risk-free rate $r
 restrictions.
 
 
+\begin{gather}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
+    \right) \mvert \F_t \right] = 1 \\
+    \intertext{By the law of iterated expectations.}
+    \E_{\PP}\left[ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1}\right)
+        \exp\left( - \theta r_{t+1}\right) \mvert \F_t, \sigma^2_{t+1} \right]\right] = 1 \\
+    \intertext{The second term is the Laplace transform of $r_{t+1}$.}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} \right)
+        \exp(-\alpha_{\PP}(\theta) \sigma^2_{t+1} - \beta_{\PP}(\theta) \sigma^2_{t} - \gamma_{\PP}(\theta_2)
+        \mvert \F_t \right] = 1 \\
+    \intertext{Reorganizing terms.}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
+        \gamma_{\PP}(\theta_2) \right) \exp(-\left(\pi + \alpha_{\PP}(\theta)\right) \sigma^2_{t+1}) \mvert \F_t
+        \right] = 1 \\ 
+    \intertext{Substituting in the Laplace transform for $\sigma^2_{t+1}$.} 
+    \E_{\PP}\left[\exp(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
+        \gamma_{\PP}(\theta_2)  - a_{\PP}(\pi + \alpha_{\PP}(\theta)) - b_{\PP}(\pi + \alpha_{\PP}(\theta))
+        \mvert \F_t \right] = 1 
+\end{gather}
+
+Since this equality must hold for all $\sigma^2_{t}$, we can solve for both $m_0(\theta, \pi)$ and $m_1(\theta,
+\pi)$ in terms of the functions determining the physical measures.
+
+\begin{align}
+    m_0(\theta, \pi)  &= \gamma_{\PP}(\theta) + b_{\PP}(\alpha_{\PP}(\theta) + \pi) \\
+    m_0(\theta, \pi)  &= \beta_{\PP}(\theta) + a_{\PP}(\alpha_{\PP}(\theta) + \pi) 
+\end{align}
+
+The reason that this is interesting is all of the right-hand side variables  are in terms of the physical
+measure.
+In other words, we do not need, at least in principle, option data to estimate the SDF.
+In particular, we can determine the risk prices from equity prices if the identified parts of the $\alpha_{\PP},
+\beta_{\PP}$ etc.\@ functions are \textquote{sufficiently} invertible.
+(I.e.\@ the matrix of their derivatives satisfies the appropriate non-singularity conditions.)
+
+
+\subsection{Identification of the Risk Prices}
+
+
+The goal moving forward is to determine what we need to assume about the physical measure functions in order to
+identify the risk prices.
+To do this, we need to do two things.
+First, we need to characterize the part of the physical measure functions that is identifiable from equity data.
+Second, we must consider under what conditions that allows us to identify the risk prices. 
+
+The information that return data contain about equity pricing data is entirely encapsulated by the asset pricing
+equation for excess returns.  
+(In what follows, we will use $r_{t+1}$ as the excess log-return.)
+
+\begin{equation}
+    \E\left[ M_{t,t+1}(\theta, \pi) \exp(r_{t+1}) \mvert \F_{t-1} \right]
+\end{equation}
+
+We now characterize, the information in this set of moment conditions regarding the risk prices.
+We start by substituting in the SDF formula from above.
+
+\begin{align}
+    \E \left[ \exps*{ - \theta_1 \sigma^2_{t+1} - (\theta_2 - 1) r_{t+1} } \mvert \F_{t} \right]
+        &= \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi)}
+    \intertext{The right-hand side of the above equation is the product of the Laplace transforms of $r_{t+1}$ and
+        $\sigma^2_{t+1}$.}
+    \E \left[\exps*{- \theta_1 \sigma^2_{t+1} - (\theta_2 - 1) r_{t+1}}  \mvert \F_{t} \right]
+        &= \exps*{ - m_0(\theta, \pi) - m_1(\theta, \pi) } 
+\end{align}
+
+
 
 
 \end{appendices}
