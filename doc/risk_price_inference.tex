@@ -682,7 +682,7 @@ Note, Since $-\alpha''(0)$ is a variance, $\alpha''(0)$ must be negative.
 \begin{defn}{Conditional Variances and Correlations} 
     \begin{align}
         \psi(\tau) &\coloneqq \alpha_{\PP, \tau}'(0) \\
-        \phi(\tau) &\coloneqq \sqrt{1 - \phi^2}) 
+        \phi(\tau) &\coloneqq \sqrt{1 -\alpha_{\PP, \tau}''(0)}
     \end{align}
 \end{defn}
 
@@ -718,20 +718,22 @@ So by It\^{o}'s formula, we can rewrite $K(u, \sigma^2, \tau)$ as follows.
 First, I write down the formula for the price process with respect to the $\F_{\sigma^2, \tau}$ filtration.
 
 \begin{align}
-    \dif p(\tau) = \left[\mu + coeff1 \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]  + \psi \left[\sigma^2(\tau)
-    - \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right]\right]  \dif \tau + \sigma_{p} \dif W^{p}(\tau) 
+    \dif p(\tau) = \left[\mu + \beta(\tau) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]  + \psi
+    \left[\sigma^2(\tau) - \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right]\right]  \dif \tau + \sigma_{p}
+    \dif W^{p}(\tau) 
 \end{align}
 
 Conversely, the formula for the price process with respect to the $\F_{\tau}$ filtration is as follows. 
 
 \begin{align}
-    \dif p(\tau) &= \left[\mu + (coeff1 + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
+    \dif p(\tau) &= \left[\mu + (\beta(\tau) + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
         \sigma^2(\tau) \dif W(\tau)  \\
-    &= \left[\mu + (coeff1 + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
-        \sigma^2(\tau) [\dif W^{p}(\tau) + \phi \dif W^{\sigma}(\tau)] \\
+    &= \left[\mu + (\beta(\tau) + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
+        \sigma^2(\tau) [(1 - \phi(\tau)^2) \dif W^{p}(\tau) + \phi \dif W^{\sigma}(\tau)] \\
     &= \left[\gamma_{\PP, \tau}'(0) + (\beta_{\PP, \tau}'  + \psi(t) ) \E\left[\sigma^2(\tau)  \mvert
-       \F_{\tau}\right]\right] \dif \tau + \sigma^2(\tau) [\dif W^{p}(\tau) + \phi(\tau) \dif W^{\sigma}(\tau)] \\
-       \label{eqn:price_process_decomp}
+        \F_{\tau}\right]\right] \dif \tau + \sigma^2(\tau) [(1 - \phi(\tau)^2)\dif W^{p}(\tau) + \phi(\tau) \dif
+        W^{\sigma}(\tau)] \\ 
+        \label{eqn:price_process_decomp}
     &= \gamma_{\PP, \tau}'(0) \dif \tau + \left[\beta_{\PP, \tau}'  + \psi(t)\right] \sigma^2(\tau-) \dif \tau +
        \sigma^2(\tau) [\dif W^{p}(\tau) + \phi(\tau) \dif W^{\sigma}(\tau)]
 \end{align}
@@ -749,8 +751,8 @@ Let $\beta(\tau) \coloneqq \beta_{\PP, \tau}'(0)$.
 \end{equation}
 
 We start by defining the means of $\beta(\tau), \psi(\tau)$, and $\phi(\tau)^2$: $\beta_0, \psi_0, \phi^2$.
-By the intermediate value theorem, there exists an $s_i^{\dagger}$ for each of these functions that function evaluated
-at $s^{\dagger}$ equals the mean over the interval.
+By the intermediate value theorem, there exists an $s_i^{\dagger}$ for each of these functions that function
+evaluated at $s^{\dagger}$ equals the mean over the interval.
 For example $\beta\left(s_i^{\dagger}\right) = \int \beta(\tau) \dif \tau$.  
 We can take mean value expansions for each of these functions.
 
@@ -787,6 +789,16 @@ We are just considering deviations from the means.
 Since $\phi(\tau)$ is a correlation and hence contained within $[-1,1]$ and contained within the $\F_{\tau}$, it
 is independent of $\dif W^{p}(\tau)$.
 Consequently, the penultimate term is also unconditionally mean zero. 
+
+As far as showing conditional mean-independence, consider the following.
+First, we are using discrete-time data to identify the parameters in question, not sample-path data.
+Consequently, we only need conditional mean-independence between the discrete-time innovation $\eta_{t+1}$ not the
+process as a whole.
+
+To see why this important, assume that the integrated parameters do not change, e.g.\@ $\int_{t}^{t+1} \phi(\tau)
+\dif \tau = \phi_0$ for all $t$.
+In that case the conditions would be automatically satisfied except for the third part of
+\cref{eqn:price_error_term} which would still have a Jensen's inequality term.
 
 
 
