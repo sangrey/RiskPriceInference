@@ -672,76 +672,123 @@ To make this concrete, \cref{eqn:cumulant_process_taylor_expansion} must equal t
 \purple{Is $K(\tau, u)$ currently the negative cumulant generating function?}
 
 \begin{equation}
+    \label{eqn:cond_log_cumulant_function}
     K(u, \tau) = \text{constant} + \E\left[r_{\tau + \Delta} \mvert \F_{\sigma^2, \tau}\right]  u  +
     \Var\left[r_{\tau + \Delta} \mvert \F_{\sigma^2, \tau}\right]  u^2 
 \end{equation}
 
-\purple{Now, do I think about $\alpha_{\PP}(0)$ as a function of $\tau$?}
+Note, Since $-\alpha''(0)$ is a variance, $\alpha''(0)$ must be negative.
 
 \begin{defn}{Conditional Variances and Correlations} 
     \begin{align}
-        \psi(\tau) &\coloneqq \alpha_{\PP, \tau}(0) \\
-        \phi(\tau) &\coloneqq \sqrt{1 - \alpha_{\PP, \tau}(0)} 
+        \psi(\tau) &\coloneqq \alpha_{\PP, \tau}'(0) \\
+        \phi(\tau) &\coloneqq \sqrt{1 - \phi^2}) 
     \end{align}
 \end{defn}
 
 $\phi(\tau)$ and $\phi(\tau)$ define stochastic processes.
-However, the relative magnitude of their time-variation is not a priori clear.
-Equivalently, how fast can the derivatives of the physical measure change over time.  
-From semimartingale theory, we know that $\E\left[r_{t+\Delta} \mvert \F_{\sigma^2, \tau}\right]$ is a drift term
-with respect to the augmented filtration and hence has stochastic order $\Delta$, as does $\E\left[r_{t+\Delta}
-\mvert \F_{\sigma^2, \tau}\right]$ because it is a variance.
 
-\purple{The variance is of the same stochastic order with respect to both filtrations.  I should probably add a
-citation for this.}
+By matching coefficient between \cref{eqn:cumulant_process_taylor_expansion} and
+\cref{eqn:cond_log_cumulant_function}, we can rewrite the log-cumulant function as follows.
 
-\purple{TODO: (Paul) Characterize the conditional expectation as an unconditional expectation.}
+Since the prices are semimartingales with respect to $\F_{\sigma^2, \tau}$, and the $(\cdot)_{\PP,\tau}$ functions
+characterize their conditional means and variances with respect to this filtration, they are must have finite
+variation. 
 
+\purple{Why are the $(\cdot)_{\PP, \tau}$ functions continuous functions of $\tau$?}
 
-
-The key concept that drives our results is as follows.
-Since $\sigma^2_{\tau}$ is measurable with respect to the $\F_{\tau}$ filtration $\beta_{\PP}(u)$ and
-$\gamma_{\PP}(u)$ terms are drift terms. 
-If they were not drift terms, we would not have a well-defined semimartingale as semimartingales only allow
-finite-variation in the predictable terms.
-
-However, since $\sigma^2_{\tau + \Delta}$ is not measurable with respect to $\F_{\tau}$, this term can be more
-general form. 
-Hence, we can replace all of $O_p(\cdot)$ terms in the above expression with the appropriate functions of
-$\Delta$. 
 
 \begin{equation}
-    - \alpha_{PP}'(0) \sigma^2_{\tau + \Delta} - \alpha_{PP}''(0) \E\left[\sigma^2_{\tau+ \Delta}  \mvert
-    \F_{\tau}\right]  - \beta_{\PP}'(0) \sigma^2_{\tau} - \gamma_{PP}'(0)  + o(\Delta) \\
-\end{equation}
-
-Simplifying the notation slightly and suppressing asymptotically negligible terms, we can rewrite that expression as
-follows.
-
-\begin{equation}
-    - \alpha_{PP}'(0) \sigma^2_{\tau + \Delta} - \alpha_{PP}''(0)  \sigma^2_{\tau} - \beta_{\PP}'(0)
-    \sigma^2_{\tau} - \gamma_{PP}'(0)  \\
+    K(u, \tau) = [\alpha_{\PP, \tau}'(0)\sigma^2(\tau)  + \beta_{\PP, \tau}'(0)\sigma^2(\tau-)] u - [\alpha_{\PP,
+    \tau}''(0) \sigma^2(\tau)] u^2  - \gamma_{\PP, \tau}'(0) 
 \end{equation}
 
 
+The physical measure functions are continuous functions of $\tau$ and hence predictable and of finite-variation.
+Consequently, for each $u$, we have implicitly defined $K$ as a differentiable function of $\sigma^2(\tau)$.
+So by It\^{o}'s formula, we can rewrite $K(u, \sigma^2, \tau)$ as follows.
 
-Similar to the argument in \cref{sec:deriving_mom_conds} we want to replace that as measurable with respect to the
-augmented filtration with one that is measurable with respect toe he prices natural filtration. 
-We can do this because one filtration contains the other and so absolute continuity requirements are automatically
-satisfied. 
-By Girsanov's theorem  and the fact that the second two terms are measurable with respect to both filtrations the
-process with respect to $\F_{\tau}$ has the following form.
+\begin{equation}
+    \dif K(u, \tau) = \psi(\tau) \dif \tau + \phi(\tau) \dif W(\tau) + 
+\end{equation}
+
+
+\purple{The goal is to write down the price formula as follows.}
+
+First, I write down the formula for the price process with respect to the $\F_{\sigma^2, \tau}$ filtration.
 
 \begin{align}
-    &= - \alpha_{PP}(\tau) \dif W^{\sigma}(s) + \frac{1}{2} \alpha_{\PP}(\tau-) \sigma^2(\tau-) -
-       \beta_{\PP}(\tau) \sigma^2_{\tau-} - \gamma_{PP}(\tau) \\
-   \intertext{We can absorb both coefficients for the $\sigma^2(\tau-)$ term into one without loss of generality.}
-   \label{eqn:continous_time_log_laplace}
-    &= - \alpha_{PP}(\tau-) \dif W^{\sigma}(s) +  \beta_{\PP}(\tau) \sigma^2_{\tau-} - \gamma_{PP}(\tau) \\
+    \dif p(\tau) = \left[\mu + coeff1 \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]  + \psi \left[\sigma^2(\tau)
+    - \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right]\right]  \dif \tau + \sigma_{p} \dif W^{p}(\tau) 
 \end{align}
 
-From the decomposition in in \cref{eqn:continous_time_log_laplace}  we can see where the volatility and return can
-be related is through the correlation between $W^{\sigma}(\tau)$  and the risk-price.
+Conversely, the formula for the price process with respect to the $\F_{\tau}$ filtration is as follows. 
+
+\begin{align}
+    \dif p(\tau) &= \left[\mu + (coeff1 + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
+        \sigma^2(\tau) \dif W(\tau)  \\
+    &= \left[\mu + (coeff1 + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
+        \sigma^2(\tau) [\dif W^{p}(\tau) + \phi \dif W^{\sigma}(\tau)] \\
+    &= \left[\gamma_{\PP, \tau}'(0) + (\beta_{\PP, \tau}'  + \psi(t) ) \E\left[\sigma^2(\tau)  \mvert
+       \F_{\tau}\right]\right] \dif \tau + \sigma^2(\tau) [\dif W^{p}(\tau) + \phi(\tau) \dif W^{\sigma}(\tau)] \\
+       \label{eqn:price_process_decomp}
+    &= \gamma_{\PP, \tau}'(0) \dif \tau + \left[\beta_{\PP, \tau}'  + \psi(t)\right] \sigma^2(\tau-) \dif \tau +
+       \sigma^2(\tau) [\dif W^{p}(\tau) + \phi(\tau) \dif W^{\sigma}(\tau)]
+\end{align}
+
+
+We can time-aggregate \cref{eqn:price_process_decomp}, and get the following formula for the discrete-time
+returns.  
+Let $\gamma(\tau) \coloneqq \gamma_{\PP, \tau}'(0)$.
+Let $\beta(\tau) \coloneqq \beta_{\PP, \tau}'(0)$.
+
+
+\begin{equation}
+    r_{t+1} = \int_t^{t+1} \gamma(s) \dif s + \int_{t}^{t+1} [\beta(s) + \psi(s)] \sigma^2(s) \dif s +
+    \int_t^{t+1} \sigma^2(s) \left[\sqrt{1 - \phi(\tau)^2} \dif W^{p}(s) + \phi(\tau) \dif W^{\sigma}(s)\right]
+\end{equation}
+
+We start by defining the means of $\beta(\tau), \psi(\tau)$, and $\phi(\tau)^2$: $\beta_0, \psi_0, \phi^2$.
+By the intermediate value theorem, there exists an $s_i^{\dagger}$ for each of these functions that function evaluated
+at $s^{\dagger}$ equals the mean over the interval.
+For example $\beta\left(s_i^{\dagger}\right) = \int \beta(\tau) \dif \tau$.  
+We can take mean value expansions for each of these functions.
+
+\begin{equation}
+    \label{eqn:price_decomp}
+    \begin{alignedat}{1}
+        r_{t+1} &= \gamma_0 + \beta_0 \E\left[\int_t^{t+1} \sigma^2(s) \dif s \mvert \F_t\right] + \psi_0
+            \int_{t}^{t+1} \sigma^2(s) \dif s  \\
+        &\qquad + \int_t^{t+1} \sigma^2(s) \left[\sqrt{1 - \phi_0^2} \dif W^{p}(s) + \phi_0 \dif
+        W^{\sigma}(s)\right] + \eta_{t+1} \\
+    \end{alignedat}
+\end{equation}
+
+To show identification of our results, we need to characterize the error term in the expression above.
+In particular, we need to show that it is mean-zero and conditionally mean-independent.
+The only non-trivial part in characterizing $\eta_t$ is characterizing the error generated by replacing $\sqrt{1 -
+\phi^2(\tau)}$ with $\sqrt{1 - \phi_0^2}$.
+Note, we know by the mean value theorem, there exists a $\phi^{\star} \in [\inf_{\tau} \phi(\tau), \sup_{\tau}
+\phi(\tau)]$, so that the following holds.
+
+\begin{equation}
+    \label{eqn:price_error_term}
+    \begin{alignedat}{1}
+        \eta_{t+1} &= [\gamma(\tau)  - \gamma(0)] + [\beta(\tau)  - \beta(0)] \E\left[\int_t^{t+1} \sigma^2(\tau)
+            \dif \tau \mvert \F_t\right] + \int_{t}^{t+1} [\psi(\tau) - \psi_0] \sigma^2(\tau) \dif \tau  \\
+        &\qquad + \int_t^{t+1} \left[\frac{(\phi^{\star})^2 - \phi_0^2}{2}\right] \sigma(\tau) \dif W^{p}(\tau)
+          + \int_t^{t+1} [\phi(\tau) - \phi_0] \sigma(\tau) \dif W^{\sigma}(\tau) \\
+    \end{alignedat}
+\end{equation}
+
+All of they terms in  \cref{eqn:price_error_term} are clearly unconditionally mean zero over time except for the
+second to the last one.
+We are just considering deviations from the means.
+Since $\phi(\tau)$ is a correlation and hence contained within $[-1,1]$ and contained within the $\F_{\tau}$, it
+is independent of $\dif W^{p}(\tau)$.
+Consequently, the penultimate term is also unconditionally mean zero. 
+
+
 
 
 
