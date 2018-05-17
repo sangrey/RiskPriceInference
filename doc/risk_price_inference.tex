@@ -652,8 +652,8 @@ must be representable by a low-order polynomial.
 \begin{equation}
     \label{eqn:cumulant_process_taylor_expansion}
     \begin{alignedat}{2}
-        K(u, \tau) &= &&- \alpha_{\PP, \tau}'(0) u \sigma^2_{\tau + \Delta} - \alpha_{\PP, \tau}''(0) u^2 \sigma^2_{\tau +
-            \Delta} \alpha_{\PP, \tau}''(0) \sigma^2_{\tau + \Delta}  \\ 
+        K(u, \tau) &= &&- \alpha_{\PP, \tau}'(0) u \sigma^2_{\tau + \Delta} - \alpha_{\PP, \tau}''(0) u^2
+            \sigma^2_{\tau + \Delta} \alpha_{\PP, \tau}''(0) \sigma^2_{\tau + \Delta}  \\ 
         & &&- \beta_{\PP, \tau}'(0) u\sigma^2_{\tau} + O_p(\beta_{\PP, \tau}''(0)) u^2 \sigma^2_{\tau} -
           \gamma_{\PP, \tau}'(0)u  + O_P(\gamma_{\PP, \tau}''(0)) u^2 \\
     \end{alignedat}
@@ -699,6 +699,7 @@ variation.
 
 
 \begin{equation}
+    \label{eqn:cumulant_generating_function_quadratic_approx}
     K(u, \tau) = [\alpha_{\PP, \tau}'(0)\sigma^2(\tau)  + \beta_{\PP, \tau}'(0)\sigma^2(\tau-)] u - [\alpha_{\PP,
     \tau}''(0) \sigma^2(\tau)] u^2  - \gamma_{\PP, \tau}'(0) 
 \end{equation}
@@ -706,11 +707,31 @@ variation.
 
 The physical measure functions are continuous functions of $\tau$ and hence predictable and of finite-variation.
 Consequently, for each $u$, we have implicitly defined $K$ as a differentiable function of $\sigma^2(\tau)$.
-So by It\^{o}'s formula, we can rewrite $K(u, \sigma^2, \tau)$ as follows.
 
-\begin{equation}
-    \dif K(u, \tau) = \psi(\tau) \dif \tau + \phi(\tau) \dif W(\tau) + 
-\end{equation}
+
+\purple{I am switching signs from above.}
+
+By plugging in the mean and variance as defined  in \cref{eqn:cumulant_generating_function_quadratic_approx}, we
+can write down the price process as follows.
+We replace the derivatives with respect to $\alpha_{\PP, \tau}$ with the $\phi, \psi$ functions.
+We only need the first derivatives of the other two functions, and so we $\beta, \gamma$ to refer the derivaties of
+the associated functions.
+
+\purple{I am missing an It\^{o}'s formula correction term below. This is why I am adding a $\tau-$ to the one
+    $\sigma^2(\tau)$ and not to the other.} 
+
+
+\begin{alignat}{2}
+    \dif p(\tau) &=\ && \psi(\tau-) \sigma^2(\tau) \dif \tau + \beta(\tau-) \sigma^2(\tau-) \dif \tau + \gamma(\tau-)
+        \dif \tau + \sqrt{1 - \phi(\tau-)^2} \sigma(\tau-) \dif W(\tau)   \\
+    \intertext{We can add and subtract the predictable projection of $\sigma^2(\tau)$.}
+    &= && \psi(\tau-) [\sigma^2(\tau)  - \sigma^2(\tau-)]  + [\beta(\tau-)  + \psi(\tau-)] \sigma^2(\tau-) \dif
+       \tau + \gamma(\tau-) \dif \tau \\ 
+    & && + \sqrt{1 - \phi(\tau-)^2} \sigma(\tau-) \dif W(\tau)   \nonumber \\
+    &= && \psi(\tau-) \sigma_{\sigma}(\tau-) \dif W^{\sigma}(\tau)  + [\beta(\tau-)  + \psi(\tau-)]
+       \sigma^2(\tau-) \dif \tau + \gamma(\tau-) \dif \tau \\ 
+    & && + \sqrt{1 - \phi(\tau-)^2} \sigma(\tau-) \dif W(\tau)  \nonumber 
+\end{alignat}
 
 
 \purple{The goal is to write down the price formula as follows.}
@@ -726,14 +747,13 @@ First, I write down the formula for the price process with respect to the $\F_{\
 Conversely, the formula for the price process with respect to the $\F_{\tau}$ filtration is as follows. 
 
 \begin{align}
-    \dif p(\tau) &= \left[\mu + (\beta(\tau) + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
-        \sigma^2(\tau) \dif W(\tau)  \\
+    \dif p(\tau) &= \left[\mu + (\beta(\tau) + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif
+        \tau + \sigma^2(\tau) \dif W(\tau)  \\
     &= \left[\mu + (\beta(\tau) + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
-        \sigma^2(\tau) [(1 - \phi(\tau)^2) \dif W^{p}(\tau) + \phi \dif W^{\sigma}(\tau)] \\
+       \sigma^2(\tau) [(1 - \phi(\tau)^2) \dif W^{p}(\tau) + \phi \dif W^{\sigma}(\tau)] \\
     &= \left[\gamma_{\PP, \tau}'(0) + (\beta_{\PP, \tau}'  + \psi(t) ) \E\left[\sigma^2(\tau)  \mvert
-        \F_{\tau}\right]\right] \dif \tau + \sigma^2(\tau) [(1 - \phi(\tau)^2)\dif W^{p}(\tau) + \phi(\tau) \dif
-        W^{\sigma}(\tau)] \\ 
-        \label{eqn:price_process_decomp}
+       \F_{\tau}\right]\right] \dif \tau + \sigma^2(\tau) [(1 - \phi(\tau)^2)\dif W^{p}(\tau) + \phi(\tau) \dif
+   W^{\sigma}(\tau)] \\ \label{eqn:price_process_decomp}
     &= \gamma_{\PP, \tau}'(0) \dif \tau + \left[\beta_{\PP, \tau}'  + \psi(t)\right] \sigma^2(\tau-) \dif \tau +
        \sigma^2(\tau) [\dif W^{p}(\tau) + \phi(\tau) \dif W^{\sigma}(\tau)]
 \end{align}
