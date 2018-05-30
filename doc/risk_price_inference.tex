@@ -486,7 +486,7 @@ Consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$.
     \text{higher-order terms}  \\
     \intertext{Implicitly defining $\psi \coloneqq \alpha_{\PP}'(0)$ and $\phi \coloneqq \sqrt{1 -
         \alpha_{PP}''(0)}$, we can rewrite this as follows.} 
-        &=  \psi + (1 - \phi^2) (\theta - \frac{1}{2}) + \text{higher-order terms}  
+        &=  \psi + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) + \text{higher-order terms}  
 \end{align}
 
 If we are wiling to assume that the conditional distribution of $r_{t+1} \vert \sigma^2_{t+1}, \F_t$ is Gaussian,
@@ -583,8 +583,8 @@ The cost of doing this is that it requires more involved notation and more sophi
     \label{defn:cont_time_dgp}
 
     \begin{align}
-        \dif p(t) &= \mu_{p}(t) + \sigma^2(s) \dif W_{\sigma}(s)  \\
-        \dif \sigma^2(s)  &= \mu_{\sigma}(t) + \sigma_{\sigma}^2(s) \dif W_{\sigma}(s) 
+        \dif p(t) &= \mu_{p}(t) + \sigma^2(t) \dif W_{\sigma}(t)  \\
+        \dif \sigma^2(s)  &= \mu_{\sigma}(t) + \sigma_{\sigma}^2(t) \dif W_{\sigma}(s) 
     \end{align}
 
 \end{defn}
@@ -644,17 +644,19 @@ However, as is well known, we must do Jensen convexity adjustments appropriately
 We will do this for each $u$, because $K(u,\tau)$ defines a stochastic process for each $\tau$.
 
 \begin{align}
-    K(u, \tau) &= \log \E_{\PP}\left[\exp\left(-u \int_{\tau}^{\tau + \Delta} \dif p(s)\right) \mvert
-        \F_{\sigma^2, \tau}\right] \\ 
+    \dif K(u, \tau) &= \lim_{\Delta \to 0} \log \E_{\PP}\left[\exp\left(-u \int_{\tau}^{\tau + \Delta} \dif
+    p(s)\right) \mvert \F_{\sigma^2, \tau}\right] \\ 
     \intertext{By It\^{o}'s Lemma for the expectation of a square-integrable semimartingale,
         \parencite{sangrey2018jumps}, we can rewrite this as follows.} 
-     &= \log \E_{\PP} \left[\int_{\tau}^{\tau+\Delta} \exp(-u p(s-)) \dif p(s) - \frac{1}{2}
-        \int_{\tau}^{\tau+\Delta} \exp(- u p(s-)) \dif \langle p(s), p(s) \rangle \mvert \F_{\sigma^2, \tau}
+    &= \lim_{\Delta \to 0} \log \E_{\PP} \left[\int_{\tau}^{\tau+\Delta} -u \dif p(s) - \frac{1}{2}
+        \int_{\tau}^{\tau+\Delta} -u \dif \langle p(s), p(s) \rangle \mvert \F_{\sigma^2, \tau}
         \right] \\
-    \intertext{Then by taking $\Delta \to 0$.}
-    &= \E_{\PP} \left[ -u p(\tau-) \dif p(\tau)  + \frac{u p(\tau-) }{2} \sigma^2(\tau)  \mvert \F_{\sigma^2, \tau}
+    \intertext{Then by taking $\Delta \to 0$. \footnote{The observant reader may notice that we just derived
+        a version of the stochastic logarithm in expectation.}}
+    &= \E_{\PP} \left[ -u \dif p(\tau)  + \frac{u}{2} \sigma^2(\tau)  \mvert \F_{\sigma^2, \tau}
        \right] 
 \end{align}
+
 
 The next step is to replace the physical measure functions with their Taylor series expansions.
 We have assumed that they display sufficient smoothness for this to be valid.
@@ -665,18 +667,22 @@ The question is how many effective degrees of freedom do we actually have.
 Since the moments must be valid processes with respect to both filtrations as must the underlying price and
 volatility, the moments of the price and volatility cannot vary too much over time.
 To put it in terms of Taylor series, only the first few terms can matter, i.e.\@ the physical measure functions
-must be representable by a low-order polynomial.
+must be representable by a 2nd-order polynomial.
 
+\purple{There is an issue from getting from above to here.}
 
-\begin{equation}
+\begin{alignat}{2}
     \label{eqn:cumulant_process_taylor_expansion}
-    \begin{alignedat}{2}
-        K(u, \tau) &= &&- \alpha_{\PP, \tau}'(0) u \sigma^2_{\tau + \Delta} - \alpha_{\PP, \tau}''(0) u^2
-            \sigma^2_{\tau + \Delta} \alpha_{\PP, \tau}''(0) \sigma^2_{\tau + \Delta}  \\ 
-        & &&- \beta_{\PP, \tau}'(0) u\sigma^2_{\tau} + O_p(\beta_{\PP, \tau}''(0)) u^2 \sigma^2_{\tau} -
-          \gamma_{\PP, \tau}'(0)u  + O_P(\gamma_{\PP, \tau}''(0)) u^2 \\
-    \end{alignedat}
-\end{equation}
+    \dif K(u, \tau) &= && - \alpha_{\PP, \tau}'(0) u \sigma^2_{\tau} + \frac{\alpha_{\PP, \tau}''(0)}{2} u
+        \sigma^2_{\tau} - \alpha_{\PP, \tau}''(0) u^2 \sigma^2_{\tau}  \\ 
+    & && - \beta_{\PP, \tau}'(0) u\sigma^2_{\tau-} + O_p(\beta_{\PP, \tau}''(0)) u^2 \sigma^2_{\tau-} -
+      \gamma_{\PP, \tau-}'(0)u  + O_P(\gamma_{\PP, \tau-}''(0)) u^2 \nonumber \\
+      \intertext{Dropping the higher-order $\beta$ and $\gamma$ terms because the $\sigma^2_{\tau-}$ (the
+          instantaneous volatility) cannot change between the risk-neutral and physical measures. The
+          $\alpha_{\PP, \tau}'(0)$ term is coming from a Jensen effect.} 
+    &= && - \alpha_{\PP, \tau}'(0) u \sigma^2_{\tau}  - \alpha_{\PP, \tau}''(0) \sigma^2_{\tau} u^2 - \beta_{\PP,
+       \tau}'(0) u\sigma^2_{\tau} - \gamma_{\PP, \tau}'(0)u  
+\end{alignat}
 
 The next step in the derivation is to figure out the magnitude of the Taylor series coefficients in
 \cref{eqn:cumulant_process_taylor_expansion}.
@@ -717,43 +723,35 @@ Since the prices are semimartingales with respect to $\F_{\sigma^2, \tau}$, and 
 characterize their conditional means and variances with respect to this filtration, they are must have finite
 variation. 
 
-\purple{Why are the $(\cdot)_{\PP, \tau}$ functions continuous functions of $\tau$?}
+\purple{Why are the $(\cdot)_{\PP, \tau}$ functions continuous functions of $\tau$? Check signs!}
 
 
-\begin{equation}
+\begin{align}
     \label{eqn:cumulant_generating_function_quadratic_approx}
-    K(u, \tau) = [\alpha_{\PP, \tau}'(0)\sigma^2(\tau)  + \beta_{\PP, \tau}'(0)\sigma^2(\tau-)] u - [\alpha_{\PP,
-    \tau}''(0) \sigma^2(\tau)] u^2  - \gamma_{\PP, \tau}'(0) 
-\end{equation}
+    K(u, \tau) &= - [\alpha_{\PP, \tau-}'(0)\sigma^2(\tau)  + \beta_{\PP, \tau-}'(0)\sigma^2(\tau-)] u -
+    [\alpha_{\PP, \tau-}''(0) \sigma^2(\tau-)] u^2  - \gamma_{\PP, \tau}'(0)  \\
+    &= - \left[\alpha_{\PP, \tau-}'(0)+ \beta_{\PP, \tau-}'(0)\right] u \sigma^2(\tau-) - \alpha_{\PP, \tau-} \dif
+       \sigma^2(\tau) + [\alpha_{\PP, \tau-}''(0) \sigma^2(\tau-)] u^2  - \gamma_{\PP, \tau}'(0)  \\
+\end{align}
 
 
-The physical measure functions are continuous functions of $\tau$ and hence predictable and of finite-variation.
-Consequently, for each $u$, we have implicitly defined $K$ as a differentiable function of $\sigma^2(\tau)$.
+Then since the first two moments can be derived from $K(t,u)$ by differentiating with resepct to $u$ and
+evaluating at zero, this implies that we can write $\dif p(t)$ as follows with respect to the $\F_{\tau,
+\sigma^2}$ filtration.
 
+\purple{Check signs!}
 
-\purple{I am switching signs from above.}
-
-By plugging in the mean and variance as defined  in \cref{eqn:cumulant_generating_function_quadratic_approx}, we
-can write down the price process as follows.
-We replace the derivatives with respect to $\alpha_{\PP, \tau}$ with the $\phi, \psi$ functions.
-We only need the first derivatives of the other two functions, and so we $\beta, \gamma$ to refer the derivaties of
-the associated functions.
-
-To simplify notation let $\zeta(\tau)$ be some drift term that is conditionally independent of both
-$\sigma^2(\tau)$ and $\sigma^2(\tau-)$.
-
-
-\begin{alignat}{2}
-    \dif p(\tau) &=\ && \psi(\tau) \sigma^2(\tau-) \dif \tau + (\phi(\tau) - \psi(\tau)) \sigma^2(\tau) \dif \tau
-        +  \zeta(\tau) \dif \tau + \sqrt{1 - \phi(\tau)^2} \sigma(\tau) \dif W(\tau)   \\
-    \intertext{We can add and subtract the predictable projection of $\sigma^2(\tau)$.}
-    &= && \psi(\tau-) [\sigma^2(\tau)  - \sigma^2(\tau-)]  + [\beta(\tau-)  + \psi(\tau-)] \sigma^2(\tau-) \dif
-       \tau + \gamma(\tau-) \dif \tau \\ 
-    & && + \sqrt{1 - \phi(\tau-)^2} \sigma(\tau-) \dif W(\tau)   \nonumber \\
-    &= && \psi(\tau-) \sigma_{\sigma}(\tau-) \dif W^{\sigma}(\tau)  + [\beta(\tau-)  + \psi(\tau-)]
-       \sigma^2(\tau-) \dif \tau + \gamma(\tau-) \dif \tau \\ 
-    & && + \sqrt{1 - \phi(\tau-)^2} \sigma(\tau-) \dif W(\tau)  \nonumber 
-\end{alignat}
+\begin{align}
+    \label{eqn:conditional_price_process}
+    \dif p(\tau)  &=  - \gamma_{\PP, \tau}'(0) - \left[\alpha_{\PP, \tau-}'(0) + \beta_{\PP, \tau-}'(0) \right]
+    \sigma^2(\tau-) + \sigma(\tau-) \sqrt{-\alpha_{\PP, \tau-}''(0)}\dif W^{p}(\tau) + \alpha'_{\PP, \tau-}
+    \mu_{\sigma} \dif \tau + \alpha'_{\PP, \tau-} \sigma_{\sigma} \dif W^{\sigma}\\
+    \intertext{Then subbing in the formula's for $\phi$, and $\phi$ above, and making some notation that is no
+        longer necessary implicit..}
+    &=  - \gamma(\tau) - \left[\psi(\tau) + \beta(\tau) \right]
+        \sigma^2(\tau-) + \sigma(\tau-) \sqrt{1 - \phi^2(\tau)}\dif W^{p}(\tau) + \psi(\tau) \mu_{\sigma} \dif
+        \tau + \psi(\tau) \sigma_{\sigma} \dif W^{\sigma}
+\end{align}
 
 
 \purple{The goal is to write down the price formula as follows.}
