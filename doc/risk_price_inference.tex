@@ -596,8 +596,8 @@ components.
 \begin{defn}{Continuous-Time DGP}
 
     \begin{align}
-        \dif p(t) &= \mu_{p}(t) \dif t + \psi(t) \mu_{\sigma}(t) \dif t + \sigma(t) \phi(t) \dif W_{p}(t)  +
-        \sigma(t) \sqrt{ 1 - \phi^2(t)} \dif W_{p}(t)  \\
+        \dif p(t) &= \gamma(t) \dif t + \beta(t) \sigma(t-) \dif t + \psi(t) \dif t + \sigma(t) \phi(t) \dif
+            W_{p}(t)  + \sigma(t) \sqrt{ 1 - \phi^2(t)} \dif W_{p}(t)  \\
         \dif \sigma^2(s)  &= \mu_{\sigma}(t) \dif t + \sigma_{\sigma}(t) \dif W_{\sigma}(t) 
     \end{align}
 
@@ -611,6 +611,28 @@ This implies that the processes with to $\F_{\sigma^2, t}$ are absolutely contin
 process with respect to $\F_t$.
 We also follow standard conventions and use $s-$ notation to refer to the predictable version of the object in
 question. 
+
+The $\psi$ and $\phi$ functions above are implicitly defined so that we can represent $\dif p(t)$ with respect to
+$\F_{t, \sigma}$ as follows.
+
+
+\begin{equation}
+    \label{eqn:price_given_vol}
+    \dif p(t) = \psi(t) \dif t + \sigma(t) \sqrt{1 - \phi^2(t)} \dif W(t)
+\end{equation}
+
+\purple{TODO We should probably have a discussion explaining why this is reasonable somewhere.}
+As long as $p(t)$ is s still a semimartingale, which we assume throughout, with respect to this filtration, these
+functions will exist.
+The $\phi(\cdot)$ function governs the correlation between the Brownian motion driving $p(t)$ and the one driving
+the volatility.
+The $\psi(\cdot)$ function is coming from the fact that once we condition on $\sigma(t+)$ the price drift might
+well change.
+
+
+
+
+
 
 The log-Laplace transform for the physical measure that we have been using in the previous sections is the
 discretization of a process with the following form.\footnote{The existence of the process below is implied
@@ -659,179 +681,125 @@ However, as is well known, we must do Jensen convexity adjustments appropriately
 We will do this for each $u$, because $K(u,\tau)$ defines a stochastic process for each $\tau$.
 
 \begin{align}
-    \dif K(u, \tau) &= \lim_{\Delta \to 0} \log \E_{\PP}\left[\exp\left(-u \int_{\tau}^{\tau + \Delta} \dif
-    p(s)\right) \mvert \F_{\sigma^2, \tau}\right] \\ 
+    \dif K(u, t) &= \lim_{\Delta \to 0} \log \E_{\PP}\left[\exp\left(-u \int_{t}^{t + \Delta} \dif
+    p(s)\right) \mvert \F_{\sigma^2, t-}\right] \\ 
     \intertext{By It\^{o}'s Lemma for the expectation of a square-integrable semimartingale,
         \parencite{sangrey2018jumps}, we can rewrite this as follows.} 
-    &= \lim_{\Delta \to 0} \log \E_{\PP} \left[\int_{\tau}^{\tau+\Delta} -u \dif p(s) - \frac{1}{2}
-        \int_{\tau}^{\tau+\Delta} -u \dif \langle p(s), p(s) \rangle \mvert \F_{\sigma^2, \tau}
+    &= \lim_{\Delta \to 0} \log \E_{\PP} \left[\int_{t}^{t+\Delta} -u \dif p(s) - \frac{1}{2}
+        \int_{t}^{t+\Delta} -u^2 \dif \langle p(s), p(s) \rangle \mvert \F_{\sigma^2, t-}
         \right] \\
     \intertext{Then by taking $\Delta \to 0$. \footnote{The observant reader may notice that we just derived
         a version of the stochastic logarithm in expectation.}}
-    &= \E_{\PP} \left[ -u \dif p(\tau)  + \frac{u}{2} \sigma^2(\tau)  \mvert \F_{\sigma^2, \tau}
+    &= \E_{\PP} \left[ -u \dif p(t)  + \frac{u^2}{2} \sigma^2(t)  \dif t \mvert \F_{\sigma^2, t-}
        \right] 
 \end{align}
 
-
 The next step is to replace the physical measure functions with their Taylor series expansions.
 We have assumed that they display sufficient smoothness for this to be valid.
-The future volatility --- $\sigma^2_{t+\Delta}$ --- is a random variable with respect to $\F_{\tau}$.
-Consequently, we have a series of random variables with respect to $\F_\tau$, one for each $u$.
-
-The question is how many effective degrees of freedom do we actually have.
-Since the moments must be valid processes with respect to both filtrations as must the underlying price and
-volatility, the moments of the price and volatility cannot vary too much over time.
-To put it in terms of Taylor series, only the first few terms can matter, i.e.\@ the physical measure functions
-must be representable by a 2nd-order polynomial.
-
-\purple{There is an issue from getting from above to here.}
+The future volatility --- $\sigma^2_{t}$ --- is a random variable with respect to $\F_{t-}$.
+Consequently, we have a series of random variables with respect to $\F_{t}$, one for each $u$.
 
 \begin{alignat}{2}
-    \label{eqn:cumulant_process_taylor_expansion}
-    \dif K(u, \tau) &= && - \alpha_{\PP, \tau}'(0) u \sigma^2_{\tau} + \frac{\alpha_{\PP, \tau}''(0)}{2} u
-        \sigma^2_{\tau} - \alpha_{\PP, \tau}''(0) u^2 \sigma^2_{\tau}  \\ 
-    & && - \beta_{\PP, \tau}'(0) u\sigma^2_{\tau-} + O_p(\beta_{\PP, \tau}''(0)) u^2 \sigma^2_{\tau-} -
-      \gamma_{\PP, \tau-}'(0)u  + O_P(\gamma_{\PP, \tau-}''(0)) u^2 \nonumber \\
-      \intertext{We can combine the 2nd derivatives with respect to $\beta$ and $\alpha$ because the volatility
-          must be predictable, and so $\sigma^2(\tau-)$ and $\sigma^2(\tau)$ coincide.} 
-    &= && - \alpha_{\PP, \tau}'(0) u \sigma^2_{\tau}  - \alpha_{\PP, \tau}''(0) \sigma^2_{\tau} u^2 - \beta_{\PP,
-      \tau}'(0) u\sigma^2_{\tau} - \gamma_{\PP, \tau}'(0)u  - \gamma_{\PP, \tau}'' u^2 
+    &\dif K(u,t) &&= \E\left[ -u \mu(\sigma(t)^2) \dif t - u \sigma \sqrt{1 - \phi^2(t)} \dif W(t) + \frac{u^2}{2}
+    \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right] \\ 
+    \intertext{By applying It\^{o}'s lemma to $\mu(\sigma^2(t))$, which applies because $\F_{\sigma^2, t}$
+        contains $\F_{t}$ and we are working inside the $\F_{\sigma^2,t}$ measure,  and hence the absolute
+        continuity requirements are met, there exist some predictable functions $\mu_1$ and $\mu_2$ so that the
+    following holds.}
+    & &&= \E\left[ -u \mu_1(t) \dif \sigma^2(t)  - u \mu_2(t) \sigma^2_{\sigma}(t) - u \sigma \sqrt{1 - \phi^2(t)}
+       \dif W(t) + \frac{u^2}{2} \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right] \\ 
+       \intertext{Then subbing in for $\dif \sigma^2(t)$.}
+    & &&= \E\left[ -u \mu_1(t) \mu_{\sigma} \dif t   - u \mu_1(t) \sigma_{\sigma}(t) \dif W_{\sigma}(t) - u
+      \mu_2(t) \sigma^2_{\sigma}(t) - u \sigma \sqrt{1 - \phi^2(t)} \dif W(t) \right. \\ 
+    & &&\quad + \left. \frac{u^2}{2} \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right]  \nonumber   \\
+    \intertext{For the instantaneous volatility of $p(t)$ to equals $\sigma^2(t)$, $\mu_1(t) \sigma^2_{\sigma}$
+        must equal $\phi(t) \sigma(t)$}
+    & &&= \E\left[ -u \mu_1(t) \mu_{\sigma} \dif t - u \sigma(t) \phi(t) \dif W_{\sigma}(t) - u \mu_2(t)
+       \sigma^2_{\sigma}(t) - u \sigma(t) \sqrt{1 - \phi^2(t)} \dif W(t)  \right. \\
+   & &&\quad + \left. \frac{u^2}{2} \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right]  \nonumber 
 \end{alignat}
 
-The next step in the derivation is to figure out the magnitude of the Taylor series coefficients in
-\cref{eqn:cumulant_process_taylor_expansion}.
-Recall with stochastic diffusion or stochastic variance-gamma processes, the first two moments of the
-process determine the entire distribution under some general conditions which this DGP satisfies.
-% \parencite{sangrey2018jumps}
-Since the first two derivatives of the cumulant generating function evaluated at zero are the moments of the first
-two moments all of the higher-order coefficients  equal zero.
 
-To make this concrete, \cref{eqn:cumulant_process_taylor_expansion} must equal the following. 
+The drift term in the previous equation has the form $\mu_1(t) \mu_{\sigma} + \mu_2(t) \sigma^2_{\sigma}(t) +
+\frac{1}{2} \sigma^2(t)$. 
+The price process has a drift of the form $\mu_{p}(t) + \beta(p)(t) \sigma^2(t)$.
+Clearly, we can write the first drift term as $\mu_{p}(t) + \beta(p)(t) \sigma^2(t) + \psi(t) \sigma^2(t) +
+\gamma(t)$ for some functions $\psi, \gamma$.
+Of course $\gamma$ and $\psi$ are not unique here, and so we can use projections of the relevant residual onto
+$\sigma^2(t)$.
 
-\purple{This does not belong here!!!!}
-To further understand the role that $\psi$ plays consider the following analogue to the third equation on p.15 of 
-\textcite[p.15]{khrapov2016affine}.
-
-Intuitively, $\psi$ is the parameter that governs how the drift of $p(t)$  changes once we condition on  the
-volatility in the immediate future. $\sigma_{\tau+}$ if you will. 
-
-
-\purple{The other thing to note here is that $\mu_{\sigma}(s)$ is drift of $\sigma^2(s)$ with respect to its own
-    filtration. This is not necessarily the same drift as the drift with respect to $\F_t$. The fundamental reason
-why $\phi$ and $\psi$ are not necessarily the same is because the drift and volatility do not have to change in the
-same way between when we change the measures. Effectively since $\sigma^2(\tau)$ is not a martingale with respect
-to its filtration, the drift may change as well. Girsanov's theorem assumes martingales.... ( Or something.)}
-
-\begin{align}
-    &\phantom{=} \E\left[r_{t+1} \mvert \F_{t}\right]  - \E\left[\E\left[r_{t+1} \mvert \F_{t+1, \sigma^2} \F_t
-      \right] \right] \\
-    &= \E\left[\psi \left( \sigma^2_{t+1} - \E\left[\sigma^2_{t+1} \mvert \F_t\right]\right)  \mvert \F_t \right]
-       \\
-       %TODO I am not quite sure this is right.
-    &= \E\left[ \int_t^{t+1} \psi(s) \dif \mu_{\sigma}(s) \mvert \F_t \right]
-\end{align}
-
-
-
-\purple{Is $K(\tau, u)$ currently the negative cumulant generating function?}
+As a consequence, the differential of the log-Laplace transform has the following form. 
 
 \begin{equation}
-    \label{eqn:cond_log_cumulant_function}
-    K(u, \tau) = \text{constant} + \E\left[r_{\tau + \Delta} \mvert \F_{\sigma^2, \tau}\right]  u  +
-    \Var\left[r_{\tau + \Delta} \mvert \F_{\sigma^2, \tau}\right]  u^2 
+    \label{eqn:log_cumulant_process}
+    \begin{alignedat}{1}
+        \dif K(t, u) &= \E\left[ -u [\psi(t) \sigma^2(t) +  \gamma(t) + \beta(t) \sigma^2(t) + \mu_{p}(t)] \dif t
+        \vphantom{\frac{u}{2}} \right. \\
+        & \quad - \left. u  \phi(t) \dif W_{\sigma}(t)  - u \sigma \sqrt{1 - \phi^2(t)} \dif W(t) + \frac{u^2}{2}
+            \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right] 
+    \end{alignedat}
 \end{equation}
 
-Note, Since $-\alpha''(0)$ is a variance, $\alpha''(0)$ must be negative.
 
-\begin{defn}{Conditional Variances and Correlations} 
-    \begin{align}
-        \psi(\tau) &\coloneqq \alpha_{\PP, \tau}'(0) \\
-        \phi(\tau) &\coloneqq \sqrt{1 -\alpha_{\PP, \tau}''(0)}
-    \end{align}
-\end{defn}
+Now, we know that the derivatives of the log-Laplace transform must give moments when evaluated at zero, and we
+can also read off the moments from \cref{eqn:log_cumulant_process}. 
+Consequently, $\psi(t) = \alpha_{\PP,t}'(0)$, $\phi(t) = \sqrt{-\alpha_{\PP, t}''(0)}$, $\beta(t) =
+\beta_{\PP,t}'(0)$, and $\gamma(t) = \gamma_{\PP,t}'(0)$.
 
-Now, 
+\purple{Why is there not a constant term in the alpha equation, comes from the fact that changes of measure are
+covariances.}
 
-
-$\phi(\tau)$ and $\phi(\tau)$ define stochastic processes.
-
-By matching coefficient between \cref{eqn:cumulant_process_taylor_expansion} and
-\cref{eqn:cond_log_cumulant_function}, we can rewrite the log-cumulant function as follows.
-
-Since the prices are semimartingales with respect to $\F_{\sigma^2, \tau}$, and the $(\cdot)_{\PP,\tau}$ functions
-characterize their conditional means and variances with respect to this filtration, they are must have finite
-variation. 
-
-\purple{Why are the $(\cdot)_{\PP, \tau}$ functions continuous functions of $\tau$? Check signs!}
-
-
-\begin{align}
-    \label{eqn:cumulant_generating_function_quadratic_approx}
-    K(u, \tau) &= - [\alpha_{\PP, \tau-}'(0)\sigma^2(\tau)  + \beta_{\PP, \tau-}'(0)\sigma^2(\tau-)] u -
-    [\alpha_{\PP, \tau-}''(0) \sigma^2(\tau-)] u^2  - \gamma_{\PP, \tau}'(0)  \\
-    &= - \left[\alpha_{\PP, \tau-}'(0)+ \beta_{\PP, \tau-}'(0)\right] u \sigma^2(\tau-) - \alpha_{\PP, \tau-} \dif
-       \sigma^2(\tau) + [\alpha_{\PP, \tau-}''(0) \sigma^2(\tau-)] u^2  - \gamma_{\PP, \tau}'(0)  \\
-\end{align}
-
-
-Then since the first two moments can be derived from $K(t,u)$ by differentiating with resepct to $u$ and
-evaluating at zero, this implies that we can write $\dif p(t)$ as follows with respect to the $\F_{\tau,
-\sigma^2}$ filtration.
-
-\purple{Check signs!}
-
-\begin{align}
-    \label{eqn:conditional_price_process}
-    \dif p(\tau)  &=  - \gamma_{\PP, \tau}'(0) - \left[\alpha_{\PP, \tau-}'(0) + \beta_{\PP, \tau-}'(0) \right]
-    \sigma^2(\tau-) + \sigma(\tau-) \sqrt{-\alpha_{\PP, \tau-}''(0)}\dif W^{p}(\tau) + \alpha'_{\PP, \tau-}
-    \mu_{\sigma} \dif \tau + \alpha'_{\PP, \tau-} \sigma_{\sigma} \dif W^{\sigma}\\
-    \intertext{Then subbing in the formula's for $\phi$ and $\psi$ above and making some notation that is no
-        longer necessary implicit..}
-    &=  - \gamma(\tau) - \left[\psi(\tau) + \beta(\tau) \right]
-        \sigma^2(\tau-) + \sigma(\tau-) \sqrt{1 - \phi^2(\tau)}\dif W^{p}(\tau) + \psi(\tau) \mu_{\sigma} \dif
-        \tau + \psi(\tau) \sigma_{\sigma}(\tau) \dif W^{\sigma}
-\end{align}
-
-
-We know that the predictable  quadratic variation of $p(t)$ is $\int_t^{t+1} \sigma^2(s) \dif s$.
-In other words, $\psi(\tau) = \phi(\tau)$.
-
-
-\purple{The goal is to write down the price formula as follows.}
-
-First, I write down the formula for the price process with respect to the $\F_{\sigma^2, \tau}$ filtration.
-
-\begin{align}
-    \dif p(\tau) = \left[\mu + \beta(\tau) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]  + \psi
-    \left[\sigma^2(\tau) - \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right]\right]  \dif \tau + \sigma_{p}
-    \dif W^{p}(\tau) 
-\end{align}
-
-Conversely, the formula for the price process with respect to the $\F_{\tau}$ filtration is as follows. 
-
-\begin{align}
-    \dif p(\tau) &= \left[\mu + (\beta(\tau) + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif
-        \tau + \sigma^2(\tau) \dif W(\tau)  \\
-    &= \left[\mu + (\beta(\tau) + \psi) \E\left[\sigma^2(\tau)  \mvert \F_{\tau}\right]\right] \dif \tau +
-       \sigma^2(\tau) [(1 - \phi(\tau)^2) \dif W^{p}(\tau) + \phi \dif W^{\sigma}(\tau)] \\
-    &= \left[\gamma_{\PP, \tau}'(0) + (\beta_{\PP, \tau}'  + \psi(t) ) \E\left[\sigma^2(\tau)  \mvert
-       \F_{\tau}\right]\right] \dif \tau + \sigma^2(\tau) [(1 - \phi(\tau)^2)\dif W^{p}(\tau) + \phi(\tau) \dif
-   W^{\sigma}(\tau)] \\ \label{eqn:price_process_decomp}
-    &= \gamma_{\PP, \tau}'(0) \dif \tau + \left[\beta_{\PP, \tau}'  + \psi(t)\right] \sigma^2(\tau-) \dif \tau +
-       \sigma^2(\tau) [\dif W^{p}(\tau) + \phi(\tau) \dif W^{\sigma}(\tau)]
-\end{align}
-
-
-We can time-aggregate \cref{eqn:price_process_decomp}, and get the following formula for the discrete-time
-returns.  
-Let $\gamma(\tau) \coloneqq \gamma_{\PP, \tau}'(0)$.
-Let $\beta(\tau) \coloneqq \beta_{\PP, \tau}'(0)$.
+Intuitively, $\psi$ is the parameter that governs how the drift of $p(t)$  changes once we condition on  the
+volatility in the immediate future. $\sigma^2(t+)$ if you will. 
+To see this more fully consider the following.
 
 
 \begin{equation}
+     \E\left[r_{t+1} \mvert \F_{t}\right]  - \E\left[\E\left[r_{t+1} \mvert \F_{t+1, \sigma^2} \F_t
+        \right] \right] 
+     \E\left[\psi \left( \sigma^2_{t+1} - \E\left[\sigma^2_{t+1} \mvert \F_t\right]\right)  \mvert \F_t \right]
+     \E\left[ \int_t^{t+1} \psi(s) \sigma^2(s) \dif (s) \mvert \F_t \right]
+\end{equation}
+
+Throughout the following section, I am going to assume that the price process actually has the formula given
+above. 
+In complete generality it might not.\footnote{If $p(t)$ is continuous, this is not an assumption.}
+However, since the prices of the two processes will be the same, this is without loss of generality. 
+You can view it as suppressing the process's potential  additional, (non-priced) complexity in the notation. 
+Consequently, we can write the log-price process with respect to the $\F_{\sigma^2, t}$ filtration as follows.
+
+\begin{equation}
+    \label{eqn:eqn:price_process_decomp}
+    \dif p(t)  =  \gamma(t) \dif t +  [\beta(t) + \psi(t)] \sigma^2(t) \dif t +
+     \sigma^2(t) \left[\sqrt{1 - \phi(t)^2} \dif W^{p}(t) + \phi(t) \dif W^{\sigma}(t)\right]
+\end{equation}
+
+
+\subsubsection{Going from Continuous-Time to Discrete-Time}
+
+The data that we have are daily, not in continuous-time. 
+Consequently, we need to consider what the price process in  \cref{eqn:eqn:price_process_decomp} implies about the
+daily data.
+Thankfully, all of the infinite-activity components are independent by construction.
+Consequently, we can time-aggregate \cref{eqn:eqn:price_process_decomp}, and get the following formula for the
+discrete-time returns.  
+We can then use those returns to characterize the identification problem.
+
+
+\begin{equation}
+    \label{eqn:discrete_time_rtn}
     r_{t+1} = \int_t^{t+1} \gamma(s) \dif s + \int_{t}^{t+1} [\beta(s) + \psi(s)] \sigma^2(s) \dif s +
     \int_t^{t+1} \sigma^2(s) \left[\sqrt{1 - \phi(\tau)^2} \dif W^{p}(s) + \phi(\tau) \dif W^{\sigma}(s)\right]
 \end{equation}
+
+The problem with \cref{eqn:discrete_time_rtn} is that it allows the various predictable components to vary.
+However, since we are using time-span  asymptotics, and not infill asymptotics, the model we end up estimating
+will have fixed parameters instead of continuous-time processes for each of these parameters.
+
+
+ 
+
+
 
 We start by defining the means of $\beta(\tau), \psi(\tau)$, and $\phi(\tau)^2$: $\beta_0, \psi_0, \phi^2$.
 By the intermediate value theorem, there exists an $s_i^{\dagger}$ for each of these functions that function
