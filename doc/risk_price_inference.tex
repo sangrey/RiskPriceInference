@@ -191,7 +191,7 @@ where they show up in the $\QQ$ measure.
     \end{equation}
 \end{defn}
 
-\subsection{Dynamics}
+\subsection{Dynamics}\label{sec:dynamics}
 
 To specify the model we must specify what the $\PP$ and $\QQ$ measures are and what $M_{t, t+1}(\eta)$ is.
 We start by specifying the $\PP$ measure.
@@ -679,14 +679,14 @@ where $\widetilde{M}_{\sigma}(t)$ has mean zero, and predictable quadratic varia
 
     Assume that volatility is an It\^{o} semimartingale without any predictable jumps, and the prices can be
     represented as follows.
-    Further assume that all of the prices are locally-square integrable.
+    Further assume that all of the prices are locally-square integrable, and have the following representation.
 
     \begin{equation}
-            \dif p(t) = \gamma(t) + \beta(t) \sigma^2(t) + \psi(t) \sigma^2(t) + \sigma(t) \sqrt{1 - \phi(t)^2}
-            \dif W^p(t) + \phi(t) \sigma(t) \dif W^{\sigma}(t) 
+        \dif p(t) = \gamma(t) + \beta(t) \sigma^2(t) + \sigma(t) \sqrt{1 - \phi(t)^2} \dif W^p(t) + \phi(t)
+        \sigma(t) \dif W^{\sigma}(t) 
     \end{equation}
 
-    Then we can represent the prices progressively enlarged by $\lim_{\Delta \to 0^{+}} \sigma(t + \Delta0$ for
+    Then we can represent the prices progressively enlarged by $\lim_{\Delta \to 0^{+}} \sigma(t + \Delta)$ for
     each $t$ as follows.
 
     \begin{equation}
@@ -704,64 +704,37 @@ Their representation only holds under some parametric assumptions, and so their 
 parametric.
 
 
-Intuitively, $\psi$ is the parameter that governs how the drift of $p(t)$  changes once we condition on  the
-volatility in the immediate future. $\sigma^2(t+)$ if you will. 
-To see this more fully consider the following.
+The $\psi(t)$ parameter governs how the drift changes once we condition on the volatility in the immediate
+future.
+To see this more fully consider the following, where we assume $\psi(t)$ and $\beta(t)$ are constant.
+Note, $F_{t+1, \sigma^2}$ conditions on the entire path of volatility from $t$ to $t+1$.
 
 
-\begin{equation}
-     \E\left[r_{t+1} \mvert \F_{t}\right]  - \E\left[\E\left[r_{t+1} \mvert \F_{t+1, \sigma^2} \F_t
-        \right] \right] 
-     \E\left[\psi \left( \sigma^2_{t+1} - \E\left[\sigma^2_{t+1} \mvert \F_t\right]\right)  \mvert \F_t \right]
-     \E\left[ \int_t^{t+1} \psi(s) \sigma^2(s) \dif (s) \mvert \F_t \right]
-\end{equation}
+\begin{align}
+    &\phantom{=} \E\left[r_{t+1} \mvert \F_{t}\right]  - \E\left[\E\left[r_{t+1} \mvert \F_{t+1, \sigma^2} \right]
+      \mvert \F_t \right]  \\
+      %
+      \intertext{Then by the law of iterated expectations.}
+      %
+    &=  \E\left[\beta(t) \sigma^2_{t+1} - \beta(t) \sigma^2_{t+1} + \psi \sigma^2_{t+1}  \mvert \F_t \right] \\
+    &= \psi \sigma^2_t
+\end{align}
 
 The parameter $\phi(t)$, on the other hand, governs the correlation between $p(t)$ and $\sigma^2(t)$.
 Consider their predictable quadratic variation of the part of the precises that is orthogonal to $\sigma^2(t)$.
-
 
 By properties of Gaussian conditioning, we can split the Wiener process driving $p(t)$ into two parts.
 One that drives $\sigma^2(t)$ --- $W^{\sigma}t)$ and one that is independent of $\sigma^2(t)$ --- $W^p(t)$.
 Consequently, we can write the price process, with respect to $\F_t$ as follows.
 
-\begin{align}
-        \dif p(t) = \gamma(t) + \beta(t) \sigma^2(t) + \sigma(t) \sqrt{1 - \phi(t)^2} \dif
-         W^{\sigma}(t) + \phi(t)\dif  W^p(t) 
-\end{align}
-
-\begin{align}
-    &\E\left[ \int^t \phi^2(s) \sigma^2(s)  \dif s \mvert \F_{t-} \right] \\
-    %
-    = &\E\left[ \predQV*{\int^t \phi(s) \sigma(s) \dif W^p(s)} \mvert \F_{t-} \right] \\
-    %
-    \intertext{Since $W^{p}(s)$ is independent of $\sigma^2(t)$.} 
-    %
-    = &\E\left[ \predQV*{\int^t \phi(s) \sigma(s) \dif W^p(s)} \mvert \F_{\sigma^2, t-} \right] \\
-    %
-    %TODO This could use some more explication.
-    \intertext{Since the argument here is still a martingale, it is contained within the diffusion part of $M(t)$.
-        The variance cannot have increased because Gaussian's variance does not increase when you condition on
-        more information, and because the other part of the process $W^{\sigma}(t)$ is not a martingale in this
-        filtration.}
-    %
-    % = &\E\left[ \predQV*{M^D(t)} \mvert \F_{\sigma^2, t-} \right] \\
-    %
-    % = &\E\left[ \phi^2(s) \sigma^2(s) \dif s \mvert \F_{t-} \right] 
-\end{align}
-
-
-% In other words, it was no accident, that we are using $\phi(t)$ for two potentially different objects. 
-% Effectively, $\phi(t)$ controls the reduction in covariance that is brought about by conditioning on the future
-% values of $\sigma^2(t)$.
-
-
-
 \begin{equation}
-    \dif p(t)  =  \gamma(t) \dif t +  [\beta(t) + \psi(t)] \sigma^2(t) \dif t + \sigma^2(t) \left[\sqrt{1 -
-    \phi(t)^2} \dif W^{\sigma}(t) + \phi(t) \dif W^{p}(t)\right]
+    \predQV*{p(t), \sigma^2(t)}  
+    = \predQV*{\int^t_0 \phi(t) \sigma(t) \dif W^{\sigma}, \int^t_0 \sigma_{\sigma} \dif W^{\sigma}} 
+    = \int^t_0 \phi(s) \sigma(s) \sigma_{\sigma}(s) \dif s
 \end{equation}
 
-
+If all of the functions are  constant then the correlation between the prices and the jumps diffusion part is
+$\phi$, i.e.\@  $\mathrm{corr}\,(p(t), {\sigma^2(t)}^D) = \phi$.
 
 \subsubsection{Going from Continuous-Time to Discrete-Time}
 
@@ -772,75 +745,100 @@ Thankfully, all of the infinite-activity components are independent by construct
 Consequently, we can time-aggregate \cref{eqn:eqn:price_process_decomp}, and get the following formula for the
 discrete-time returns.  
 We can then use those returns to characterize the identification problem.
-
+We can define the returns with respect to the following two filtrations.
+First, we define $r_{t+1}$ with respect to the $\F_{t}$ filtration.
 
 \begin{equation}
     \label{eqn:discrete_time_rtn}
-    r_{t+1} = \int_t^{t+1} \gamma(s) \dif s + \int_{t}^{t+1} [\beta(s) + \psi(s)] \sigma^2(s) \dif s +
-    \int_t^{t+1} \sigma^2(s) \left[\sqrt{1 - \phi(\tau)^2} \dif W^{p}(s) + \phi(\tau) \dif W^{\sigma}(s)\right]
+    r_{t+1} = \int_t^{t+1} \gamma(s) \dif s + \int_{t}^{t+1} \beta(s) \sigma^2(s) \dif s +
+    \int_t^{t+1} \sigma(s) \left[\sqrt{1 - \phi(\tau)^2} \dif W^{p}(s) + \phi(\tau) \dif W^{\sigma}(s)\right]
 \end{equation}
 
-The problem with \cref{eqn:discrete_time_rtn} is that it allows the various predictable components to vary.
+If we knew the entire path of future volatility, we could use the following equation, where we characterize
+$r_{t+1}$ with respect to the $\sigma\left(\F_{t} \F_{\sigma^2_{t+1}}\right)$ filtration.
+
+\begin{equation}
+    \label{eqn:discrete_time_cond_rtn}
+    r_{t+1} = \int_t^{t+1} \gamma(s) \dif s + \int_{t}^{t+1} [\beta(s) + \psi(s)] \sigma^2(s) \dif s +
+    \int_t^{t+1} \sigma(s) \phi(\tau) \dif W^{\sigma}(s)
+\end{equation}
+
+In both \cref{eqn:discrete_time_rtn} and \cref{eqn:discrete_time_cond_rtn}, we have the random functions
+$\gamma(t), \beta(t), \psi(t), \phi(t)$.
+In addition, in we also condition on the entire path of future volatility in \cref{eqn:discrete_time_cond_rtn}
+instead of just $\int_t^{t+1} \sigma^2(s) \dif s$.
+
 However, since we are using time-span  asymptotics, and not infill asymptotics, the model we end up estimating
 will have fixed parameters instead of continuous-time processes for each of these parameters.
 
+%TODO Added assumption here.
+We start by defining the means of $\gamma_0, \beta(t), \psi(t)$, and $\phi(t)$: $\gamma_0, \beta_0, \psi_0, \phi_0$.
+We assume that all of the processes are ergodic and so time and cross-sectional means are the same.
+We also let $\xi_{t+1} \coloneqq \E\left[\sigma_{t+1} \mvert \sigma(Z_1,Z_2, \ldots) \right]$, where $Z_i$ are
+some some $t$-measurable variables associated with $\sigma_{t+1}$, i.e.\@ they are instruments / predictors for
+$\sigma_{t+1}$.
 
- 
 
-
-
-We start by defining the means of $\beta(\tau), \psi(\tau)$, and $\phi(\tau)^2$: $\beta_0, \psi_0, \phi^2$.
-By the intermediate value theorem, there exists an $s_i^{\dagger}$ for each of these functions that function
-evaluated at $s^{\dagger}$ equals the mean over the interval.
-For example $\beta\left(s_i^{\dagger}\right) = \int \beta(\tau) \dif \tau$.  
+%TODO Added assumption here.
+By the intermediate value theorem, assuming the predictable functions are continuous, there exists an
+$s_i^{\dagger}$ for each of these functions that function evaluated at $s^{\dagger}$ equals the mean over the
+interval.
+For example $\beta\left(s_i^{\dagger}\right) = \int_0^{\infty} \beta(s) \dif s$.  
 We can take mean value expansions for each of these functions.
 
-\begin{equation}
+\begin{alignat}{1}
     \label{eqn:price_decomp}
-    \begin{alignedat}{1}
-        r_{t+1} &= \gamma_0 + \beta_0 \E\left[\int_t^{t+1} \sigma^2(s) \dif s \mvert \F_t\right] + \psi_0
-            \int_{t}^{t+1} \sigma^2(s) \dif s  \\
-        &\qquad + \int_t^{t+1} \sigma^2(s) \left[\sqrt{1 - \phi_0^2} \dif W^{p}(s) + \phi_0 \dif
-        W^{\sigma}(s)\right] + \eta_{t+1} \\
-    \end{alignedat}
-\end{equation}
+    \left. r_{t+1} \mvert \F_t \right. 
+    %
+    &= \gamma_0 + \beta_0 \E\left[\int_t^{t+1} \sigma^2(s) \dif s \mvert \F_t\right] + \int_t^{t+1} \sigma(s)
+       \left[\sqrt{1 - \phi_0^2} \dif W^{p}(s) + \phi_0 \dif W^{\sigma}(s)\right] + \eta_{1,t+1} \\
+    \left. r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right. 
+    %
+    &= \gamma_0 + (\beta_0 + \psi_0) \E\left[\int_t^{t+1} \sigma^2(s) \dif s \mvert \F_t\right] + \int_t^{t+1}
+       \sigma(s) \phi_0 \dif W^{\sigma}(s) + \eta_{2, t+1} 
+\end{alignat}
 
-To show identification of our results, we need to characterize the error term in the expression above.
-In particular, we need to show that it is mean-zero and conditionally mean-independent.
-The only non-trivial part in characterizing $\eta_t$ is characterizing the error generated by replacing $\sqrt{1 -
-\phi^2(\tau)}$ with $\sqrt{1 - \phi_0^2}$.
-Note, we know by the mean value theorem, there exists a $\phi^{\star} \in [\inf_{\tau} \phi(\tau), \sup_{\tau}
-\phi(\tau)]$, so that the following holds.
+To show identification of our results, we need to characterize the error terms in the expression above.
+In particular, we need to show that they are mean-zero and conditionally mean-independent.
+We can compute what the error terms are by adding and subtracting the relevant terms.
+
+\begin{alignat}{1}
+    \eta_{1,t+1} 
+    &= \int_t^{t+1}(\gamma(s) - \gamma_0) \dif s + \E\left[\int_t^{t+1} (\beta(s) - \beta_0) \sigma^2(s) \dif s
+        \mvert \F_t\right] \\
+    &+ \int_t^{t+1} \sigma(s) \left[\left(\sqrt{1 - \phi(s)^2} - \sqrt{1 - \phi_0^2}\right) \dif W^{p}(s) +
+        \left(\phi(s) - \phi_0\right) \dif W^{\sigma}(s)\right] \nonumber \\
+%
+    \eta_{2,t+1} 
+    &= \int_t^{t+1}(\gamma(s) - \gamma_0) \dif s + \E\left[\int_t^{t+1} (\beta(s) + \psi(s) - (\beta_0 + \psi_0))
+       \sigma^2(s) \dif s \mvert \F_t\right] \\
+    &+ \int_t^{t+1} \sigma(s) \left(\phi(s) - \phi_0\right) \dif W^{\sigma}(s) \nonumber 
+\end{alignat}
+
+Clearly, all of the terms are mean zero unconditionally. 
+The non-martingale terms are deviations from their global means, and the martingale terms are martingales.
+To get them to be conditionally zero, we need to work a little harder.
+
+Assume that the prices of volatility and market risk and the dependence of volatility on its past are fixed over
+time.
+That implies that approximate log-Laplace transform studied in \cref{sec:dynamics} is fixed.
+Consequently, the $\gamma_0, \beta_0$, etc.\ functions are valid means for each day, e.g.\@ $\E\left[\int_t^{t+1}
+\gamma(t) \mvert \F_t \right] = \gamma_0$. 
+Note, the length of the day does not entire in here because it equals $1$.
 
 \begin{equation}
-    \label{eqn:price_error_term}
-    \begin{alignedat}{1}
-        \eta_{t+1} &= [\gamma(\tau)  - \gamma(0)] + [\beta(\tau)  - \beta(0)] \E\left[\int_t^{t+1} \sigma^2(\tau)
-            \dif \tau \mvert \F_t\right] + \int_{t}^{t+1} [\psi(\tau) - \psi_0] \sigma^2(\tau) \dif \tau  \\
-        &\qquad + \int_t^{t+1} \left[\frac{(\phi^{\star})^2 - \phi_0^2}{2}\right] \sigma(\tau) \dif W^{p}(\tau)
-          + \int_t^{t+1} [\phi(\tau) - \phi_0] \sigma(\tau) \dif W^{\sigma}(\tau) \\
-    \end{alignedat}
+    \label{eqn:cond_zero_err_terms}
+    \E\left[\eta_{i,t+1} \mvert \F_{t}\right] = 0
 \end{equation}
 
-All of they terms in  \cref{eqn:price_error_term} are clearly unconditionally mean zero over time except for the
-second to the last one.
-We are just considering deviations from the means.
-Since $\phi(\tau)$ is a correlation and hence contained within $[-1,1]$ and contained within the $\F_{\tau}$, it
-is independent of $\dif W^{p}(\tau)$.
-Consequently, the penultimate term is also unconditionally mean zero. 
-
-As far as showing conditional mean-independence, consider the following.
-First, we are using discrete-time data to identify the parameters in question, not sample-path data.
-Consequently, we only need conditional mean-independence between the discrete-time innovation $\eta_{t+1}$ not the
-process as a whole.
-
-To see why this important, assume that the integrated parameters do not change, e.g.\@ $\int_{t}^{t+1} \phi(\tau)
-\dif \tau = \phi_0$ for all $t$.
-In that case the conditions would be automatically satisfied except for the third part of
-\cref{eqn:price_error_term} which would still have a Jensen's inequality term.
-
-
-
+The only question then is if the $\eta_{i,t+1}$ are correlated with the regressors. 
+If we were to use $\sigma^2_{t+1}$ directly as a regressors, they would be.
+Consequently, we will solve this using the standard method --- instruments.
+We have a collection of $Z_{i,t}$ that are $\F_t$ measurable, but correlated with $\sigma^2_{t+1}$.
+Since $Z_{i,t+1} \in \F_t$, \cref{eqn:cond_zero_err_terms} implies they satisfy the necessary orthogonality
+condition. 
+Any good predictor of $\sigma^2_{t+1}$ will satisfy this criterion.
+In the empirical example, we will use lags of $\sigma^2_{t+1}$.
 
 
 \section{GMM}\label{sec:GMM}
@@ -1083,146 +1081,77 @@ realized volatility.
     We work directly with the martingale part of the price, $\sigma(t) \dif W(t)$, the drift part can just be
     added back to the price when we are finished because it is predictable.
     
-    To model the additional information in a tractable way, we consider the following.
-    Consider a dense discrete grid of points over $\R$ --- the magnitudes of the prices.
+    To model the additional information in a tractable way, consider a dense discrete grid of points over $\R$ ---
+    the magnitudes of the prices.
     Define a set of times $\lbrace \tau_i\rbrace $ such that $\tau_i$ is the time at which the volatility crosses
-    the $i-th$ point, but not the $(i+1)-th$ one. 
+    the $i$\textsuperscript{th} point, but not the $(i+1)$\textsuperscript{th} one. 
     Note, since equality at a discrete dense set of points is sufficient to imply equality over any open set,
-    equality over $\lbrace \tau_i \rbrace$ is sufficient for equality in probability.
+    equality over $\lbrace \tau_i \rbrace$ is sufficient for equality in probability since the opens sets generate
+    the Borel measure.
     
     Now, each $\tau_i$ is an honest time with respect to the $\F_{t=\tau_i-}$ filtration, but not a stopping time
     because it is not contained within the $\F_{\tau_i-}$ filtration.
-    Define $\F_{\sigma,t} \coloneqq \F_{t+} \cup \sigma\left(\lbrace \tau_i \rbrace\right)$. 
+    Define $\F_{\sigma,t} \coloneqq \F_{\sigma, t+} \cap \sigma\left(\lbrace \tau_i \rbrace\right)$. 
     Clearly, there is only one $\tau_i$ in that filtration, which we will refer to as $\tau$ in the sequel.
     
     We are augmenting the predictable filtration $\F_{t-}$ with an honest time --- $\tau$.
     Since, $p(t)$ is adapted to $\F_{t-}$, we can use formulas for augmenting the price with an honest time. 
     Also, since there are at most countably many jumps and the prices and volatilities are locally square
-    integrable, it is without loss of generality to consider the case with only one jump.
-    
-    Let $A^{\tau}(t)$ be the predictable projection of the process $1\lbrace \tau \leq t \rbrace$, define the
-    c\'{a}dl\'{a}g martingale $\mu^{\tau}(t) \coloneqq \E\left[A^{\tau}(\infty) \mvert \F_{t-}
-    \right]$.\footnote{Our notation is taken from \textcite{nikeghbali2007nonstopping}, but we simplified slightly
-    using the assumptions in our environment.}
-    Then by \textcite[eqn 2.3]{nikeghbali2007nonstopping}, we can write the martingale part of the process stopped
-    at $\tau$  as follows, where $M(t)$ is a martingale.
-    Note, $\lbrack M(t), \sigma^2(t) \rbrack = 0$ because $\lim_{\Delta \to 0} \sigma^2(t + \Delta)$ is contained
-    within the $\F_{\sigma, t-}$ filtration.
-    
-    \begin{equation}
-        \label{eqn:filtration_changed_martingale}
-            \int_0^{t \wedge \tau} \sigma(s)  \dif W(s)  = M(t) + \int_0^{t \wedge \tau} \frac{1}{\Pr\left(\tau > s
-            \mvert \F_{s-}\right)} \dif \predQV*{\int_0^t \sigma(s) \dif W(s), \mu^{\tau}(t) } (s)  
-    \end{equation}
+    integrable, there is at most one jump in $\sigma^2(t)$ that is measurable with respect to $\F_{\sigma, t+}$.
     
     Since $\sigma^2(t)$ has no predictable jumps, $\tau$ avoid all stopping times of $\F_{t-}$.  
-    Hence, $\mu^{\tau}(t)$ is continuous \parencite[p. 459]{nikeghbali2005definition}, and so we can rewrite
-    \cref{eqn:filtration_changed_martingale} as follows because drifts do not affect quadratic variation.
+    Hence, the optional and predictable projections coincide, and we can choose the following quantities to be
+    continuous.
+    Let $A^{\tau}(t)$ be the predictable projection of the process $1\lbrace \tau \leq t \rbrace$, define the
+    c\'{a}dl\'{a}g martingale $\mu^{\tau}(t) \coloneqq \E\left[A^{\tau}(\infty) \mvert \F_{t-}
+    \right]$.
+    Then by \textcite[eqn 2.3]{nikeghbali2007nonstopping}, we can write the martingale part of the process stopped
+    at $\tau$  as follows, where $M(t)$ is a martingale.
+
     
     \begin{align}
-        &M(t \wedge \tau) + \int_0^{t \wedge \tau} \frac{1}{\Pr\left(\tau > s \mvert \F_{s-}\right)} \dif
+        \label{eqn:filtration_changed_martingale}
+        \int_0^{t \wedge \tau} \sigma(s)  \dif W(s)   
+         &= M(t) + \int_0^{t \wedge \tau} \frac{1}{\Pr\left(\tau > s
+            \mvert \F_{s-}\right)} \dif \predQV*{\int_0^s \sigma(u) \dif W(u), \mu^{\tau}(s) } 
+%
+            \intertext{Since drifts do not affect quadratic variation and $\mu^{\tau}(t)$ is continuous. }
+%
+        &= M(t \wedge \tau) + \int_0^{t \wedge \tau} \frac{1}{\Pr\left(\tau > s \mvert \F_{s-}\right)} \dif
           \predQV*{\int_0^t \sigma(s) \dif W(s), \sigma_{\mu} \dif W^{\mu}(s)} (s)  \\
     %
-        =\ &M(t \wedge \tau) + \int_0^{t \wedge \tau} \frac{\sigma(s) \sigma_{\mu}(s)}{\Pr\left(\tau > s \mvert
-        \F_{s-}\right)} \dif s
+        &= M(t \wedge \tau) + \int_0^{t \wedge \tau} \frac{\sigma(s) \sigma_{\mu}(s)}{\Pr\left(\tau > s \mvert
+           \F_{s-}\right)} \dif s
     \end{align}
     
-    
     We now let $\psi(t) \coloneqq \frac{\sigma_{\mu}(s) }{\Pr\left(\tau > s \mvert \F_{s-}\right)}$. 
+    Then we can write the drift as $\E\left[\dif p(t) \mvert \F_{t-}\right] = \psi(t) \sigma(s)$.
+
     In addition, $M(t)$ has some predictable quadratic variation that we assume is absolutely continuous.
     We will define $\phi(t)$ so that its diffusion part --- $M^D(t)$ -- has the appropriate relationship with the
     prices.
     Define $\phi(t) \coloneqq \frac{\dif \predQV*{M}(t)}{\sigma_{\sigma}(t)}$. 
     
     
-    $M(t)$ is still a martingale in $\F^p(t)$, which is the smallest filtration satisfying the standard conditions
-    that is generated by the prices augmented with $\F^{t-}$. 
+    $M(t)$ is still a martingale in $\mathcal{G}(t)$, which is the smallest filtration satisfying the standard
+    conditions that is generated by the prices augmented with $\F_{t-}$. 
     In addition, since $\predQV{M}(t)$ is predictable, and hence $\F_{t-}$ measurable, we can choose its
-    instantaneous variance to be equal in the two different filtrations. 
-    We also know that $M(t)$ is orthogonal with respect to $\sigma^(t)$. 
-    Consequently, $p(t) \perp \sigma^2(t)$ and $M(t)$ have the same predictable quadratic variation.
-    Hence, $p(t) = M(t) + W(t)$, where $W(t) \perp M(t)$.
-    $M(t)$ cannot have more because conditioning of Gaussian processes cannot increase the variance, and it cannot
-    have less because it is a martingale in the original filtration that forms part of the price.
-    Since the prices are continuous, only continuous processes are adapted to $\F^p(t)$.
-    Consequently, $M(t)$ is continuous in this filtration.
+    instantaneous variance to be same in the two different filtrations. 
+
+    Martingales in a larger filtration are still martingales in a smaller filtration.
+    Consequently, $M(t)$ is still a martingale in $\mathcal{G}(t)$.
+    However, since only predictable processes are measurable with respect to $\mathcal{G}(t)$.
+    Consequently, $M(t)$ is a predictable martingale, implying it is a continuous version.
     
-    Then since $M(t)$ is a martingale in $F_{\sigma,t}$ and predictable quadratic variation is predictable,
-    conditioning  on more information in this filtration does not change the predictable quadratic variation of
-    the diffusion part.
-    In addition, the predictable quadratic variation of a martingale with both a diffusion part and a jump part is
-    strictly greater than just a diffusion part.
-    Hence, we can let $M(t)$ is continuous up to a measure zero set with respect to $\F_{\sigma^2,t}$.
+    Hence $\predQV*{M}(t) <= \predQV*{p(t) \perp \sigma^2(t)}$ because conditioning in Gaussian environments does
+    not decrease the variance.
+    The reverse inequality holds because $p(t) \perp \sigma^2(t)$ is still a martingale in $\F_{\sigma,t}$.
+    Consequently, the two processes are equivalent.
+   
+    Since $p(t) \perp \sigma^2(t) = \int^t \phi(s) \dif W^{p}(s)$, the result follows.
+
 
 \end{proof}
-
-% \begin{proof}
-    
-%     We start by characterizing the process in continuous-time and then simplifying it by using a generalized
-%     It\^{o}'s lemma.
-
-%     \begin{align}
-%         \dif K(u, t) &= \lim_{\Delta \to 0} \log \E_{\PP}\left[\exp\left(-u \int_{t}^{t + \Delta} \dif
-%         p(s)\right) \mvert \F_{\sigma^2, t-}\right] \\ 
-%         \intertext{By It\^{o}'s Lemma for the expectation of a square-integrable semimartingale,
-%             \parencite{sangrey2018jumps}, we can rewrite this as follows.} 
-%         &= \lim_{\Delta \to 0} \log \E_{\PP} \left[\int_{t}^{t+\Delta} -u \dif p(s) - \frac{1}{2}
-%             \int_{t}^{t+\Delta} -u^2 \dif \langle p(s), p(s) \rangle \mvert \F_{\sigma^2, t-}
-%             \right] \\
-%         \intertext{Then by taking $\Delta \to 0$. \footnote{The observant reader may notice that we just derived
-%             a version of the stochastic logarithm in expectation.}}
-%         &= \E_{\PP} \left[ -u \dif p(t)  + \frac{u^2}{2} \sigma^2(t)  \dif t \mvert \F_{\sigma^2, t-}
-%            \right] 
-%     \end{align}
-    
-%     The next step is to replace the physical measure functions with their Taylor series expansions.
-%     We have assumed that they display sufficient smoothness for this to be valid.
-%     The future volatility --- $\sigma^2_{t}$ --- is a random variable with respect to $\F_{t-}$.
-%     We further define $\widetilde{\sigma}^2(t) \coloneqq \sigma^2_{t} - \sigma^2_{t-}$, i.e.\@ the martingale part
-%     of $\sigma^2_{t}$.
-%     Consequently, we have a series of random variables with respect to $\F_{t}$, one for each $u$.
-%     Its predictable compensator $\sigma^2_{t-}$ is measurable with respect to $\F_{t-}$.
-%     The price drift with respect to $\F_{\sigma^2, t}$ is in principle a function of both of these variables.
-
-
-%     \begin{equation}
-%         \dif K(u,t) = \E\left[ -u \mu(\widetilde{\sigma}^2(t), \sigma^2(t-)) \dif t - u \sigma \sqrt{1 -
-%         \phi^2(t)} \dif W(t) + \frac{u^2}{2} \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right] 
-%     \end{equation}
-
-%     By applying It\^{o}'s lemma to $\mu(\sigma^2(t))$, which applies because $\F_{\sigma^2, t}$ contains $\F_{t}$
-%     and we are working inside the $\F_{\sigma^2,t}$ measure,  and hence the absolute continuity requirements are
-%     met, there exist some predictable functions $\mu_1$ and $\psi$ so that the following holds. 
-%     In addition, $\mu_1$ and $\psi$ can be chosen to be  $\F_{\sigma^2, t-}$ measurable and hence $\F_{t-}$
-%     measurable. 
-%     This follows from It\^{o}'s lemma, since predictable quadratic variation is predictable, and $\psi(t)$ is an
-%     appropriately renormalized density of a predictable quadratic variation process.
-%     See \parencite[4248]{jeanblanc2015martingale}  for further discussion.
-%     In general, we can create such a $\psi$ by multiplying and dividing by $\sigma^2(t)$ which is valid because it
-%     is strictly positive.
-
-%     % \begin{alignat}{2}
-%     %     &\dif K(u,t) &&= \E\left[ -u \gamma(t) - u \beta(t) \sigma^2(t-) + \mu_1(t) \dif \widetilde{\sigma}^2(t)
-%     %       - u \psi(t) \sigma^2(t) - u \sigma \sqrt{1 - \phi^2(t)} \dif W(t) \right. \\
-%     %     & &&\quad \left. + \frac{u^2}{2} \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} ] \nonumber \\ 
-%     %       %
-%     %       \intertext{Then subbing in for $\dif \widetilde{\sigma}^2(t)$.}
-%     %       %
-%     %     & &&= \E\left[ -u \gamma(t) - u \beta(t) \sigma^2(t-) - u \mu_1(t) \sigma_{\sigma}(t)\dif W_{\sigma}(t) -
-%     %         u \frac{\mu_1(t) \gamma_{\sigma}(t)}{\sqrt{2}} \dif L_{\sigma}(t)   \right.  \\
-%     %     & &&\quad -\left. u \psi(t) \sigma^2(t-) - u \sigma \sqrt{1 - \phi^2(t)} \dif W(t) + \frac{u^2}{2}
-%     %       \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right] \nonumber \\
-%     %       %
-%     %       \intertext{For the instantaneous volatility of $p(t)$ to equal $\sigma^2(t)$, $\mu_1(t)
-%     %       \sigma^2_{\sigma}(t)$ must equal $\phi(t) \sigma(t)$}
-%     %       %
-%     %     & &&= \E\left[ -u \gamma(t) - u \beta(t) \sigma^2(t-) - u \mu_1(t) \sigma_{\sigma}(t)\dif W_{\sigma}(t) -
-%     %         u \frac{\mu_1(t) \gamma_{\sigma}(t)}{\sqrt{2}} \dif L_{\sigma}(t)   \right.  \\
-%     %     & &&\quad -\left. u \psi(t) \sigma^2(t-) - u \sigma \sqrt{1 - \phi^2(t)} \dif W(t) +  \frac{u^2}{2}
-%     %       \sigma^2(t) \dif t \mvert \F_{\sigma^2, t-} \right] \nonumber 
-%     % \end{alignat}
-    
-% \end{proof}
 
 \section{Inference Assumptions}
 
