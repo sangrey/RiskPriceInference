@@ -206,15 +206,6 @@ to the volatility and that returns are serially independent given the volatility
 In other words, the volatility drives all of the dynamics of the process.
 Note, we do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, which they are in the data. 
 
-We assume that the distribution of $\sigma^2_{t+1}$ depends on some instruments $\E\left[\sigma^2_{t+1}
-\mvert Z_{1,t}, Z_{2,t} \ldots Z_{\# Z, t} \right]$. 
-We further assume that these instruments enter through a linear index $\zeta (Z_{1,t} \ldots Z_{\#, t})$ .
-This is not much of an assumption because we only require that they are valid instruments and the instruments can
-be functions of each other.
-Effectively, we are projection the information about $\sigma^2_{t+1}$ onto the space spanned by  the instruments.
-To maintain identification, we require that $\norm{\zeta}_{L_1} = 1$.
-    
-
 We construct the following conditional Laplace transforms as follows.
 This is well-defined because we can define the true Laplace transform is the expectation of a specific function,
 and then integrate out all of the unknown variables using their marginal distributions.
@@ -225,10 +216,10 @@ can represent out model under the physical  as follows for some functions $a_{\P
 \begin{restatable}[The Limited Information Model under the Physical Measure]{defn}{physicalMeasureModel}
     \label{defn:physical_model}
     \begin{align}
-        \E_{\PP} \left[\exp(-u \sigma^2_{t+1}) \mvert z_t \right] &= \exp\left( - a_{\PP}(u) z_t -
+        \E_{\PP} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t \right] &= \exp\left( - a_{\PP}(u) \sigma^2_t -
         b_{\PP}(u) \right) \\
-        \E\left[\exp(-u r_{t+1}) \mvert z_t,  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\PP}(u)
-        \sigma^2_{t+1} - \beta_{\PP}(u)z_t - \gamma_{\PP}(u) \right) 
+        \E\left[\exp(-u r_{t+1}) \mvert \sigma^2_t,  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\PP}(u)
+        \sigma^2_{t+1} - \beta_{\PP}(u)\sigma^2_t - \gamma_{\PP}(u) \right) 
     \end{align}
 \end{restatable}
 
@@ -256,8 +247,8 @@ We start by computing $\E\left[\sigma^2_{t+1} \mvert \F_t\right]$ and $\Var\left
 
 
 \begin{align}
-    \E\left[\sigma^2_{t+1} \mvert z_t \right]  &= a_{\PP}'(0) z_t  + b_{\PP}'(0) \\
-    \Var\left[\sigma^2_{t+1} \mvert z_t \right]  &= -a_{\PP}''(0) z_t  - b_{\PP}''(0) 
+    \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= a_{\PP}'(0) \sigma^2_t  + b_{\PP}'(0) \\
+    \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= -a_{\PP}''(0) \sigma^2_t  - b_{\PP}''(0) 
 \end{align}
 
 To simplify the exposition, we will reparameterize these equations. 
@@ -275,21 +266,22 @@ Essentially, we will give these derivatives names.
 To interpret these factors, can derive a series of moments. 
 $\rho$ is a persistence parameter.
 $c$ is a scaling parameter.
-We will also assume that the unconditional mean of $z_t$ agrees with that of $\sigma^2_{t+1}$, and so we can use
+We will also assume that the unconditional mean of $\sigma^2_t$ agrees with that of $\sigma^2_{t+1}$, and so we can use
 the law of iterated expectation and the law of total variance to determine the moments.
 This will be true in our case because we are using lagged volatility as instruments, and $\norm{\zeta}_{L_1} = 1$.
 
 
 \begin{align}
-    \E\left[\sigma^2_{t+1} \mvert z_t \right]  &= \rho z_t  + c \delta\\
+    \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= \rho \sigma^2_t  + c \delta\\
+%
     \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
-    \Var\left[\sigma^2_{t+1} \mvert z_t \right]  &=  2 c z_t  + c^2 \omega \\
-    \Var\left[\sigma^2_{t+1} \right]  &=  c^2 \left(\frac{2 \rho \delta}{1 - \rho}  +
-\omega \right) + \rho^2 \gamma' \Cov (z_t) \gamma
+%
+    \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
+%
+    \Var\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1- \rho^2} \left(\frac{2 \rho \delta}{1 - \rho}  + \omega
+        \right) 
 \end{align}
 
-Once we estimate $\Cov (z_t)$ and $\gamma$ from the first stage equation, we have four independent equations in
-four unknowns.
 Clearly, we can identify all four of these parameters from the volatility data as long as the parameters are in
 the interior of their domains.
 
@@ -298,17 +290,17 @@ the interior of their domains.
 We then turn to computing the moments of the return distribution. 
 
 \begin{align}
-    \E\left[r_{t+1} \mvert z_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
-    z_t - \gamma_{\PP}'(0) \\
-    \Var\left[r_{t+1}^2 \mvert z_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
-    \beta_{\PP}''(0) z_t - \gamma_{\PP}''(0)
+    \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
+    \sigma^2_t - \gamma_{\PP}'(0) \\
+    \Var\left[r_{t+1}^2 \mvert \sigma^2_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
+    \beta_{\PP}''(0) \sigma^2_t - \gamma_{\PP}''(0)
 \end{align}
 
 We can then use the law of total variance to compute $\Var\left[r_{t+1} \mvert \F_t\right]$.
 
 \begin{equation}
-    \Var\left[r_{t+1} \mvert z_t\right]  = -\left( \alpha_{\PP}''(0) \E \left[\sigma^2_{t+1} \mvert z_t \right]
-    + \beta_{\PP}''(0) z_t + \gamma_{\PP}''(0)\right) + {\alpha_{\PP}'(0)}^2 \Var\left[\sigma^2_{t+1}
+    \Var\left[r_{t+1} \mvert \sigma^2_t\right]  = -\left( \alpha_{\PP}''(0) \E \left[\sigma^2_{t+1} \mvert \sigma^2_t \right]
+    + \beta_{\PP}''(0) \sigma^2_t + \gamma_{\PP}''(0)\right) + {\alpha_{\PP}'(0)}^2 \Var\left[\sigma^2_{t+1}
     \mvert z_{t} \right]
 \end{equation}
 
@@ -747,16 +739,16 @@ equation for excess returns.
 
 We now characterize, the information in this set of moment conditions regarding the risk prices.
 We start by substituting in the SDF formula from above, and we also replace all of the dependence on $\F_t$ with
-$z_t$.
+$\sigma^2_t$.
 
 \begin{gather}
-    \E \left[ \exps*{ - \pi \sigma^2_{t+1} - (\theta - 1) r_{t+1} } \mvert z_t \right]
-        = \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi) z_t}
+    \E \left[ \exps*{ - \pi \sigma^2_{t+1} - (\theta - 1) r_{t+1} } \mvert \sigma^2_t \right]
+        = \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi) \sigma^2_t}
     \intertext{Similar to above, we used the law of iterated expectations to substitute in the conditional Laplace
         transforms of $r_{t+1}$ and $\sigma^2_{t+1}$.}
-    \E\left[\exps*{- a_{\PP}\left(\pi + \alpha_{\PP}(\theta -1)\right) z_t - b_{\PP}(\pi) -
-        \beta_{\PP}(\theta-1) z_t - \gamma_{\PP}(\theta-1)} \mvert z_t \right] = \exps*{- m_0(\theta, \pi)
-        - m_1(\theta, \pi) z_t} 
+    \E\left[\exps*{- a_{\PP}\left(\pi + \alpha_{\PP}(\theta -1)\right) \sigma^2_t - b_{\PP}(\pi) -
+        \beta_{\PP}(\theta-1) \sigma^2_t - \gamma_{\PP}(\theta-1)} \mvert \sigma^2_t \right] = \exps*{- m_0(\theta, \pi)
+        - m_1(\theta, \pi) \sigma^2_t} 
 \end{gather}
 
 
@@ -871,38 +863,53 @@ We are not making any causal claims here, just econometric ones.
 
 \section{GMM}\label{sec:GMM}
 
-We derive a set of moment conditions from the characteristic function above by evaluating it at a grid of points
-in $[0,1] \times i [0,1]$. 
-That is we can define a function $g_t(x, \eta)$
+To estimate the model we use the various moment conditions that we have derived.
+The one that we have yet to derive is the ones implied by the continuous-time model that allow us to estimate
+$\phi$ and $\psi$.
+Deriving them is straightforward because we constructed what the discrete-time equations, and they are linear.
+The last two equations are not moment conditions per-se. 
+Rather they are best understood as 
+
 
 \begin{defn}{Moment Conditions}
-    \begin{equation}
-        g_t(x, \eta) \coloneqq Z_t \otimes \begin{bmatrix} \exp(- x \sigma^2_{t+1}) - \exp\left( - a(x) \sigma_t^2
-        - b(x) \right) \\ \exp\left(- x r_{t+1}\right) - \exp\left(- \alpha(x) \sigma^2_{t+1} - \beta(x)
-        \sigma^2_t - \gamma(x)\right) \end{bmatrix}
-    \end{equation}
+\begin{align}
+    \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= \rho \sigma^2_t  + c \delta\\
+%
+    \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
+%
+    \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
+%
+    \Var\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2}  \left(\frac{2 \rho \delta}{1 - \rho}  + \omega
+        \right)  \\
+%
+    \E\left[r_{t+1} \mvert \sigma^2_t\right] &= \gamma + \beta \sigma^2_t + \sigma_{t+1} \left(\phi e_{1,t}  +
+        \sqrt{1 - \phi^2} e_{2,t}\right) + e_{3,t} \\
+%
+    \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma + (\beta + \psi) \sigma^2_{t+1}  + \sigma_{t+1}
+    \sqrt{1 - \phi^2}  e_{2,t} + e_{2,t} \\
+%
+        % \mathrm{Corr}(e_{1,t}, e_{2,t}) &= \phi \\
+%
+    \gamma (\theta - 1) + c \delta \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right) &= \gamma
+    \theta + c \delta \left(\pi + \psi \theta + \phi \frac{\theta^2}{2} \right) \\ 
+%
+    \beta (\theta - 1) + \rho \left(\pi + \psi (\theta-1)  + \phi \frac{(\theta -1)^2}{2}\right)
+    &= \beta \theta + \rho \left(\pi + \psi \theta  + \phi \frac{\theta^2}{2}\right) 
+\end{align}
 \end{defn}
 
-Where the instruments are given by \cref{defn:instruments} for complex unit $i$. 
 
+As for instruments, we use the lags of volatility. 
 \begin{defn}{Instruments}
     \label{defn:instruments}
     \begin{equation}
-        Z_t = \left[1, \exp\left(- i \sigma_{t-1}^2\right), \exp\left(-i \sigma^2_{t-2}\right)\right] 
+        Z_t \coloneqq 1, \sigma^2_{t}, \sigma^2_{t-1}, \sigma^2_{t-2}, \ldots
     \end{equation}
 \end{defn}
 
-The implied unconditional moment restrictions are the following.  
-
-\begin{equation}
-    \E \begin{bmatrix}  \mathrm{Re} (g_t(x, \eta)) \\ \mathrm{Im} (g_t(x, \eta)) \end{bmatrix} = 0
-\end{equation}
-
-
-The optimal weighting matrix has its standard form as the precision matrix of the moments as long as we choose a
-finite gird for $x$. 
-If we use the entire continuum, handling the weights becomes more delicate. 
-So we use only finitely many moments for now.
+Having constructed the moments and the instruments, we can use GMM to estimate the parameters.
+We do need to run a constricted optimization though, because only certain values of the parameters are valid. 
+In particular, the parameters must be contained in the followed identified set.
 
 
 \begin{restatable}[Identified Set]{lemma}{identifiedSet}
