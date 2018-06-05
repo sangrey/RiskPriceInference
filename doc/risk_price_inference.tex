@@ -204,46 +204,120 @@ The leading parameterization is the autoregressive gamma process (ARG) of \textc
 In particular, we assume that the variables are first-order Markov and there is no Granger causality from return
 to the volatility and that returns are serially independent given the volatility path.
 In other words, the volatility drives all of the dynamics of the process.
-Note, we do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated.
-They are in the data.
+Note, we do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, which they are in the data. 
 
+We assume that the distribution of $\sigma^2_{t+1}$ depends on some instruments $\E\left[\sigma^2_{t+1}
+\mvert Z_{1,t}, Z_{2,t} \ldots Z_{\# Z, t} \right]$. 
+We further assume that these instruments enter through a linear index $\zeta (Z_{1,t} \ldots Z_{\#, t})$ .
+This is not much of an assumption because we only require that they are valid instruments and the instruments can
+be functions of each other.
+Effectively, we are projection the information about $\sigma^2_{t+1}$ onto the space spanned by  the instruments.
+To maintain identification, we require that $\norm{\zeta}_{L_1} = 1$.
+    
+
+We construct the following conditional Laplace transforms as follows.
+This is well-defined because we can define the true Laplace transform is the expectation of a specific function,
+and then integrate out all of the unknown variables using their marginal distributions.
 Since the Laplace transform is an expectation of a specific function, by assuming the data are jointly CAR(1), we
 can represent out model under the physical  as follows for some functions $a_{\PP}, b_{\PP}, \alpha_{\PP},
     \beta_{\PP}$, and $\gamma_{\PP}$ for all $u$ in its domain.
 
-\begin{restatable}[The Model under the Physical Measure]{defn}{physicalMeasureModel}
+\begin{restatable}[The Limited Information Model under the Physical Measure]{defn}{physicalMeasureModel}
     \label{defn:physical_model}
     \begin{align}
-        \E_{\PP} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t\right] &= \exp\left( - a_{\PP}(u)
-            \sigma^2_{t} - b_{\PP}(u) \right) \\
-        \E\left[\exp(-u r_{t+1}) \mvert \sigma^2_{t},  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\PP}(u)
-        \sigma^2_{t+1} - \beta_{\PP}(u)\sigma^2_{t} - \gamma_{\PP}(u) \right) 
+        \E_{\PP} \left[\exp(-u \sigma^2_{t+1}) \mvert z_t \right] &= \exp\left( - a_{\PP}(u) z_t -
+        b_{\PP}(u) \right) \\
+        \E\left[\exp(-u r_{t+1}) \mvert z_t,  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\PP}(u)
+        \sigma^2_{t+1} - \beta_{\PP}(u)z_t - \gamma_{\PP}(u) \right) 
     \end{align}
 \end{restatable}
 
-The model in \cref{defn:physical_model} is parameterized using the functions mentioned and at this level of
-generality fully nonparametric. 
-To gain tractability, we will specify these function below obtaining a parametric model.
-In other words, we replace the infinite degrees of freedom in \cref{defn:physical_model} with a parameter vector
-with finite degrees of freedom.
+The model in \cref{defn:physical_model} is parameterized using the functions mentioned, and at this level of
+generality is fully nonparametric. 
+We now derive the moment conditions that govern the physical measure. 
+We follow \textcite{khrapov2016affine} closely.
+Recall the model under the physical measure. 
 
-First, we assume that the volatility follows an autoregressive gamma process---ARG(1), and so its physical measure
-dynamics are governed by following equations.
+% \subsection{Derivation of the Moment Conditions}\label{sec:deriving_mom_conds}
 
-\begin{gather}
-    a_{\PP}(x) = \frac{\rho x}{1 + c x}  \\
-    b_{\PP}(x) = \delta \log \left(1 + c x\right) \\
-    \rho \in [0, 1), c > 0, \delta > 0 
-\end{gather}
-
-In order to interpret these parameters, it is useful to note the formula for the conditional mean
-\parencite[8]{khrapov2016affine}.
-As we can see, $\rho$ is a persistence parameter, and $\delta$ is a drift.
-The parameter $c$ scales the volatility.
+Note, by the physical-measure functions satisfy the following constraint by definition.
 
 \begin{equation}
-    \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right] = c \delta + \rho \sigma^2_t
+    a_{\PP}(0) = b_{\PP}(0) = \alpha_{\PP}(0) = \beta_{\PP}(0) = \gamma_{\PP}(0) 
 \end{equation}
+
+We can differentiate the Laplace transform at zero to compute the moments.
+The logarithm of the Laplace transform above is a conditional cumulant generating function.
+Since, we are only using the mean and variance, we can differentiate this function  and evaluate the
+resultant function at zero get formulas for these moments.
+
+We start by computing $\E\left[\sigma^2_{t+1} \mvert \F_t\right]$ and $\Var\left[\sigma^2_{t+1} \mvert
+\F_t\right]$
+
+
+\begin{align}
+    \E\left[\sigma^2_{t+1} \mvert z_t \right]  &= a_{\PP}'(0) z_t  + b_{\PP}'(0) \\
+    \Var\left[\sigma^2_{t+1} \mvert z_t \right]  &= -a_{\PP}''(0) z_t  - b_{\PP}''(0) 
+\end{align}
+
+To simplify the exposition, we will reparameterize these equations. 
+Essentially, we will give these derivatives names.
+
+\begin{defn}{Volatility Dynamics Parameters}
+    \begin{align}
+        \rho &\coloneqq a_{\PP}'(0) \in (0,1) \\
+        c &\coloneqq - \frac{a_{\PP}''(0)}{2 a_{\PP}'(0)} > 0 \\
+        \delta &\coloneqq -2 \frac{a_{\PP}'(0) b_{\PP}'(0)}{a_{\PP}''(0)} > 0 \\
+        \omega &\coloneqq -4 \frac{b_{\PP}''(0) [a_{\PP}'(0)]^2}{[a_{\PP}''(0)]^2}
+    \end{align}
+\end{defn}
+
+To interpret these factors, can derive the conditional conditional moments. 
+$\rho$ is a persistence parameter.
+$c$ is a scaling parameter.
+We will also assume that the unconditional mean of $z_t$ agrees with that of $\sigma^2_{t+1}$. 
+This will be true in our case because we are using lagged volatility as instruments, and $\norm{\zeta}_{L_1} = 1$.
+
+
+\begin{align}
+    \E\left[\sigma^2_{t+1} \mvert z_t \right]  &= \rho z_t  + c \delta\\
+    \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
+    \Var\left[\sigma^2_{t+1} \mvert z_t \right]  &=  2 c z_t  + c^2 \omega \\
+    \Var\left[\sigma^2_{t+1} \right]  &=  c^2 \left(\frac{2 \rho \delta}{1 - \rho}  +
+        \omega \right) 
+\end{align}
+
+Clearly, we can identify all four of these parameters from the volatility data as long as the parameters are in
+the interior of their domains.
+
+We then turn to computing the moments of the return distribution. 
+
+\begin{align}
+    \E\left[r_{t+1} \mvert \F_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
+    \sigma^2_{t} - \gamma_{\PP}'(0) \\
+    \Var\left[r_{t+1}^2 \mvert \F_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
+    \beta_{\PP}''(0) \sigma^2_{t} - \gamma_{\PP}''(0)
+\end{align}
+
+We can then use the law of total variance to compute $\Var\left[r_{t+1} \mvert \F_t\right]$.
+
+\begin{equation}
+    \Var\left[r_{t+1} \mvert \F_t\right]  = -\left( \alpha_{\PP}''(0) \E \left[\sigma^2_{t+1} \mvert \F_t \right]
+    + \beta_{\PP}''(0) \sigma^2_{t} + \gamma_{\PP}''(0)\right) + {\alpha_{\PP}'(0)}^2 \Var\left[\sigma^2_{t+1}
+    \mvert \F_{t} \right]
+\end{equation}
+
+% In order to interpret these parameters, it is useful to note the formula for the conditional mean
+% \parencite[8]{khrapov2016affine}.
+% We can solve for $\E\left[ \sigma^2_{t+1} \mvert z_t\right]$ by differentiating the logarithm
+% \cref{defn:physical_model} because it defines a conditional cumulant function.
+
+% \begin{align}
+%     \label{eqn:vol_mean}
+%     \E\left[\sigma^2_{t+1} \mvert z_t\right] &= \alpha_{\PP}'(0) z_t + \beta_{\PP}'(0) \\
+%     \label{eqn:vol_var}
+%     \Var\left[\sigma^2_{t+1} \mvert z_t\right] &= \alpha_{\PP}''(0) z_t 
+% \end{align}
 
 Before, we discuss how we parameterize the Laplace function for the return process, we will consider the $\QQ$
 measure.
@@ -281,83 +355,10 @@ It deterministically discounts the prices but plays no further role in the analy
 \end{defn}
 
 
-\subsection{Derivation of the Moment Conditions}\label{sec:deriving_mom_conds}
-
-In this section, we derive the moment conditions that we use to identify the model.
-We follow \textcite{khrapov2016affine} closely.
-Recall the model under the physical measure. 
-
-
-\physicalMeasureModel*
-
-By definition, we have the following. 
-
-\begin{equation}
-    a_{\PP}(0) = b_{\PP}(0) = \alpha_{\PP}(0) = \beta_{\PP}(0) = \gamma_{\PP}(0) 
-\end{equation}
-
-We can differentiate the Laplace transform at zero to compute the moments.
-The negative signs on the mean, but the not the 2nd moment come from the negative signs inside the exponential on
-the right-hand side canceling for the negative signs in the Taylor series expansion of the left-hand side for the
-mean but not the 2nd moment. 
-
-We start by deriving the first two conditional moments of $r_{t+1}$ by viewing the log of the Laplace transform as
-a cumulant generating function.
-$K\left(-t \right) \coloneqq \log \E\left[\exp(-t X) \right]$. 
-This is useful because the first two derivatives of $K(-t)$ evaluated at zero are the centered moments.
-
-\begin{align}
-    \E\left[r_{t+1} \mvert \F_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
-    \sigma^2_{t} - \gamma_{\PP}'(0) \\
-    \Var\left[r_{t+1}^2 \mvert \F_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
-    \beta_{\PP}''(0) \sigma^2_{t} - \gamma_{\PP}''(0)
-\end{align}
-
-We can then use the law of total variance to compute $\Var\left[r_{t+1} \mvert \F_t\right]$.
-
-\begin{equation}
-    \Var\left[r_{t+1} \mvert \F_t\right]  = -\left( \alpha_{\PP}''(0) \E \left[\sigma^2_{t+1} \mvert \F_t \right]
-    + \beta_{\PP}''(0) \sigma^2_{t} + \gamma_{\PP}''(0)\right) + {\alpha_{\PP}'(0)}^2 \Var\left[\sigma^2_{t+1}
-    \mvert \F_{t} \right]
-\end{equation}
-
-We are computing $\E\left[\sigma^2_{t+1} \mvert \F_t\right]$ and $\Var\left[\sigma^2_{t+1} \mvert
-\F_t\right]$
-
-
-\begin{align}
-    \E\left[\sigma^2_{t+1} \mvert \F_t \right]  &= a_{\PP}'(0) \sigma^2_{t}  + b_{\PP}'(0) \\
-    \Var\left[\sigma^2_{t+1} \mvert \F_t \right]  &= -a_{\PP}''(0) \sigma^2_{t}  - b_{\PP}''(0) 
-\end{align}
-
 Before we show how the risk prices $\pi, \theta$ show up in the equations above, we will introduce some parameters
 that govern the dynamics of the volatility process.
 
 
-\begin{defn}{Volatility Dynamics Parameters}
-    \begin{align}
-        \rho &\coloneqq a_{\PP}'(0) \in (0,1) \\
-        c &\coloneqq - \frac{a_{\PP}''(0)}{2 a_{\PP}'(0)} > 0 \\
-        \delta &\coloneqq -2 \frac{a_{\PP}'(0) b_{\PP}'(0)}{a_{\PP}''(0)} > 0 \\
-        \omega &\coloneqq -4 \frac{b_{\PP}''(0) [a_{\PP}'(0)]^2}{[a_{\PP}''(0)]^2}
-    \end{align}
-\end{defn}
-
-To interpret these factors, can derive the conditional conditional moments. 
-$\rho$ is a persistence parameter.
-$c$ is a scaling parameter.
-
-
-\begin{align}
-    \E\left[\sigma^2_{t+1} \mvert \F_t \right]  &= \rho \sigma^2_{t}  + c \delta\\
-    \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
-    \Var\left[\sigma^2_{t+1} \mvert \F_t \right]  &=  2 c \rho \sigma^2_{t}  + c^2 \omega \\
-    \Var\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2} \left(\frac{2 \rho \delta}{1 - \rho}  +
-        \omega \right) 
-\end{align}
-
-Clearly, we can identify all four of these parameters from the volatility data as long as the parameters are in
-the interior of their domains.
 
 \subsubsection{\texorpdfstring{Parameterizing the mean and variance of $r_{t+1}$}{Parameterizing the return's
 mean and variance}}\label{sec:deriving_sdf_functions}
