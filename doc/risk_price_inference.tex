@@ -600,7 +600,30 @@ Consequently, we can write the price process, with respect to $\F_t$ as follows.
 If all of the functions are  constant then the correlation between the prices and the jumps diffusion part is
 $\phi$, i.e.\@  $\mathrm{corr}\,(p(t), {\sigma^2(t)}^D) = \phi$.
 
-\subsubsection{Going from Continuous-Time to Discrete-Time}
+\subsubsection{Going from Continuous-Time to Discrete-Time}\label{sec:discrete_time_to_cont_time}
+
+The main issue in case 2 is that we also do not know the physical measure equations.
+In principle, we could estimate them from equity price data.
+However, estimating conditional densities is quite difficult and asset pricing data is rather badly behaved.
+Consequently, we do not want to either make parametric assumptions on these physical measure functions nor try to
+non-parametrically estimate them.
+However, we can estimate some of their low-order moments, such as the conditional mean and variance.
+
+The specification for risks that we are using relies exclusively on the mean and volatility (i.e.\@ the first two
+moments.)
+If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional,
+conrad2012exante, chang2013market},  and we used higher sample moments as well to determine the price of our
+risk-factors our resulting estimates would be biased, likely substantially so. 
+
+The question facing us is how to we prevent our model's potential misspecification regarding the risk prices of
+higher-order moments from affecting our estimates of the volatility prices.
+To answer this question, we turn to what our model specifies the continuous-time process, that our model is a
+discretization of.
+
+Imposing consistency with a continuous-time model is reasonable in our context because even though our model is
+specified in discrete-time it is for an asset that is is continuously tradable.
+A good discrete-time model for a continuously-tradable asset would is consistent with a continuous-time
+generalization that rules our no-arbitrage.
 
 The data that we have are daily, not in continuous-time. 
 Consequently, we need to consider what the price process in  \cref{eqn:eqn:price_process_decomp} implies about the
@@ -615,16 +638,16 @@ First, we define $r_{t+1}$ with respect to the $\F_{t}$ filtration.
 \begin{equation}
     \label{eqn:discrete_time_rtn}
     r_{t+1} = \int_t^{t+1} \gamma(s) \dif s + \int_{t}^{t+1} \beta(s) \sigma^2(s) \dif s +
-    \int_t^{t+1} \sigma(s) \left[\sqrt{1 - \phi(\tau)^2} \dif W^{p}(s) + \phi(\tau) \dif W^{\sigma}(s)\right]
+    \int_t^{t+1} \sigma(s) \left[\sqrt{1 - \phi(s)^2} \dif W^{p}(s) + \phi(s) \dif W^{\sigma}(s)\right]
 \end{equation}
 
 If we knew the entire path of future volatility, we could use the following equation, where we characterize
-$r_{t+1}$ with respect to the $\sigma\left(\F_{t} \F_{\sigma^2_{t+1}}\right)$ filtration.
+$r_{t+1}$ with respect to the $\sigma\left(\F_{t}, \F_{\sigma^2_{t+1}}\right)$ filtration.
 
 \begin{equation}
     \label{eqn:discrete_time_cond_rtn}
     r_{t+1} = \int_t^{t+1} \gamma(s) \dif s + \int_{t}^{t+1} [\beta(s) + \psi(s)] \sigma^2(s) \dif s +
-    \int_t^{t+1} \sigma(s) \phi(\tau) \dif W^{\sigma}(s)
+    \int_t^{t+1} \sigma(s) \sqrt{1-\phi(s)^2} \dif W^{p}(s)
 \end{equation}
 
 In both \cref{eqn:discrete_time_rtn} and \cref{eqn:discrete_time_cond_rtn}, we have the random functions
@@ -658,8 +681,8 @@ We can take mean value expansions for each of these functions.
        \left[\sqrt{1 - \phi_0^2} \dif W^{p}(s) + \phi_0 \dif W^{\sigma}(s)\right] + \eta_{1,t+1} \\
     \left. r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right. 
     %
-    &= \gamma_0 + (\beta_0 + \psi_0) \E\left[\int_t^{t+1} \sigma^2(s) \dif s \mvert \F_t\right] + \int_t^{t+1}
-       \sigma(s) \phi_0 \dif W^{\sigma}(s) + \eta_{2, t+1} 
+    &= \gamma_0 + (\beta_0 + \psi_0) \int_t^{t+1} \sigma^2(s) \dif s + \int_t^{t+1} \sigma(s) \sqrt{1-\phi_0^2}
+       \dif W^{p}(s) + \eta_{2, t+1} 
 \end{alignat}
 
 To show identification of our results, we need to characterize the error terms in the expression above.
@@ -676,7 +699,7 @@ We can compute what the error terms are by adding and subtracting the relevant t
     \eta_{2,t+1} 
     &= \int_t^{t+1}(\gamma(s) - \gamma_0) \dif s + \E\left[\int_t^{t+1} (\beta(s) + \psi(s) - (\beta_0 + \psi_0))
        \sigma^2(s) \dif s \mvert \F_t\right] \\
-    &+ \int_t^{t+1} \sigma(s) \left(\phi(s) - \phi_0\right) \dif W^{\sigma}(s) \nonumber 
+    &+ \int_t^{t+1} \sigma(s) \left(\sqrt{1 - \phi(s)^2} - \sqrt{1 - \phi_0^2}\right) \dif W^{p}(s) \nonumber 
 \end{alignat}
 
 Clearly, all of the terms are mean zero unconditionally. 
@@ -775,90 +798,75 @@ We can characterize the identification restrictions in \cref{eqn:identification_
         identify both $\theta$ and $\pi$.
 \end{enumerate}
 
+Requiring \cref{eqn:identification_eqn_1} and \cref{eqn:identification_eqn_2} hold is equivalent to
+requiring that their Taylor series expansions equal.
+We need the entire physical measure functions to characterize the full information available in the physical
+measures about the risk-prices.
+However, if we want to allow for higher-order priced risks, we cannot use all of that information.
+\purple{TODO (Paul) Write this out.}
+In addition, in the Taylor series formulas the change in the first two moments is captured in the change of the
+first two moments of the change of measure.
+Consequently, we need to require that their quadratic expansions equal.\footnote{The equality of the quadratic
+    expansion of the logarithm of the density is precisely what the change of measure in the discrete-time
+Gaussian and continuous-time cases requires.}
 
-As discussed in \textcite[13]{khrapov2016affine}, in this 2nd case the existence of leverage allows us to
-separate the two risk prices.
-Consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$.
+
+In the first case, as discussed in \textcite[13]{khrapov2016affine}, in this 2nd case the existence of leverage
+allows us to separate the two risk prices.
+Clearly, both identification equations are satisfied if $\alpha_{\PP}(\theta) = \alpha_{\PP}(\theta -1)$.
+To see when this will happen consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$.
 
 \begin{align}
-    \alpha(\theta) - \alpha(\theta - 1) &= \alpha_{\PP}'(0) + \alpha_{\PP}''(0) \left(\theta - \frac{1}{2}\right)
-        + \text{higher-order terms}  \\
+    \alpha(\theta) - \alpha(\theta - 1) &= \alpha_{\PP}'(0)  + \alpha_{\PP}''(0) \left(\theta - \frac{1}{2}\right)
+    + \text{higher-order terms} \\
 %
     \intertext{Implicitly defining $\psi \coloneqq \alpha_{\PP}'(0)$ and $\phi \coloneqq \sqrt{1 -
         \alpha_{\PP}''(0)}$, we can rewrite this as follows.} 
-%
+ %
     &=  \psi + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) + \text{higher-order terms}  
+%
+    \intertext{Since we only want to use mean and variances for identification, we can drop the higher-order
+    terms.}
+%
+    \label{eqn:lack_of_id}
+    &=  \psi + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) 
 \end{align}
 
-If we are wiling to assume that the conditional distribution of $r_{t+1} \vert \sigma^2_{t+1}, z_t$ is Gaussian,
-the higher-order terms are identically zero.
-The question at hand is there a way of estimating $\psi, \phi, \theta, \pi$ that is not asymptotically biased by
-the existence of these higher-order terms.
-
-In the general case we have two issues.
-First, we 
-We will explain precisely how we do this in \cref{sec:pricing_the_variance}.
-
-
-
-
-\purple{Add a discussion about how the first two conditional moments identify the model in the Gaussian case $\iff$
-    $\psi \neq (1 - \phi^2) (\theta - 1/2).$}
+If the \cref{eqn:lack_of_id} equals zero, then we cannot identify $\pi$.
+As discussed in \textcite[13]{khrapov2016affine}, since $\psi$ is a adjustment to a drift, if $\phi=0$, (there is
+no leverage effect), the drift would change by $\theta - \frac{1}{2}$ through a Jensen type effect if the
+intra-day volatility is constant. 
+This decomposition would still go through in the general case if $\phi=0$ because then instantaneous changes in
+volatility would not be priced, and so the time-aggregation formulas and Jensen inequality terms would not be
+affected.
+(Predictable variation in the volatility enters into the price of market risk. The condition argument in
+\cref{sec:discrete_time_to_cont_time} was entirely concerned with unpredictable variation, which is irrelevant if
+$\phi = 0$.)
 
 
-\subsection{Pricing the Variance}\label{sec:pricing_the_variance}
+\purple{TODO: (Paul) justify why we are taking a linear expansion with respect to $\gamma$, $\beta$, and $b$.}
+
+In the second case, we take Taylor series expansions of \cref{eqn:identification_eqn_1} and
+\cref{eqn:identification_eqn_2}.  
+We require that the approximations we are using hold exactly. 
+Effectively, this is an identification assumption for $\theta, \pi$.
+They are the parameters that make the means and variances have the relationship in the model that they do in the
+data between the physical and risk-neutral measures.
+If we wanted to make the equations hold with respect to a higher-order approximation we would want to introduce
+prices of other types of risk such as skewness risk and kurtosis risk.
 
 
-The main issue in case 2 is that we also do not know the physical measure equations.
-In principle, we could estimate them from equity price data.
-However, estimating conditional densities is quite difficult and asset pricing data is rather badly behaved.
-Consequently, we do not want to either make parametric assumptions on these physical measure functions nor try to
-non-parametrically estimate them.
-However, we can estimate some of their low-order moments, such as the conditional mean and variance.
+\begin{align}
+    \gamma (\theta - 1) + c \delta \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right) &= \gamma
+    \theta + c \delta \left(\pi + \psi \theta + \phi \frac{\theta^2}{2} \right) \\ 
+%
+    \beta (\theta - 1) + \rho \left(\pi + \psi (\theta-1)  + \phi \frac{(\theta -1)^2}{2}\right)
+    &= \beta \theta + \rho \left(\pi + \psi \theta  + \phi \frac{\theta^2}{2}\right) 
+\end{align}
 
-
-The specification for risks that we are using relies exclusively on the mean and volatility (i.e.\@ the first two
-moments.)
-If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional,
-conrad2012exante, chang2013market},  and we used higher sample moments as well to determine the price of our
-risk-factors our resulting estimates would be biased, likely substantially so. 
-
-The question facing us is how to we prevent our model's potential misspecification regarding the risk prices of
-higher-order moments from affecting our estimates of the volatility prices.
-To answer this question, we turn to what our model specifies the continuous-time process, that our model is a
-discretization of.
-
-Imposing consistency with a continuous-time model is reasonable in our context because even though our model is
-specified in discrete-time it is for an asset that is is continuously tradable.
-A good discrete-time model for a continuously-tradable asset would is consistent with a continuous-time
-generalization that rules our no-arbitrage.
-
-When we get to the empirical exercise, we will use the integrated volatility as our measure of volatility.
- 
-\begin{defn}[Integrated Volatilty]
-    \begin{equation}
-        \sigma^2_{t+1} = \int_{t}^{t+1} \sigma^2(s) \dif s
-    \end{equation}
-\end{defn}
-
-Standard asset pricing theory in continuous-time implies that continuous-time volatility --- $\sigma^2(s)$ ---
-is the only priced factor \parencites{merton1973intertemporal, tsai2018pricing, sangrey2018jumps} in a static
-world.
-(This is a direct consequence of the form of It\^{o}'s Lemma for (potentially discontinuous) continuous-time
-process.)
-In general its price could vary over the course of the day.
-For example, its price could  itself be a function of the volatility: $\pi(s-) = \pi(\sigma^2(s-))$.
-If $\pi(t)$ is not a constant function intra-day, we would see that higher-order moments are priced.
-The object of interest here is the price of volatility, and so we want the 0th order Taylor series expansion of
-the $\pi(t)$.
-
-To make the discussion in the previous paragraph more concrete, we want the following equalities to hold. 
-
-\begin{equation}
-    \pi \sigma^2_{t+1} = \pi \int_{t}^{t+1} \sigma^2(s) \dif s =  \int_{t}^{t+1} \pi(s) \sigma^2(s) \dif s
-\end{equation}
-
-
+The two equations above implicitly define $\theta$, $\pi$, as functions of $\psi$ and $\phi$.
+Note, as is standard in this environment, we have an equilibrium relationship in terms of various parameters.
+We are not making any causal claims here, just econometric ones.
 
 
 \section{GMM}\label{sec:GMM}
