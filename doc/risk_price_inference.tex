@@ -272,10 +272,11 @@ Essentially, we will give these derivatives names.
     \end{align}
 \end{defn}
 
-To interpret these factors, can derive the conditional conditional moments. 
+To interpret these factors, can derive a series of moments. 
 $\rho$ is a persistence parameter.
 $c$ is a scaling parameter.
-We will also assume that the unconditional mean of $z_t$ agrees with that of $\sigma^2_{t+1}$. 
+We will also assume that the unconditional mean of $z_t$ agrees with that of $\sigma^2_{t+1}$, and so we can use
+the law of iterated expectation and the law of total variance to determine the moments.
 This will be true in our case because we are using lagged volatility as instruments, and $\norm{\zeta}_{L_1} = 1$.
 
 
@@ -284,50 +285,41 @@ This will be true in our case because we are using lagged volatility as instrume
     \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
     \Var\left[\sigma^2_{t+1} \mvert z_t \right]  &=  2 c z_t  + c^2 \omega \\
     \Var\left[\sigma^2_{t+1} \right]  &=  c^2 \left(\frac{2 \rho \delta}{1 - \rho}  +
-        \omega \right) 
+\omega \right) + \rho^2 \gamma' \Cov (z_t) \gamma
 \end{align}
 
+Once we estimate $\Cov (z_t)$ and $\gamma$ from the first stage equation, we have four independent equations in
+four unknowns.
 Clearly, we can identify all four of these parameters from the volatility data as long as the parameters are in
 the interior of their domains.
+
+\subsubsection{The moments of the return}
 
 We then turn to computing the moments of the return distribution. 
 
 \begin{align}
-    \E\left[r_{t+1} \mvert \F_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
-    \sigma^2_{t} - \gamma_{\PP}'(0) \\
-    \Var\left[r_{t+1}^2 \mvert \F_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
-    \beta_{\PP}''(0) \sigma^2_{t} - \gamma_{\PP}''(0)
+    \E\left[r_{t+1} \mvert z_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  + \beta_{\PP}'(0)
+    z_t - \gamma_{\PP}'(0) \\
+    \Var\left[r_{t+1}^2 \mvert z_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
+    \beta_{\PP}''(0) z_t - \gamma_{\PP}''(0)
 \end{align}
 
 We can then use the law of total variance to compute $\Var\left[r_{t+1} \mvert \F_t\right]$.
 
 \begin{equation}
-    \Var\left[r_{t+1} \mvert \F_t\right]  = -\left( \alpha_{\PP}''(0) \E \left[\sigma^2_{t+1} \mvert \F_t \right]
-    + \beta_{\PP}''(0) \sigma^2_{t} + \gamma_{\PP}''(0)\right) + {\alpha_{\PP}'(0)}^2 \Var\left[\sigma^2_{t+1}
-    \mvert \F_{t} \right]
+    \Var\left[r_{t+1} \mvert z_t\right]  = -\left( \alpha_{\PP}''(0) \E \left[\sigma^2_{t+1} \mvert z_t \right]
+    + \beta_{\PP}''(0) z_t + \gamma_{\PP}''(0)\right) + {\alpha_{\PP}'(0)}^2 \Var\left[\sigma^2_{t+1}
+    \mvert z_{t} \right]
 \end{equation}
 
-% In order to interpret these parameters, it is useful to note the formula for the conditional mean
-% \parencite[8]{khrapov2016affine}.
-% We can solve for $\E\left[ \sigma^2_{t+1} \mvert z_t\right]$ by differentiating the logarithm
-% \cref{defn:physical_model} because it defines a conditional cumulant function.
-
-% \begin{align}
-%     \label{eqn:vol_mean}
-%     \E\left[\sigma^2_{t+1} \mvert z_t\right] &= \alpha_{\PP}'(0) z_t + \beta_{\PP}'(0) \\
-%     \label{eqn:vol_var}
-%     \Var\left[\sigma^2_{t+1} \mvert z_t\right] &= \alpha_{\PP}''(0) z_t 
-% \end{align}
-
-Before, we discuss how we parameterize the Laplace function for the return process, we will consider the $\QQ$
-measure.
-We will assume that the risk-neutral measure is structure preserving.
+Before, we discuss how we parameterize the Laplace function for the return process, we will consider the
+risk-neutral measure.
+We assume that the risk-neutral measure is structure preserving.
 In other words, the Laplace functions maintain the same structure for some functions some functions $a_{\QQ},
 b_{\QQ}, \alpha_{\QQ}, \beta_{\QQ}$, and $\gamma_{\QQ}$.
 This is a relatively weak assumption because the absolute continuity of the two measures places strong
 restrictions on deviations from this case.
 For example, in the continuous-time limit this structure-preserving relationship would always hold.
-
 
 \begin{defn}{The Model under the Risk-Neutral Measure}
     \label{defn:risk_neutral_model}
@@ -411,149 +403,15 @@ In particular, we can determine the risk prices from equity prices if the identi
 \beta_{\PP}$ etc.\@ functions are \textquote{sufficiently} invertible.
 (I.e.\@ the matrix of their derivatives satisfies the appropriate non-singularity conditions.)
 
-
-\subsubsection{Identification of the Risk Prices}
-
-
-The goal moving forward is to determine what we need to assume about the physical measure functions in order to
-identify the risk prices.
-To do this, we need to do two things.
-First, we need to characterize the part of the physical measure functions that is identifiable from equity data.
-Second, we must consider under what conditions that allows us to identify the risk prices. 
-
-The information that return data contain about equity pricing data is entirely encapsulated by the asset pricing
-equation for excess returns.  
-(In what follows, we will use $r_{t+1}$ as the excess log-return.)
-
-\begin{equation}
-    \E\left[ M_{t,t+1}(\theta, \pi) \exp(r_{t+1}) \mvert \F_{t-1} \right]
-\end{equation}
-
-We now characterize, the information in this set of moment conditions regarding the risk prices.
-We start by substituting in the SDF formula from above.
-
-\begin{gather}
-    \E \left[ \exps*{ - \pi \sigma^2_{t+1} - (\theta - 1) r_{t+1} } \mvert \F_{t} \right]
-        = \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi) \sigma^2_t}
-    \intertext{Similar to above, we used the law of iterated expectations to substitute in the conditional Laplace
-        transforms of $r_{t+1}$ and $\sigma^2_{t+1}$.}
-    \E\left[\exps*{- a_{\PP}\left(\pi + \alpha_{\PP}(\theta -1)\right) \sigma^2_t - b_{\PP}(\pi) -
-        \beta_{\PP}(\theta-1) \sigma^2_t - \gamma_{\PP}(\theta-1)} \mvert \F_t \right] = \exps*{- m_0(\theta, \pi)
-        - m_1(\theta, \pi) \sigma^2_t} 
-\end{gather}
-
-
-Similar, to above, we can now match the coefficients of the $\F_t$ measurable variables in the above moment
-condition. 
-We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ that we derived in
-\cref{sec:deriving_sdf_functions}.
-
-\begin{align}
-    \label{eqn:identification_eqn_1}
-   \gamma_{\PP}(\theta-1) + b_{\PP}(\pi + \alpha_{\PP}(\theta - 1)  &= \gamma_{\PP}(\theta) +
-       b_{\PP}(\alpha_{\PP}(\theta) + \pi)  \\
-    \label{eqn:identification_eqn_2}
-    \beta_{\PP}(\theta-1) + a_{\PP}(\pi + \alpha_{\PP}(\theta -1)) &= \beta_{\PP}(\theta) +
-        a_{\PP}(\alpha_{\PP}(\theta) + \pi) 
-\end{align}
-
-We can characterize the identification restrictions in \cref{eqn:identification_eqn_1} and
-\cref{eqn:identification_eqn_2} in two different cases.   
-
-\begin{enumerate}
-    \item[Case 1:] The price of equity risk $\theta$ satisfies the following equations. 
-        \begin{equation}
-            \alpha_{\PP}(\theta - 1) = \alpha_{\PP}(\theta)\ \text{and}\ \beta_{\PP}(\theta) = \beta_{\PP}(\theta
-            -1)\ \text{and}\ \gamma_{\PP}(\theta) = \gamma_{\PP}(\theta - 1)
-            \label{eqn:lack_of_id_condition}
-        \end{equation}
-        In this situation, clearly, regardless of the value of $\pi$, we can satisfy these equations.
-        In other words, the asset pricing equation does not identify $\pi$. 
-        As noted by \textcite{khrapov2016affine}, this is in line with the common belief that the econometrician
-        needs options data to be able to identify the price of volatility risk. 
-    \item[Case 2:] 
-        In general, there is no reason to expect the \cref{eqn:lack_of_id_condition} to hold.
-        Since we have two equations and two unknowns, it might seem reasonable to expect that we should be able to
-        identify both $\theta$ and $\pi$.
-\end{enumerate}
-
-
-As discussed in \textcite[13]{khrapov2016affine}, in this 2nd case the existence of leverage allows us to
-separate the two risk prices.
-Consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$.
-
-\begin{align}
-    \alpha(\theta) - \alpha(\theta - 1) &= \alpha_{\PP}'(0) + \alpha_{\PP}''(0) (\theta - \frac{1}{2}) +
-    \text{higher-order terms}  \\
-    \intertext{Implicitly defining $\psi \coloneqq \alpha_{\PP}'(0)$ and $\phi \coloneqq \sqrt{1 -
-        \alpha_{PP}''(0)}$, we can rewrite this as follows.} 
-        &=  \psi + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) + \text{higher-order terms}  
-\end{align}
-
-If we are wiling to assume that the conditional distribution of $r_{t+1} \vert \sigma^2_{t+1}, \F_t$ is Gaussian,
-the higher-order terms are identically zero.
-The question at hand is there a way of estimating $\psi, \phi, \theta, \pi$ that is not asymptotically biased by
-the existence of these higher-order terms.
-We will explain precisely how we do this in \cref{sec:pricing_the_variance}.
-
-
-\purple{Add a discussion about how the first two conditional moments identify the model in the Gaussian case $\iff$
-    $\psi \neq (1 - \phi^2) (\theta - 1/2).$}
-
-
-
-\subsection{Pricing the Variance}\label{sec:pricing_the_variance}
-
-
-The main issue in case 2 is that we also do not know the physical measure equations.
-In principle, we could estimate them from equity price data.
-However, estimating conditional densities is quite difficult and asset pricing data is rather badly behaved.
-Consequently, we do not want to either make parametric assumptions on these physical measure functions nor try to
-non-parametrically estimate them.
-However, we can estimate some of their low-order moments, such as the conditional mean and variance.
-
-
-The specification for risks that we are using relies exclusively on the mean and volatility (i.e.\@ the first two
-moments.)
-If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional,
-conrad2012exante, chang2013market},  and we used higher sample moments as well to determine the price of our
-risk-factors our resulting estimates would be biased, likely substantially so. 
-
-The question facing us is how to we prevent our model's potential misspecification regarding the risk prices of
-higher-order moments from affecting our estimates of the volatility prices.
-To answer this question, we turn to what our model specifies the continuous-time process, that our model is a
-discretization of.
-
-Imposing consistency with a continuous-time model is reasonable in our context because even though our model is
-specified in discrete-time it is for an asset that is is continuously tradable.
-A good discrete-time model for a continuously-tradable asset would is consistent with a continuous-time
-generalization that rules our no-arbitrage.
-
-When we get to the empirical exercise, we will use the integrated volatility as our measure of volatility.
- 
-\begin{defn}[Integrated Volatilty]
-    \begin{equation}
-        \sigma^2_{t+1} = \int_{t}^{t+1} \sigma^2(s) \dif s
-    \end{equation}
-\end{defn}
-
-Standard asset pricing theory in continuous-time implies that continuous-time volatility --- $\sigma^2(s)$ ---
-is the only priced factor \parencites{merton1973intertemporal, tsai2018pricing, sangrey2018jumps}. 
-(This is a direct consequence of the form of It\^{o}'s Lemma for (potentially discontinuous) continuous-time
-process.)
-In general its price could vary over the course of the day.
-For example, its price could  itself be a function of the volatility: $\pi(s-) = \pi(\sigma^2(s-))$.
-If $\pi(t)$ is not a constant function intra-day, we would see that higher-order moments are priced.
-The object of interest here is the price of volatility, and so we want the 0th order Taylor series expansion of
-the $\pi(t)$.
-
-To make the discussion in the previous paragraph more concrete, we want the following equalities to hold. 
-
-\begin{equation}
-    \pi \sigma^2_{t+1} = \pi \int_{t}^{t+1} \sigma^2(s) \dif s =  \int_{t}^{t+1} \pi(s) \sigma^2(s) \dif s
-\end{equation}
-
-
+However, before we do that we are going to consider the difference in the physical measures when we condition on
+the volatility and when we do not.
+In discrete-time this is straightforward.
+The distribution of $ r_{t+1} \vert \F_t$ is not the same as $r_{t+1} \vert \F_t, \sigma^2_{t+1}$.
+In continuous-time, the issue becomes more difficult.
+In particular, what does it mean to condition on future volatility? 
+In a sense, you want to condition on $\lim_{\Delta \to 0^{+}} \sigma^2(t+\Delta)$, but when you time-aggregate
+it is not obvious how the difference between a right and left limits disappear affects the resulting integral.
+We discuss this in the next section.
 
 \subsection{Characterizing the Structure of the Identification Problem in Continuous-Time}
 
@@ -645,6 +503,11 @@ structure is preserved is outside this scope of this paper.}
 
 \subsubsection{Relating Change of Filtration to the Risk-Neutral Measure.}
 
+In the previous section, we defined a parameter $\psi_0$ and $\phi_0$ and showed how they govern the
+relationship between the two physical measures under consideration here.
+The two risk prices $\pi$ and $\theta$ govern the relationship between the associated risk-neutral measures.
+
+
 To fully understand the price of volatility risk we need to understand how the physical change of measure
 caused  by switching between $\F_t$ and $\F_{\sigma^2,t}$ interacts with the measure change caused from switching
 between $\PP$ and $\QQ$.
@@ -675,7 +538,7 @@ under $\F_{\sigma^2,t}$.
 To be concrete, we will show that you can represent the log-price with respect to $\F_{\sigma^2,t}$ as follows,
 where $\widetilde{M}_{\sigma}(t)$ has mean zero, and predictable quadratic variation  $t$.
 
-\begin{restatable}[Log-Price Given Future Volatlity]{theorem}{priceDGPGivenVol}
+\begin{restatable}[Log-Price Given Future Volatility]{theorem}{priceDGPGivenVol}
     \label{defn:logPriceGivenVol}
 
     Assume that volatility is an It\^{o} semimartingale without any predictable jumps, and the prices can be
@@ -840,6 +703,162 @@ Since $Z_{i,t+1} \in \F_t$, \cref{eqn:cond_zero_err_terms} implies they satisfy 
 condition. 
 Any good predictor of $\sigma^2_{t+1}$ will satisfy this criterion.
 In the empirical example, we will use lags of $\sigma^2_{t+1}$.
+
+
+\subsubsection{Identification of the Risk Prices}
+
+
+The goal moving forward is to determine what we need to assume about the physical measure functions in order to
+identify the risk prices.
+To do this, we need to do two things.
+First, we need to characterize the part of the physical measure functions that is identifiable from equity data.
+Second, we must consider under what conditions that allows us to identify the risk prices. 
+
+The information that return data contain about equity pricing data is entirely encapsulated by the asset pricing
+equation for excess returns.  
+(In what follows, we will use $r_{t+1}$ as the excess log-return.)
+
+\begin{equation}
+    \E\left[ M_{t,t+1}(\theta, \pi) \exp(r_{t+1}) \mvert \F_{t} \right]
+\end{equation}
+
+We now characterize, the information in this set of moment conditions regarding the risk prices.
+We start by substituting in the SDF formula from above, and we also replace all of the dependence on $\F_t$ with
+$z_t$.
+
+\begin{gather}
+    \E \left[ \exps*{ - \pi \sigma^2_{t+1} - (\theta - 1) r_{t+1} } \mvert z_t \right]
+        = \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi) z_t}
+    \intertext{Similar to above, we used the law of iterated expectations to substitute in the conditional Laplace
+        transforms of $r_{t+1}$ and $\sigma^2_{t+1}$.}
+    \E\left[\exps*{- a_{\PP}\left(\pi + \alpha_{\PP}(\theta -1)\right) z_t - b_{\PP}(\pi) -
+        \beta_{\PP}(\theta-1) z_t - \gamma_{\PP}(\theta-1)} \mvert z_t \right] = \exps*{- m_0(\theta, \pi)
+        - m_1(\theta, \pi) z_t} 
+\end{gather}
+
+
+
+
+
+
+Similar, to above, we can now match the coefficients of the $\F_t$ measurable variables in the above moment
+condition. 
+We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ that we derived in
+\cref{sec:deriving_sdf_functions}.
+
+\begin{align}
+    \label{eqn:identification_eqn_1}
+   \gamma_{\PP}(\theta-1) + b_{\PP}(\pi + \alpha_{\PP}(\theta - 1)  &= \gamma_{\PP}(\theta) +
+       b_{\PP}(\alpha_{\PP}(\theta) + \pi)  \\
+    \label{eqn:identification_eqn_2}
+    \beta_{\PP}(\theta-1) + a_{\PP}(\pi + \alpha_{\PP}(\theta -1)) &= \beta_{\PP}(\theta) +
+        a_{\PP}(\alpha_{\PP}(\theta) + \pi) 
+\end{align}
+
+We can characterize the identification restrictions in \cref{eqn:identification_eqn_1} and
+\cref{eqn:identification_eqn_2} in two different cases.   
+
+\begin{enumerate}
+    \item[Case 1:] The price of equity risk $\theta$ satisfies the following equations. 
+        \begin{equation}
+            \alpha_{\PP}(\theta - 1) = \alpha_{\PP}(\theta)\ \text{and}\ \beta_{\PP}(\theta) = \beta_{\PP}(\theta
+            -1)\ \text{and}\ \gamma_{\PP}(\theta) = \gamma_{\PP}(\theta - 1)
+            \label{eqn:lack_of_id_condition}
+        \end{equation}
+        In this situation, clearly, regardless of the value of $\pi$, we can satisfy these equations.
+        In other words, the asset pricing equation does not identify $\pi$. 
+        As noted by \textcite{khrapov2016affine}, this is in line with the common belief that the econometrician
+        needs options data to be able to identify the price of volatility risk. 
+    \item[Case 2:] 
+        In general, there is no reason to expect the \cref{eqn:lack_of_id_condition} to hold.
+        Since we have two equations and two unknowns, it might seem reasonable to expect that we should be able to
+        identify both $\theta$ and $\pi$.
+\end{enumerate}
+
+
+As discussed in \textcite[13]{khrapov2016affine}, in this 2nd case the existence of leverage allows us to
+separate the two risk prices.
+Consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$.
+
+\begin{align}
+    \alpha(\theta) - \alpha(\theta - 1) &= \alpha_{\PP}'(0) + \alpha_{\PP}''(0) \left(\theta - \frac{1}{2}\right)
+        + \text{higher-order terms}  \\
+%
+    \intertext{Implicitly defining $\psi \coloneqq \alpha_{\PP}'(0)$ and $\phi \coloneqq \sqrt{1 -
+        \alpha_{\PP}''(0)}$, we can rewrite this as follows.} 
+%
+    &=  \psi + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) + \text{higher-order terms}  
+\end{align}
+
+If we are wiling to assume that the conditional distribution of $r_{t+1} \vert \sigma^2_{t+1}, z_t$ is Gaussian,
+the higher-order terms are identically zero.
+The question at hand is there a way of estimating $\psi, \phi, \theta, \pi$ that is not asymptotically biased by
+the existence of these higher-order terms.
+
+In the general case we have two issues.
+First, we 
+We will explain precisely how we do this in \cref{sec:pricing_the_variance}.
+
+
+
+
+\purple{Add a discussion about how the first two conditional moments identify the model in the Gaussian case $\iff$
+    $\psi \neq (1 - \phi^2) (\theta - 1/2).$}
+
+
+\subsection{Pricing the Variance}\label{sec:pricing_the_variance}
+
+
+The main issue in case 2 is that we also do not know the physical measure equations.
+In principle, we could estimate them from equity price data.
+However, estimating conditional densities is quite difficult and asset pricing data is rather badly behaved.
+Consequently, we do not want to either make parametric assumptions on these physical measure functions nor try to
+non-parametrically estimate them.
+However, we can estimate some of their low-order moments, such as the conditional mean and variance.
+
+
+The specification for risks that we are using relies exclusively on the mean and volatility (i.e.\@ the first two
+moments.)
+If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional,
+conrad2012exante, chang2013market},  and we used higher sample moments as well to determine the price of our
+risk-factors our resulting estimates would be biased, likely substantially so. 
+
+The question facing us is how to we prevent our model's potential misspecification regarding the risk prices of
+higher-order moments from affecting our estimates of the volatility prices.
+To answer this question, we turn to what our model specifies the continuous-time process, that our model is a
+discretization of.
+
+Imposing consistency with a continuous-time model is reasonable in our context because even though our model is
+specified in discrete-time it is for an asset that is is continuously tradable.
+A good discrete-time model for a continuously-tradable asset would is consistent with a continuous-time
+generalization that rules our no-arbitrage.
+
+When we get to the empirical exercise, we will use the integrated volatility as our measure of volatility.
+ 
+\begin{defn}[Integrated Volatilty]
+    \begin{equation}
+        \sigma^2_{t+1} = \int_{t}^{t+1} \sigma^2(s) \dif s
+    \end{equation}
+\end{defn}
+
+Standard asset pricing theory in continuous-time implies that continuous-time volatility --- $\sigma^2(s)$ ---
+is the only priced factor \parencites{merton1973intertemporal, tsai2018pricing, sangrey2018jumps} in a static
+world.
+(This is a direct consequence of the form of It\^{o}'s Lemma for (potentially discontinuous) continuous-time
+process.)
+In general its price could vary over the course of the day.
+For example, its price could  itself be a function of the volatility: $\pi(s-) = \pi(\sigma^2(s-))$.
+If $\pi(t)$ is not a constant function intra-day, we would see that higher-order moments are priced.
+The object of interest here is the price of volatility, and so we want the 0th order Taylor series expansion of
+the $\pi(t)$.
+
+To make the discussion in the previous paragraph more concrete, we want the following equalities to hold. 
+
+\begin{equation}
+    \pi \sigma^2_{t+1} = \pi \int_{t}^{t+1} \sigma^2(s) \dif s =  \int_{t}^{t+1} \pi(s) \sigma^2(s) \dif s
+\end{equation}
+
+
 
 
 \section{GMM}\label{sec:GMM}
