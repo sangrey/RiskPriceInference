@@ -161,10 +161,10 @@ physical measure.
 We can further define the risk neutral measure --- $\QQ$ ---  as the process that makes $P_t$ a martingale, i.e.\@
 the following holds. 
 The advantage of defining $\QQ$ is that for some payoff function --- $f$  -- that is a function of future return
---- $r_{t+1}$ and volatility $\sigma^{t+1}$ and potentially depends upon the current information available --
+--- $r_{t+1}$ and volatility $\sigma^2_{t+1}$ and potentially depends upon the current information available --
 $\F_t$, we can price this payoff as its expectation with respect to $\QQ$.
 In other  words, the price of $f(r_{t+1}, \sigma^2_{t+1}, \F_t)$ satisfies for all $t$ and for all $f$.
-This is useful because we can choose $f$ as a convenient function for our estimation. 
+This is useful because we can choose $f$ to make our estimation convenient.
 
 \begin{equation}
     P_t(f) = \E_{\QQ}\left[ f\left(r_{t+1}, \sigma^2_{t+1}, \F_{t}\right)  \mvert \F_{t}\right]
@@ -207,11 +207,10 @@ In other words, the volatility drives all of the dynamics of the process.
 Note, we do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, which they are in the data. 
 
 We construct the following conditional Laplace transforms as follows.
-This is well-defined because we can define the true Laplace transform is the expectation of a specific function,
+This is well-defined because we can define the true Laplace transform as the expectation of a specific function,
 and then integrate out all of the unknown variables using their marginal distributions.
-Since the Laplace transform is an expectation of a specific function, by assuming the data are jointly CAR(1), we
-can represent out model under the physical  as follows for some functions $a_{\PP}, b_{\PP}, \alpha_{\PP},
-    \beta_{\PP}$, and $\gamma_{\PP}$ for all $u$ in its domain.
+Hence, we can represent out model under the physical  as follows for some functions $a_{\PP}, b_{\PP},
+\alpha_{\PP}, \beta_{\PP}$, and $\gamma_{\PP}$ for all $u$ in its domain.
 
 \begin{restatable}[The Limited Information Model under the Physical Measure]{defn}{physicalMeasureModel}
     \label{defn:physical_model}
@@ -240,7 +239,7 @@ Note, by the physical-measure functions satisfy the following constraint by defi
 We can differentiate the Laplace transform at zero to compute the moments.
 The logarithm of the Laplace transform above is a conditional cumulant generating function.
 Since, we are only using the mean and variance, we can differentiate this function  and evaluate the
-resultant function at zero get formulas for these moments.
+resultant function at zero to construct formulas for these moments.
 
 We start by computing $\E\left[\sigma^2_{t+1} \mvert \F_t\right]$ and $\Var\left[\sigma^2_{t+1} \mvert
 \F_t\right]$
@@ -268,7 +267,6 @@ $\rho$ is a persistence parameter.
 $c$ is a scaling parameter.
 We will also assume that the unconditional mean of $\sigma^2_t$ agrees with that of $\sigma^2_{t+1}$, and so we can use
 the law of iterated expectation and the law of total variance to determine the moments.
-This will be true in our case because we are using lagged volatility as instruments, and $\norm{\zeta}_{L_1} = 1$.
 
 
 \begin{align}
@@ -307,11 +305,11 @@ We can then use the law of total variance to compute $\Var\left[r_{t+1} \mvert \
 Before, we discuss how we parameterize the Laplace function for the return process, we will consider the
 risk-neutral measure.
 We assume that the risk-neutral measure is structure preserving.
-In other words, the Laplace functions maintain the same structure for some functions some functions $a_{\QQ},
-b_{\QQ}, \alpha_{\QQ}, \beta_{\QQ}$, and $\gamma_{\QQ}$.
+In other words, the Laplace functions maintain the same structure for some functions $a_{\QQ}, b_{\QQ},
+\alpha_{\QQ}, \beta_{\QQ}$, and $\gamma_{\QQ}$.
 This is a relatively weak assumption because the absolute continuity of the two measures places strong
 restrictions on deviations from this case.
-For example, in the continuous-time limit this structure-preserving relationship would always hold.
+For example, in the continuous-time limit this structure-preserving relationship always holds.
 
 \begin{defn}{The Model under the Risk-Neutral Measure}
     \label{defn:risk_neutral_model}
@@ -402,7 +400,7 @@ The distribution of $ r_{t+1} \vert \F_t$ is not the same as $r_{t+1} \vert \F_t
 In continuous-time, the issue becomes more difficult.
 In particular, what does it mean to condition on future volatility? 
 In a sense, you want to condition on $\lim_{\Delta \to 0^{+}} \sigma^2(t+\Delta)$, but when you time-aggregate
-it is not obvious how the difference between a right and left limits disappear affects the resulting integral.
+it is not obvious how the difference between a right and left limits affects the resulting integral.
 We discuss this in the next section.
 
 \subsection{Characterizing the Structure of the Identification Problem in Continuous-Time}
@@ -423,7 +421,7 @@ explicit.
 The way by which we do this is by representing the processes in continuous-time.
 Since the assets we are characterizing are continuously tradable they must satisfy some continuous-time
 no-arbitrage conditions. 
-In other words, there exists a continuous-time DGP that the DGP we have been using so far is a discretization of. 
+In other words, there exists a continuous-time DGP where the DGP we have been using so far is a discretization of. 
 This is useful because we can work with the first two moments of the process effectively without loss of
 generality.
 The linear-affine structure we have been using before will show up as certain terms being constant functions of
@@ -495,33 +493,27 @@ structure is preserved is outside this scope of this paper.}
 
 \subsubsection{Relating Change of Filtration to the Risk-Neutral Measure.}
 
-In the previous section, we defined a parameter $\psi_0$ and $\phi_0$ and showed how they govern the
-relationship between the two physical measures under consideration here.
-The two risk prices $\pi$ and $\theta$ govern the relationship between the associated risk-neutral measures.
-
-
 To fully understand the price of volatility risk we need to understand how the physical change of measure
 caused  by switching between $\F_t$ and $\F_{\sigma^2,t}$ interacts with the measure change caused from switching
 between $\PP$ and $\QQ$.
 The volatility risk price governs how pricing under the $\F_{t-}$ and $\F_{\sigma^2,t-}$ filtrations is related.
 Note, we can price under both filtrations because they are predictable filtrations.
 
-To quantitatively characterize this relationship, we need to represent it somehow.
-Following the discussion in discrete-time, we will do so using the log-Laplace transform. 
-The log-Laplace transform for the physical measure that we have been using in the previous sections is the
-discretization of a process with the following form.\footnote{The existence of the process below is implied
-    by the existence of a discrete-time objects and mild smoothness conditions on the $\alpha_{\PP}$ etc.\@
-    functions because local integrability conditions are implied by global integrability conditions plus
-smoothness conditions.}
+Moving forward we will rely on a  specification for risks that depends exclusively on the mean and volatility
+(i.e.\@ the first two moments.)
+If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional,
+conrad2012exante, chang2013market},  and we used higher sample moments as well to determine the price of our
+risk-factors our resulting estimates would be biased, likely substantially so. 
 
-In continuous-time, with stochastic diffusion or stochastic variance-gamma processes, the first two moments of the
-process determine the entire distribution under some general conditions which this DGP satisfies,
-\parencite{sangrey2018jumps}.
-Consequently, as long as we match the first two derivatives of continuous-time log-Laplace transform we are
-matching the entire distribution.
-The intuition here is that by using It\^{o}'s formula for jump  processes, the 2nd-order Taylor series is exact in
-continuous-time.
-The higher-order  terms disappear as we shrink the intervals. 
+The question facing us is how to we prevent our model's potential misspecification regarding the risk prices of
+higher-order moments from affecting our estimates of the volatility prices.
+To answer this question, we turn to what our model specifies the continuous-time process, that our model is a
+discretization of.
+
+Imposing consistency with a continuous-time model is reasonable in our context because even though our model is
+specified in discrete-time it is for an asset that is is continuously tradable.
+A good discrete-time model for a continuously-tradable asset would is consistent with a continuous-time
+generalization that rules our no-arbitrage.
 
 Instead of using the log-Laplace transform as we did in discrete-time, we will tackle the change of measure
 induced by the change of filtration for the log-price directly.
@@ -590,33 +582,10 @@ Consequently, we can write the price process, with respect to $\F_t$ as follows.
     = \int^t_0 \phi(s) \sigma(s) \sigma_{\sigma}(s) \dif s
 \end{equation}
 
-If all of the functions are  constant then the correlation between the prices and the jumps diffusion part is
-$\phi$, i.e.\@  $\mathrm{corr}\,(p(t), {\sigma^2(t)}^D) = \phi$.
+If all of the functions are  constant then the correlation between the price's and the volatility's diffusion part
+is $\phi$, i.e.\@  $\mathrm{corr}\,(p(t), {\sigma^2(t)}^D) = \phi$.
 
 \subsubsection{Going from Continuous-Time to Discrete-Time}\label{sec:discrete_time_to_cont_time}
-
-The main issue in case 2 is that we also do not know the physical measure equations.
-In principle, we could estimate them from equity price data.
-However, estimating conditional densities is quite difficult and asset pricing data is rather badly behaved.
-Consequently, we do not want to either make parametric assumptions on these physical measure functions nor try to
-non-parametrically estimate them.
-However, we can estimate some of their low-order moments, such as the conditional mean and variance.
-
-The specification for risks that we are using relies exclusively on the mean and volatility (i.e.\@ the first two
-moments.)
-If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional,
-conrad2012exante, chang2013market},  and we used higher sample moments as well to determine the price of our
-risk-factors our resulting estimates would be biased, likely substantially so. 
-
-The question facing us is how to we prevent our model's potential misspecification regarding the risk prices of
-higher-order moments from affecting our estimates of the volatility prices.
-To answer this question, we turn to what our model specifies the continuous-time process, that our model is a
-discretization of.
-
-Imposing consistency with a continuous-time model is reasonable in our context because even though our model is
-specified in discrete-time it is for an asset that is is continuously tradable.
-A good discrete-time model for a continuously-tradable asset would is consistent with a continuous-time
-generalization that rules our no-arbitrage.
 
 The data that we have are daily, not in continuous-time. 
 Consequently, we need to consider what the price process in  \cref{eqn:eqn:price_process_decomp} implies about the
@@ -648,16 +617,12 @@ $\gamma(t), \beta(t), \psi(t), \phi(t)$.
 In addition, in we also condition on the entire path of future volatility in \cref{eqn:discrete_time_cond_rtn}
 instead of just $\int_t^{t+1} \sigma^2(s) \dif s$.
 
-However, since we are using time-span  asymptotics, and not infill asymptotics, the model we end up estimating
+However, since we are using long time-span asymptotics, and not infill asymptotics, the model we end up estimating
 will have fixed parameters instead of continuous-time processes for each of these parameters.
 
 %TODO Added assumption here.
 We start by defining the means of $\gamma_0, \beta(t), \psi(t)$, and $\phi(t)$: $\gamma_0, \beta_0, \psi_0, \phi_0$.
 We assume that all of the processes are ergodic and so time and cross-sectional means are the same.
-We also let $\xi_{t+1} \coloneqq \E\left[\sigma_{t+1} \mvert \sigma(Z_1,Z_2, \ldots) \right]$, where $Z_i$ are
-some some $t$-measurable variables associated with $\sigma_{t+1}$, i.e.\@ they are instruments / predictors for
-$\sigma_{t+1}$.
-
 
 %TODO Added assumption here.
 By the intermediate value theorem, assuming the predictable functions are continuous, there exists an
@@ -690,12 +655,12 @@ We can compute what the error terms are by adding and subtracting the relevant t
         \left(\phi(s) - \phi_0\right) \dif W^{\sigma}(s)\right] \nonumber \\
 %
     \eta_{2,t+1} 
-    &= \int_t^{t+1}(\gamma(s) - \gamma_0) \dif s + \E\left[\int_t^{t+1} (\beta(s) + \psi(s) - (\beta_0 + \psi_0))
-       \sigma^2(s) \dif s \mvert \F_t\right] \\
+    &= \int_t^{t+1}(\gamma(s) - \gamma_0) \dif s + \int_t^{t+1} (\beta(s) + \psi(s) - (\beta_0 + \psi_0))
+       \sigma^2(s) \dif s \\
     &+ \int_t^{t+1} \sigma(s) \left(\sqrt{1 - \phi(s)^2} - \sqrt{1 - \phi_0^2}\right) \dif W^{p}(s) \nonumber 
 \end{alignat}
 
-Clearly, all of the terms are mean zero unconditionally. 
+Clearly, all of the terms are  unconditionally mean zero. 
 The non-martingale terms are deviations from their global means, and the martingale terms are martingales.
 To get them to be conditionally zero, we need to work a little harder.
 
@@ -868,6 +833,8 @@ To estimate the model we use the various moment conditions that we have derived.
 The one that we have yet to derive is the ones implied by the continuous-time model that allow us to estimate
 $\phi$ and $\psi$.
 Deriving them is straightforward because we constructed what the discrete-time equations, and they are linear.
+The only difficult one is that we used the Markov assumption along with the Taylor approximation to convert
+$\E\left[r_{t+1} \mvert \F_t\right]$ into a linear function of $\sigma^2_t$ (\cref{eqn:market_risk_price}).
 The last two equations are not moment conditions because they most exactly; they are a restriction upon the
 population values.
 They define an population relationship between the parameters implicitly defining the risk prices in terms of the
@@ -883,10 +850,11 @@ other parameters.
     \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
 %
     \Var\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2}  \left(\frac{2 \rho \delta}{1 - \rho}  + \omega
-        \right)  \\
+    \right)  \\
 %
-    \E\left[r_{t+1} \mvert \sigma^2_t\right] &= \gamma + \beta \sigma^2_t + \sigma_{t+1} \left(\phi e_{1,t}  +
-        \sqrt{1 - \phi^2} e_{2,t}\right) + e_{3,t} \\
+    \label{eqn:market_risk_price}
+    \E\left[r_{t+1} \mvert \sigma^2_t\right] &= \gamma + \beta (\rho \sigma^2_t + c \delta) + \sigma_{t+1}
+    \left(\phi e_{1,t}  + \sqrt{1 - \phi^2} e_{2,t}\right) + e_{3,t} \\
 %
     \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma + (\beta + \psi) \sigma^2_{t+1}  +
     \sigma_{t+1} \sqrt{1 - \phi^2}  e_{2,t} + e_{2,t} \\
@@ -985,56 +953,9 @@ As can clearly be seen in \cref{fig:fig:gamma_diff_theta2}, there is a zero when
     \includegraphics[width=.5\textwidth]{gamma_diff_theta2.pdf}
 \end{figure}
 
-\begin{restatable}[Uniform Convergence under Strong Identification]{lemma}{UllnStrongID}
-    \label{lemma:UniformConvergenceStrongID}
-    Let $\Eta$ be the identified set defined by \cref{eqn:EtaDefn}.
-    Further assume that $\phi_0 \neq 0$. 
-    Let $\sampmom$ be the sample moment condition defined above, and $\W_T$ be the associated optimal weight matrix
-    estimator.
-    Then we have the following convergence.
-
-    \begin{align}
-        &\sup_{\eta \in \Eta} \norm*{\sampmom(\eta) - \E\left[g\left(\eta \mvert \gamma_0\right)\right]}_{Fro}
-          \pto 0 \\ 
-        &\sup_{\eta \in \Eta} \norm{\W_{T}(\eta)-\E\left[\W\left(\eta \mvert \gamma_0\right)\right]} \pto 
-    \end{align}
-
-\end{restatable}
-
 
 
 %TODO where does this go?
-By the above arguments, we have a consistent estimator for $\eta$ and the optimal weight matrix $\W \coloneqq
-(\E\left[g g'\right])^{-1}$, and we will assume that the true value $\eta_{0}$ is in the interior of its sample
-space $\Eta$.\footnote{Throughout we will use subscript \num{0}  to denote true values for parameters.}
-Let $G \coloneqq \E\left[\frac{\partial}{\partial \eta} \popmom \right]$
-Clearly, $g$ is continuously differentiable, and its derivative $G$ is continuous.
-In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
-
-%TODO Replace this with strong (alpha) mixing of order (1+\epsilon). 
-%Don't you need a lot more than this...?
-
-\begin{assump}[Weak Dependence]
-    \label{assumption:weak_dependence}
-    $z_t \coloneqq \begin{pmatrix} r_{t+1} \\ \sigma^2_{t+1} \end{pmatrix}$ are $\alpha$-mixing with $\alpha_t =
-       O\left(T^{-5}\right)$
-\end{assump}
-
-Since, $\norm*{g_t}$ is almost surely bounded by $1$ it has all of its moments and $z_t$ being $\alpha$-mixing
-implies $g_t$ is as well by the central limit theorem for strongly mixing process 
-$\sqrt{T} \sampmom(\eta^{*}) \dto \N\left(0, \E\left[\W\right]^{-1}\right)$ as required. 
-Consequently, by \textcite[theorem 3.2]{newey1994large} we have convergence in distribution as well as convergence
-in probability.
-
-\begin{theorem}[Inference for $\eta$ under Strong Identification]
-    Assume that $\phi_0  \in (-1,1) \setminus 0$, $\rho_0 \in [0,1)$, and $c_0 > 0$. 
-    Further assume that the data are ergodic, stationary, and satisfy \cref{assumption:weak_dependence}.
-    Then the following convergence in distribution holds.
-
-    \begin{equation}
-    \sqrt{T} (\widehat{\eta}_T - \eta_0) \dto \N\left(0, \left(G' \E[\W] G\right)^{-1}\right)
-    \end{equation}
-\end{theorem}
 
 
 
@@ -1410,7 +1331,21 @@ realized volatility.
     \end{proof}
 
 
-\UllnStrongID*
+\begin{restatable}[Uniform Convergence under Strong Identification]{lemma}{UllnStrongID}
+    \label{lemma:UniformConvergenceStrongID}
+    Let $\Eta$ be the identified set defined by \cref{eqn:EtaDefn}.
+    Further assume that $\phi_0 \neq 0$. 
+    Let $\sampmom$ be the sample moment condition defined above, and $\W_T$ be the associated optimal weight matrix
+    estimator.
+    Then we have the following convergence.
+
+    \begin{align}
+        &\sup_{\eta \in \Eta} \norm*{\sampmom(\eta) - \E\left[g\left(\eta \mvert \gamma_0\right)\right]}_{Fro}
+          \pto 0 \\ 
+        &\sup_{\eta \in \Eta} \norm{\W_{T}(\eta)-\E\left[\W\left(\eta \mvert \gamma_0\right)\right]} \pto 
+    \end{align}
+
+\end{restatable}
 
 \begin{proof}
 
@@ -1444,6 +1379,46 @@ realized volatility.
 
 
 \end{proof}
+
+
+\begin{assump}[Weak Dependence]
+    \label{assumption:weak_dependence}
+    $z_t \coloneqq \begin{pmatrix} r_{t+1} \\ \sigma^2_{t+1} \end{pmatrix}$ are $\alpha$-mixing with $\alpha_t =
+       O\left(T^{-5}\right)$
+\end{assump}
+
+
+\begin{theorem}[Inference for $\eta$ under Strong Identification]
+    Assume that $\phi_0  \in (-1,1) \setminus 0$, $\rho_0 \in [0,1)$, and $c_0 > 0$. 
+    Further assume that the data are ergodic, stationary, and satisfy \cref{assumption:weak_dependence}.
+    Then the following convergence in distribution holds.
+
+    \begin{equation}
+    \sqrt{T} (\widehat{\eta}_T - \eta_0) \dto \N\left(0, \left(G' \E[\W] G\right)^{-1}\right)
+    \end{equation}
+\end{theorem}
+
+\begin{proof}
+
+    By the above arguments, we have a consistent estimator for $\eta$ and the optimal weight matrix $\W \coloneqq
+    (\E\left[g g'\right])^{-1}$, and we will assume that the true value $\eta_{0}$ is in the interior of its
+    sample space $\Eta$.\footnote{Throughout we will use subscript \num{0}  to denote true values for parameters.}
+    Let $G \coloneqq \E\left[\frac{\partial}{\partial \eta} \popmom \right]$ Clearly, $g$ is continuously
+    differentiable, and its derivative $G$ is continuous.
+    In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
+    
+    %TODO Replace this with strong (alpha) mixing of order (1+\epsilon). 
+    %Don't you need a lot more than this...?
+
+    Since, $\norm*{g_t}$ is almost surely bounded by $1$ it has all of its moments and $z_t$ being $\alpha$-mixing
+    implies $g_t$ is as well by the central limit theorem for strongly mixing process $\sqrt{T} \sampmom(\eta^{*})
+    \dto \N\left(0, \E\left[\W\right]^{-1}\right)$ as required. 
+    Consequently, by \textcite[theorem 3.2]{newey1994large} we have convergence in distribution as well as
+    convergence in probability.
+    
+
+\end{proof}
+
 
 \InferenceWeakID*
 
