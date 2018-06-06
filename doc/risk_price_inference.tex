@@ -153,8 +153,8 @@ We go into further detail in \cref{sec:data} regarding how we obtained it, the t
 We estimate the prices of some factors using moment conditions derived from an option pricing model. 
 As is standard in that literature, we will do  this by specifying the physical and risk-neutral measures and their
 relationship, i.e.\@ the stochastic discount factor or pricing kernel.
-Let $\F_t$ be the representative investor's information set, and $P_t$ be the price on the asset in question, with
-associated return $r_{t+1}$ and volatility  $\sigma^2_{t+1}$.
+Let $\F_t$ be the representative investor's information set at time $t$, and $P_t$ be the price on the asset in
+question, with associated return $r_{t+1}$ and volatility  $\sigma^2_{t+1}$.
 
 Given $\F_{t}$, the vector $\left( r_{t+1},  \sigma^2_{t+1}\right)$ is drawn from some process --- $\PP$ --- the
 physical measure. 
@@ -952,13 +952,6 @@ As can clearly be seen in \cref{fig:fig:gamma_diff_theta2}, there is a zero when
     \label{fig:fig:gamma_diff_theta2}
     \includegraphics[width=.5\textwidth]{gamma_diff_theta2.pdf}
 \end{figure}
-
-
-
-%TODO where does this go?
-
-
-
 
 
 \section{Weak Identification Setup}
