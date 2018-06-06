@@ -573,7 +573,8 @@ Note, $F_{t+1, \sigma^2}$ conditions on the entire path of volatility from $t$ t
       \intertext{Then by the law of iterated expectations.}
       %
     &=  \E\left[\beta(t) \sigma^2_{t+1} - \beta(t) \sigma^2_{t+1} + \psi \sigma^2_{t+1}  \mvert \F_t \right] \\
-    &= \psi \sigma^2_t
+      \label{eqn:change_in_expected_rtn}
+      &= \psi \E\left[\sigma^2_{t+1} \mvert \F_t \right]
 \end{align}
 
 The parameter $\phi(t)$, on the other hand, governs the correlation between $p(t)$ and $\sigma^2(t)$.
@@ -867,11 +868,13 @@ To estimate the model we use the various moment conditions that we have derived.
 The one that we have yet to derive is the ones implied by the continuous-time model that allow us to estimate
 $\phi$ and $\psi$.
 Deriving them is straightforward because we constructed what the discrete-time equations, and they are linear.
-The last two equations are not moment conditions per-se. 
-Rather they are best understood as 
+The last two equations are not moment conditions because they most exactly; they are a restriction upon the
+population values.
+They define an population relationship between the parameters implicitly defining the risk prices in terms of the
+other parameters. 
 
 
-\begin{defn}{Moment Conditions}
+\begin{defn}{Equilibrium Conditions}
 \begin{align}
     \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= \rho \sigma^2_t  + c \delta\\
 %
@@ -885,10 +888,8 @@ Rather they are best understood as
     \E\left[r_{t+1} \mvert \sigma^2_t\right] &= \gamma + \beta \sigma^2_t + \sigma_{t+1} \left(\phi e_{1,t}  +
         \sqrt{1 - \phi^2} e_{2,t}\right) + e_{3,t} \\
 %
-    \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma + (\beta + \psi) \sigma^2_{t+1}  + \sigma_{t+1}
-    \sqrt{1 - \phi^2}  e_{2,t} + e_{2,t} \\
-%
-        % \mathrm{Corr}(e_{1,t}, e_{2,t}) &= \phi \\
+    \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma + (\beta + \psi) \sigma^2_{t+1}  +
+    \sigma_{t+1} \sqrt{1 - \phi^2}  e_{2,t} + e_{2,t} \\
 %
     \gamma (\theta - 1) + c \delta \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right) &= \gamma
     \theta + c \delta \left(\pi + \psi \theta + \phi \frac{\theta^2}{2} \right) \\ 
@@ -898,12 +899,44 @@ Rather they are best understood as
 \end{align}
 \end{defn}
 
+To fully specify the GMM conditions, we need to also specify the instruments we are using.
+Doing this correctly is somewhat subtle because we need to only use $\F_{t-1}$-measurable variables in order to
+satisfy the necessary exogeneity conditions, while providing instruments for both $\sigma^2_t$ and
+$\sigma^2_{t+1}$. 
+The natural instrument to use in both cases is $\sigma^2_t$.
+This comes from the first-order Markov assumption that we made.
+However, we need more than one instrument in order to be identified.
+The way around this is to notice that although we assumed first-order Markov, we did not assume that the
+transition was linear. 
 
-As for instruments, we use the lags of volatility. 
+To see this more fully, note that the volatility risk price is being identified through the part of $\psi$ above
+and beyond a Jensen inequality effect.
+
+Furthermore, recall \cref{eqn:change_in_expected_rtn},  $\E\left[r_{t+1} \mvert \sigma^2_{t+1}, \F_{t}\right]  -
+\E\left[ r_{t+1} \mvert \F_t\right]$ = $\psi \E\left[\sigma^2_{t+1} \mvert \F_t\right]$.
+To the extent that we can predict $\sigma^2_{t+1}$ by using $\sigma^2_t$, the price will already be absorbed into
+$\beta$, the coefficient on $\sigma^2_t$.
+Hence, to identify $\psi$ correctly, we need the conditioning set here to be more than just $\sigma^2_t$.
+
+
+As an aside, using more discrete-time information here to predict $\sigma^2_{t+1}$ does not contradict our
+derivation above because we conditioned on $\sigma^2(t-)$ in continuous time, and so the investors in the market
+would not have had to instrument for $\sigma^2(t)$ using $\F_{t-1}$ information.
+To put it another way, the investors in the market have access to a more informative sufficient statistic than we
+do, and so we assumed they were using that in the derivation.
+Consequently, it is innocuous to assume that they are not using the $\F_{t}$ information that we are using.
+
+Consequently, we use lags of the volatility and powers of those lags as instruments.
+In principle, we would only need to use powers of $\sigma^2_t$ as long as we used enough of them.
+However, since in practice we are using an estimate of $\sigma^2_t$, using additional lags instead of very high
+powers of $\sigma^2_t$ will likely perform better in practice.
+
+
 \begin{defn}{Instruments}
     \label{defn:instruments}
     \begin{equation}
-        Z_t \coloneqq 1, \sigma^2_{t}, \sigma^2_{t-1}, \sigma^2_{t-2}, \ldots
+        Z_t \coloneqq 1, \sigma^2_{t}, \sigma^2_{t-1}, \sigma^2_{t-2}, \ldots, (\sigma^2_{t})^2,
+        (\sigma^2_{t-1})^2, (\sigma^2_{t-2})^2, \ldots
     \end{equation}
 \end{defn}
 
