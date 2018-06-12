@@ -730,10 +730,10 @@ We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$
 \begin{align}
     \label{eqn:identification_eqn_1}
    \gamma_{\PP}(\theta-1) + b_{\PP}(\pi + \alpha_{\PP}(\theta - 1)  &= \gamma_{\PP}(\theta) +
-       b_{\PP}(\alpha_{\PP}(\theta) + \pi)  \\
+       b_{\PP}(\pi + \alpha_{\PP}(\theta))  \\
     \label{eqn:identification_eqn_2}
     \beta_{\PP}(\theta-1) + a_{\PP}(\pi + \alpha_{\PP}(\theta -1)) &= \beta_{\PP}(\theta) +
-        a_{\PP}(\alpha_{\PP}(\theta) + \pi) 
+        a_{\PP}(\pi + \alpha_{\PP}(\theta)) 
 \end{align}
 
 We can characterize the identification restrictions in \cref{eqn:identification_eqn_1} and
@@ -813,6 +813,24 @@ data between the physical and risk-neutral measures.
 If we wanted to make the equations hold with respect to a higher-order approximation we would want to introduce
 prices of other types of risk such as skewness risk and kurtosis risk.
 
+Before, we continue to simplify the equations, there is another asset pricing restriction that we should impose.
+If the risk prices --- $\theta$ --- equal zero, then the expected return should be zero.
+Then by noting that the physical measure functions equal zero when evaluated at zero, we have the following.
+
+\begin{align}
+    \gamma_{\PP}(-1) + b_{\PP}(\alpha_{\PP}(-1))  = 0  \\
+    \beta_{\PP}(-1) + a_{\PP}(\alpha_{\PP}(-1))  =  0
+\end{align}
+
+To simplify this further, take the 2nd order Taylor expansion of consider $\alpha_{\PP}(-1) = \psi + \frac{1}{2}(1 - \phi^2)
+(-1)$. 
+Plugging that in, we have the following equations, and imposing linearity on $\gamma_{\PP}$ and $\beta_{\PP}$.
+
+\begin{align}
+    \gamma_{\PP}(v) &= - \gamma_{\PP}(-1) v = v b_{\PP}\left(\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)  \\
+    \beta_{\PP}(v) &= - \gamma_{\PP}(-1) v = v a_{\PP}\left(\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)  
+\end{align}
+
 
 \begin{align}
     \gamma (\theta - 1) + c \delta \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right) &= \gamma
@@ -825,6 +843,22 @@ prices of other types of risk such as skewness risk and kurtosis risk.
 The two equations above implicitly define $\theta$, $\pi$, as functions of $\psi$ and $\phi$.
 Note, as is standard in this environment, we have an equilibrium relationship in terms of various parameters.
 We are not making any causal claims here, just econometric ones.
+
+Equivalently, we can solve for $\psi$ and $\gamma$ as functions of the other parameters.
+This is a natural reparameterization because $\psi$ and $\beta$ are the two physical measure parameters that are
+drive the conditional risk premia and hence are determined by the risk prices.
+
+\begin{defn}
+    \begin{align}
+        \gamma(c, \delta, \pi, \theta)  &\coloneqq c \delta \left[\left(\pi + \psi \theta + \phi
+        \frac{\theta^2}{2} \right)  - \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right)
+        \right]\\ 
+%
+    \beta (\theta - 1) + \rho \left(\pi + \psi (\theta-1)  + \phi \frac{(\theta -1)^2}{2}\right)
+    &= \beta \theta + \rho \left(\pi + \psi \theta  + \phi \frac{\theta^2}{2}\right) 
+    \end{align}
+\end{defn}
+
 
 
 \section{GMM}\label{sec:GMM}
@@ -840,31 +874,34 @@ population values.
 They define an population relationship between the parameters implicitly defining the risk prices in terms of the
 other parameters. 
 
+First, we define two functions that we use to reparameterize the moment conditions.
+We do this because the model creates some cross-equation equations to eliminate two of the redundant parameters.
+By doing this we are able to avoid the econometric complications that we would have to handle in the general
+case.
+
 
 \begin{defn}{Equilibrium Conditions}
-\begin{align}
-    \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= \rho \sigma^2_t  + c \delta\\
-%
-    \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
-%
-    \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
-%
-    \Var\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2}  \left(\frac{2 \rho \delta}{1 - \rho}  + \omega
-    \right)  \\
-%
-    \label{eqn:market_risk_price}
-    \E\left[r_{t+1} \mvert \sigma^2_t\right] &= \gamma + \beta (\rho \sigma^2_t + c \delta) + \sigma_{t+1}
-    \left(\phi e_{1,t}  + \sqrt{1 - \phi^2} e_{2,t}\right) + e_{3,t} \\
-%
-    \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma + (\beta + \psi) \sigma^2_{t+1}  +
-    \sigma_{t+1} \sqrt{1 - \phi^2}  e_{2,t} + e_{2,t} \\
-%
-    \gamma (\theta - 1) + c \delta \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right) &= \gamma
-    \theta + c \delta \left(\pi + \psi \theta + \phi \frac{\theta^2}{2} \right) \\ 
-%
-    \beta (\theta - 1) + \rho \left(\pi + \psi (\theta-1)  + \phi \frac{(\theta -1)^2}{2}\right)
-    &= \beta \theta + \rho \left(\pi + \psi \theta  + \phi \frac{\theta^2}{2}\right) 
-\end{align}
+    \begin{align}
+        \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= \rho \sigma^2_t  + c \delta\\
+    %
+        \E\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
+    %
+        \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
+    %
+        \Var\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2}  \left(\frac{2 \rho \delta}{1 - \rho}  +
+        \omega \right)  \\
+    %
+        \label{eqn:market_risk_price}
+        \E\left[r_{t+1} \mvert \sigma^2_t\right] &= \gamma + \beta (\rho \sigma^2_t + c \delta)  \\
+    %
+        \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma + (\beta + \psi) \sigma^2_{t+1}  \\
+    %
+        \gamma (\theta - 1) + c \delta \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right) &=
+        \gamma \theta + c \delta \left(\pi + \psi \theta + \phi \frac{\theta^2}{2} \right) \\ 
+    %
+        \beta (\theta - 1) + \rho \left(\pi + \psi (\theta-1)  + \phi \frac{(\theta -1)^2}{2}\right)
+        &= \beta \theta + \rho \left(\pi + \psi \theta  + \phi \frac{\theta^2}{2}\right) 
+    \end{align}
 \end{defn}
 
 To fully specify the GMM conditions, we need to also specify the instruments we are using.
