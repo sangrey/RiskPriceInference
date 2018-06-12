@@ -254,6 +254,7 @@ To simplify the exposition, we will reparameterize these equations.
 Essentially, we will give these derivatives names.
 
 \begin{defn}{Volatility Dynamics Parameters}
+    \label{defn:vol_dynamics_params}
     \begin{align}
         \rho &\coloneqq a_{\PP}'(0) \in (0,1) \\
         c &\coloneqq - \frac{a_{\PP}''(0)}{2 a_{\PP}'(0)} > 0 \\
@@ -814,7 +815,7 @@ If we wanted to make the equations hold with respect to a higher-order approxima
 prices of other types of risk such as skewness risk and kurtosis risk.
 
 Before, we continue to simplify the equations, there is another asset pricing restriction that we should impose.
-If the risk prices --- $\theta$ --- equal zero, then the expected return should be zero.
+If the risk prices equal zero, then the expected return should be zero.
 Then by noting that the physical measure functions equal zero when evaluated at zero, we have the following.
 
 \begin{align}
@@ -822,31 +823,63 @@ Then by noting that the physical measure functions equal zero when evaluated at 
     \beta_{\PP}(-1) + a_{\PP}(\alpha_{\PP}(-1))  =  0
 \end{align}
 
-To simplify this further, take the 2nd order Taylor expansion of consider $\alpha_{\PP}(-1) = \psi + \frac{1}{2}(1 - \phi^2)
-(-1)$. 
+To simplify this further, take the 2nd order Taylor expansion of consider $\alpha_{\PP}(-1) = -\psi -
+\frac{1}{2}(1 - \phi^2)$. 
 Plugging that in, we have the following equations, and imposing linearity on $\gamma_{\PP}$ and $\beta_{\PP}$.
 
 \begin{align}
-    \gamma_{\PP}(v) &= - \gamma_{\PP}(-1) v = v b_{\PP}\left(\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)  \\
-    \beta_{\PP}(v) &= - \gamma_{\PP}(-1) v = v a_{\PP}\left(\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)  
+    \gamma_{\PP}(v) &= - \gamma_{\PP}(-1) v = v b_{\PP}\left(-\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)
+    \\
+    \beta_{\PP}(v) &= - \beta_{\PP}(-1) v = v a_{\PP}\left(-\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)
 \end{align}
+
+We can simplify \cref{eqn:identification_eqn_1} and \cref{eqn:identification_eqn_2} as follows.
+
+\begin{align}
+    -\gamma  + b_{\PP}\left(\pi + \alpha_{\PP}(\theta - 1)\right) &=  b_{\PP}(\pi + \alpha_{\PP}(\theta))  \\
+%
+    - a_{\PP}\left(-\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)  + a_{\PP}(\pi + \alpha_{\PP}(\theta -1)) 
+    &= a_{\PP}(\pi + \alpha_{\PP}(\theta)) 
+\end{align}
+
+We now solve for $\psi$ and $\gamma$ as functions of the other parameters.
+This is a natural reparameterization because $\psi$ and $\beta$ are the two physical measure parameters that are
+drive the conditional risk premia and hence are determined by the risk prices.
+
+To do this, we will adopt the following parameterization for $a_{\PP}(v)$  and $b_{\PP}(v)$. 
+These two functions will have the correct first two moments by construction.
+They might have (potentially) incorrect higher-order moments, but since we are only using conditional moments of
+the data, as long as those are sufficient to identify the parameters, we will get correct inference on the
+parameters of interest. 
+This paramterization, which was used in \textcite{krapov2017affine}, is the paramterization used in the
+firt-order autoregressive conditional autoregressive process there.
 
 
 \begin{align}
-    \gamma (\theta - 1) + c \delta \left(\pi + \psi(\theta - 1) + \phi \frac{(\theta - 1)^2}{2}\right) &= \gamma
-    \theta + c \delta \left(\pi + \psi \theta + \phi \frac{\theta^2}{2} \right) \\ 
-%
-    \beta (\theta - 1) + \rho \left(\pi + \psi (\theta-1)  + \phi \frac{(\theta -1)^2}{2}\right)
-    &= \beta \theta + \rho \left(\pi + \psi \theta  + \phi \frac{\theta^2}{2}\right) 
+    a_{\PP}(v) &\coloneqq \frac{\rho v}{1 + c v} \\
+    b_{\PP}(v) &\coloneqq \delta \log(1 + c v) 
 \end{align}
+
+
+
+
+
+\begin{alignat}{2}
+    &\hphantom{\implies} - a_{\PP}\left(-\psi - \frac{1}{2}\left(1 - \phi^2\right)\right)  + a_{\PP}(\pi +
+      \alpha_{\PP}(\theta -1)) 
+    &&= a_{\PP}(\pi + \alpha_{\PP}(\theta))  \\
+%
+    &\implies \rho \left[\psi +  \frac{1}{2}\left(1 - \phi^2\right)\right]  - \rho c \left[\psi + \frac{1}{2}\left(1
+      - \phi^2\right)\right]^2 
+    &&= a_{\PP}(\pi + \alpha_{\PP}(\theta)) - a_{\PP}(\pi + \alpha_{\PP}(\theta -1))  \\
+\end{alignat}
+
+
 
 The two equations above implicitly define $\theta$, $\pi$, as functions of $\psi$ and $\phi$.
 Note, as is standard in this environment, we have an equilibrium relationship in terms of various parameters.
 We are not making any causal claims here, just econometric ones.
 
-Equivalently, we can solve for $\psi$ and $\gamma$ as functions of the other parameters.
-This is a natural reparameterization because $\psi$ and $\beta$ are the two physical measure parameters that are
-drive the conditional risk premia and hence are determined by the risk prices.
 
 \begin{defn}
     \begin{align}
