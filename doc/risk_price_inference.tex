@@ -473,6 +473,9 @@ We can then substitute in the risk-neutral distributions.
 \begin{align}
     \label{eqn:beta_function}
     \beta_{\PP}'(0)  &= a_{\QQ}\left(-\psi_{\QQ} - \frac{1}{2} (1- \phi^2)\right)   \\
+%
+    \intertext{Some algebra leads to the following.}
+%
     &= c^{2} \omega \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
        \left(1- \phi^{2}\right) - \frac{1}{2}\right)^{2}  \\
     &\quad + c \delta \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
@@ -484,11 +487,47 @@ We can perform a similar simplification for $\gamma_{\PP}'(0)$.
 \begin{align}
     \label{eqn:gamma_function}
     \gamma_{\PP}'(0)  &= b_{\QQ}\left(-\psi_{\QQ} - \frac{1}{2} (1- \phi^2)\right)  \\
+%
+    \intertext{Again after some algebra.}
+%
                      &= c^{2} \omega \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} -
                         \frac{\theta^{2}}{2} \left(1 - \phi^{2} \right) - \frac{1}{2}\right)^{2}   \\
                      &\quad + c \delta \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} -
                        \frac{\theta^{2}}{2} \left(1- \phi^{2}\right) - \frac{1}{2}\right) \nonumber 
 \end{align}
+
+The key issue with  \cref{eqn:beta_function} and \cref{eqn:gamma_function} is that they are both truncated Taylor
+series expansions. 
+The questions is what does this mean?
+First, if $\left. \sigma^2_{t+1} \mvert \sigma^2_t \right.$ and $\left. r_{t+1} \mvert  \sigma^2_{t+1}\right.$
+are Gaussian distributed this simplification is hold exactly.
+The log-cumulant function of a Gaussian variable truncates after the first two terms.
+
+In general, this is should be viewed as an approximation.
+Economically, what does this approximation do?
+We start by considering the approximation for the volatility.
+First, consider the case where  the higher-order moments of the distribution of $\left. \sigma^2_{t+1}
+\mvert \sigma^2_t \right.$ are constant. 
+In this case, there might be a risk-premia associated with these higher-order moments but this risk-premia is
+constant.
+We cannot have a time-varying risk-premia that is driven by a constant.
+In general, even if these higher-order moments are time-varying, it will not affect our analysis here as long as
+that time-variation is independent of $\sigma^2_t$.
+A careful reader might notice that the constant case is a special case of this because deterministic variation is
+independent  of stochastic variation.
+Of course in the general case, this will not hold.
+There will be higher-order variation in these moments as a function of $\sigma^2_t$. 
+As long as this higher-order variation is not associated with a large amount of time-variation in risk premia our
+estimation procedure will still work well in practice.
+
+The situation for $\left. r_{t+1} \mvert \sigma^2, \sigma^2_{t+1} \right.$ is similar.
+Again we are replacing an arbitrary function with a 2nd-order Taylor expansion.
+In the conditionally case, this is without loss of generality.
+In general, however, it is not.
+There is one key difference, though, since we are trying to identify the price of equity and volatility risk,
+i.e.\@ the risk associated with time-variation in the first two motets, ignoring time-variation in the higher
+moments is actually what we want to do in the general case.
+We do not want to confuse time-varying skewness risk with time-varying vitality risk.
 
 The one value in the above expressions we do know know is $\psi_{\QQ}$. 
 Again using \textcite[Proposition 5]{khrapov2016affine}, we can relate $\psi_{\PP}$ and $\psi_{\QQ}$ as in their
@@ -527,10 +566,9 @@ Having made that assumption that we can solve for $\psi_{\PP}$ as follows.
 \begin{equation}
     \psi_{\PP}  = \phi \sqrt{\frac{\E_{\PP}(\sigma^2_{t+1})}{\E_{\PP}\left(\Var_{\PP}(\sigma^2_{t+1}) \mvert \F_t
     \right) }}
-    = \phi \sqrt{\frac{\delta}{2 \delta + c \omega (1 - \rho}}
+    = \phi \sqrt{\frac{\delta}{2 c \delta \rho + c \omega (1 - \rho)}}
     \label{eqn:psi_function}
 \end{equation}
-
 
 
 \subsection{Identification of the Risk Prices}
@@ -664,21 +702,27 @@ log-cumulant function equaling the conditional mean.
 
 
 \begin{defn}{Equilibrium Moment Conditions}
+    \label{defn:equilibrium_moment_conditions}
     \begin{align}
+        \label{eqn:cond_vol_mean}
         \E_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= \rho \sigma^2_t  + c \delta\\
 %
+        \label{eqn:global_vol_mean}
         \E_{\PP}\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
 %
+        \label{eqn:cond_vol_var}
         \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
 %
+        \label{eqn:global_vol_var}
         \Var_{\PP}\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2}  \left(\frac{2 \rho \delta}{1 - \rho}  +
         \omega \right)  \\
 %
+        \label{eqn:cond_expected_rtn_moment}
         \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\theta, \pi, \phi, \delta, c,
         \omega, \rho) + \beta(\theta, \pi, \phi, \delta, c, \omega, \rho) \sigma^2_t + \psi_{\PP}(\delta, c, \omega,
         \rho) \sigma^2_{t+1} \\
-        \label{eqn:cond_expected_rtn_moment}
 %
+        \label{eqn:cond_rtn_var}
         \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= (1 - \phi^2) \sigma^2_{t+1} 
 \end{align}
 \end{defn}
@@ -693,8 +737,8 @@ However, we need more than one instrument in order to be identified.
 The way around this is to notice that although we assumed first-order Markov, we did not assume that the
 transition was linear. 
 
-To see this more fully, note that the volatility risk price is being identified through the part of $\psi_{\PP}$ above
-and beyond a Jensen inequality effect.
+To see this more fully, note that the volatility risk price is being identified through the part of $\psi_{\PP}$
+above and beyond a Jensen inequality effect.
 Consequently, we use lags of the volatility and powers of those lags as instruments.
 In principle, we would only need to use powers of $\sigma^2_t$ as long as we used enough of them.
 However, since in practice we are using an estimate of $\sigma^2_t$, using additional lags instead of very high
@@ -711,6 +755,51 @@ powers of $\sigma^2_t$ will likely perform better in practice.
 
 Having constructed the moments and the instruments, we can use GMM to estimate the parameters.
 We do need to run a constricted optimization though, because only certain values of the parameters are valid. 
+
+\begin{lemma}{Identified Set}
+    
+    Let the true parameter vector $\eta \coloneqq (\rho, c, \delta, \omega, \phi, \theta, \pi) \in [-1+\epsilon_1,
+    1 - \epsilon_2] \times [M_1, M_2] \times [\epsilon_4, M_4]\times [M_5, M_6]\times [M_7, M_8] \times [-1 +
+    \epsilon_4, 1 - \epsilon_5] \times [M_9, M_10] \times [M_12, M_13]$, where the $M_{\ast}$ are some large (in
+    magnitude) known constants and the $\epsilon_{\ast}$ are some small positive constants.  
+
+    Let $Q_T(\eta, X)$  be the GMM objective function with moment conditions given in
+    \cref{defn:equilibrium_moment_conditions} and instruments given in  \cref{defn:instruments}.
+
+    If there exists a $\epsilon$ such that $\abs{\phi} > \epsilon > 0$, then all of the parameters are identified. 
+    If $\phi = 0$, then the objective function is independent of $\pi$, and so $\pi$ is not identified but all of
+    the other parameters are still identified.
+
+\end{lemma}
+
+\begin{proof}
+    Identifying the four parameters that govern the volatility dynamics is not particularly complicated. 
+    We have four parameters and four non-redundant moment conditions.
+
+    The first two equations in    \cref{defn:equilibrium_moment_conditions} identify $\rho$ and $c \delta$.
+    \cref{eqn:cond_vol_var} identifies $c$ and $c^2 \omega$. 
+    This allows us to separately identify $c$ and $\delta$.
+    We can then use to  \cref{eqn:global_vol_var} to determine $\omega$ since \cref{eqn:cond_vol_var} and
+    \cref{eqn:global_vol_var} are linear functions of $\omega$, but have different slopes. 
+    
+    Identifying the other reduced-form parameter is also straightforward. 
+    Identifying $\phi$ is also relatively straightforward. Since $r_{t+1}$ and $\sigma^2_{t+1}$ are known, as long
+    as we know the conditional mean $\phi$ is identified by \cref{eqn:cond_rtn_var}.
+    
+    Since we have enough a sufficient number of exogenous valid instruments the conditioning implied by projecting
+    on the instruments does not affect the arguments above. 
+
+    Identifying the risk prices $\pi$ and $\theta$ is more complicated.
+    We have to identify both parameters off of \cref{eqn:cond_expected_rtn_moment}. 
+    This is in principle possible because we now have two non-redundant sources of variation in the data ---
+    $\sigma^2_t$ and $\sigma^2_{t+1}$.
+
+    The first part we have to show is that the equity and volatility risk prices are correctly parameterized by
+    \cref{eqn:cond_expected_rtn_moment}.
+    By definition $\pi$ and $\theta$ should only lead to higher-returns as the result of time-variation in either
+    the volatility or the return.
+    
+\end{proof}
 
 
 \section{Weak Identification Setup}
