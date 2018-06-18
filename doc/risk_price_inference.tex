@@ -644,13 +644,16 @@ Since returns are conditionally Gaussian with respect to the risk-neutral measur
 \end{align}
 
 
-We now turn to using the law of total variance to derive  formula for $\psi$.
-From its definition $\psi_{\QQ} = k_{\QQ} \phi + \frac{1 - \phi^2}{2}$.
-The question at hand is what is $k_{\QQ}$?
+We now turn to using the law of total variance to compute what $k_{\QQ}$ is. 
+The key thing to note is that this is in terms of log-returns, not prices.
+Consequently, the correct conditional mean to use is $k \phi$. 
+We should not include the Jensen-inequality term --- $\frac{1 - \phi^2}{2}$.
+Consequently, the following decomposition holds.
+
 
 \begin{align}
     \Var_{\QQ}\left[r_{t+1} \mvert \sigma^2_t\right]  &= (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1} \mvert
-    \sigma^2_t \right] + \psi_{\QQ}^2 \Var_{\QQ}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  \\
+    \sigma^2_t \right] + k^2 \phi^2 \Var_{\QQ}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  \\
 %
     \intertext{Taking expectations of both sides.}
 %
@@ -658,30 +661,25 @@ The question at hand is what is $k_{\QQ}$?
     \E_{\QQ}\left[\sigma^2_{t+1} \right] + \psi_{\QQ}^2 \E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert
     \sigma^2_t \right]\right]  \\
 %
-    \intertext{Plugging in the formula from \cref{eqn:expectations}.}
-%
-    \implies (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1} \right]  + k^2 \phi^2 \E_{\QQ}\left[\Var(\sigma^2_{t+1}
-    \mvert \sigma^2_t ) \right]  &= (1 - \phi^2)
-    \E_{\QQ}\left[\sigma^2_{t+1} \right] + \psi_{\QQ}^2 \E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert
-    \sigma^2_t \right]\right]  \\
-%
     \intertext{Rearranging terms.}
 %
-    \implies \psi_{\QQ}^2 &= \frac{\E_{\QQ}\left[r^2_{t+1} \right] -  (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1}
+    \implies k^2 \phi^2 &= \frac{\E_{\QQ}\left[r^2_{t+1} \right] -  (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1}
     \right]}{\E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]\right]}
     \label{eqn:psi_qq_as_corr}
 \end{align}
 
 We now follow \textcite{khrapov2016affine} with one main caveat. 
-We assume that $\E\left[\Var_{\QQ}\left(r_{t+1} \mvert \sigma^2_t\right)\right] = \E\left[\sigma^2_{t+1}\right]$.
+We assume that $\E_{\QQ}\left[\Var_{\QQ}\left(r_{t+1} \mvert \sigma^2_t\right)\right] =
+\E\left[\sigma^2_{t+1}\right]$.
 They had made the same assumption using the physical measure instead of the risk-neutral one.
-It is more natural to make the assumption in the risk-neutral measure because in that measure we have the
-following decomposition. 
 
-\begin{equation}
-    r_{t+1} = \E\left[r_{t+1} \mvert \sigma^2_{t}\right]  + \sigma_{t+1} \text{innovation}
-    \label{eqn:return_decomp}
-\end{equation}
+\purple{
+Since we are using realized volatility to measure variance, we have the following aggregation property
+$\E_{\QQ}\left[\sigma^2_{t+} \mvert \sigma^2_t\right] = \E_{\PP} \left[\Var_{\PP}\left(r_{t+1} \mvert
+\sigma^2_{t+1}\right) \mvert \sigma^2_t \right]$.\footnote{In continuous-time this is known as the It\^{o}
+Isometry.}
+\purple{We are also assuming that there is no change in the drift as a function of $\sigma^2_{t+1}$.}
+}
 
 %TODO This could be made more clear.
 However, here $\E\left[r_{t+1} \mvert \sigma^2_{t}\right] = 0$.
