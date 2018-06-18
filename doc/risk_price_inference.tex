@@ -208,6 +208,7 @@ and then integrate out all of the unknown variables using their marginal distrib
 Hence, we can represent out model under the physical measure as follows for some functions $a_{\PP}, b_{\PP},
 \alpha_{\PP}, \beta_{\PP}$, and $\gamma_{\PP}$ for all $v$ in its domain.
 
+
 \begin{restatable}[The Limited Information Model under the Physical Measure]{defn}{physicalMeasureModel}
     \label{defn:physical_model}
     \begin{align}
@@ -217,6 +218,7 @@ Hence, we can represent out model under the physical measure as follows for some
         \sigma^2_{t+1} - \beta_{\PP}(v)\sigma^2_t - \gamma_{\PP}(v) \right) 
     \end{align}
 \end{restatable}
+
 
 The difficult part moving forward is that we are identifying risk prices, which are  parameters of the stochastic
 discount factor (SDF), but since we only observe equity data, we only observe the physical measure.
@@ -345,6 +347,14 @@ I now introduce some notation to simplify the expression we have here.
     \psi_{\PP} &\coloneqq \alpha_{\PP}'(0)
 \end{align}
 
+This implies that $\alpha_{\PP}(v)$ has the following truncated Taylor series expansion around zero since
+$\alpha_{\PP}(0) = 0$.
+
+\begin{equation}
+    \label{eqn:alpha_PP_expansion}
+    \alpha_{\PP}(v) = \psi v + \frac{1 - \phi^2}{2} v^2
+\end{equation}
+
 We can then use the law of total variance to compute $\Var_{\PP}\left[r_{t+1} \mvert \F_t\right]$ and the law of
 iterated expectations to compute $\E\left[r_{t+1} \mvert \F_t \right]$.
 
@@ -440,6 +450,23 @@ In this case, the Laplace functions maintain the same structure for some functio
     \end{align}
 \end{restatable}
 
+%TODO Explain where this is coming from.
+The key question moving forward is what do we use for $a_{\QQ}$. 
+Following \textcite{khrapov2016affine}, we assume that the volatility follows a first-order autoregressive gamma
+process.
+This implies that $a_{\QQ}$ has the following form for some function $\rho_{\QQ}$ and $c_{\QQ}$, which are the
+risk-neutral analogues of the $\rho$ and $c$ we defined above.
+
+\begin{defn}{Volatility Dynamics Functions}
+    \begin{align}
+        \label{defn:a_QQ}
+        a_{\QQ}(v) &= \frac{\rho_{\QQ} v}{1 + c_{\QQ} v} \\
+        \label{defn:b_QQ}
+        b_{\QQ}(v) &= \delta \log(1 + c_{\QQ} v)
+    \end{align}
+\end{defn}
+
+
 We will maintain the same paramters in this measure as we did before, and use subscript $\QQ$ to notate that they
 no longer refer to the same measure.
 For example, $\psi_{\QQ} \coloneqq \alpha_{\QQ}'(0)$ and $\phi_{\QQ} = \sqrt{1 - \abs*{\alpha''(0)}}$.
@@ -461,12 +488,17 @@ risk-netural measure functions.
 Risk-neutrality means that the expectation of $\exp(r_{t+1})$.
 
 \begin{align}
-    1 &= \E_{\QQ}\left[\E_{\QQ}\left[\exp(r_{t+1} \mvert \sigma_t^2 \sigma^2_{t+1}\right]  \mvert \sigma^2_t
+    1 &= \E_{\QQ}\left[\E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma_t^2, \sigma^2_{t+1}\right]  \mvert \sigma^2_t
         \right] \\
+%
       \intertext{This is the conditional Laplace transform evaluated at $-1$.}
+%
+      \label{eqn:risk_neutral_at_neg_1}
       &= \E_{\QQ}\left[ \exp\left(-\alpha_{\QQ}(-1) \sigma^2_{t+1}\right)  \mvert \sigma^2_t \right] 
          \exp\left(-\beta_{\QQ}(-1) \sigma^2_t - \gamma_{\QQ}(-1)\right)   \\
+%
       \intertext{The first term is the Laplace transform evaluated at $\alpha(-1)$.}
+%
       &= \exp(-a_{\QQ}(\alpha_{\QQ}(-1)) \sigma^2_t - b_{\QQ}(\alpha_{\QQ}(-1))) \exp\left(-\beta_{\QQ}(-1)
          \sigma^2_t - \gamma_{\QQ}(-1)\right)  
 \end{align}
@@ -478,132 +510,233 @@ Since this equation must hold for all $\sigma_t^2$, we have the following two eq
     b_{\QQ}(\alpha_{\QQ}(-1)) = - \gamma_{\QQ}(-1) 
 \end{align}
 
-We can take quadratic expansions of the $\alpha_{\QQ}$ function and linear forms for $\beta_{\QQ}$ and
-$\gamma_{\QQ}$. 
+
+%TODO Added assumption.
+
+The return's conditionally Gaussian distribution implies that $\alpha_{\QQ}$ is a quadratic function, with an
+expansion as in \cref{eqn:alpha_PP_expansion}.
+In addition, as discussed above $\beta_{\QQ}$ and $\gamma_{\QQ}$ will be linear functions. 
+This linearity implies that the physical and risk-neutral forms of these functions will coincide. 
+%TODO Explain why this has to be case.
+% This directly follows from \cref{eqn:sdf_functions_vs_physical_functions}.
 We can replace the last two functions with their physical counterparts because linearity implies they
 coincide. 
 We can then substitute in the risk-neutral distributions.
 
-%TODO Replace this.
+\begin{gather}
+    \label{eqn:beta_qq_at_minus_one}
+    \phantom{\implies}   - \beta_{\PP}(-1) = a_{\QQ}(\alpha_{\QQ}(-1))\\
+%
+    \intertext{Filling in Taylor series expansions of $\beta_{\PP}$ and $\alpha_{\QQ}$ and recalling that
+    $\phi_{\QQ} = \phi_{\PP}$ implies.}
+%
+    \implies \beta_{\PP}'(0) = a_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
+%
+    \intertext{Then we can fill in the formula for $a_{\QQ}$ from \cref{defn:a_QQ}.}
+%
+    \implies \beta_{\PP}'(0) = \frac{\rho_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)}{1 + c_{\QQ}
+    \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)} 
+    \label{eqn:beta_function_QQ}
+\end{gather}
+
+Before we derive $\rho_{\QQ}$, $c_{\QQ}$, and $\psi_{\QQ}$ in terms of the physical measure functions, we perform
+a similar calculation for $\gamma_{\QQ}(-1)$.
+
+%TODO explain where $\delta$ is the same under the risk-neutral and physical measures.
+
+\begin{gather}
+    \label{eqn:gamma_qq_at_minus_one}
+    \phantom{\implies}   - \gamma_{\PP}(-1) = b_{\QQ}(\alpha_{\QQ}(-1))\\
+%
+    \intertext{Again taking Taylor series expansions of $\gamma_{\PP}$ and $\alpha_{\QQ}$.}
+%
+    \implies \gamma_{\PP}'(0) = b_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
+%
+    \intertext{Then we can fill in the formula for $b_{\QQ}$ from \cref{defn:b_QQ}.}
+%
+    \implies \gamma_{\PP}'(0) = \delta \log\left(1 + c_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1-
+    \phi^2)\right)\right)
+    \label{eqn:gamma_function_QQ}
+\end{gather}
+
+To simplify \cref{eqn:beta_function} and \cref{eqn:gamma_function} further, we need to solve for $c_{\QQ}$,
+$b_{c_\QQ}$, and $\psi_{\QQ}$  in terms of their physical counterparts.
+We can take the equations in \textcite[Proposition 5]{khrapov2016affine} and differentiate and derive the following
+relationship between $a_{\QQ}, b_{\QQ}$ and $a_{\PP}, b_{\PP}$.
 
 \begin{align}
-    \label{eqn:beta_function}
-    \beta_{\PP}'(0)  &= a_{\QQ}\left(-\psi_{\QQ} - \frac{1}{2} (1- \phi^2)\right)   \\
+    a_{\QQ}'(v) &= a_{\PP}'(v + \pi + \alpha_{\PP}(\theta))  \nonumber \\
 %
-    \intertext{Some algebra leads to the following.}
+    b_{\QQ}'(v) &= b_{\PP}'(v + \pi + \alpha_{\PP}(\theta))  \\
 %
-    &= c^{2} \omega \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
-       \left(1- \phi^{2}\right) - \frac{1}{2}\right)^{2}  \\
-    &\quad + c \delta \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
-      \left(1 - \phi^{2} \right) - \frac{1}{2}\right)  \nonumber
+    b_{\QQ}''(v) &= b_{\PP}''(v + \pi + \alpha_{\PP}(\theta))  \nonumber \\
+%
+    \intertext{Filling in parameterization of the right-hand sides, and evaluating the equations at $0$ gives the
+    following.} 
+%
+    a_{\QQ}'(0) &= \frac{\rho_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \nonumber \\
+%
+    b_{\QQ}'(0) &= \frac{c_{\PP} \delta_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \\
+%
+    b_{\QQ}''(0) &= -\frac{c_{\PP}^2 \delta_{\PP}}{(1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2)))^2} \nonumber \\
+%
+    \intertext{Then since the right hand sides of the equation above are $\rho_{\QQ}$ and $c_{\QQ} \delta$, we
+    have the following expressions.}
+%
+    \rho_{\QQ} &= \frac{\rho_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \nonumber \\
+%
+    \label{eqn:c_rho_delta_QQ}
+    c_{\QQ} \delta_{\QQ} &= \frac{c_{\PP} \delta_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))}  \\
+%
+    -c_{\QQ}^2 \delta_{\QQ} &= -\frac{c_{\PP}^2 \delta_{\PP}}{(1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2)))^2}
+    \nonumber
 \end{align}
 
-We can perform a similar simplification for $\gamma_{\PP}'(0)$.
-
-\begin{align}
-    \label{eqn:gamma_function}
-    \gamma_{\PP}'(0)  &= b_{\QQ}\left(-\psi_{\QQ} - \frac{1}{2} (1- \phi^2)\right)  \\
-%
-    \intertext{Again after some algebra.}
-%
-                     &= c^{2} \omega \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} -
-                        \frac{\theta^{2}}{2} \left(1 - \phi^{2} \right) - \frac{1}{2}\right)^{2}   \\
-                     &\quad + c \delta \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} -
-                       \frac{\theta^{2}}{2} \left(1- \phi^{2}\right) - \frac{1}{2}\right) \nonumber 
-\end{align}
-
-The key issue with  \cref{eqn:beta_function} and \cref{eqn:gamma_function} is that they are both truncated Taylor
-series expansions. 
-The questions is what does this mean?
-First, if $\left. \sigma^2_{t+1} \mvert \sigma^2_t \right.$ and $\left. r_{t+1} \mvert  \sigma^2_{t+1}\right.$
-are Gaussian distributed this simplification is hold exactly.
-The log-cumulant function of a Gaussian variable truncates after the first two terms.
-
-In general, this is should be viewed as an approximation.
-Economically, what does this approximation do?
-We start by considering the approximation for the volatility.
-First, consider the case where  the higher-order moments of the distribution of $\left. \sigma^2_{t+1}
-\mvert \sigma^2_t \right.$ are constant. 
-In this case, there might be a risk-premia associated with these higher-order moments but this risk-premia is
-constant.
-We cannot have a time-varying risk-premia that is driven by a constant.
-In general, even if these higher-order moments are time-varying, it will not affect our analysis here as long as
-that time-variation is independent of $\sigma^2_t$.
-A careful reader might notice that the constant case is a special case of this because deterministic variation is
-independent  of stochastic variation.
-Of course in the general case, this will not hold.
-There will be higher-order variation in these moments as a function of $\sigma^2_t$. 
-As long as this higher-order variation is not associated with a large amount of time-variation in risk premia our
-estimation procedure will still work well in practice.
-
-The situation for $\left. r_{t+1} \mvert \sigma^2, \sigma^2_{t+1} \right.$ is similar.
-Again we are replacing an arbitrary function with a 2nd-order Taylor expansion.
-In the conditionally case, this is without loss of generality.
-In general, however, it is not.
-There is one key difference, though, since we are trying to identify the price of equity and volatility risk,
-i.e.\@ the risk associated with time-variation in the first two motets, ignoring time-variation in the higher
-moments is actually what we want to do in the general case.
-We do not want to confuse time-varying skewness risk with time-varying vitality risk.
-
-The one value in the above expressions we do know know is $\psi_{\QQ}$. 
-Again using \textcite[Proposition 5]{khrapov2016affine}, we can relate $\psi_{\PP}$ and $\psi_{\QQ}$ as in their
-Equation 3.13, we can relate $\psi_{\QQ}$ and $\psi_{\PP}$.
+To simplify notation, define the following rescaling function.
 
 \begin{equation}
-    \psi_{\QQ} = \psi_{\PP} - (1- \phi^2) \theta 
+    \chi(\pi, \theta) \coloneqq 1 + c_{\PP}(\pi + \alpha_{\PP}(\theta))
 \end{equation}
 
-This is not necessarily useful because we have not derived $\psi_{\PP}$.
-Recall the decomposition of the $\Var\left(r_{t+1} \mvert \F_t\right)$ in \cref{eqn:ltv_rtn_variance}.
+We can use \cref{eqn:c_rho_delta_QQ} and substitute in $\chi(\pi, \theta)$ to get the following.
 
 \begin{align}
-    \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t\right]  &= (1 - \phi^2) \E_{\PP}\left[\sigma^2_{t+1} \mvert
-    \sigma^2_t \right] + \psi_{\PP}^2 \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  \\
-%
-    \implies \E_{\PP}\left[\Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t\right]\right]  &= (1 - \phi^2)
-    \E_{\PP}\left[\sigma^2_{t+1} \right] + \psi_{\PP}^2 \E_{\PP}\left[\Var_{\PP}\left[\sigma^2_{t+1} \mvert
-    \sigma^2_t \right]\right]  \\
-%
-    \implies \psi_{\PP} &= \frac{\E_{\PP}\left[\Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t\right]\right] -  (1 -
-    \phi^2) \E_{\PP}\left[\sigma^2_{t+1} \right]}{\E_{\PP}\left[\Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t
-    \right]\right] }
+    \delta_{\QQ} &= \delta_{\PP} \\
+    \rho_{\QQ} &= \frac{\rho_{\PP}}{\chi^2(\pi, \theta)} \\
+    c_{\QQ} &= \frac{c_{\PP}}{\chi(\pi, \theta)} 
 \end{align}
 
-Following \textcite{khrapov2016affine}, we assume that $\E\left[\Var_{\PP}\left(r_{t+1} \mvert
-\sigma^2_t\right)\right] = \E\left[\sigma^2_{t+1}\right]$. 
-This is equivalent to assume that the predictable part of continuous-time return in $r_{t+1}$  is
-$\F_{t}$-measurable.
-In other words, the continuous-time and discrete-time risk premia coincide.
-Note, this is statement is about the predictable part of the return, it is not about the information content in
-the volatility. 
+The one value we have yet to derive is $\psi_{\QQ}$.
+Again we use \textcite[Proposition 5]{khrapov2016affine}, to relate $\psi_{\PP}$ and $\psi_{\QQ}$. 
+Since the $\alpha$ functions are quadratic, we have the following.
 
-Having made that assumption that we can solve for $\psi_{\PP}$ as follows.
+\begin{align}
+    \alpha_{\QQ}(v) = \psi_{\QQ} v + \frac{1- \phi^2_{\QQ}}{2} v^2  \\
+%
+    \alpha_{\PP}(v) = \psi_{\PP} v + \frac{1- \phi^2_{\PP}}{2} v^2  
+%
+    \intertext{As in \cref{eqn:risk_neutral_at_neg_1}, $\alpha_{\QQ}(-1) = \alpha_{\PP}(\theta)$, recalling that
+        $\phi_{\PP} = \phi_{\QQ}$, we can differentiate and get the following.}
+%
+    \implies \alpha_{\QQ}'(0) = \alpha_{\PP}'(0) + (1 - \phi^2) \theta
+%
+    \implies \psi_{\QQ} = \psi_{\PP} + (1 - \phi^2) \theta
+\end{align}
+
+This is not necessarily useful because we have not derived $\psi_{\PP}$, and so we have no way to estimate it.
+Recall the decomposition of the $\Var\left(r_{t+1} \mvert \F_t\right)$ in \cref{eqn:ltv_rtn_variance}.
+We repeat that decomposition here, but do so using the risk-neutral distribution, not the physical one.
+
+First, note the following. 
+Since returns are conditionally Gaussian with respect to the risk-neutral measure. 
+
+\begin{align} 
+    \label{eqn:expectations}
+    \exp(r_{t+1}) &\stackrel{\QQ}{\sim} \log \N\left(k_{\QQ} \phi \sigma^2_{t+1}, (1 - \phi^2)
+    \sigma^2_{t+1}\right) \\
+%
+    \intertext{We can solve for the price's first two moments.}
+    %
+    \E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1} \right] &= k_{\QQ} \phi \sigma^2_{t+1} + \frac{(1 -
+    \phi^2)}{2} \sigma^2_{t+1}  \\
+%
+    \Var_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1} \right] &= (1 - \phi^2) \sigma_{t+1}^2 
+\end{align}
+
+
+We now turn to using the law of total variance to derive  formula for $\psi$.
+From its definition $\psi_{\QQ} = k_{\QQ} \phi + \frac{1 - \phi^2}{2}$.
+The question at hand is what is $k_{\QQ}$?
+
+\begin{align}
+    \Var_{\QQ}\left[r_{t+1} \mvert \sigma^2_t\right]  &= (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1} \mvert
+    \sigma^2_t \right] + \psi_{\QQ}^2 \Var_{\QQ}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  \\
+%
+    \intertext{Taking expectations of both sides.}
+%
+    \implies \E_{\QQ}\left[\Var_{\QQ}\left[r_{t+1} \mvert \sigma^2_t\right]\right]  &= (1 - \phi^2)
+    \E_{\QQ}\left[\sigma^2_{t+1} \right] + \psi_{\QQ}^2 \E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert
+    \sigma^2_t \right]\right]  \\
+%
+    \intertext{Plugging in the formula from \cref{eqn:expectations}.}
+%
+    \implies (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1} \right]  + k^2 \phi^2 \E_{\QQ}\left[\Var(\sigma^2_{t+1}
+    \mvert \sigma^2_t ) \right]  &= (1 - \phi^2)
+    \E_{\QQ}\left[\sigma^2_{t+1} \right] + \psi_{\QQ}^2 \E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert
+    \sigma^2_t \right]\right]  \\
+%
+    \intertext{Rearranging terms.}
+%
+    \implies \psi_{\QQ}^2 &= \frac{\E_{\QQ}\left[r^2_{t+1} \right] -  (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1}
+    \right]}{\E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]\right]}
+    \label{eqn:psi_qq_as_corr}
+\end{align}
+
+We now follow \textcite{khrapov2016affine} with one main caveat. 
+We assume that $\E\left[\Var_{\QQ}\left(r_{t+1} \mvert \sigma^2_t\right)\right] = \E\left[\sigma^2_{t+1}\right]$.
+They had made the same assumption using the physical measure instead of the risk-neutral one.
+It is more natural to make the assumption in the risk-neutral measure because in that measure we have the
+following decomposition. 
 
 \begin{equation}
-    \psi_{\PP}  = \phi \sqrt{\frac{\E_{\PP}(\sigma^2_{t+1})}{\E_{\PP}\left(\Var_{\PP}(\sigma^2_{t+1}) \mvert \F_t
-    \right) }}
-    = \phi \sqrt{\frac{\delta}{2 c \delta \rho + c \omega (1 - \rho)}}
+    r_{t+1} = \E\left[r_{t+1} \mvert \sigma^2_{t}\right]  + \sigma_{t+1} \text{innovation}
+    \label{eqn:return_decomp}
+\end{equation}
+
+%TODO This could be made more clear.
+However, here $\E\left[r_{t+1} \mvert \sigma^2_{t}\right] = 0$.
+Consequently, $\Var_{\QQ}(r_{t+1}) \E_{\QQ}\left[r_{t+1}^2\right]  = \E_{\QQ}\left(r^2_{t+1}\right) =
+\E_{\QQ}\left[\sigma^2_{t+1}\right]$.
+Essentially, here variability in the conditional mean cannot affect the variance.
+In the physical measure, the risk prices will cause  \cref{eqn:psi_qq_as_corr} to fail to hold except in rare edge
+cases in the parameter space.\footnote{It is worth noting that  \cref{eqn:return_decomp} has two endogenous
+    possibly correlated variables on the right-hand side. We are not assuming that $\sigma^2_{t+1}$ and $r_{t+1}$
+    are independent there. In continuous-time, this would be a standard time-change representation for the
+stochastic volatility diffusion.}
+
+Having made that assumption that we can solve for $\psi_{\QQ}$ as follows.
+
+\begin{equation}
+    \psi_{\QQ} =  \phi \sqrt{\frac{\E_{\QQ}(\sigma^2_{t+1})}{\E_{\QQ}\left(\Var_{\QQ}(\sigma^2_{t+1}) \mvert \F_t
+    \right)}}
+    %
+    = \phi \sqrt{\frac{\delta}{2 c_{\QQ} \delta \rho_{\QQ} + c_{\QQ} \omega (1 - \rho_{\QQ})}}
     \label{eqn:psi_function}
 \end{equation}
 
+Now that we have a formula for $\psi_{\QQ}$, $\rho_{\QQ}$, and $c_{\QQ}$ we can substitute them into
+\cref{eqn:beta_function_QQ}  and \cref{eqn:gamma_function_QQ} in order to reparameterize $\beta$ and $\gamma$ as
+functions of the parameters.
+(Recall, $\eta$ is the vector of parameters.)
+
+\begin{align}
+    \label{eqn:beta_function}
+    \beta(\eta) &\coloneqq \frac{\rho_{\PP} \left(-\psi_{\PP} - (1- \phi^2)(\theta -
+    \frac{1}{2})\right)}{\chi^2\left(\pi, \theta\right) + \chi(\pi, \theta)c_{\PP} \left(-\psi_{\PP} - (1-
+    \phi^2)(\theta-\frac{1}{2} )\right)}  \\
+%
+    \label{eqn:gamma_function}
+    \gamma(\eta) &\coloneqq \delta \log\left(1 + \frac{c_{\PP}}{\chi(\pi,\theta)} \left(-\psi_{\PP} - (1-
+    \phi^2)\left(\theta - \frac{1}{2}\right) \right)\right)
+\end{align}
 
 \subsection{Identification of the Risk Prices}
 
 The final goal is to identify the risk-prices $\theta$ and $\pi$.
-In the previous sections, we have derived the a series of moment conditions in terms of the paramters.
+In the previous sections, we have derived a series of moment conditions in terms of the parameters.
 We now need to analyze when these moment conditions allow to identify the risk prices. 
 The information that return data contain about equity pricing data is entirely encapsulated by the asset pricing
 equation for excess returns.  
 In what follows, we will use $rx_{t+1}$ as the excess log-return.
-The definition of $M_{t,t+1}$ as a chnage of measure means that the following holds.
+The definition of $M_{t,t+1}$ as a change of measure means that the following holds.
 
 \begin{equation}
     \E_{\PP}\left[ M_{t,t+1}(\theta, \pi) \exp(rx_{t+1}) \mvert \F_{t} \right]
 \end{equation}
 
 We now characterize, the information in this set of moment conditions regarding the risk prices.
-The difficult part is identifying the volatlity risk price --- $\pi$, and so we will focus first on the
-information regarding that paramter.
+The difficult part is identifying the volatility risk price --- $\pi$, and so we will focus first on the
+information regarding that parameter.
 We start by substituting in the SDF formula from above, and we also replace all of the dependence on $\F_t$ with
 $\sigma^2_t$.
 
@@ -621,7 +754,7 @@ $\sigma^2_t$.
     \pi) - m_1(\theta, \pi) \sigma^2_t} 
 \end{gather}
 
-Similar, to above, we can now match the coefficients of the $\F_t$-measurable variables in the above moment
+Similar to above, we can now match the coefficients of the $\F_t$-measurable variables in the above moment
 condition. 
 We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ that we derived in
 \cref{sec:deriving_sdf_functions}.
@@ -636,7 +769,8 @@ We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$
 \end{align}
 
 We can characterize the identification restrictions in \cref{eqn:identification_eqn_1} and
-\cref{eqn:identification_eqn_2} in two different cases.   
+\cref{eqn:identification_eqn_2} in two different cases.\footnote{These equations are Equation 3.7 in
+\textcite{khrapov2016affine}.}
 
 \begin{enumerate}
     \item[Case 1:] The price of equity risk $\theta$ satisfies the following equations. 
@@ -649,6 +783,11 @@ We can characterize the identification restrictions in \cref{eqn:identification_
         In other words, the asset pricing equation does not identify $\pi$. 
         As noted by \textcite{khrapov2016affine}, this is in line with the common belief that the econometrician
         needs options data to be able to identify the price of volatility risk. 
+        By \cref{eqn:beta_qq_at_minus_one} and \cref{eqn:gamma_qq_at_minus_one}and some algebra, the second two
+        equations are equivalent to asking if $\alpha_{\QQ}(-1) = 0$, which the relationship between
+        $\alpha_{\QQ}$ and $\alpha_{\PP}$ is equivalent to first equation.
+        Consequently, we will focus exclusively on that equation moving forward.
+
     \item[Case 2:] 
         In general, there is no reason to expect the \cref{eqn:lack_of_id_condition} to hold.
         If it does not, it might seem reasonable to expect that we should be able to identify both $\theta$ and
@@ -659,17 +798,6 @@ We can characterize the identification restrictions in \cref{eqn:identification_
         %fail. Why?
         %Is this right?
 \end{enumerate}
-
-% Requiring \cref{eqn:identification_eqn_1} and \cref{eqn:identification_eqn_2} hold is equivalent to
-% requiring that their Taylor series expansions equal.
-% We need the entire physical measure functions to characterize the full information available in the physical
-% measures about the risk-prices.
-% However, if we want to allow for higher-order priced risks, we cannot use all of that information.
-% In addition, in the Taylor series formulas the change in the first two moments is captured in the change of the
-% first two moments of the change of measure.
-% Consequently, we need to require that their quadratic expansions equal.\footnote{The equality of the quadratic
-%     expansion of the logarithm of the density is precisely what the change of measure in the discrete-time
-% Gaussian and continuous-time cases requires.}
 
 In the first case, as discussed in \textcite[13]{khrapov2016affine}, in this 2nd case the existence of leverage
 allows us to separate the two risk prices.
@@ -686,11 +814,16 @@ To see when this will happen consider a 2nd-order Taylor series expansion of $\a
  %
     &=  \psi_{\PP} + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) + \text{higher-order terms}  
 %
-    \intertext{Since we only want to use mean and variances for identification, we can drop the higher-order
-    terms.}
+    \intertext{Then since returns are conditionally gaussian.}
 %
     \label{eqn:lack_of_id}
-    &=  \psi_{\PP} + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) 
+    &=  \psi_{\PP} + (1 - \phi^2) \left(\theta - \frac{1}{2}\right)  \\
+%
+    &= \phi \text{(constant)} + (1- \phi^2) \theta +  (1 - \phi^2) \left(\theta - \frac{1}{2}\right) 
+%
+    \intertext{If $\phi = 0$.}
+%
+    &=  \frac{1}{2} 
 \end{align}
 
 If the \cref{eqn:lack_of_id} equals zero, then we cannot identify $\pi$.
@@ -739,9 +872,8 @@ log-cumulant function equaling the conditional mean.
         \omega \right)  \\
 %
         \label{eqn:cond_expected_rtn_moment}
-        \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\theta, \pi, \phi, \delta, c,
-        \omega, \rho) + \beta(\theta, \pi, \phi, \delta, c, \omega, \rho) \sigma^2_t + \psi_{\PP}(\delta, c, \omega,
-        \rho) \sigma^2_{t+1} \\
+        \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\eta) + \beta(\eta) \sigma^2_t +
+        \psi_{\PP}(\eta) \sigma^2_{t+1} \\
 %
         \label{eqn:cond_rtn_var}
         \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= (1 - \phi^2) \sigma^2_{t+1} 
@@ -779,6 +911,9 @@ We do need to run a constricted optimization though, because only certain values
 
 \begin{lemma}{Identified Set}
     
+    Assume that the moment conditions specified in \cref{defn:equilibrium_moment_conditions} have the correct form
+    and that the instruments we are using satisfy the standard exogeneity and relevant conditions. 
+
     Let the true parameter vector $\eta \coloneqq (\rho, c, \delta, \omega, \phi, \theta, \pi) \in [-1+\epsilon_1,
     1 - \epsilon_2] \times [M_1, M_2] \times [\epsilon_4, M_4]\times [M_5, M_6]\times [M_7, M_8] \times [-1 +
     \epsilon_4, 1 - \epsilon_5] \times [M_9, M_10] \times [M_12, M_13]$, where the $M_{\ast}$ are some large (in
@@ -788,8 +923,8 @@ We do need to run a constricted optimization though, because only certain values
     \cref{defn:equilibrium_moment_conditions} and instruments given in  \cref{defn:instruments}.
 
     If there exists a $\epsilon$ such that $\abs{\phi} > \epsilon > 0$, then all of the parameters are identified. 
-    If $\phi = 0$, then the objective function is independent of $\pi$, and so $\pi$ is not identified but all of
-    the other parameters are still identified.
+    If $\phi = 0$, then the objective function is independent of $\pi$. 
+    Hence, $\pi$ is not identified but all of the other parameters are still identified.
 
 \end{lemma}
 
@@ -814,6 +949,11 @@ We do need to run a constricted optimization though, because only certain values
     We have to identify both parameters off of \cref{eqn:cond_expected_rtn_moment}. 
     This is in principle possible because we now have two non-redundant sources of variation in the data ---
     $\sigma^2_t$ and $\sigma^2_{t+1}$.
+
+    The only place that \cref{defn:equilibrium_moment_conditions} that the risk-prices occurs in
+    \cref{eqn:cond_expected_rtn_moment}. 
+    We start by showing that the $\gamma, \beta$ and $\psi$ functions are independent of $\pi$ if $\phi = 0$.
+    
 
     The first part we have to show is that the equity and volatility risk prices are correctly parameterized by
     \cref{eqn:cond_expected_rtn_moment}.

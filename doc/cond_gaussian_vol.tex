@@ -1,0 +1,78 @@
+\documentclass[11pt, letterpaper, twoside, final]{article}
+\usepackage{risk_price_inference}
+\addbibresource{riskpriceinference.bib}
+
+\author{Xu Cheng\thanks{University of Pennsylvania, The Ronald O. Perlman Center for Political Science and
+    Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}}
+    \and 
+    Eric Renault\thanks{Brown University, Department of Economics -- Box B, 64 Waterman Street, Providence, RI
+    02912, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}}
+    \and 
+    Paul Sangrey\thanks{University of Pennsylvania, The Ronald O. Perlman Center for Political Science and
+    Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
+    
+\title{Inference for Risk Prices using Equity Data: Conditionally Gaussian Volatility Derivation}
+
+\begin{document}
+
+\begin{align}
+    \label{eqn:beta_function}
+    \beta_{\PP}'(0)  &= a_{\QQ}\left(-\psi_{\QQ} - \frac{1}{2} (1- \phi^2)\right)   \\
+%
+    \intertext{Some algebra leads to the following.}
+%
+    &= c^{2} \omega \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
+       \left(1- \phi^{2}\right) - \frac{1}{2}\right)^{2}  \\
+    &\quad + c \delta \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
+      \left(1 - \phi^{2} \right) - \frac{1}{2}\right)  \nonumber
+\end{align}
+
+We can perform a similar simplification for $\gamma_{\PP}'(0)$.
+
+\begin{align}
+    \label{eqn:gamma_function}
+    \gamma_{\PP}'(0)  &= b_{\QQ}\left(-\psi_{\QQ} - \frac{1}{2} (1- \phi^2)\right)  \\
+%
+    \intertext{Again after some algebra.}
+%
+        &= c^{2} \omega \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
+           \left(1 - \phi^{2} \right) - \frac{1}{2}\right)^{2}   \\
+        &\quad + c \delta \left(\frac{\phi^{2}}{2} + \pi + \psi_{\QQ} \theta - \psi_{\QQ} - \frac{\theta^{2}}{2}
+          \left(1- \phi^{2}\right) - \frac{1}{2}\right) \nonumber 
+\end{align}
+
+The key issue with  \cref{eqn:beta_function} and \cref{eqn:gamma_function} is that they are both truncated Taylor
+series expansions. 
+The questions is what does this mean?
+First, if $\left. \sigma^2_{t+1} \mvert \sigma^2_t \right.$ and $\left. r_{t+1} \mvert  \sigma^2_{t+1}\right.$
+are Gaussian distributed this simplification is hold exactly.
+The log-cumulant function of a Gaussian variable truncates after the first two terms.
+
+In general, this is should be viewed as an approximation.
+Economically, what does this approximation do?
+We start by considering the approximation for the volatility.
+First, consider the case where  the higher-order moments of the distribution of $\left. \sigma^2_{t+1}
+\mvert \sigma^2_t \right.$ are constant. 
+In this case, there might be a risk-premia associated with these higher-order moments but this risk-premia is
+constant.
+We cannot have a time-varying risk-premia that is driven by a constant.
+In general, even if these higher-order moments are time-varying, it will not affect our analysis here as long as
+that time-variation is independent of $\sigma^2_t$.
+A careful reader might notice that the constant case is a special case of this because deterministic variation is
+independent  of stochastic variation.
+Of course in the general case, this will not hold.
+There will be higher-order variation in these moments as a function of $\sigma^2_t$. 
+As long as this higher-order variation is not associated with a large amount of time-variation in risk premia our
+estimation procedure will still work well in practice.
+
+The situation for $\left. r_{t+1} \mvert \sigma^2, \sigma^2_{t+1} \right.$ is similar.
+Again we are replacing an arbitrary function with a 2nd-order Taylor expansion.
+In the conditionally case, this is without loss of generality.
+In general, however, it is not.
+There is one key difference, though, since we are trying to identify the price of equity and volatility risk,
+i.e.\@ the risk associated with time-variation in the first two motets, ignoring time-variation in the higher
+moments is actually what we want to do in the general case.
+We do not want to confuse time-varying skewness risk with time-varying vitality risk.
+
+\end{document}
+
