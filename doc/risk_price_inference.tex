@@ -629,34 +629,50 @@ We repeat that decomposition here, but do so using the risk-neutral distribution
 
 We construct the following \textquote{return} because it will have useful properties with respect to the
 risk-neutral distribution $\tilde{r}_{t+1} = r_{t+1} - \frac{1- \phi^2}{2} \sigma^2_{t+1}$.
+By the definition of the risk-neutral measure, the conditional expectation of $\exp(r_{t+1})$ equals $1$.
 
 \begin{align}
-    1 &= \E_{\QQ}\left[\exp(\tilde{r}_{t+1} - \frac{1-\phi^2}{2}\sigma^2_{t+1}) \mvert \sigma^2_t \right]
+    1 &= \E_{\QQ}\left[\exp\left(\tilde{r}_{t+1} - \frac{1-\phi^2}{2}\sigma^2_{t+1}\right) \mvert \sigma^2_t
+    \right]
 %
-    \intertext{By the conditional-Gaussianity of the return.}
+    \intertext{By the conditional-Gaussianity of the return, since $\Var_{\QQ}\left(r_{t+1} \mvert
+    \sigma^2_{t+1}\right) = (1 - \phi^2) \sigma^2-{t+1}$.}
 %
     &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \frac{1 -
        \phi^2}{2}\sigma^2_{t+1}   + \frac{1 - \phi^2}{2}\sigma^2_{t+1}\right) \mvert \sigma^2_t \right] \\
 %
     &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \right) \mvert \sigma^2_t
-       \right] \\
+       \right] 
+\end{align}
+
+Since the mean of $r_{t+1}$ given $\sigma^2_{t+1}$ is $\psi \sigma^2_{t+1} + \beta_{\QQ}'(0) \sigma^2_t +
+\gamma_{\QQ}'(0)$, there exists a constant $k$ such that $\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] = k
+\sigma^2_{t+1} + \beta_{\QQ}'(0) \sigma^2_t + \gamma_{QQ}'(0)$, i.e.\@ $k \coloneqq \psi - \frac{1 - \phi^2}{2}$.
+
+\begin{align}
+    &= \E_{\QQ}\left[\exp\left(k \sigma^2_{t+1} \right) \mvert \sigma^2_t \right] \exp\left(\beta_{\QQ}'(0)
+       \sigma^2_t + \gamma_{\QQ}'(0)\right)
 %
-       \intertext{Since the mean of $r_{t+1}$ given $\sigma^2_{t+1}$ is $\psi \sigma^2_{t+1}$, there exists a
-       constant $k$ such that $\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1} = k \sigma^2_{t+1}\right]$.}
+       \intertext{By the conditional Gaussianity of $\sigma^2_{t+1}$.}
 %
-    &= \E_{\QQ}\left[\exp\left(k \sigma^2_{t+1} \right) \mvert \sigma^2_t \right]
+    &= \exp\left( k \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right] + \frac{k^2}{2} \Var\left(\sigma^2_t \mvert
+       \sigma^2_t\right)\right) \exp\left(\beta_{\QQ}'(0) \sigma^2_t + \gamma_{\QQ}'(0)\right) \\
 %
-       \intertext{This is the Laplace transform of $\sigma^2_{t+1}$ evaluated at $-k$.}
+    \intertext{Taking logarithms of both sides.}
 %
-    &= \exp(- a_{\QQ}(-k)\sigma^2_t - b_{\QQ}(-k))
-%
-    \intertext{Taking logarithms and unconditional expectations of both sides.}
-%
-    \implies 0 &= -a_{\QQ}(-k) \E\left[\sigma^2_t\right] - b_{\QQ}(-k)
+    \implies 0 &=  k (\rho_{\QQ} \sigma^2_t + c_{\QQ} \delta)  + \frac{k^2}{2} (2 c_{\QQ} \sigma^2_t + c_{\QQ}^2
+    \omega) + \beta_{\QQ}'(0) \sigma^2_t + \gamma_{\QQ}'(0) \\
 %
     \intertext{This must hold for all $\sigma^2_t$.}
 %
-    \implies 0 &= a_{\QQ}(-k)\ \text{and}\ 0 = b_{\QQ}(-k)
+    \implies 0 &= k \rho_{\QQ} + k^2 c_{\QQ} + \beta_{\QQ}'(0) 
+%
+    \intertext{By the quadratic formula.}
+%
+    \implies k &= \frac{-c_{\QQ} \pm \sqrt{c^2_{\QQ} - 4 \beta_{\QQ}'(0) \rho_{\QQ}}}{2 \rho_{\QQ}}
+%
+    \intertext{$k$ must be positive.}
+    \implies k &= \frac{-c_{\QQ} + \sqrt{c^2_{\QQ} - 4 \beta_{\QQ}'(0) \rho_{\QQ}}}{2 \rho_{\QQ}}
 \end{align}
 
 We know the following $\Var_{\QQ}\left(r_{t+1} \mvert \sigma^2_{t+1}\right) = \sqrt{1 - \phi^2} \sigma^2_{t+1}$.
@@ -673,15 +689,15 @@ Since returns are conditionally Gaussian with respect to the risk-neutral measur
 
 \begin{align} 
     \label{eqn:expectations}
-    \exp(r_{t+1}) &\stackrel{\QQ}{\sim} \log \N\left(\phi \left(\sigma^2_{t+1} - \E\left[\sigma^2_{t+1} \mvert
-    \F_t\right]\right) , (1 - \phi^2) \sigma^2_{t+1}\right) \\
+    \exp(r_{t+1}) &\stackrel{\QQ}{\sim} \log \N\left(\widetilde{\psi}_{\QQ}\left(\sigma^2_{t+1} -
+    \E\left[\sigma^2_{t+1} \mvert \F_t\right]\right) , (1 - \phi^2) \sigma^2_{t+1}\right) \\
 %
     \intertext{We can solve for the price's first two moments.}
     %
-    \E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1} \right] &= \phi\left( \sigma^2_{t+1} -
+    \log \E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1} \right] &= \phi\left( \sigma^2_{t+1} -
     \E\left[\sigma^2_{t+1}\right] \right)+ \frac{(1 - \phi^2)}{2} \sigma^2_{t+1}  \\
 %
-    \Var_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1} \right] &= (1 - \phi^2) \sigma_{t+1}^2 
+    \Var_{\QQ}\left[r_{t+1} \mvert \sigma^2_{t+1} \right] &= (1 - \phi^2) \sigma_{t+1}^2 
 \end{align}
 
 
@@ -728,10 +744,12 @@ Consequently, $\Var_{\QQ}(r_{t+1}) \E_{\QQ}\left[r_{t+1}^2\right]  = \E_{\QQ}\le
 \E_{\QQ}\left[\sigma^2_{t+1}\right]$.
 Essentially, here variability in the conditional mean cannot affect the variance.
 In the physical measure, the risk prices will cause  \cref{eqn:psi_qq_as_corr} to fail to hold except in rare edge
-cases in the parameter space.\footnote{It is worth noting that  \cref{eqn:return_decomp} has two endogenous
-    possibly correlated variables on the right-hand side. We are not assuming that $\sigma^2_{t+1}$ and $r_{t+1}$
-    are independent there. In continuous-time, this would be a standard time-change representation for the
-stochastic volatility diffusion.}
+cases in the parameter space.
+
+% \footnote{It is worth noting that  \cref{eqn:return_decomp} has two endogenous
+%     possibly correlated variables on the right-hand side. We are not assuming that $\sigma^2_{t+1}$ and $r_{t+1}$
+%     are independent there. In continuous-time, this would be a standard time-change representation for the
+% stochastic volatility diffusion.}
 
 Having made that assumption that we can solve for $\psi_{\QQ}$ as follows.
 
