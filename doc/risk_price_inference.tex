@@ -636,13 +636,63 @@ By the definition of the risk-neutral measure, the conditional expectation of $\
     \right]
 %
     \intertext{By the conditional-Gaussianity of the return, since $\Var_{\QQ}\left(r_{t+1} \mvert
-    \sigma^2_{t+1}\right) = (1 - \phi^2) \sigma^2-{t+1}$.}
+    \sigma^2_{t+1}\right) = (1 - \phi^2) \sigma^2_{t+1}$.}
 %
     &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \frac{1 -
        \phi^2}{2}\sigma^2_{t+1}   + \frac{1 - \phi^2}{2}\sigma^2_{t+1}\right) \mvert \sigma^2_t \right] \\
 %
     &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \right) \mvert \sigma^2_t
        \right] 
+\end{align}
+
+We can add and subtract $\E\left[r_{t+1} \mvert \sigma^2_t\right]$ to isolate the additional information arising
+from $\sigma^2_{t+1}$.
+
+\begin{align}
+    1 &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \E\left[\tilde{r}_{t+1}
+    \mvert \sigma^2_{t}\right] \right) \right] \exp(\E\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right]) \\
+%
+        \intertext{Taking logs of both sides and simplifying.}
+%
+    \implies -\E\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right] &= \log
+    \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \E\left[\tilde{r}_{t+1} \mvert
+    \sigma^2_{t}\right] \right) \right]  \\
+%
+    \intertext{Clearly, the expression inside the exponent is mean-zero. In addition, everything here is linear
+    and Gaussian, and so we can take the log-normal expectation on the right-hand side.} 
+%
+    \implies -\E_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right] &= \frac{1}{2} \Var_{\QQ}\left(
+    \E_{\QQ}\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \E_{\QQ}\left[\tilde{r}_{t+1} \mvert
+    \sigma^2_{t}\right] \mvert \sigma^2_t \right)
+%
+    \intertext{Removing constants does not change the variance.} 
+%
+    \label{eqn:expected_return_decomposition}
+    \implies -\E_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right] &= \frac{1}{2} \Var_{\QQ}\left(
+    \E_{\QQ}\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma^2_t \right) 
+\end{align}
+
+By the law of total variance, the following holds.
+
+\begin{equation}
+    \Var_{\QQ}\left(\widetilde{r}_{t+1} \mvert \sigma^2_t\right) =
+    \Var_{\QQ}\left(\E_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma^2_t\right) +
+    \E_{\QQ}\left[\Var_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma^2_t\right] \\
+\end{equation}
+
+We can fill in the expression with the definitions of $\widetilde{\psi}_{\QQ}$ and $\phi$ and get the following.
+
+\begin{equation}
+    \Var_{\QQ}\left(\widetilde{r}_{t+1} \mvert \sigma^2_t\right) = \widetilde{\psi}_{\QQ}^2
+    \Var_{\QQ}\left(\sigma^2_{t+1} \mvert \sigma^2_t\right) + (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1} \mvert
+    \sigma^2_t\right] 
+\end{equation}
+
+
+We further know that the following must hold from the definition of the risk-neutral measure.
+
+\begin{align}
+    1 &= \E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_t\right]
 \end{align}
 
 Since the mean of $r_{t+1}$ given $\sigma^2_{t+1}$ is $\psi \sigma^2_{t+1} + \beta_{\QQ}'(0) \sigma^2_t +
