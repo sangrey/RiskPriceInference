@@ -212,8 +212,8 @@ Hence, we can represent out model under the physical measure as follows for some
 \begin{restatable}[The Limited Information Model under the Physical Measure]{defn}{physicalMeasureModel}
     \label{defn:physical_model}
     \begin{align}
-        \E_{\PP} \left[\exp(-v \sigma^2_{t+1}) \mvert \sigma^2_t \right] &= \exp\left( - a_{\PP}(v) \sigma^2_t -
-        b_{\PP}(v) \right) \\
+        \E_{\PP} \left[\exp(-v \sigma^2_{t+1}) \mvert \sigma^2_t \right] &= \exp\left( - a_{\PP}(v) 
+        \sigma^2_t - b_{\PP}(v) \right) \\
         \E_{\PP}\left[\exp(-v r_{t+1}) \mvert \sigma^2_t,  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\PP}(v)
         \sigma^2_{t+1} - \beta_{\PP}(v)\sigma^2_t - \gamma_{\PP}(v) \right) 
     \end{align}
@@ -261,8 +261,8 @@ We start by computing $\E_{\PP}\left[\sigma^2_{t+1} \mvert \F_t\right]$ and $\Va
 
 
 \begin{align}
-    \E_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= a_{\PP}'(0) \sigma^2_t  + b_{\PP}'(0) \\
-    \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= -a_{\PP}''(0) \sigma^2_t  - b_{\PP}''(0) 
+    \E_{\PP}\left[\log \sigma^2_{t+1} \mvert \sigma^2_t \right]  &= a_{\PP}'(0) \log \sigma^2_t  + b_{\PP}'(0) \\
+    \Var_{\PP}\left[\log \sigma^2_{t+1} \mvert \sigma^2_t \right]  &= -a_{\PP}''(0) \log \sigma^2_t  - b_{\PP}''(0) 
 \end{align}
 
 To simplify the exposition, we will reparameterize these equations. 
@@ -294,7 +294,7 @@ law of iterated expectation and the law of total variance to determine the uncon
 %
         \E_{\PP}\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
 %
-        \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
+        \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \rho \sigma^2_t  + c^2 \omega \\
 %
         \Var_{\PP}\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1- \rho^2} \left(\frac{2 \rho \delta}{1 - \rho}  +
         \omega \right) 
@@ -580,7 +580,7 @@ relationship between $a_{\QQ}, b_{\QQ}$ and $a_{\PP}, b_{\PP}$.
 %
     b_{\QQ}''(0) &= -\frac{c_{\PP}^2 \delta_{\PP}}{(1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2)))^2} \nonumber \\
 %
-    \intertext{Then since the right hand sides of the equation above are $\rho_{\QQ}$ and $c_{\QQ} \delta$, we
+    \intertext{Then since the left hand sides of the equation above are $\rho_{\QQ}$ and $c_{\QQ} \delta$, we
     have the following expressions.}
 %
     \rho_{\QQ} &= \frac{\rho_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \nonumber \\
@@ -614,204 +614,135 @@ Since the $\alpha$ functions are quadratic, we have the following.
     \alpha_{\QQ}(v) = \psi_{\QQ} v + \frac{1- \phi^2_{\QQ}}{2} v^2  \\
 %
     \alpha_{\PP}(v) = \psi_{\PP} v + \frac{1- \phi^2_{\PP}}{2} v^2  
-%
-    \intertext{As in \cref{eqn:risk_neutral_at_neg_1}, $\alpha_{\QQ}(-1) = \alpha_{\PP}(\theta)$, recalling that
-        $\phi_{\PP} = \phi_{\QQ}$, we can differentiate and get the following.}
-%
+\end{align}
+
+As in \cref{eqn:risk_neutral_at_neg_1}, $\alpha_{\QQ}(-1) = \alpha_{\PP}(\theta)$, recalling that $\phi_{\PP} =
+\phi_{\QQ}$, we can differentiate and get the following.
+
+\begin{align}
     \implies \alpha_{\QQ}'(0) = \alpha_{\PP}'(0) + (1 - \phi^2) \theta
 %
     \implies \psi_{\QQ} = \psi_{\PP} + (1 - \phi^2) \theta
 \end{align}
 
+
+\subsubsection{Deriving \texorpdfstring{$\psi_{\QQ}$}{\psi}}
+
 This is not necessarily useful because we have not derived $\psi_{\PP}$, and so we have no way to estimate it.
-Recall the decomposition of the $\Var\left(r_{t+1} \mvert \F_t\right)$ in \cref{eqn:ltv_rtn_variance}.
-We repeat that decomposition here, but do so using the risk-neutral distribution, not the physical one.
+Instead of deriving $\psi_{\PP}$ we derive $\psi_{\QQ}$, and then use the relationship above to solve for
+$\psi_{\PP}$. 
 
-We construct the following \textquote{return} because it will have useful properties with respect to the
-risk-neutral distribution $\tilde{r}_{t+1} = r_{t+1} - \frac{1- \phi^2}{2} \sigma^2_{t+1}$.
-By the definition of the risk-neutral measure, the conditional expectation of $\exp(r_{t+1})$ equals $1$.
+We start by deriving a pseudo-return that is mean-zero with respect to the risk-neutral distribution. 
 
-\begin{align}
-    1 &= \E_{\QQ}\left[\exp\left(\tilde{r}_{t+1} - \frac{1-\phi^2}{2}\sigma^2_{t+1}\right) \mvert \sigma^2_t
-    \right]
-%
-    \intertext{By the conditional-Gaussianity of the return, since $\Var_{\QQ}\left(r_{t+1} \mvert
-    \sigma^2_{t+1}\right) = (1 - \phi^2) \sigma^2_{t+1}$.}
-%
-    &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \frac{1 -
-       \phi^2}{2}\sigma^2_{t+1}   + \frac{1 - \phi^2}{2}\sigma^2_{t+1}\right) \mvert \sigma^2_t \right] \\
-%
-    &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \right) \mvert \sigma^2_t
-       \right] 
-\end{align}
-
-We can add and subtract $\E\left[r_{t+1} \mvert \sigma^2_t\right]$ to isolate the additional information arising
-from $\sigma^2_{t+1}$.
+We know in general that the conditional covariance of the SDF and the return equals one.
 
 \begin{align}
-    1 &= \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \E\left[\tilde{r}_{t+1}
-    \mvert \sigma^2_{t}\right] \right) \right] \exp(\E\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right]) \\
-%
-        \intertext{Taking logs of both sides and simplifying.}
-%
-    \implies -\E\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right] &= \log
-    \E_{\QQ}\left[\exp\left(\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \E\left[\tilde{r}_{t+1} \mvert
-    \sigma^2_{t}\right] \right) \right]  \\
-%
-    \intertext{Clearly, the expression inside the exponent is mean-zero. In addition, everything here is linear
-    and Gaussian, and so we can take the log-normal expectation on the right-hand side.} 
-%
-    \implies -\E_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right] &= \frac{1}{2} \Var_{\QQ}\left(
-    \E_{\QQ}\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] - \E_{\QQ}\left[\tilde{r}_{t+1} \mvert
-    \sigma^2_{t}\right] \mvert \sigma^2_t \right)
-%
-    \intertext{Removing constants does not change the variance.} 
-%
-    \label{eqn:expected_return_decomposition}
-    \implies -\E_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right] &= \frac{1}{2} \Var_{\QQ}\left(
-    \E_{\QQ}\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma^2_t \right) 
-\end{align}
-
-By the law of total variance, the following holds.
-
-\begin{equation}
-    \Var_{\QQ}\left(\widetilde{r}_{t+1} \mvert \sigma^2_t\right) =
-    \Var_{\QQ}\left(\E_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma^2_t\right) +
-    \E_{\QQ}\left[\Var_{\QQ}\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma^2_t\right] \\
-\end{equation}
-
-We can fill in the expression with the definitions of $\widetilde{\psi}_{\QQ}$ and $\phi$ and get the following.
-
-\begin{equation}
-    \Var_{\QQ}\left(\widetilde{r}_{t+1} \mvert \sigma^2_t\right) = \widetilde{\psi}_{\QQ}^2
-    \Var_{\QQ}\left(\sigma^2_{t+1} \mvert \sigma^2_t\right) + (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1} \mvert
-    \sigma^2_t\right] 
-\end{equation}
-
-
-We further know that the following must hold from the definition of the risk-neutral measure.
-
-\begin{align}
-    1 &= \E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_t\right]
-\end{align}
-
-Since the mean of $r_{t+1}$ given $\sigma^2_{t+1}$ is $\psi \sigma^2_{t+1} + \beta_{\QQ}'(0) \sigma^2_t +
-\gamma_{\QQ}'(0)$, there exists a constant $k$ such that $\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] = k
-\sigma^2_{t+1} + \beta_{\QQ}'(0) \sigma^2_t + \gamma_{QQ}'(0)$, i.e.\@ $k \coloneqq \psi - \frac{1 - \phi^2}{2}$.
-
-\begin{align}
-    &= \E_{\QQ}\left[\exp\left(k \sigma^2_{t+1} \right) \mvert \sigma^2_t \right] \exp\left(\beta_{\QQ}'(0)
-       \sigma^2_t + \gamma_{\QQ}'(0)\right)
-%
-       \intertext{By the conditional Gaussianity of $\sigma^2_{t+1}$.}
-%
-    &= \exp\left( k \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right] + \frac{k^2}{2} \Var\left(\sigma^2_t \mvert
-       \sigma^2_t\right)\right) \exp\left(\beta_{\QQ}'(0) \sigma^2_t + \gamma_{\QQ}'(0)\right) \\
-%
-    \intertext{Taking logarithms of both sides.}
-%
-    \implies 0 &=  k (\rho_{\QQ} \sigma^2_t + c_{\QQ} \delta)  + \frac{k^2}{2} (2 c_{\QQ} \sigma^2_t + c_{\QQ}^2
-    \omega) + \beta_{\QQ}'(0) \sigma^2_t + \gamma_{\QQ}'(0) \\
-%
-    \intertext{This must hold for all $\sigma^2_t$.}
-%
-    \implies 0 &= k \rho_{\QQ} + k^2 c_{\QQ} + \beta_{\QQ}'(0) 
-%
-    \intertext{By the quadratic formula.}
-%
-    \implies k &= \frac{-c_{\QQ} \pm \sqrt{c^2_{\QQ} - 4 \beta_{\QQ}'(0) \rho_{\QQ}}}{2 \rho_{\QQ}}
-%
-    \intertext{$k$ must be positive.}
-    \implies k &= \frac{-c_{\QQ} + \sqrt{c^2_{\QQ} - 4 \beta_{\QQ}'(0) \rho_{\QQ}}}{2 \rho_{\QQ}}
-\end{align}
-
-We know the following $\Var_{\QQ}\left(r_{t+1} \mvert \sigma^2_{t+1}\right) = \sqrt{1 - \phi^2} \sigma^2_{t+1}$.
-Since $r_{t+1}$ is conditionally-gaussian there exists a k
-
-We define $\tilde{r}_{t+1}$ in this manner because then $\E_{\QQ}\left[\tilde{r}_{t+1} \mvert \sigma^2_t\right] =
-0$.
-This is because in general $1 = \E[\E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}\right]  =
-    \exp\left(\E\left[r_{t+1} \mvert \sigma^2_t\right] + \frac{1 - \phi^2}{2}\E\left[\Var\left( r_{t+1} \mvert
-    \sigma^2_{t+1}\right) \mvert \sigma^2_t \right]\right)$.
-
-First, note the following. 
-Since returns are conditionally Gaussian with respect to the risk-neutral measure. 
-
-\begin{align} 
-    \label{eqn:expectations}
-    \exp(r_{t+1}) &\stackrel{\QQ}{\sim} \log \N\left(\widetilde{\psi}_{\QQ}\left(\sigma^2_{t+1} -
-    \E\left[\sigma^2_{t+1} \mvert \F_t\right]\right) , (1 - \phi^2) \sigma^2_{t+1}\right) \\
-%
-    \intertext{We can solve for the price's first two moments.}
+    1 &= \E\left[M_{t,t+1} \exp(r_{t+1}) \mvert \sigma^2_t \right]  \\
     %
-    \log \E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1} \right] &= \tilde{\psi}\left( \sigma^2_{t+1} -
-    \E\left[\sigma^2_{t+1}\right] \right)+ \frac{(1 - \phi^2)}{2} \sigma^2_{t+1}  \\
-%
-    \Var_{\QQ}\left[r_{t+1} \mvert \sigma^2_{t+1} \right] &= (1 - \phi^2) \sigma_{t+1}^2 
+    \intertext{Taking logs of both sides.}
+    %
+    \implies 0 &= \log \E\left[\E\left[ M_{t,t+1} \exp(r_{t+1}) \mvert \sigma^2_{t+1} \right] \mvert \sigma^2_t
+    \right]  \\
+            &=
 \end{align}
-
-
-We now turn to using the law of total variance to compute what $k_{\QQ}$ is. 
-The key thing to note is that this is in terms of log-returns, not prices.
-Consequently, the correct conditional mean to use is $k \phi$. 
-We should not include the Jensen-inequality term --- $\frac{1 - \phi^2}{2}$.
-Consequently, the following decomposition holds.
-
 
 \begin{align}
-    \Var_{\QQ}\left[r_{t+1} \mvert \sigma^2_t\right]  &= (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1} \mvert
-    \sigma^2_t \right] + k^2 \phi^2 \Var_{\QQ}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  \\
+    &\phantom{=} \Cov\left(m_{t,t+1}, r_{t+1} \mvert \sigma^2_{t+1}\right)   \\
 %
-    \intertext{Taking expectations of both sides.}
+    \intertext{Dropping constant terms with respect to $\sigma^2_{t+1}$ and filling in the definition of
+    $m_{t, t+1}$.}
+    %
+    &= \Cov\left(-\theta r_{t+1}, r_{t+1} \mvert \sigma^2_{t+1}\right)   \\
 %
-    \implies \E_{\QQ}\left[\Var_{\QQ}\left[r_{t+1} \mvert \sigma^2_t\right]\right]  &= (1 - \phi^2)
-    \E_{\QQ}\left[\sigma^2_{t+1} \right] + \psi_{\QQ}^2 \E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert
-    \sigma^2_t \right]\right]  \\
+    &= \theta \Var\left(r_{t+1} \mvert \sigma^2_{t+1}\right)   \\
 %
-    \intertext{Rearranging terms.}
-%
-    \implies k^2 \phi^2 &= \frac{\E_{\QQ}\left[r^2_{t+1} \right] -  (1 - \phi^2) \E_{\QQ}\left[\sigma^2_{t+1}
-    \right]}{\E_{\QQ}\left[\Var_{\QQ}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]\right]}
-    \label{eqn:psi_qq_as_corr}
+    &= \theta (1 - \phi^2) \sigma^2_{t+1} 
 \end{align}
 
-We now follow \textcite{khrapov2016affine} with one main caveat. 
-We assume that $\E_{\QQ}\left[\Var_{\QQ}\left(r_{t+1} \mvert \sigma^2_t\right)\right] =
-\E\left[\sigma^2_{t+1}\right]$.
-They had made the same assumption using the physical measure instead of the risk-neutral one.
+The somewhat confusing aspect here is that we would not expect $\E_{\PP}\left[M_{t,t+1} \exp(r_{t+1}) \mvert
+\sigma^2_{t+1}\right] = 1$.
+Stochastic discount factors only price returns correctly with respect to predictable filtrations.
+$r_{t+1}$ and $\sigma^2_{t+1}$ are realized at the same time.
+Consequently, we need to perform two measure changes.
+One from the physical measure to the risk-neutral measure and the second from the filtration generated by
+$\sigma^2_{t+1}$ to the one generated by $\sigma^2_{t+1}$.
 
-\purple{
-Since we are using realized volatility to measure variance, we have the following aggregation property
-$\E_{\QQ}\left[\sigma^2_{t+} \mvert \sigma^2_t\right] = \E_{\PP} \left[\Var_{\PP}\left(r_{t+1} \mvert
-\sigma^2_{t+1}\right) \mvert \sigma^2_t \right]$.\footnote{In continuous-time this is known as the It\^{o}
-Isometry.}
-\purple{We are also assuming that there is no change in the drift as a function of $\sigma^2_{t+1}$.}
-}
+Let $\tilde{r}_{t+1} = r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} + (1 - \phi^2) \theta \sigma^2_{t+1}$.
 
-%TODO This could be made more clear.
-However, here $\E\left[r_{t+1} \mvert \sigma^2_{t}\right] = 0$.
-Consequently, $\Var_{\QQ}(r_{t+1}) \E_{\QQ}\left[r_{t+1}^2\right]  = \E_{\QQ}\left(r^2_{t+1}\right) =
-\E_{\QQ}\left[\sigma^2_{t+1}\right]$.
-Essentially, here variability in the conditional mean cannot affect the variance.
-In the physical measure, the risk prices will cause  \cref{eqn:psi_qq_as_corr} to fail to hold except in rare edge
-cases in the parameter space.
+\begin{align}
+    &\phantom{=} \E_{\PP}\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1} \right]  \\
+%
+    \intertext{We can absorb the formula for the log-expectation of a conditional Gaussian variable to convert
+    this expression to an expression in terms of $\exp(r_{t+1})$. The second convexity adjustment is not affected
+    by this because it is measurable with respect to the conditioning set.}
+    %
+    &= \log \E_{\PP}\left[\exp\left(r_{t+1}\right) \exp\left((1 - \phi^2) \theta \sigma^2_{t+1}\right) \mvert
+       \sigma^2_{t+1} \right]\\
+%
+    \intertext{Since the second term is the covariance between the SDF and the return, we can use it as a change
+    of measure.}
+%
+    &= \log \E_{\QQ}\left[\exp\left(r_{t+1}\right) \mvert \sigma^2_{t+1} \right]\\
+\end{align}
 
-% \footnote{It is worth noting that  \cref{eqn:return_decomp} has two endogenous
-%     possibly correlated variables on the right-hand side. We are not assuming that $\sigma^2_{t+1}$ and $r_{t+1}$
-%     are independent there. In continuous-time, this would be a standard time-change representation for the
-% stochastic volatility diffusion.}
+The last term must equal zero because it is the log-expectation of a change in the price with respect to the
+risk-neutral measure.\footnote{I am implicitly assuming that the risk-neutral distribution prices assets in a
+    valid manner with respect to this filtration as well. In continuous-time this is true because volatility is
+predictable as a continuous-time process.} 
 
-Having made that assumption that we can solve for $\psi_{\QQ}$ as follows.
+Clearly, since $\E_{\PP}\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1} \right] = 0$, $\E_{\PP}\left[\tilde{r}_{t+1}
+\mvert \sigma^2_{t} \right] = 0$.
+We need to use this small filtration because we want to only condition on discrete-time predictable objects.
+Because the mean of the log-return $\tilde{r}_{t+1}$ equals zero, it is the discretization of some continuous-time
+martingale. 
+Consequently, we can use the It\^{o} Isometry.\footnote{We need to use the argument above to avoid any
+    discrete-time drifts. Even though the It\^{0} Isometry holds for general semimartingales in continuous-time,
+the aggregation we are doing here does not.} 
+In other words, the following holds. 
 
 \begin{equation}
-    \psi_{\QQ} =  \phi \sqrt{\frac{\E_{\QQ}(\sigma^2_{t+1})}{\E_{\QQ}\left(\Var_{\QQ}(\sigma^2_{t+1}) \mvert \F_t
-    \right)}}
-    %
-    = \phi \sqrt{\frac{\delta}{2 c_{\QQ} \delta \rho_{\QQ} + c_{\QQ} \omega (1 - \rho_{\QQ})}}
-    \label{eqn:psi_function}
+    \label{eqn:return_var_versus_expected_vol_pp}
+    \E_{\PP}\left[\Var_{\PP}\left[\widetilde{r}_{t+1} \mvert \sigma^2_t \right]\right]  =
+    \E_{\PP}\left[\sigma^2_{t+1} \right]
 \end{equation}
 
-Now that we have a formula for $\psi_{\QQ}$, $\rho_{\QQ}$, and $c_{\QQ}$ we can substitute them into
+There is another way that we can compute $\Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t \right]$.
+We can use the law of total variance.
+
+\begin{equation}
+    \Var_{\PP}\left[\widetilde{r}_{t+1} \mvert \sigma^2_t\right]  =
+    \E_{\PP}\left[\Var_{\PP}\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma_t^2 \right] +
+    \Var_{\PP}\left[\E_{\PP}\left[\widetilde{r}_{t+1}\mvert \sigma_{t+1}^2\right] \mvert \sigma^2_t\right]
+\end{equation}
+
+Since $\sigma^2_{t+1}$ is constant given $\sigma^2_{t+1}, \sigma^2_t$, the conditional variance of
+$\widetilde{r}_{t+1}$ is the same as $r_{t+1}$.
+
+Now, we can fill in the values for both of the inside variables on the right-hand side and
+\cref{eqn:return_var_versus_expected_vol_pp} on the left-hand side and taking unconditional expectations of all of
+the variables.
+
+\begin{equation}
+    \E_{\PP}\left[\sigma^2_{t+1} \right]  = \E_{\PP}[ \E_{\PP}\left[(1 - \phi^2) \sigma^2_{t+1} \right]] +
+    \E_{\PP}\left[\Var_{\PP}\left[\widetilde{\psi} \sigma^2_{t+1} \mvert \sigma^2_t\right]\right] 
+\end{equation}
+
+Solving for $\widetilde{\psi}$ we have the following.
+
+\begin{equation}
+    \widetilde{\psi} = \phi \sqrt{\frac{\E_{\PP}\left[\sigma^2_{t+1} \right]}{\E_{\PP}
+    [\Var_{\PP}\left(\sigma^2_{t+1} \mvert \sigma^2_t\right)]}}  
+\end{equation}
+
+Now we can use the relationship between $r_{t+1}$ and $\tilde{r}_{t+1}$ to relate $\tilde{\psi}$ and $\psi$.
+
+\begin{equation}
+    \psi_{\PP} = \phi \sqrt{\frac{c_{\PP} \delta / (1 - \rho_{\PP})}{2 c_{\PP} \rho_{\PP} \left(c_{\PP} \delta /
+    (1 - \rho_{\PP})\right) + c_{\PP}^2 \delta}} - \frac{1- \phi^2}{2} - (1 - \phi^2) \theta = \frac{\phi}{\sqrt{c
+    (1 + \rho_{\PP})}} - \frac{1 - \phi^2}{2}  + (1 - \phi^2) \theta
+\end{equation}
+
+Now that we have a formula for $\psi_{\PP}$, $\rho_{\QQ}$, and $c_{\QQ}$ we can substitute them into
 \cref{eqn:beta_function_QQ}  and \cref{eqn:gamma_function_QQ} in order to reparameterize $\beta$ and $\gamma$ as
 functions of the parameters.
 (Recall, $\eta$ is the vector of parameters.)
@@ -824,8 +755,12 @@ functions of the parameters.
 %
     \label{eqn:gamma_function}
     \gamma(\eta) &\coloneqq \delta \log\left(1 + \frac{c_{\PP}}{\chi(\pi,\theta)} \left(-\psi_{\PP} - (1-
-    \phi^2)\left(\theta - \frac{1}{2}\right) \right)\right)
+    \phi^2)\left(\theta - \frac{1}{2}\right) \right)\right) \\
+%
+    \label{eqn:psi_function}
+    \psi(\eta) &= \frac{\phi}{\sqrt{c_{\PP} (1 + \rho_{\PP})}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta 
 \end{align}
+
 
 \subsection{Identification of the Risk Prices}
 
@@ -926,20 +861,16 @@ To see when this will happen consider a 2nd-order Taylor series expansion of $\a
     \label{eqn:lack_of_id}
     &=  \psi_{\PP} + (1 - \phi^2) \left(\theta - \frac{1}{2}\right)  \\
 %
-    &= \phi \text{(constant)} + (1- \phi^2) \theta +  (1 - \phi^2) \left(\theta - \frac{1}{2}\right) 
+    &= \frac{\phi}{\sqrt{c (1 + \rho_{\PP} )}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta +  (1 - \phi^2)
+       \left(\theta - \frac{1}{2}\right) 
 %
     \intertext{If $\phi = 0$.}
 %
-    &=  \frac{1}{2} 
+    &=  \frac{1}{2} - \theta   + \left(\theta - \frac{1}{2}\right) = 0
 \end{align}
 
 If the \cref{eqn:lack_of_id} equals zero, then we cannot identify $\pi$.
-As discussed in \textcite[13]{khrapov2016affine}, since $\psi_{\PP}$ is a adjustment to a drift, if $\phi=0$,
-(there is no leverage effect), the drift would change by $\theta - \frac{1}{2}$ through a Jensen type effect if
-the intra-day volatility is constant. 
-This decomposition would still go through in the general case if $\phi=0$ because then instantaneous changes in
-volatility would not be priced, and so the time-aggregation formulas and Jensen inequality terms would not be
-affected.
+Of course, in general, there is no reason to expect it equal zero.
 
 %Explain this better.
 
@@ -956,8 +887,8 @@ By doing this we are able to avoid the econometric complications that we would h
 case.
 Note, we are only specifying values for the return conditional on both $\sigma^2_{t+1}$ and $\sigma^2_t$ because
 the other moments can be derived from them and the volatility moments.
-Also, it is woth noting that we consider \cref{eqn:beta_function}, \cref{eqn:gamma_function}, and
-\cref{eqn:psi_function} as implicitely defining those paramters as functions of the other paramters.
+Also, it is worth noting that we consider \cref{eqn:beta_function}, \cref{eqn:gamma_function}, and
+\cref{eqn:psi_function} as implicitly defining those parameters as functions of the other parameters.
 \cref{eqn:cond_expected_rtn_moment} can be derived from those equation and the first derivative of the conditional
 log-cumulant function equaling the conditional mean.
 
@@ -972,7 +903,7 @@ log-cumulant function equaling the conditional mean.
         \E_{\PP}\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
 %
         \label{eqn:cond_vol_var}
-        \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \sigma^2_t  + c^2 \omega \\
+        \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \rho \sigma^2_t  + c^2 \omega \\
 %
         \label{eqn:global_vol_var}
         \Var_{\PP}\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2}  \left(\frac{2 \rho \delta}{1 - \rho}  +
