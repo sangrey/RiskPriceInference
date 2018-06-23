@@ -433,11 +433,33 @@ restrictions.
     \right) \mvert \F_t \right] = 1 \\
 \end{equation}
 
-%TODO Add derivation here.
-
 We can use \cref{eqn:reweigted_sdf} to relate $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ to the physical measure
 functions. 
-(\cref{eqn:sdf_functions_vs_physical_functions} are taken from \textcite[3.4]{khrapov2016affine}.)
+
+\begin{gather}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
+    \right) \mvert \F_t \right] = 1 \\
+    \intertext{By the law of iterated expectations.}
+    \E_{\PP}\left[ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1}\right)
+        \exp\left( - \theta r_{t+1}\right) \mvert \F_t, \sigma^2_{t+1} \right]\right] = 1 \\
+    \intertext{The second term is the Laplace transform of $r_{t+1}$.}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} \right)
+        \exp(-\alpha_{\PP}(\theta) \sigma^2_{t+1} - \beta_{\PP}(\theta) \sigma^2_{t} - \gamma_{\PP}(\theta_2)
+        \mvert \F_t \right] = 1 \\
+    \intertext{Reorganizing terms.}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
+        \gamma_{\PP}(\theta_2) \right) \exp(-\left(\pi + \alpha_{\PP}(\theta)\right) \sigma^2_{t+1}) \mvert \F_t
+        \right] = 1 \\ 
+    \intertext{Substituting in the Laplace transform for $\sigma^2_{t+1}$.} 
+    \label{eqn:expected_sdf_wrt_PP}
+    \E_{\PP}\left[\exp(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
+        \gamma_{\PP}(\theta_2)  - a_{\PP}(\pi + \alpha_{\PP}(\theta)) - b_{\PP}(\pi + \alpha_{\PP}(\theta))
+        \mvert \F_t \right] = 1 
+\end{gather}
+
+Then since \cref{eqn:expected_sdf_wrt_PP} must hold for all $\sigma^2_t$ and $\sigma^2_{t+1}$, we have the
+following.\footnote{\cref{eqn:sdf_functions_vs_physical_functions} is Equation $3.4$ in 
+\textcite[3.4]{khrapov2016affine}.}
 
 \begin{align}
     \label{eqn:sdf_functions_vs_physical_functions}
@@ -521,8 +543,8 @@ The return's conditionally Gaussian distribution implies that $\alpha_{\QQ}$ is 
 expansion as in \cref{eqn:alpha_PP_expansion}.
 In addition, as discussed above $\beta_{\QQ}$ and $\gamma_{\QQ}$ will be linear functions. 
 This linearity implies that the physical and risk-neutral forms of these functions will coincide. 
-%TODO Explain why this has to be case.
-% This directly follows from \cref{eqn:sdf_functions_vs_physical_functions}.
+To see this, you can differentiate \cref{eqn:sdf_functions_vs_physical_functions} with respect to $\theta$, and
+then note that the physical and risk-neutral functions must equal at zero.
 We can replace the last two functions with their physical counterparts because linearity implies they
 coincide. 
 We can then substitute in the risk-neutral distributions.
@@ -1050,7 +1072,6 @@ We collect the parameters that we are estimating $\omega$ and the nuisance param
 $\gamma$ and associated parameter space $\Gamma$.
 In the previous discussion we characterized the parameter spaces in a non-compact fashion, let $\omega^{*}$ be a
 compact subset of $\omega$, where the true parameter values live.
-%TODO Does the set of possible nuisance parameters depend upon the estimated parameters in our model?
 
 \begin{defn}{Complete Parameter Space}
     \begin{equation}
