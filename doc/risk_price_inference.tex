@@ -2,13 +2,13 @@
 \usepackage{risk_price_inference}
 \addbibresource{riskpriceinference.bib}
 
-\author{Xu Cheng\thanks{University of Pennsylvania, The Ronald O. Perlman Center for Political Science and
+\author{Xu Cheng\thanks{University of Pennsylvania, The Perelman Center for Political Science and
     Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}}
     \and 
     Eric Renault\thanks{Brown University, Department of Economics -- Box B, 64 Waterman Street, Providence, RI
     02912, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}}
     \and 
-    Paul Sangrey\thanks{University of Pennsylvania, The Ronald O. Perlman Center for Political Science and
+    Paul Sangrey\thanks{University of Pennsylvania, The Perelman Center for Political Science and
     Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
     
 \title{Inference for Risk Prices using Equity Data}
@@ -25,17 +25,18 @@
     \addtocounter{page}{-1}
 
     \begin{abstract} \singlespacing \noindent 
-        The risk-return trade off is a central question in modern asset pricing. 
+        How risks and returns are traded off is arguably the central object of study in modern asset pricing. 
         Even though the theoretical literature cohesively argues there should be a strong positive correlation
         between expected returns and volatility, empirically measuring it has proven difficult. 
         In addition, the option pricing literature shows that volatility enters as its own risk factor, not just
         as a predictor of returns.
-        Even obtaining point estimates of these risk prices in the presence of contemporaneous correlation between
-        returns and volatility, the  volatility feedback effect, has proven delicate.
-        We develop methods to provide  valid confidence intervals for the price of volatility and equity risk from
-        equity data directly that account for this weak identification of the various parameters. 
+        However, because as there is a negative contemporaneous correlation between the volatlity and return
+        processes and the return and volatlity relationship is inherently nonlineary measuring these risk prices
+        have proven delicate. 
+        We develop methods to provide  valid inference for the prices of equity and volatility risk using only
+        equity data that directly handles this identification problem. 
         We do this by adapting the results in weak identification literature that uses drifting sequences in order
-        to be robust to the data's identification strength. 
+        to be robust to the various paramters' identification strength. 
     \end{abstract}
 
     \jelcodes{C12, C14, C38,  C58, G12}
@@ -53,18 +54,31 @@ In particular, the central question of asset pricing is what drives expected ret
 Standard economic theory predicts you must compensate investors with higher expected returns when they face more
 risk.
 In other words, we would expect a positive relationship between the mean and volatility of returns.
-In fact, in \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected
-return varies proportionally with the volatility. 
-In other words, we have a constant price of volatility risk and expected returns are perfectly correlated with
-volatility.
-Even in more complicated models such as the long-run risk model and rare disasters models find a very close
-relationship between variance and mean of returns \parencite{bansal2014volatility, wachter2013can}.
+In \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected
+return varies proportionally with the volatility of the market return.
+However, to price option prices well, we need not only a price of equity risk that loads upon the market variance,
+but also a price of volatlity risk as well \parencite{christoffersen2013capturing}.
+Investors care not just about how their returns comove with the market return but also how they comove with the
+market volatlity.
 
-Consequently, an important empirical question is what is the precise magnitude of this relationship.
-However, unlike the consensus in the theoretical literature, the empirical literature has found pinning down this
-relationship quite difficult.
+This implies that current volatlity will affect expected returns in two ways. 1) Through investors' preferences
+over future market returns. 2) Through investors' preferences over future volatlity. 
+As one might expect distinguishing these two effects is quite difficult. 
+The difference between how the two effect risk premia comes through their different nonlinear relationships in the
+preserence of contemporaneous correlation between the volatlity and reutrn processes. 
+We adopt the framework of \textcite{khrapov2016affine}, which is a discret-time exponentiallyr-affine stochastic
+volatity model.
+They mention a potential identification strategy in that paper. 
+We develop this strategy,  characterizing how the identification strength of the risk prices varies over the
+paramter space, and show how to perform uniformly valid inference.
+
+To take a step back and more fully develop empirical structure at hand, we consider how to measure the
+relationship between market volatility and expected returns if we assume that this relationship is constant and
+linear. 
+Even in this simple case, unlike the consensus in the theoretical literature, the empirical literature has found
+pinning down this relationship quite difficult.
 Not only has its magnitude proven difficult to determine, but various estimates even differ in sign,
-\parencite{lettau2010measuring}, .
+\parencite{lettau2010measuring}.
 
 The empirical literature, which we examine in more detail in the literature review, has focused on point estimates
 of this magnitude. 
@@ -96,29 +110,24 @@ and expected returns.
 It is not a contemporaneous relationship, but rather a predictable one. 
 
 Second, and just as important.
-In the papers estimating the volatility expected-return relationship such as
-\textcite{brandt2004relationship,lettau2010measuring} are implicitly using a one-factor model where volatility
-is that factor.
-However, the option pricing literature, such as  \textcite{christoffersen2013capturing}, has argued that in order
-to match the option pricing data we need to include another factor.
-In other there are two sources of risk that the investors face: what returns will do and what the volatility
-will do.
-One can view the loading on the equity risk to itself be a function of the volatility.
-The econometrician can rewrite this as a two factor model with equity and volatility risk up to higher order
-terms.
-Since, the econometrician must disentangle these two effects, their ability to do this will depend upon various
-other parameters.
-As mentioned in the introduction,in CAPM we only have factor, and so clearly we cannot disentangle them.
-However, most models of interest to economists nest CAPM as a special case. 
-Consequently, for certain values of the parameters, the model has only one factor. 
-This directly implies that we cannot separately identify the two risks for some values of the other parameters.
-More generally, the identification strength of the risk prices depends upon the other parameters.
-The weak identification literature shows that in these scenarios, the finite-sample distributions of the estimates
-are highly nonstandard, and the usual asymptotic approximations do not perform well.
+We need to seperate the equity risk price and the volatility risk price. 
+In general, and we will show this below, the equity risk price is strongly identified even in the presence of the
+volatlity risk price. 
+There is a simple linear relationship that we can use.
+However, volatlity risk being another priced factor will introduce nonlinear nuisance temrs into this regression. 
+They will not matter asymptotically, but in finite samples, they likely do.
 
+Returning to identifying the price of volatlity risk, we know that when the strength of identification varies over
+the parameter space and we lack identificaiton entirely for some paramter values, the finite sample distributions
+are highly nonstandard. 
+Consequently, the usual asymptotic approximations do not perform well. 
 
-Hopefully, the reader has a high-level understanding of the issue in at hand, and why simple econometric
-procedures does not provide a useful guide to the true uncertainty regarding the parameters.
+In addition, the finite-sample distributions are the relevant ones here. 
+Even though we often have thousands of observations, since the variation in the expected return is so much smaller
+than variation in the return itself, we have a very low signal-to-noise ratio.
+Consequently, our estimators will continue to behave as if they were taken from a \textquote{small} sample even in
+\textquote{large} samples.
+
 The obvious next step is considering how we need to do this in practice.
 Since the contribution of this paper is in terms of methodology and empirical results, we will take a model from
 the literature that has the various components, instead of developing our own asset or option pricing model.
@@ -135,10 +144,8 @@ our results.
 If we were to use a diffusion process in continuous time, we would be severely counterfactually constraining the
 higher-order  moments of the process in way that would likely bias our inference. 
 
-As far as estimation is concerned, we follow \textcite{khrapov2016affine} in using a finite version of spectral
-General Method of Moments (GMM).
-Effectively, we take some moments implied by the characteristic function of returns and use them in a standard GMM
-setup.
+As far as estimation is concierend, we derive a series of conditional means and variances.
+We then take these means and variances and plug them into a general method of moments (GMM) criterion.
 The data we use are the bivariate series $\begin{pmatrix} r_{t+1}, \sigma^2_{t+1} \end{pmatrix}$.
 $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$.
 We go into further detail in \cref{sec:data} regarding how we obtained it, the time-span covered, and so on.
@@ -150,12 +157,18 @@ We go into further detail in \cref{sec:data} regarding how we obtained it, the t
 
 \addtocounter{subsection}{1}
 
-We estimate the prices of some factors using moment conditions derived from an option pricing model. 
+We estimate the prices of some factors using moment conditions derived from a pricing model. 
 As is standard in that literature, we will do  this by specifying the physical and risk-neutral measures and their
 relationship, i.e.\@ the stochastic discount factor or pricing kernel.
+This is non-trivial because we only observe equity data and so can only use moments with respect to the physical
+measure to estimate the paramters. 
+However, as will be seen in detail below the risk prices govern the stochastic discount factor (SDF), not the
+physicalo measure directly. 
+Consequently, we need to relate the the physical and risk-neutral measures and SDF closely in order to get
+restrictions on the behavior of the physical measure in terms of the risk prices. 
+
 Let $\F_t$ be the representative investor's information set at time $t$, and $P_t$ be the price on the asset in
 question, with associated return $r_{t+1}$ and volatility  $\sigma^2_{t+1}$.
-
 Given $\F_{t}$, the vector $\left( r_{t+1},  \sigma^2_{t+1}\right)$ is drawn from some process --- $\PP$ --- the
 physical measure. 
 We can further define the risk neutral measure --- $\QQ$ ---  as the process that makes $P_t$ a martingale.
@@ -679,8 +692,8 @@ Let $\tilde{r}_{t+1} = r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} + (1 - \phi
     &= \log \E_{\PP}\left[\exp\left(r_{t+1}\right) \exp\left((1 - \phi^2) \theta \sigma^2_{t+1}\right) \mvert
        \sigma^2_{t+1} \right]\\
 %
-    \intertext{Since the second term is the covariance between the SDF and the return, we can use it as a change
-    of measure.}
+    \intertext{Since the second term is the conditional covariance between the SDF and the return, we can use it
+    as a change of measure.}
 %
     &= \log \E_{\QQ}\left[\exp\left(r_{t+1}\right) \mvert \sigma^2_{t+1} \right]\\
 \end{align}
@@ -841,7 +854,7 @@ We can characterize the identification restrictions in \cref{eqn:identification_
 We now show that if $\phi = 0$, then \cref{eqn:lack_of_id_condition} will hold, but it will fail to hold if $\phi
 \neq 0$.
 In other words, as mentioned in \textcite[13]{khrapov2016affine}, a leverage effect will allow us to separately
-identify $\theta$ and $\pi$>
+identify $\theta$ and $\pi$.
 
 To see why this is the case note the following.
 To see when this will happen consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$, which since returns
