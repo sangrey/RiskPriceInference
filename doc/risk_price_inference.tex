@@ -737,6 +737,7 @@ Solving for $\widetilde{\psi}$ we have the following.
 Now we can use the relationship between $r_{t+1}$ and $\tilde{r}_{t+1}$ to relate $\tilde{\psi}$ and $\psi$.
 
 \begin{equation}
+    \label{eqn:psi_pp_as_func_of_params}
     \psi_{\PP} = \phi \sqrt{\frac{c_{\PP} \delta / (1 - \rho_{\PP})}{2 c_{\PP} \rho_{\PP} \left(c_{\PP} \delta /
     (1 - \rho_{\PP})\right) + c_{\PP}^2 \delta}} - \frac{1- \phi^2}{2} - (1 - \phi^2) \theta = \frac{\phi}{\sqrt{c
     (1 + \rho_{\PP})}} - \frac{1 - \phi^2}{2}  + (1 - \phi^2) \theta
@@ -817,62 +818,57 @@ We can characterize the identification restrictions in \cref{eqn:identification_
 \begin{enumerate}
     \item[Case 1:] The price of equity risk $\theta$ satisfies the following equations. 
         \begin{equation}
-            \alpha_{\PP}(\theta - 1) = \alpha_{\PP}(\theta)\ \text{and}\ \beta_{\PP}(\theta) = \beta_{\PP}(\theta
-            -1)\ \text{and}\ \gamma_{\PP}(\theta) = \gamma_{\PP}(\theta - 1)
+            \alpha_{\PP}(\theta - 1) = \alpha_{\PP}(\theta)
             \label{eqn:lack_of_id_condition}
         \end{equation}
-        In this situation, clearly, regardless of the value of $\pi$, we can satisfy these equations.
+
+        If \cref{eqn:lack_of_id_condition} holds, then some simple algebra shows that $\gamma(\theta) =
+        \gamma(\theta-1)$ and $\beta(\theta) = \beta(\theta-1)$.
+        In this situation, clearly, regardless of the value of $\pi$, we can satisfy these
+        \cref{eqn:identification_eqn_1} and \cref{eqn:identification_eqn_2}.
         In other words, the asset pricing equation does not identify $\pi$. 
         As noted by \textcite{khrapov2016affine}, this is in line with the common belief that the econometrician
         needs options data to be able to identify the price of volatility risk. 
-        By \cref{eqn:beta_qq_at_minus_one} and \cref{eqn:gamma_qq_at_minus_one}and some algebra, the second two
-        equations are equivalent to asking if $\alpha_{\QQ}(-1) = 0$, which the relationship between
-        $\alpha_{\QQ}$ and $\alpha_{\PP}$ is equivalent to first equation.
-        Consequently, we will focus exclusively on that equation moving forward.
 
     \item[Case 2:] 
         In general, there is no reason to expect the \cref{eqn:lack_of_id_condition} to hold.
         If it does not, it might seem reasonable to expect that we should be able to identify both $\theta$ and
         $\pi$.
-        In other words, we should, in princple, at least be able to identify $\pi$ from the difference between the
+        In other words, we should, in principle, at least be able to identify $\pi$ from the difference between the
         functions in the previous case when evaluated at $\theta-1$ and $\theta$.
-        %TODO $\beta$ and $\gamma$ are linear functions. This causes idientification using these functions to
-        %fail. Why?
-        %Is this right?
 \end{enumerate}
 
-In the first case, as discussed in \textcite[13]{khrapov2016affine}, in this 2nd case the existence of leverage
-allows us to separate the two risk prices.
+We now show that if $\phi = 0$, then \cref{eqn:lack_of_id_condition} will hold, but it will fail to hold if $\phi
+\neq 0$.
+In other words, as mentioned in \textcite[13]{khrapov2016affine}, a leverage effect will allow us to separately
+identify $\theta$ and $\pi$>
+
 To see why this is the case note the following.
-Clearly, both identification equations are satisfied if $\alpha_{\PP}(\theta) = \alpha_{\PP}(\theta -1)$.
-To see when this will happen consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$.
+To see when this will happen consider a 2nd-order Taylor series expansion of $\alpha_{\PP}$, which since returns
+are conditionally Gaussian is an exact expansion.
 
 \begin{align}
     \alpha(\theta) - \alpha(\theta - 1) &= \alpha_{\PP}'(0)  + \alpha_{\PP}''(0) \left(\theta - \frac{1}{2}\right)
-    + \text{higher-order terms} \\
-%
-    \intertext{Implicitly defining $\psi_{\PP} \coloneqq \alpha_{\PP}'(0)$ and $\phi \coloneqq \sqrt{1 -
-        \alpha_{\PP}''(0)}$, we can rewrite this as follows.} 
- %
-    &=  \psi_{\PP} + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) + \text{higher-order terms}  
-%
-    \intertext{Then since returns are conditionally gaussian.}
+    \\
 %
     \label{eqn:lack_of_id}
     &=  \psi_{\PP} + (1 - \phi^2) \left(\theta - \frac{1}{2}\right)  \\
 %
-    &= \frac{\phi}{\sqrt{c (1 + \rho_{\PP} )}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta +  (1 - \phi^2)
+    \intertext{Then filling in the definition of $\psi_{\PP}$ from \cref{eqn:psi_pp_as_func_of_params}.}
+%
+    &= \frac{\phi}{\sqrt{c_{\PP} (1 + \rho_{\PP} )}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta +  (1 - \phi^2)
        \left(\theta - \frac{1}{2}\right) 
 %
-    \intertext{If $\phi = 0$.}
+    \intertext{Simplifying we have the following.}
 %
-    &=  \frac{1}{2} - \theta   + \left(\theta - \frac{1}{2}\right) = 0
+    \label{eqn:alpha_difference}
+    &= \frac{\phi}{\sqrt{c_{\PP} (1 + \rho_{\PP} )}} 
 \end{align}
 
-If the \cref{eqn:lack_of_id} equals zero, then we cannot identify $\pi$.
-Of course, in general, there is no reason to expect it equal zero.
-
-%Explain this better.
+Clearly, if \cref{eqn:alpha_difference} equals zero if and only if $\phi = 0$.
+If $\phi \neq 0$, , the derivatives of \cref{eqn:identification_eqn_1} and \cref{eqn:identification_eqn_2}  do not
+equal at $\theta$ and $\theta-1$ since $a_{\PP}$ and $b_{\PP}$ are not linear functions.
+Consequently, we can separately identify $\pi$ and $\theta$.
 
 \section{GMM}\label{sec:GMM}
 
@@ -903,11 +899,11 @@ log-cumulant function equaling the conditional mean.
         \E_{\PP}\left[\sigma^2_{t+1}\right]  &= \frac{c \delta}{1 - \rho} \\
 %
         \label{eqn:cond_vol_var}
-        \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \rho \sigma^2_t  + c^2 \omega \\
+        \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c \rho \sigma^2_t  + c^2 \delta \\
 %
         \label{eqn:global_vol_var}
         \Var_{\PP}\left[\sigma^2_{t+1} \right]  &=  \frac{c^2}{1 - \rho^2}  \left(\frac{2 \rho \delta}{1 - \rho}  +
-        \omega \right)  \\
+        \delta \right)  \\
 %
         \label{eqn:cond_expected_rtn_moment}
         \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\eta) + \beta(\eta) \sigma^2_t +
@@ -952,9 +948,9 @@ We do need to run a constricted optimization though, because only certain values
     Assume that the moment conditions specified in \cref{defn:equilibrium_moment_conditions} have the correct form
     and that the instruments we are using satisfy the standard exogeneity and relevant conditions. 
 
-    Let the true parameter vector $\eta \coloneqq (\rho, c, \delta, \omega, \phi, \theta, \pi) \in [-1+\epsilon_1,
-    1 - \epsilon_2] \times [M_1, M_2] \times [\epsilon_4, M_4]\times [M_5, M_6]\times [M_7, M_8] \times [-1 +
-    \epsilon_4, 1 - \epsilon_5] \times [M_9, M_10] \times [M_12, M_13]$, where the $M_{\ast}$ are some large (in
+    Let the true parameter vector $\eta \coloneqq (\rho, c, \delta, \phi, \theta, \pi) \in [-1+\epsilon_1,
+    1 - \epsilon_2] \times [M_1, M_2] \times [\epsilon_4, M_4]\times [M_5, M_6]\times \times [-1 +
+    \epsilon_4, 1 - \epsilon_5] \times [M_7, M_8] \times [M_12, M_13]$, where the $M_{\ast}$ are some large (in
     magnitude) known constants and the $\epsilon_{\ast}$ are some small positive constants.  
 
     Let $Q_T(\eta, X)$  be the GMM objective function with moment conditions given in
@@ -971,14 +967,14 @@ We do need to run a constricted optimization though, because only certain values
     We have four parameters and four non-redundant moment conditions.
 
     The first two equations in    \cref{defn:equilibrium_moment_conditions} identify $\rho$ and $c \delta$.
-    \cref{eqn:cond_vol_var} identifies $c$ and $c^2 \omega$. 
+    \cref{eqn:cond_vol_var} identifies $\rho c$ and $c^2 \delta$. 
     This allows us to separately identify $c$ and $\delta$.
-    We can then use to  \cref{eqn:global_vol_var} to determine $\omega$ since \cref{eqn:cond_vol_var} and
-    \cref{eqn:global_vol_var} are linear functions of $\omega$, but have different slopes. 
     
     Identifying the other reduced-form parameter is also straightforward. 
     Identifying $\phi$ is also relatively straightforward. Since $r_{t+1}$ and $\sigma^2_{t+1}$ are known, as long
-    as we know the conditional mean $\phi$ is identified by \cref{eqn:cond_rtn_var}.
+    as we know the conditional mean of $r_{t+1}$, then identifying $\phi$ is identified by \cref{eqn:cond_rtn_var}.
+    Identifying the conditional mean of $r_{t+1}$ is straightforward because we observe volatility and the
+    conditional mean is a linear equation in these variables. 
     
     Since we have enough a sufficient number of exogenous valid instruments the conditioning implied by projecting
     on the instruments does not affect the arguments above. 
@@ -990,13 +986,12 @@ We do need to run a constricted optimization though, because only certain values
 
     The only place that \cref{defn:equilibrium_moment_conditions} that the risk-prices occurs in
     \cref{eqn:cond_expected_rtn_moment}. 
-    We start by showing that the $\gamma, \beta$ and $\psi$ functions are independent of $\pi$ if $\phi = 0$.
-    
-
-    The first part we have to show is that the equity and volatility risk prices are correctly parameterized by
-    \cref{eqn:cond_expected_rtn_moment}.
-    By definition $\pi$ and $\theta$ should only lead to higher-returns as the result of time-variation in either
-    the volatility or the return.
+    We showed that $\gamma, \beta$ and $\psi$ functions are independent of $\pi$ if $\phi = 0$ in the discussion
+    leading up \cref{eqn:alpha_difference}.
+    We further showed that they are not independent if $\phi \neq 0$.
+    In addition the dependence of the identification in terms of the non-singularity of the derivatives
+    equilibrium conditions in terms of $\pi$ and $\theta$ depends smoothly on $\phi$. 
+    This will be important later.
     
 \end{proof}
 
@@ -1017,7 +1012,7 @@ To write it in the notation of \textcite{andrews2014Gmm}, we partition $\eta$ in
     \phi &\coloneqq \phi  \in (-1, 1) \\ 
     \zeta &\coloneqq \lbrace \rho, c, \delta, \theta \rbrace \in [0,1) \times \R_{++} \times \R_{++} \times
     \R  \\
-    \pi &\coloneqq \pi \in \R 
+    \pi &\coloneqq \pi \in \R
 \end{align}
 
 Let $\Eta$ be the set of possible $\eta$, that as defined above.
