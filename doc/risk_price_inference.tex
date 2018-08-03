@@ -373,7 +373,6 @@ By plugging in the Laplace transforms for $\sigma^2_{t+1}$ and $r_{t+1}$ we can 
     Then the SDF constants follow the following equations.\footnote{This is Equation $3.4$ in
     \textcite[3.4]{khrapov2016affine}.}
 
-
     \begin{align}
         \label{eqn:sdf_functions_vs_physical_functions}
         m_0(\theta, \pi)  &= \gamma_{\PP}(\theta) + b_{\PP}(\alpha_{\PP}(\theta) + \pi) \\
@@ -426,145 +425,6 @@ Since we have a risk-neutral distribution the only change between $\E_{\QQ}\left
 increased in information.
 
 \subsection{Relating the Physical Measure Functions and the Risk Prices}
-
-We characterize $a_{\QQ}$ and $b_{\QQ}$ by deriving the restrictions that risk-neutrality implies upon the
-risk-neutral measure functions.
-Risk-neutrality means that the expectation of $\exp(r_{t+1}) = 1$.
-
-\begin{align}
-    1 &= \E_{\QQ}\left[\E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma_t^2, \sigma^2_{t+1}\right]  \mvert \sigma^2_t
-        \right] \\
-%
-      \intertext{This is the conditional Laplace transform evaluated at $-1$.}
-%
-      \label{eqn:risk_neutral_at_neg_1}
-      &= \E_{\QQ}\left[ \exp\left(-\alpha_{\QQ}(-1) \sigma^2_{t+1}\right)  \mvert \sigma^2_t \right] 
-         \exp\left(-\beta_{\QQ}(-1) \sigma^2_t - \gamma_{\QQ}(-1)\right)   \\
-%
-      \intertext{The first term is the Laplace transform evaluated at $\alpha(-1)$.}
-%
-      &= \exp(-a_{\QQ}(\alpha_{\QQ}(-1)) \sigma^2_t - b_{\QQ}(\alpha_{\QQ}(-1))) \exp\left(-\beta_{\QQ}(-1)
-         \sigma^2_t - \gamma_{\QQ}(-1)\right)  
-\end{align}
-
-Since this equation must hold for all $\sigma_t^2$, we have the following two equations.
-
-\begin{align}
-    a_{\QQ}(\alpha_{\QQ}(-1)) = - \beta_{\QQ}(-1) \\
-    b_{\QQ}(\alpha_{\QQ}(-1)) = - \gamma_{\QQ}(-1) 
-\end{align}
-
-
-The linearity of $\beta$ and $\gamma$ as shown by \cref{lemma:linearity_of_physical_functions} implies that the
-physical and risk-neutral forms of these functions will coincide. 
-To see this, you can differentiate \cref{eqn:sdf_functions_vs_physical_functions} with respect to $\theta$, and
-then note that the physical and risk-neutral functions must equal at zero.
-We can replace the last two functions with their physical counterparts because linearity implies they
-coincide. 
-We can then substitute in the risk-neutral distributions.
-
-\begin{gather}
-    \label{eqn:beta_qq_at_minus_one}
-    \phantom{\implies}   - \beta_{\PP}(-1) = a_{\QQ}(\alpha_{\QQ}(-1))\\
-%
-    \intertext{Filling in Taylor series expansions of $\beta_{\PP}$ and $\alpha_{\QQ}$ and recalling that
-    $\phi_{\QQ} = \phi_{\PP}$ implies.}
-%
-    \implies \beta_{\PP}'(0) = a_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
-%
-    \intertext{Then we can fill in the formula for $a_{\QQ}$ from \cref{defn:a_PP} because the change of measure
-    preserves the structure.}
-%
-    \implies \beta_{\PP}'(0) = \frac{\rho_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)}{1 + c_{\QQ}
-    \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)} 
-    \label{eqn:beta_function_QQ}
-\end{gather}
-
-Before we derive $\rho_{\QQ}$, $c_{\QQ}$, and $\psi_{\QQ}$ in terms of the physical measure functions, we perform
-a similar calculation for $\gamma_{\QQ}(-1)$.
-
-\begin{gather}
-    \label{eqn:gamma_qq_at_minus_one}
-    \phantom{\implies}   - \gamma_{\PP}(-1) = b_{\QQ}(\alpha_{\QQ}(-1))\\
-%
-    \intertext{Again taking Taylor series expansions of $\gamma_{\PP}$ and $\alpha_{\QQ}$.}
-%
-    \implies \gamma_{\PP}'(0) = b_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
-%
-    \intertext{Then we can fill in the formula for $b_{\QQ}$ from \cref{defn:b_PP} because that the measure change
-    is structure preserving.}
-%
-    \implies \gamma_{\PP}'(0) = \delta \log\left(1 + c_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1-
-    \phi^2)\right)\right)
-    \label{eqn:gamma_function_QQ}
-\end{gather}
-
-To simplify \cref{eqn:beta_function} and \cref{eqn:gamma_function} further, we need to solve for $c_{\QQ}$,
-$b_{c_\QQ}$, and $\psi_{\QQ}$  in terms of their physical counterparts.
-We can take the equations in \textcite[Proposition 5]{khrapov2016affine} and differentiate and derive the
-following relationship between $a_{\QQ}, b_{\QQ}$ and $a_{\PP}, b_{\PP}$.
-
-\begin{align}
-    a_{\QQ}'(v) &= a_{\PP}'(v + \pi + \alpha_{\PP}(\theta))  \nonumber \\
-%
-    b_{\QQ}'(v) &= b_{\PP}'(v + \pi + \alpha_{\PP}(\theta))  \\
-%
-    b_{\QQ}''(v) &= b_{\PP}''(v + \pi + \alpha_{\PP}(\theta))  \nonumber \\
-%
-    \intertext{Filling in parameterization of the right-hand sides, and evaluating the equations at $0$ gives the
-    following.} 
-%
-    a_{\QQ}'(0) &= \frac{\rho_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \nonumber \\
-%
-    b_{\QQ}'(0) &= \frac{c_{\PP} \delta_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \\
-%
-    b_{\QQ}''(0) &= -\frac{c_{\PP}^2 \delta_{\PP}}{(1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2)))^2} \nonumber \\
-%
-    \intertext{Then since the left hand sides of the equation above are $\rho_{\QQ}$ and $c_{\QQ} \delta$, we
-    have the following expressions.}
-%
-    \rho_{\QQ} &= \frac{\rho_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \nonumber \\
-%
-    \label{eqn:c_rho_delta_QQ}
-    c_{\QQ} \delta_{\QQ} &= \frac{c_{\PP} \delta_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))}  \\
-%
-    -c_{\QQ}^2 \delta_{\QQ} &= -\frac{c_{\PP}^2 \delta_{\PP}}{(1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2)))^2}
-    \nonumber
-\end{align}
-
-To simplify notation, define the following rescaling function.
-
-\begin{equation}
-    \chi(\pi, \theta) \coloneqq 1 + c_{\PP}(\pi + \alpha_{\PP}(\theta))
-\end{equation}
-
-We can use \cref{eqn:c_rho_delta_QQ} and substitute in $\chi(\pi, \theta)$ to get the following.
-
-\begin{align}
-    \delta_{\QQ} &= \delta_{\PP} \\
-    \rho_{\QQ} &= \frac{\rho_{\PP}}{\chi^2(\pi, \theta)} \\
-    c_{\QQ} &= \frac{c_{\PP}}{\chi(\pi, \theta)} 
-\end{align}
-
-The one value we have yet to derive is $\psi_{\QQ}$.
-Again we use \textcite[Proposition 5]{khrapov2016affine}, to relate $\psi_{\PP}$ and $\psi_{\QQ}$. 
-Since the $\alpha$ functions are quadratic, we have the following.
-
-\begin{align}
-    \alpha_{\QQ}(v) = \psi_{\QQ} v + \frac{1- \phi^2_{\QQ}}{2} v^2  \\
-%
-    \alpha_{\PP}(v) = \psi_{\PP} v + \frac{1- \phi^2_{\PP}}{2} v^2  
-\end{align}
-
-As in \cref{eqn:risk_neutral_at_neg_1}, $\alpha_{\QQ}(-1) = \alpha_{\PP}(\theta)$, recalling that $\phi_{\PP} =
-\phi_{\QQ}$, we can differentiate and get the following.
-
-\begin{align}
-    \implies \alpha_{\QQ}'(0) = \alpha_{\PP}'(0) + (1 - \phi^2) \theta
-%
-    \implies \psi_{\QQ} = \psi_{\PP} + (1 - \phi^2) \theta
-\end{align}
-
 
 \subsubsection{Deriving \texorpdfstring{$\psi$}{psi}}
 
@@ -749,19 +609,6 @@ Now that we have a formula for $\psi_{\PP}$, $\rho_{\QQ}$, and $c_{\QQ}$ we can 
 functions of the parameters.
 (Recall, $\omega$ is the vector of parameters.)
 
-\begin{align}
-    \label{eqn:beta_function}
-    \beta(\omega) &\coloneqq \frac{\rho_{\PP} \left(-\psi_{\PP} - (1- \phi^2)(\theta -
-    \frac{1}{2})\right)}{\chi^2\left(\pi, \theta\right) + \chi(\pi, \theta)c_{\PP} \left(-\psi_{\PP} - (1-
-    \phi^2)(\theta-\frac{1}{2} )\right)}  \\
-%
-    \label{eqn:gamma_function}
-    \gamma(\omega) &\coloneqq \delta \log\left(1 + \frac{c_{\PP}}{\chi(\pi,\theta)} \left(-\psi_{\PP} - (1-
-    \phi^2)\left(\theta - \frac{1}{2}\right) \right)\right) \\
-%
-    \label{eqn:psi_function}
-    \psi(\omega) &= \frac{\phi}{\sqrt{c_{\PP} (1 + \rho_{\PP})}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta 
-\end{align}
 
 
 \subsection{Identification of the Risk Prices}
@@ -1191,6 +1038,181 @@ functions.
 
 \end{proof}
 
+
+
+\begin{restatable}[Reparamaterizing the Physical Distribution]{lemma}{physicalMeasureFunctions}
+
+    
+    Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
+    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}.
+ 
+
+    \begin{align}
+        \label{eqn:beta_function}
+        \beta(\pi, \theta) &\coloneqq \frac{\rho_{\PP} \left(-\psi_{\PP} - (1- \phi^2)(\theta -
+        \frac{1}{2})\right)}{\chi^2\left(\pi, \theta\right) + \chi(\pi, \theta)c_{\PP} \left(-\psi_{\PP} - (1-
+        \phi^2)(\theta-\frac{1}{2} )\right)}  \\
+    %
+        \label{eqn:gamma_function}
+        \gamma(\pi, \theta) &\coloneqq \delta \log\left(1 + \frac{c_{\PP}}{\chi(\pi,\theta)} \left(-\psi_{\PP} - (1-
+        \phi^2)\left(\theta - \frac{1}{2}\right) \right)\right) \\
+    %
+        \label{eqn:psi_function}
+        \psi(\pi, \theta) &= \frac{\phi}{\sqrt{c_{\PP} (1 + \rho_{\PP})}} + \frac{1 - \phi^2}{2} - (1 - \phi^2)
+        \theta 
+    \end{align}
+
+\end{restatable}
+
+
+\physicalMeasureFunctions*
+
+\begin{proof}
+We characterize $a_{\QQ}$ and $b_{\QQ}$ by deriving the restrictions that risk-neutrality implies upon the
+risk-neutral measure functions.
+Risk-neutrality means that the expectation of $\exp(r_{t+1}) = 1$.
+
+\begin{align}
+    1 &= \E_{\QQ}\left[\E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma_t^2, \sigma^2_{t+1}\right]  \mvert \sigma^2_t
+        \right] \\
+%
+    \intertext{This is the conditional Laplace transform of $r_{t+1}$ evaluated at $-1$.}
+%
+      \label{eqn:risk_neutral_at_neg_1}
+    &= \E_{\QQ}\left[ \exp\left(-\alpha_{\QQ}(-1) \sigma^2_{t+1}\right)  \mvert \sigma^2_t \right]
+       \exp\left(-\beta_{\QQ}(-1) \sigma^2_t - \gamma_{\QQ}(-1)\right)   \\
+%
+    \intertext{The first term is the Laplace transform of $\sigma^2_{t+1}$ evaluated at $\alpha(-1)$.}
+%
+      &= \exp(-a_{\QQ}(\alpha_{\QQ}(-1)) \sigma^2_t - b_{\QQ}(\alpha_{\QQ}(-1))) \exp\left(-\beta_{\QQ}(-1)
+         \sigma^2_t - \gamma_{\QQ}(-1)\right)  
+\end{align}
+
+Since this equation must hold for all $\sigma_t^2$ and $\exp(0) = 1$, we have the following two equations.
+
+\begin{align}
+    a_{\QQ}(\alpha_{\QQ}(-1)) = - \beta_{\QQ}(-1) \\
+    b_{\QQ}(\alpha_{\QQ}(-1)) = - \gamma_{\QQ}(-1) 
+\end{align}
+
+
+The linearity of $\beta$ and $\gamma$ as shown by \cref{lemma:linearity_of_physical_functions} implies that the
+physical and risk-neutral forms of these functions will coincide. 
+To see this, you can differentiate \cref{eqn:sdf_functions_vs_physical_functions} with respect to $\theta$, and
+then note that the physical and risk-neutral functions must equal at zero.
+
+\begin{equation}
+    m_0'(\theta, \pi) = \beta_{\PP}'(0) + a_{\PP}'(\alpha_{\PP}(\theta) + \pi) \alpha_{\PP}'(\theta)
+\end{equation}
+
+
+We can replace the last two functions with their physical counterparts because linearity implies they
+coincide. 
+We can then substitute in the risk-neutral distributions.
+
+\begin{gather}
+    \label{eqn:beta_qq_at_minus_one}
+    \phantom{\implies}   - \beta_{\PP}(-1) = a_{\QQ}(\alpha_{\QQ}(-1))\\
+%
+    \intertext{Filling in Taylor series expansions of $\beta_{\PP}$ and $\alpha_{\QQ}$ and recalling that
+    $\phi_{\QQ} = \phi_{\PP}$ implies.}
+%
+    \implies \beta_{\PP}'(0) = a_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
+%
+    \intertext{Then we can fill in the formula for $a_{\QQ}$ from \cref{defn:a_PP} because the change of measure
+    preserves the structure.}
+%
+    \implies \beta_{\PP}'(0) = \frac{\rho_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)}{1 + c_{\QQ}
+    \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)} 
+    \label{eqn:beta_function_QQ}
+\end{gather}
+
+Before we derive $\rho_{\QQ}$, $c_{\QQ}$, and $\psi_{\QQ}$ in terms of the physical measure functions, we perform
+a similar calculation for $\gamma_{\QQ}(-1)$.
+
+\begin{gather}
+    \label{eqn:gamma_qq_at_minus_one}
+    \phantom{\implies}   - \gamma_{\PP}(-1) = b_{\QQ}(\alpha_{\QQ}(-1))\\
+%
+    \intertext{Again taking Taylor series expansions of $\gamma_{\PP}$ and $\alpha_{\QQ}$.}
+%
+    \implies \gamma_{\PP}'(0) = b_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
+%
+    \intertext{Then we can fill in the formula for $b_{\QQ}$ from \cref{defn:b_PP} because that the measure change
+    is structure preserving.}
+%
+    \implies \gamma_{\PP}'(0) = \delta \log\left(1 + c_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1-
+    \phi^2)\right)\right)
+    \label{eqn:gamma_function_QQ}
+\end{gather}
+
+To simplify \cref{eqn:beta_function} and \cref{eqn:gamma_function} further, we need to solve for $c_{\QQ}$,
+$b_{c_\QQ}$, and $\psi_{\QQ}$  in terms of their physical counterparts.
+We can take the equations in \textcite[Proposition 5]{khrapov2016affine} and differentiate and derive the
+following relationship between $a_{\QQ}, b_{\QQ}$ and $a_{\PP}, b_{\PP}$.
+
+\begin{align}
+    a_{\QQ}'(v) &= a_{\PP}'(v + \pi + \alpha_{\PP}(\theta))  \nonumber \\
+%
+    b_{\QQ}'(v) &= b_{\PP}'(v + \pi + \alpha_{\PP}(\theta))  \\
+%
+    b_{\QQ}''(v) &= b_{\PP}''(v + \pi + \alpha_{\PP}(\theta))  \nonumber \\
+%
+    \intertext{Filling in parameterization of the right-hand sides, and evaluating the equations at $0$ gives the
+    following.} 
+%
+    a_{\QQ}'(0) &= \frac{\rho_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \nonumber \\
+%
+    b_{\QQ}'(0) &= \frac{c_{\PP} \delta_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \\
+%
+    b_{\QQ}''(0) &= -\frac{c_{\PP}^2 \delta_{\PP}}{(1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2)))^2} \nonumber \\
+%
+    \intertext{Then since the left hand sides of the equation above are $\rho_{\QQ}$ and $c_{\QQ} \delta$, we
+    have the following expressions.}
+%
+    \rho_{\QQ} &= \frac{\rho_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))} \nonumber \\
+%
+    \label{eqn:c_rho_delta_QQ}
+    c_{\QQ} \delta_{\QQ} &= \frac{c_{\PP} \delta_{\PP}}{1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2))}  \\
+%
+    -c_{\QQ}^2 \delta_{\QQ} &= -\frac{c_{\PP}^2 \delta_{\PP}}{(1 + c_{\PP}(\pi + \alpha_{\PP}(\theta_2)))^2}
+    \nonumber
+\end{align}
+
+To simplify notation, define the following rescaling function.
+
+\begin{equation}
+    \chi(\pi, \theta) \coloneqq 1 + c_{\PP}(\pi + \alpha_{\PP}(\theta))
+\end{equation}
+
+We can use \cref{eqn:c_rho_delta_QQ} and substitute in $\chi(\pi, \theta)$ to get the following.
+
+\begin{align}
+    \delta_{\QQ} &= \delta_{\PP} \\
+    \rho_{\QQ} &= \frac{\rho_{\PP}}{\chi^2(\pi, \theta)} \\
+    c_{\QQ} &= \frac{c_{\PP}}{\chi(\pi, \theta)} 
+\end{align}
+
+The one value we have yet to derive is $\psi_{\QQ}$.
+Again we use \textcite[Proposition 5]{khrapov2016affine}, to relate $\psi_{\PP}$ and $\psi_{\QQ}$. 
+Since the $\alpha$ functions are quadratic, we have the following.
+
+\begin{align}
+    \alpha_{\QQ}(v) = \psi_{\QQ} v + \frac{1- \phi^2_{\QQ}}{2} v^2  \\
+%
+    \alpha_{\PP}(v) = \psi_{\PP} v + \frac{1- \phi^2_{\PP}}{2} v^2  
+\end{align}
+
+As in \cref{eqn:risk_neutral_at_neg_1}, $\alpha_{\QQ}(-1) = \alpha_{\PP}(\theta)$, recalling that $\phi_{\PP} =
+\phi_{\QQ}$, we can differentiate and get the following.
+
+\begin{align}
+    \implies \alpha_{\QQ}'(0) = \alpha_{\PP}'(0) + (1 - \phi^2) \theta
+%
+    \implies \psi_{\QQ} = \psi_{\PP} + (1 - \phi^2) \theta
+\end{align}
+
+\end{proof}
 
 \section{Identification Proofs}
 
