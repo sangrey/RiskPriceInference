@@ -254,154 +254,91 @@ This is not trivial because we only modeled the conditional distribution of the 
 
 \subsection{Parameterizing the Physical Measure Dynamics}
 
-The model in \cref{defn:physical_model} is parameterized using the functions mentioned, and at this level of
-generality is fully nonparametric. 
-We now derive the moment conditions that govern the physical measure. 
-Note, by the physical-measure functions satisfy the following constraint by definition.
-
-\begin{equation}
-    a_{\PP}(0) = b_{\PP}(0) = \alpha_{\PP}(0) = \beta_{\PP}(0) = \gamma_{\PP}(0) 
-\end{equation}
-
-We can differentiate the Laplace transform at zero to compute the moments.
-The logarithm of the Laplace transform above is a conditional cumulant generating function.
-The first two derivative of this function evaluated at zero are the first two cumulants, which are the mean and
-variance. 
-
-We start by computing $\E_{\PP}\left[\sigma^2_{t+1} \mvert \F_t\right]$ and $\Var_{\PP}\left[\sigma^2_{t+1} \mvert
-\F_t\right]$
-
-
-\begin{align}
-    \E_{\PP}\left[\log \sigma^2_{t+1} \mvert \sigma^2_t \right]  &= a_{\PP}'(0) \log \sigma^2_t  + b_{\PP}'(0) \\
-    \Var_{\PP}\left[\log \sigma^2_{t+1} \mvert \sigma^2_t \right]  &= -a_{\PP}''(0) \log \sigma^2_t  - b_{\PP}''(0) 
-\end{align}
-
-To simplify the exposition, we will reparameterize these equations. 
-Essentially, we are giving these derivatives names.\footnote{These are the same definitions as those used in
-\textcite{khrapov2016affine} with the exception that we do not define the parameter they refer to as $\omega$
-because the parametric from we adopt below implies that that parameter equals $\delta$.}
-
-\begin{defn}{Volatility Dynamics Parameters}
-    \label{defn:vol_dynamics_params}
-    \begin{align}
-        \rho_{\PP} &\coloneqq a_{\PP}'(0) \in (0,1) \\
-        c_{\PP} &\coloneqq - \frac{a_{\PP}''(0)}{2 a_{\PP}'(0)} > 0 \\
-        \delta_{\PP} &\coloneqq -2 \frac{a_{\PP}'(0) b_{\PP}'(0)}{a_{\PP}''(0)} > 0 
-    \end{align}
-\end{defn}
-
-Since \cref{defn:vol_dynamics_params} relates the parameters on the right-hand side to a set of moments on the
-right hand side, we can use straightforward algebra to invert this relationship.
-This is useful because it makes interpreting the parameters more straightforward, and we can use these moment in
-estimation later. 
-
-\subsubsection{Volatility Dynamics}
-
-We now derive a few moments of $\sigma^2_{t+1}$. 
-To do this we use a parametric conditional autoregressive process CAR(1) as in \textcite{khrapov2016affine}.
-That implies that $a_{\PP}$ and $b_{\PP}$ have the following form. 
+We now introduce the data generating process for the volatility.
+We use a conditional autoregressive gamma process as in \textcite{gourieroux2006autoregressive, khrapov2016affine}
+for the volatility.
+This implies that we can parameterize the process using $a_{\PP}$ and $b_{\PP}$ which are defined as follows.
 
 \begin{defn}{Volatility Dynamics Functions}
+    \label{defn:physical_vol_dynamics}
     \begin{align}
         \label{defn:a_PP}
         a_{\PP}(v) &= \frac{\rho_{\PP} v}{1 + c_{\PP} v} \\
         \label{defn:b_PP}
         b_{\PP}(v) &= \delta \log(1 + c_{\PP} v)
     \end{align}
+    
+    with 
+    \begin{equation}
+        \rho \in [0,1), \quad c > 0, \quad \delta > 0
+    \end{equation}
+
 \end{defn}
 
 $\rho_{\PP}$ is a persistence parameter.
 $c_{\PP}$ is a scaling parameter.
-We assume that the unconditional moments of $\sigma^2_t$ agrees with that of $\sigma^2_{t+1}$, (i.e.\@ the
-volatility is stationary) and so we can use the law of iterated expectations, the law of total variance, and the
-parametric forms above  to determine the unconditional moments.
+we can see this this clearly from the following forms of the moment conditions.
 
 \begin{remark}[Volatilty Moment Conditions] 
     \label{remark:vol_moment_conditions}
     \begin{align}
         \E_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &= \rho_{\PP} \sigma^2_t  + c_{\PP} \delta\\
 %
-        \E_{\PP}\left[\sigma^2_{t+1}\right]  &= \frac{c \delta_{\PP}}{1 - \rho_{\PP}} \\
-%
         \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]  &=  2 c_{\PP} \rho_{\PP} \sigma^2_t  + c_{\PP}^2
-        \omega \\
+        \delta \\
 %
-        \Var_{\PP}\left[\sigma^2_{t+1} \right]  &=  \frac{c_{\PP}^2}{1- \rho_{\PP}^2} \left(\frac{2 \rho \delta}{1
-        - \rho}  + \delta \right) 
     \end{align}
 \end{remark}
 
-We have four non-redundant moment conditions and four parameters. 
-Hence, we can identify all four of these parameters from the volatility data as long as the parameters are in
-the interior of their domains
+Since these two moment conditions are sufficient to derive the unconditional moments, all of the parameters are
+identified as long as they are in the interior of their appropriately specified domains.
+Intuitively, we are using linear regression to estimate the slope and intercept parameters.
+
 
 \subsubsection{Return Dynamics}
 
 We then turn to computing the moments of the return distribution. 
 This is more subtle that computing the moments of the volatility dynamics because we have to relate the dynamics
-of the returns to that of the volatility and to the stochastic discount factor, which is not returned. 
-Our model for the return in \cref{defn:physical_model} only specifies the conditional Laplace transform of the
-return as a function of $\left. r_{t+1} \mvert \sigma^2_{t+1}, \sigma^2_t \right.$
+of the returns to that of the volatility and to the stochastic discount factor, which is not observed. 
+We use the conditional autoregressive CAR(1) model here, which we take from
+\textcite{darolles2006structural,khrapov2016affine}
+This model  specifies the conditional Laplace transform of the return as a function of $\left. r_{t+1} \mvert
+\sigma^2_{t+1}, \sigma^2_t \right.$
 
-The first step is to compute the moments of the conditional distributions of $\left. r_{t+1} \mvert
+We start by specifying a parametric form for $\alpha_{\PP}(v)$ and $\beta_{\PP}(v)$, and $\gamma_{\PP}(v)$.
+We parameterize $\alpha_{\PP}(v)$ in the way that we do because it gives $\phi$ a nice interpretation.
+It is a leverage effect parameter.
+
+\begin{defn}{Return Dynamics Functions}
+    \label{defn:physical_return_dynamics}
+    \begin{align}
+        \alpha_{\PP}(v) &\coloneqq \psi v + \frac{1 - \phi^2}{2} v^2 \\
+        \beta_{\PP}(v) &\coloneqq \beta v  \\
+        \gamma_{\PP}(v) &\coloneqq \gamma v  
+    \end{align}
+\end{defn}
+
+Since $\alpha_{\PP}$ is quadratic, the return are conditionally Gaussian.
+In addition, these functions that parameterize the Laplace transform, but equal zero at zero, and so we do not
+need an intercept.
+It might seem as first, that the linear for $\beta_{\PP}(v)$ and $\gamma_{\PP}(v)$ is a strong restriction.
+This is not actually the case.
+Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility hence greater than $\Var_{\PP}\left(r_{t+1} \mvert
+\sigma^2_{t+1}, \sigma^2_{t}\right)$ and variances must be positive, the model implies that they must be linear
+(\cref{lemma:linearity_of_physical_functions}).
+
+
+Again, we start by computing the moments of the conditional distributions of $\left. r_{t+1} \mvert
     \sigma^2_{t+1}, \sigma^2_t \right.$.
 As we did above, we do this by evaluating the derivative the log-cumulant function at zero.
 
 \begin{align}
-    \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  &= \alpha_{\PP}'(0) \sigma^2_{t+1}  +
-    \beta_{\PP}'(0) \sigma^2_t + \gamma_{\PP}'(0) \\
-    \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  &= -\alpha_{\PP}''(0) \sigma^2_{t+1}  -
-    \beta_{\PP}''(0) \sigma^2_t - \gamma_{\PP}''(0)
+    \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  &= \psi \sigma^2_{t+1}  + \beta \sigma^2_t +
+    \gamma \\
+    \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  &= (1 - \phi^2) \sigma^2_{t+1}  
     \label{eqn:rtn_cond_vol}
 \end{align}
 
-
-Before we move to computing the moments of $\left. r_{t+1} \mvert \F_t \right.$, it is useful to simplify the
-notation slightly.
-We are using realized volatility  as our data for $\sigma^2_{t+1}$, and realized volatility is an
-estimator for the realized variance of the martingale part of the process.
-Consequently, $\Var_{\PP}\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) \leq \sigma^2_{t+1}$.
-Since the three second derivatives \cref{eqn:rtn_cond_vol} are constant, this implies that $\beta_{\PP}''(0)$ and
-$\gamma_{\PP}''(0)$ are both non-positive.
-They cannot be negative or the conditional variance would be negative for small enough realizations of
-$\sigma^2_{t+1}$.
-In other words, we have the following equation.
-
-\begin{equation}
-    \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  = -\alpha_{\PP}''(0) \sigma^2_{t+1} 
-\end{equation}
-
-I now introduce some notation to simplify the expression we have here.\footnote{$\phi$ does not have a $\PP$
-subscript because, as will be shown later, it does not change between the physical and risk-neutral measures.}
-
-\begin{align}
-    \phi &\coloneqq \sqrt{1 - \abs{\alpha_{\PP}''(0)}} \\
-    \psi_{\PP} &\coloneqq \alpha_{\PP}'(0)
-\end{align}
-
-This implies that $\alpha_{\PP}(v)$ has the following truncated Taylor series expansion around zero since
-$\alpha_{\PP}(0) = 0$.
-
-\begin{equation}
-    \label{eqn:alpha_PP_expansion}
-    \alpha_{\PP}(v) = \psi v + \frac{1 - \phi^2}{2} v^2
-\end{equation}
-
-$\alpha_{\PP}(v)$ being equal to its 2nd-order Taylor series expansion is equivalent to $r_{t+1}$ being
-conditionally Gaussian given $\sigma^2_{t+1}$ and $\sigma^2_t$.
-We can then use the law of total variance to compute $\Var_{\PP}\left[r_{t+1} \mvert \F_t\right]$ and the law of
-iterated expectations to compute $\E\left[r_{t+1} \mvert \F_t \right]$.
-
-\begin{align}
-    \label{eqn:lie_expected_rtn}
-    \E_{\PP}\left[r_{t+1} \mvert \F_t\right] &= \psi_{\PP} \E\left[\sigma^2_{t+1} \mvert \F_t\right]  +
-    \beta_{\PP}'(0) \sigma^2_t + \gamma_{\PP}'(0)  \\
-%
-    \label{eqn:ltv_rtn_variance}
-    \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t\right]  &= (1 - \phi^2) \E \left[\sigma^2_{t+1} \mvert \sigma^2_t
-    \right] + \psi_{\PP}^2 \Var_{\PP}\left[\sigma^2_{t+1} \mvert \sigma^2_t \right] 
-\end{align}
 
 \subsection{The Stochastic Discount Factor}\label{sec:deriving_sdf_functions}
 
@@ -415,6 +352,7 @@ Let $r_{f,t}$ refer to the risk-free rate.
 It deterministically discounts the prices but plays no further role in the analysis.
 
 \begin{defn}{The Stochastic Discount Factor}
+    \label{defn:SDF}
     \begin{equation}
         M_{t,t+1}(\pi, \theta) = \exp\left(-r_{f,t}\right) \exp\left(m_{0}(\pi, \theta) + m_1(\pi, \theta)
         \sigma_t^2 - \pi \sigma^2_{t+1} - \theta r_{t+1}\right) 
@@ -424,48 +362,26 @@ It deterministically discounts the prices but plays no further role in the analy
 
 Before we show how the risk prices $\pi, \theta$ show up in the equations above, we will introduce some parameters
 that govern the dynamics of the volatility process.
-Since the SDF must integrate to $1$ once we discount using the risk-free rate $r_{f,t}$\, we have the following
-restrictions.
+$M_{t,t+1}$ must integrate to $1$ for all $\sigma^2_t$.
+We can view $m_{0}$ and $m_1$ as integration constants.
+By plugging in the Laplace transforms for $\sigma^2_{t+1}$ and $r_{t+1}$ we can derive the following.
 
-\begin{equation}
-    \label{eqn:reweigted_sdf}
-    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
-    \right) \mvert \F_t \right] = 1 \\
-\end{equation}
+\begin{restatable}[Uniform Convergence under Strong Identification]{lemma}{sdfConstants}
+    Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
+    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}.
 
-We can use \cref{eqn:reweigted_sdf} to relate $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ to the physical measure
-functions. 
+    Then the SDF constants follow the following equations.\footnote{This is Equation $3.4$ in
+    \textcite[3.4]{khrapov2016affine}.}
 
-\begin{gather}
-    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
-    \right) \mvert \F_t \right] = 1 \\
-    \intertext{By the law of iterated expectations.}
-    \E_{\PP}\left[ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1}\right)
-        \exp\left( - \theta r_{t+1}\right) \mvert \F_t, \sigma^2_{t+1} \right]\right] = 1 \\
-    \intertext{The second term is the Laplace transform of $r_{t+1}$.}
-    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} \right)
-        \exp(-\alpha_{\PP}(\theta) \sigma^2_{t+1} - \beta_{\PP}(\theta) \sigma^2_{t} - \gamma_{\PP}(\theta_2)
-        \mvert \F_t \right] = 1 \\
-    \intertext{Reorganizing terms.}
-    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
-        \gamma_{\PP}(\theta_2) \right) \exp(-\left(\pi + \alpha_{\PP}(\theta)\right) \sigma^2_{t+1}) \mvert \F_t
-        \right] = 1 \\ 
-    \intertext{Substituting in the Laplace transform for $\sigma^2_{t+1}$.} 
-    \label{eqn:expected_sdf_wrt_PP}
-    \E_{\PP}\left[\exp(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
-        \gamma_{\PP}(\theta_2)  - a_{\PP}(\pi + \alpha_{\PP}(\theta)) - b_{\PP}(\pi + \alpha_{\PP}(\theta))
-        \mvert \F_t \right] = 1 
-\end{gather}
 
-Then since \cref{eqn:expected_sdf_wrt_PP} must hold for all $\sigma^2_t$ and $\sigma^2_{t+1}$, we have the
-following.\footnote{\cref{eqn:sdf_functions_vs_physical_functions} is Equation $3.4$ in 
-\textcite[3.4]{khrapov2016affine}.}
+    \begin{align}
+        \label{eqn:sdf_functions_vs_physical_functions}
+        m_0(\theta, \pi)  &= \gamma_{\PP}(\theta) + b_{\PP}(\alpha_{\PP}(\theta) + \pi) \\
+        m_1(\theta, \pi)  &= \beta_{\PP}(\theta) + a_{\PP}(\alpha_{\PP}(\theta) + \pi) \nonumber
+    \end{align}
 
-\begin{align}
-    \label{eqn:sdf_functions_vs_physical_functions}
-    m_0(\theta, \pi)  &= \gamma_{\PP}(\theta) + b_{\PP}(\alpha_{\PP}(\theta) + \pi) \\
-    m_1(\theta, \pi)  &= \beta_{\PP}(\theta) + a_{\PP}(\alpha_{\PP}(\theta) + \pi) \nonumber
-\end{align}
+\end{restatable}
+
 
 Since the right-hand side of \cref{eqn:sdf_functions_vs_physical_functions} are entirely in terms of the physical
 measure functions, which are in principle observable, we can estimate the SDF functions entirely using equity
@@ -513,7 +429,7 @@ increased in information.
 
 We characterize $a_{\QQ}$ and $b_{\QQ}$ by deriving the restrictions that risk-neutrality implies upon the
 risk-neutral measure functions.
-Risk-neutrality means that the expectation of $\exp(r_{t+1})$.
+Risk-neutrality means that the expectation of $\exp(r_{t+1}) = 1$.
 
 \begin{align}
     1 &= \E_{\QQ}\left[\E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma_t^2, \sigma^2_{t+1}\right]  \mvert \sigma^2_t
@@ -539,10 +455,8 @@ Since this equation must hold for all $\sigma_t^2$, we have the following two eq
 \end{align}
 
 
-The return's conditionally Gaussian distribution implies that $\alpha_{\QQ}$ is a quadratic function, with an
-expansion as in \cref{eqn:alpha_PP_expansion}.
-In addition, as discussed above $\beta_{\QQ}$ and $\gamma_{\QQ}$ will be linear functions. 
-This linearity implies that the physical and risk-neutral forms of these functions will coincide. 
+The linearity of $\beta$ and $\gamma$ as shown by \cref{lemma:linearity_of_physical_functions} implies that the
+physical and risk-neutral forms of these functions will coincide. 
 To see this, you can differentiate \cref{eqn:sdf_functions_vs_physical_functions} with respect to $\theta$, and
 then note that the physical and risk-neutral functions must equal at zero.
 We can replace the last two functions with their physical counterparts because linearity implies they
@@ -652,43 +566,110 @@ As in \cref{eqn:risk_neutral_at_neg_1}, $\alpha_{\QQ}(-1) = \alpha_{\PP}(\theta)
 \end{align}
 
 
-\subsubsection{Deriving \texorpdfstring{$\psi_{\QQ}$}{\psi}}
+\subsubsection{Deriving \texorpdfstring{$\psi$}{psi}}
 
-This is not necessarily useful because we have not derived $\psi_{\PP}$, and so we have no way to estimate it.
-We resolve this issue by relating $\Var\left(r_{t+1} \mvert \sigma^2_t\right)$ and $\E\left[\sigma^2_{t+1}\right]$.
-In continuous-time this is easy because $r_{t+1}$ is a semimartingale and so we can use the It\^{o} Isometry to
-show that they equal. 
-However, in discrete-time this does not quite hold.
-You cannot ignore drifts.
+The goal moving forward is to solve for $\gamma$, $\beta$, and $\psi$ in terms of the risk parameters. 
+Once we do this we can use the difference in expected returns between the distribution given $\sigma^2_t$ and the
+distribution given $\sigma^2_{t+1}$ and $\sigma^2_t$ to separately identify the two risk prices.
+In this section, we focus on $\psi$ because it controls this difference in means.
+
+In general, $\psi$ will have three parts.
+First, we have the Jensen's inequality term --- the mean will shift by a value proportional to the variance.
+Second, the reduction in variance will shift the price as consumers are risk averse.
+Third, since $\sigma^2_{t+1}$ and $r_{t+1}$ are correlated, (the leverage effect) the drift will change directly. 
+
+Intuitively, if volatility and returns are uncorrelated, we cannot disentangle the shift in the mean because the
+price of volatility risk from the shift in the mean induced by price of equity risk.
+They both show up in the same way in $\psi$.
+However, if we have a leverage effect, when we condition on $\sigma^2_{t+1}$ two different components of the
+return are moving -- the mean and variance.
+Since we now have two moments, we can identify both parameters.
+
+The discussion in the previous paragraph was very high level, and so we now turn to the details.
+The goal is to separate out the three components.
+We know that $\E_{\PP}\left[M_{t,t+1} \exp(r_{t+1}) \mvert \sigma^2_t \right] = 0$.
+We want to relate $\E_{\PP}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1} \sigma^2_t \right]$  to this expression.
+Clearly, there are two different things, we have the SDF in the first expression and the conditioning information
+is different.
+
+We can view this as two measure changes.
+Since prices here are conditionally log-Gaussian, the measure change  can be paramterized in terms of the
+covariance between the log SDF ($m_{t,t+1} \coloneqq \log M_{t,t+1}$) and the return.
+
+If we apply the logarithm to \cref{defn:SDF}, we get he following expression for $m_{t,t+1}$.
+
+\begin{equation}
+        m_{t,t+1}(\pi, \theta) = \left(m_{0}(\pi, \theta) + m_1(\pi, \theta) \sigma_t^2 - \pi \sigma^2_{t+1} -
+        \theta r_{t+1}\right) 
+\end{equation}
+
+All of the terms on the right are constant given $\sigma^2_t, \sigma^2_{t+1}$ except for $\theta r_{t+1}$, and so
+they do not affect covariances.
+
+\begin{equation}
+    \Cov\left(m_{t,t+1}, r_{t+1} \mvert \sigma^2_{t+1}, \sigma^2_t \right)   
+%
+    = \Cov\left(-\theta r_{t+1}, r_{t+1} \mvert \sigma^2_{t+1}\right)   
+%
+    = -\theta \Var\left(r_{t+1} \mvert \sigma^2_{t+1}\right)   
+\end{equation}
+
+Once we have plugged in the covariance, we can simply slightly, getting the following expression.
+
+\begin{equation}
+    \label{eqn:return_covarinace}
+    \Cov\left(m_{t,t+1}, r_{t+1} \mvert \sigma^2_{t+1}, \sigma^2_t \right)   
+%
+    = -\theta (1 - \phi^2) \sigma^2_{t+1} 
+\end{equation}
+
+The expression in \cref{eqn:return_covarinace} is the change in the mean driven by investors' risk aversion, and
+is controlled by their equity risk price.
+It clearly equals zero if $\theta = 0$.
+
+The second term is the Jensen's effect term.
+The mean of a log-Gaussian price variable depends on both the mean and variance of the conditionally Gaussian
+return.
+It has the standard form, minus one-half the conditional variance $\left(-\frac{1 - \phi^2}{2}
+\sigma^2_{t+1}\right)$. 
+
+
+% This is not necessarily useful because we have not derived $\psi_{\PP}$, and so we have no way to estimate it.
+% We resolve this issue by relating $\Var\left(r_{t+1} \mvert \sigma^2_t\right)$ and $\E\left[\sigma^2_{t+1}\right]$.
+% In continuous-time this is easy because $r_{t+1}$ is a semimartingale and so we can use the It\^{o} Isometry to
+% show that they equal. 
+% However, in discrete-time this does not quite hold.
+% You cannot ignore drifts.
 
 We resolve this issue by deriving a pseudo-return that is mean-zero with respect to the physical distribution. 
-We start by defining the covariance of $m_{t,t+1}$ and $r_{t+1}$.
-
-\begin{align}
-    &\phantom{=} \Cov\left(m_{t,t+1}, r_{t+1} \mvert \sigma^2_{t+1}\right)   \\
-%
-    \intertext{Dropping constant terms with respect to $\sigma^2_{t+1}$ because they do not affect covariance and
-    filling in the definition of $m_{t, t+1}$.}
-    %
-    &= \Cov\left(-\theta r_{t+1}, r_{t+1} \mvert \sigma^2_{t+1}\right)   \\
-%
-    &= \theta \Var\left(r_{t+1} \mvert \sigma^2_{t+1}\right)   \\
-%
-    &= \theta (1 - \phi^2) \sigma^2_{t+1} 
-\end{align}
-
-Having done that 
-Let $\tilde{r}_{t+1} = r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} + (1 - \phi^2) \theta \sigma^2_{t+1}$.
-There are two It\^{o} terms in this expression because we will have to make two measure changes.
+Let $\tilde{r}_{t+1} = r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} - (1 - \phi^2) \theta \sigma^2_{t+1}$.
+The second two terms here are the 
 One from the physical measure to the risk-neutral measure and the second from the filtration generated by
 $\sigma^2_{t+1}$ to the one generated by $\sigma^2_{t+1}$.
 
 
-\begin{equation}
-    \E_{\PP}\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1} \right]  
-    = \E_{\PP}\left[r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} + (1 - \phi^2) \theta \sigma^2_{t+1} \mvert
-        \sigma^2_{t+1} \right]  \\
-\end{equation}
+\begin{align}
+    &\phantom{=} \log \E_{\QQ}\left[\exp\left(r_{t+1}\right) \mvert \sigma^2_{t+1}\right] 
+%
+    \intertext{We can add and subtract the covariance between the return and the SDF.}
+%
+    &= \log \E_{\QQ}\left[\exp\left(r_{t+1}\right) \exp\left(-(1-\phi^2)\theta \sigma^2_{t+1}\right) \mvert
+       \sigma^2_{t+1}\right] + (1-\phi^2) \theta \sigma^2_{t+1} 
+%
+    \intertext{Since this term is a covariance, we can use it to form a measure change. Intuitively, we are
+    applying the chain rule to the multivariate exponential function and noting that only the cross term
+    survives.}
+%
+    &= \log \E_{\PP}\left[\exp\left(r_{t+1}\right) \mvert \sigma^2_{t+1}\right] + (1-\phi^2) \theta \sigma^2_{t+1} 
+%
+    \intertext{We can now use the formula for the mean of a conditionally log-Gaussian random variable.}
+%
+    &= \E_{\PP}\left[r_{t+1} \mvert \sigma^2_{t+1}\right] + \frac{1 - \phi^2}{2} \sigma^2_{t+1} + (1 - \phi^2)
+        \theta \sigma^2_{t+1}   \\
+\end{align}
+
+We know that  
+
 
 We can absorb the formula for the log-expectation of a conditional Gaussian variable to convert this expression to
 an expression in terms of $\exp(r_{t+1})$. 
@@ -1115,6 +1096,100 @@ realized volatility.
 \clearpage
 
 \begin{appendices}
+
+
+\section{Model Characterization}
+
+\begin{lemma}[Linearity of $\beta$ and $\gamma$]
+    \label{lemma:linearity_of_physical_functions}
+    Letting $\sigma^2_{t+1}$ be the integrated volatility of a process with return $r_{t+1}$.
+    Assume that $\sigma^2_{t+1}$ and $r_{t+1}$ follow a bivariate CAR(1) process parametrized as in
+    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}. 
+    Then $\beta_{\PP}''(0)$ and $\gamma_{\PP}''(0)$ both equal zero.
+\end{lemma}
+
+\begin{proof}
+    By the \Ito\ Isometry, and the definition of $r_{t+1}$ as an integrated variance, the following holds for the
+    returns' predictable information set $\F^r_{t-}$.  
+
+    \begin{equation}
+        \Var_{\PP}\left(r_{tau+1}\mvert \F_{tau-}\right) \leq \E_{\PP}\left(r^2_{tau+1} \mvert \F_{tau-}\right) 
+        = \E_{\PP}\left(\sigma^2_{t+1}\mvert \F_{\tau-}\right)
+    \end{equation}
+
+    The integrated volatlity is predictable, and so $\sigma^2_{t+1}$ is contained in the return's predictable
+    $\sigma$-algebra. 
+
+    Consequently, $\Var_{\PP}\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) \leq \sigma^2_{t+1}$
+    In addition, variance must always be positive, and so $\Var_{\PP}\left(r_{t+1} \mvert \sigma^2_t,
+    \sigma^2_{t+1}\right) \geq 0$.
+
+    Since the second derivative of the log-cumulant funciton evaluted at zero equals the variance, we have the
+    following set of inequalities.
+
+    \begin{gather}
+        0 \leq (1 - \phi^2) \sigma^2_{t+1} - \beta_{\PP}''(0) \sigma^2_t - \gamma_{\PP}''(0) \leq
+        \sigma^2_{t+1} 
+%
+        \intertext{Dividing through by $\sigma^2_{t+1}$ and pulling the first term outside}
+%
+        \label{eqn:second_derivative_inequalities}
+        \implies \phi^2 - 1 \leq -\frac{1}{\sigma^2_{t+1}} \left(\beta_{\PP}''(0)  \sigma^2_t +
+        \gamma_{\PP}''(0)\right) \leq \phi^2 
+%
+    \end{gather}
+
+    On the outside of the two inequalities we have constants, and the distribution of $\sigma^2_{t+1}$ given
+    $\sigma^2_t$ is not bounded away from zero.
+    Consequently, the only way for \cref{eqn:second_derivative_inequalities} to hold for all $\sigma^2_{t+1}$ is
+    if the term inside the parantheses equals  zero.
+
+    \begin{equation}
+        0 = \beta_{\PP}''(0) \sigma^2_t + \gamma_{\PP}''(0)
+    \end{equation}
+
+    However, the only way for this to hold is for both $\gamma''(0)$ and $\beta''(0)$ to equal zero.
+    This plus the condtional gaussianity of the returns implied by the paramtric model implies that $\gamma_{\PP}$
+    and $\beta_{\PP}$  are both linear.
+
+\end{proof}
+
+
+\sdfConstants*
+
+\begin{proof}
+
+\begin{equation}
+    \label{eqn:reweigted_sdf}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
+    \right) \mvert \F_t \right] = 1 
+\end{equation}
+
+We can use \cref{eqn:reweigted_sdf} to relate $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ to the physical measure
+functions. 
+
+\begin{gather}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
+    \right) \mvert \F_t \right] = 1 \\
+    \intertext{By the law of iterated expectations.}
+    \E_{\PP}\left[ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1}\right)
+        \exp\left( - \theta r_{t+1}\right) \mvert \F_t, \sigma^2_{t+1} \right]\right] = 1 \\
+    \intertext{The second term is the Laplace transform of $r_{t+1}$.}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} \right)
+        \exp(-\alpha_{\PP}(\theta) \sigma^2_{t+1} - \beta_{\PP}(\theta) \sigma^2_{t} - \gamma_{\PP}(\theta_2)
+        \mvert \F_t \right] = 1 \\
+    \intertext{Reorganizing terms.}
+    \E_{\PP}\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
+        \gamma_{\PP}(\theta_2) \right) \exp(-\left(\pi + \alpha_{\PP}(\theta)\right) \sigma^2_{t+1}) \mvert \F_t
+        \right] = 1 \\ 
+    \intertext{Substituting in the Laplace transform for $\sigma^2_{t+1}$.} 
+    \label{eqn:expected_sdf_wrt_PP}
+    \E_{\PP}\left[\exp(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \beta_{\PP}(\theta) \sigma^2_{t} -
+        \gamma_{\PP}(\theta_2)  - a_{\PP}(\pi + \alpha_{\PP}(\theta)) - b_{\PP}(\pi + \alpha_{\PP}(\theta))
+        \mvert \F_t \right] = 1 
+\end{gather}
+
+\end{proof}
 
 
 \section{Identification Proofs}
