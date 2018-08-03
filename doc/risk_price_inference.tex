@@ -30,13 +30,13 @@
         between expected returns and volatility, empirically measuring it has proven difficult. 
         In addition, the option pricing literature shows that volatility enters as its own risk factor, not just
         as a predictor of returns.
-        However, because as there is a negative contemporaneous correlation between the volatlity and return
-        processes and the return and volatlity relationship is inherently nonlineary measuring these risk prices
+        However, because as there is a negative contemporaneous correlation between the volatility and return
+        processes and the return and volatility relationship is inherently nonlinear measuring these risk prices
         have proven delicate. 
         We develop methods to provide  valid inference for the prices of equity and volatility risk using only
         equity data that directly handles this identification problem. 
         We do this by adapting the results in weak identification literature that uses drifting sequences in order
-        to be robust to the various paramters' identification strength. 
+        to be robust to the various parameters' identification strength. 
     \end{abstract}
 
     \jelcodes{C12, C14, C38,  C58, G12}
@@ -45,6 +45,9 @@
     risk premium, risk price, confidence set, asymptotic size}
 
 \end{titlepage}
+
+\tableofcontents
+\clearpage
 
 \phantomsection
 \addcontentsline{toc}{section}{Introduction}
@@ -456,11 +459,11 @@ We can view this as two measure changes.
 Since prices here are conditionally log-Gaussian, the measure change  can be paramterized in terms of the
 covariance between the log SDF ($m_{t,t+1} \coloneqq \log M_{t,t+1}$) and the return.
 
-If we apply the logarithm to \cref{defn:SDF}, we get he following expression for $m_{t,t+1}$.
+If we apply the logarithm to \cref{defn:SDF}, we get the following expression for $m_{t,t+1}$.
 
 \begin{equation}
-        m_{t,t+1}(\pi, \theta) = \left(m_{0}(\pi, \theta) + m_1(\pi, \theta) \sigma_t^2 - \pi \sigma^2_{t+1} -
-        \theta r_{t+1}\right) 
+        m_{t,t+1}(\pi, \theta) = m_{0}(\pi, \theta) + m_1(\pi, \theta) \sigma_t^2 - \pi \sigma^2_{t+1} - \theta
+        r_{t+1}
 \end{equation}
 
 All of the terms on the right are constant given $\sigma^2_t, \sigma^2_{t+1}$ except for $\theta r_{t+1}$, and so
@@ -609,6 +612,31 @@ Now that we have a formula for $\psi_{\PP}$, $\rho_{\QQ}$, and $c_{\QQ}$ we can 
 functions of the parameters.
 (Recall, $\omega$ is the vector of parameters.)
 
+\begin{restatable}[Reparamaterizing the Physical Distribution]{lemma}{physicalMeasureFunctions}
+
+    
+    Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
+    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}, and assume that the risk-neutral
+    measures have distributions with the same parametric forms.
+    Then the following three equations hold.
+
+
+    \begin{align}
+        \label{eqn:beta_function}
+        \beta(\pi, \theta) &\coloneqq \frac{\rho_{\PP} \left(-\psi_{\PP} - (1- \phi^2)(\theta -
+        \frac{1}{2})\right)}{\chi^2\left(\pi, \theta\right) + \chi(\pi, \theta)c_{\PP} \left(-\psi_{\PP} - (1-
+        \phi^2)(\theta-\frac{1}{2} )\right)}  \\
+    %
+        \label{eqn:gamma_function}
+        \gamma(\pi, \theta) &\coloneqq \delta \log\left(1 + \frac{c_{\PP}}{\chi(\pi,\theta)} \left(-\psi_{\PP} - (1-
+        \phi^2)\left(\theta - \frac{1}{2}\right) \right)\right) \\
+    %
+        \label{eqn:psi_function}
+        \psi(\pi, \theta) &= \frac{\phi}{\sqrt{c_{\PP} (1 + \rho_{\PP})}} + \frac{1 - \phi^2}{2} - (1 - \phi^2)
+        \theta 
+    \end{align}
+
+\end{restatable}
 
 
 \subsection{Identification of the Risk Prices}
@@ -754,8 +782,8 @@ log-cumulant function equaling the conditional mean.
         \delta \right)  \\
 %
         \label{eqn:cond_expected_rtn_moment}
-        \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\omega) + \beta(\omega) \sigma^2_t +
-        \psi_{\PP}(\omega) \sigma^2_{t+1} \\
+        \E_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\pi, \theta) + \beta(\pi, \theta)
+        \sigma^2_t + \psi_{\PP}(\pi, \theta) \sigma^2_{t+1} \\
 %
         \label{eqn:cond_rtn_var}
         \Var_{\PP}\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= (1 - \phi^2) \sigma^2_{t+1} 
@@ -1040,30 +1068,6 @@ functions.
 
 
 
-\begin{restatable}[Reparamaterizing the Physical Distribution]{lemma}{physicalMeasureFunctions}
-
-    
-    Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
-    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}.
- 
-
-    \begin{align}
-        \label{eqn:beta_function}
-        \beta(\pi, \theta) &\coloneqq \frac{\rho_{\PP} \left(-\psi_{\PP} - (1- \phi^2)(\theta -
-        \frac{1}{2})\right)}{\chi^2\left(\pi, \theta\right) + \chi(\pi, \theta)c_{\PP} \left(-\psi_{\PP} - (1-
-        \phi^2)(\theta-\frac{1}{2} )\right)}  \\
-    %
-        \label{eqn:gamma_function}
-        \gamma(\pi, \theta) &\coloneqq \delta \log\left(1 + \frac{c_{\PP}}{\chi(\pi,\theta)} \left(-\psi_{\PP} - (1-
-        \phi^2)\left(\theta - \frac{1}{2}\right) \right)\right) \\
-    %
-        \label{eqn:psi_function}
-        \psi(\pi, \theta) &= \frac{\phi}{\sqrt{c_{\PP} (1 + \rho_{\PP})}} + \frac{1 - \phi^2}{2} - (1 - \phi^2)
-        \theta 
-    \end{align}
-
-\end{restatable}
-
 
 \physicalMeasureFunctions*
 
@@ -1097,25 +1101,14 @@ Since this equation must hold for all $\sigma_t^2$ and $\exp(0) = 1$, we have th
 
 
 The linearity of $\beta$ and $\gamma$ as shown by \cref{lemma:linearity_of_physical_functions} implies that the
-physical and risk-neutral forms of these functions will coincide. 
-To see this, you can differentiate \cref{eqn:sdf_functions_vs_physical_functions} with respect to $\theta$, and
-then note that the physical and risk-neutral functions must equal at zero.
-
-\begin{equation}
-    m_0'(\theta, \pi) = \beta_{\PP}'(0) + a_{\PP}'(\alpha_{\PP}(\theta) + \pi) \alpha_{\PP}'(\theta)
-\end{equation}
-
-
-We can replace the last two functions with their physical counterparts because linearity implies they
-coincide. 
-We can then substitute in the risk-neutral distributions.
+physical and risk-neutral forms of these functions coincide \textcite[Proposition 5]{khrapov2016affine}. 
+Hence we can substitute in the physical forms for $\beta_{\QQ}$ and $\beta_{\PP}$.
 
 \begin{gather}
     \label{eqn:beta_qq_at_minus_one}
     \phantom{\implies}   - \beta_{\PP}(-1) = a_{\QQ}(\alpha_{\QQ}(-1))\\
 %
-    \intertext{Filling in Taylor series expansions of $\beta_{\PP}$ and $\alpha_{\QQ}$ and recalling that
-    $\phi_{\QQ} = \phi_{\PP}$ implies.}
+    \intertext{Filling in the formula for $\alpha_{\QQ}$ and recalling that $\phi_{\QQ} = \phi_{\PP}$ gives.}
 %
     \implies \beta_{\PP}'(0) = a_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
 %
@@ -1130,24 +1123,22 @@ We can then substitute in the risk-neutral distributions.
 Before we derive $\rho_{\QQ}$, $c_{\QQ}$, and $\psi_{\QQ}$ in terms of the physical measure functions, we perform
 a similar calculation for $\gamma_{\QQ}(-1)$.
 
-\begin{gather}
+\begin{equation}
     \label{eqn:gamma_qq_at_minus_one}
-    \phantom{\implies}   - \gamma_{\PP}(-1) = b_{\QQ}(\alpha_{\QQ}(-1))\\
-%
-    \intertext{Again taking Taylor series expansions of $\gamma_{\PP}$ and $\alpha_{\QQ}$.}
-%
-    \implies \gamma_{\PP}'(0) = b_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
-%
-    \intertext{Then we can fill in the formula for $b_{\QQ}$ from \cref{defn:b_PP} because that the measure change
-    is structure preserving.}
-%
+    \gamma_{\PP}'(0) = b_{\QQ}(\alpha_{\QQ}(-1))  = b_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  
+\end{equation}
+
+We can fill in the formula for $b_{\QQ}$ from \cref{defn:b_PP} because that the measure change is structure
+preserving.
+
+\begin{equation}
     \implies \gamma_{\PP}'(0) = \delta \log\left(1 + c_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1-
     \phi^2)\right)\right)
     \label{eqn:gamma_function_QQ}
-\end{gather}
+\end{equation}
 
 To simplify \cref{eqn:beta_function} and \cref{eqn:gamma_function} further, we need to solve for $c_{\QQ}$,
-$b_{c_\QQ}$, and $\psi_{\QQ}$  in terms of their physical counterparts.
+$b_{\QQ}$, and $\psi_{\QQ}$  in terms of their physical counterparts.
 We can take the equations in \textcite[Proposition 5]{khrapov2016affine} and differentiate and derive the
 following relationship between $a_{\QQ}, b_{\QQ}$ and $a_{\PP}, b_{\PP}$.
 
