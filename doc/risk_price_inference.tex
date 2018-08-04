@@ -88,8 +88,7 @@ of this magnitude.
 However, if individual investors are ambiguity averse as in \textcite{hansen2001robust, jiu2012ambiguity}, they
 will care not just about how the representative investor prices volatility but also their uncertainty regarding
 this estimate. 
-Furthermore, when economists calibrate models, they need to know how precisely the data determine the parameters
-they are calibrating.
+Furthermore, when economists calibrate models, they must know how precisely the data determine these parameters. 
 If the need to alter the parameter value slightly in order to make their model perform well, are they bringing in
 more restrictions or data to more precisely determine the parameter of interest or are they using a value that the
 data tell us is incorrect?
@@ -113,10 +112,10 @@ and expected returns.
 It is not a contemporaneous relationship, but rather a predictable one. 
 
 Second, and just as important.
-We need to separate the equity risk price and the volatility risk price. 
+We must separate the equity risk price and the volatility risk price. 
 In general, and we will show this below, the equity risk price is strongly identified even in the presence of the
 volatility risk price. 
-There is a simple linear relationship that we can use.
+There is a simple linear relationship that we can use between the equity risk price and the expected return.
 However, volatility risk being another priced factor will introduce nonlinear nuisance terms into this regression. 
 They will not matter asymptotically, but in finite samples, they likely do.
 
@@ -133,12 +132,12 @@ Consequently, our estimators will continue to behave as if they were taken from 
 
 The obvious next step is considering how we need to do this in practice.
 Since the contribution of this paper is in terms of methodology and empirical results, we will take a model from
-the literature that has the various components, instead of developing our own asset or option pricing model.
+the literature that has the various components, instead of developing our own pricing model.
 In particular, we take the model from \textcite{khrapov2016affine} and use it to estimate the relevant parameters. 
 
 This model has a few nice features. 
 First, it has both equity and volatility prices and a leverage effect. 
-As such, it is the natural discrete time analogue of the \textcite{heston1993closedform} option pricing model. 
+As such, it is the natural discrete-time analogue of the \textcite{heston1993closedform} option pricing model. 
 It has an exponentially affine stochastic discount factor  and shares with \textcite{heston1993closedform} the
 advantage of having a structure preserving change of measure between the physical and risk-neutral models.
 By doing our analysis in discrete-time we are able to more directly compare our results to risk-premia estimates
@@ -190,7 +189,7 @@ This is useful because we can choose $f$ to make our estimation convenient.
 Since $P_t(f), r_{t+1}$ and $\sigma_t^2$ are observable, if we specify a model for $\F_t$ in terms of observable
 (to the econometrician) variables, this provides a moment condition that we can use. 
 However, this condition does not identify everything we wish to estimate, in particular it does not identify the
-risk prices because $\QQ$ is not observable.
+risk prices because $\QQ$ is not observable from equity data.
 
 To resolve this we complete the model by defining the stochastic discount factor --- $M_{t, t+1}$ --- as the
 Radon-Nikodym derivative between the $\PP$ and $\QQ$ measures. 
@@ -212,13 +211,13 @@ We then solve for the $\QQ$ more in terms of these moments.
 We start by specifying the $\PP$ measure.
 
 Following \textcite{khrapov2016affine}, we assume that the variables are first-order Markov and there is no
-Granger causality from return to the volatility and that returns are serially independent given the volatility
+Granger-causality from return to the volatility and that returns are serially independent given the volatility
 path.
 In other words, the volatility drives all of the dynamics of the process.
 Note, we do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, which they are in the data. 
 
 We construct the following conditional Laplace transforms as follows.
-This is well-defined because we can define the true Laplace transform as the expectation of a specific function,
+This is well-defined because we can define the true Laplace transform as the expectation of a known function,
 and then integrate out all of the unknown variables using their marginal distributions.
 Hence, we can represent out model under the physical measure as follows for some functions $a, b,
 \alpha, \beta$, and $\gamma$ for all $v$ in its domain.
@@ -260,7 +259,7 @@ This is not trivial because we only modeled the conditional distribution of the 
 We now introduce the data generating process for the volatility.
 We use a conditional autoregressive gamma process as in \textcite{gourieroux2006autoregressive, khrapov2016affine}
 for the volatility.
-This implies that we can parameterize the process using $a$ and $b$ which are defined as follows.
+This implies that we can parameterize the process using the $a$ and $b$ defined as follows.
 
 \begin{defn}{Volatility Dynamics Functions}
     \label{defn:physical_vol_dynamics}
@@ -301,7 +300,7 @@ Intuitively, we are using linear regression to estimate the slope and intercept 
 \subsubsection{Return Dynamics}
 
 We then turn to computing the moments of the return distribution. 
-This is more subtle that computing the moments of the volatility dynamics because we have to relate the dynamics
+This is more subtle than computing the moments of the volatility dynamics because we have to relate the dynamics
 of the returns to that of the volatility and to the stochastic discount factor, which is not observed. 
 We use the conditional autoregressive CAR(1) model here, which we take from
 \textcite{darolles2006structural,khrapov2016affine}
@@ -322,13 +321,12 @@ It is a leverage effect parameter.
 \end{defn}
 
 Since $\alpha$ is quadratic, the return are conditionally Gaussian.
-In addition, these functions that parameterize the Laplace transform, but equal zero at zero, and so we do not
-need an intercept.
-It might seem as first, that the linear for $\beta(v)$ and $\gamma(v)$ is a strong restriction.
+In addition, as these functions parameterize the Laplace transform, they equal zero at at $v=0$.
+It might seem as first, that imposing linearity for $\beta(v)$ and $\gamma(v)$ is a strong restriction.
 This is not actually the case.
-Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility hence greater than $\Var\left(r_{t+1} \mvert
-\sigma^2_{t+1}, \sigma^2_{t}\right)$ and variances must be positive, the model implies that they must be linear
-(\cref{lemma:linearity_of_physical_functions}).
+Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility and hence greater than $\Var\left(r_{t+1}
+\mvert \sigma^2_{t+1}, \sigma^2_{t}\right)$ and variances must be positive, the model implies that they must be
+linear, (\cref{lemma:linearity_of_physical_functions}).
 
 
 Again, we start by computing the moments of the conditional distributions of $\left. r_{t+1} \mvert
@@ -387,52 +385,20 @@ Since the right-hand side of \cref{eqn:sdf_functions_vs_physical_functions} are 
 measure functions, which are in principle observable, we can estimate the SDF functions entirely using equity
 data.
 In other words, we do not need, at least in principle, option data to estimate the SDF.
-In particular, we can determine the risk prices from equity prices if the identified parts of the $\alpha,
-\beta$ etc.\@ functions are \textquote{sufficiently} invertible.
+In particular, we can determine the risk prices from equity prices if the identified parts of the physical measure
+functions ($\alpha$, $\beta$, etc.) are \textquote{sufficiently} invertible.
 (I.e.\@ the matrix of their derivatives satisfies the appropriate non-singularity conditions.)
-
-\subsection{The Risk-Neutral Distribution}
-
-The conditions in \cref{eqn:sdf_functions_vs_physical_functions} are not yet usable in estimation because they
-relate a series of unknown functions.
-To simplify these equations we impose some restrictions that must hold in the risk-neutral model. 
-We know that risk-neutral expected returns must equal zero.
-Consequently, any expected returns in the physical measure must be caused by the change of measure.
-
-As we did above, we will use conditional Laplace transforms to parameterize the distributions.
-In this case, the Laplace functions maintain the same structure for some functions $a_{\QQ}, b_{\QQ},
-\alpha_{\QQ}, \beta_{\QQ}$, and $\gamma_{\QQ}$.
-
-\begin{restatable}[The Limited Information Model under the Risk-Neutral Measure]{defn}{riskNeutralMeasureModel}
-    \label{defn:risk_neutral_model}
-    \begin{align}
-        \E_{\QQ} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t \right] &= \exp\left( - a_{\QQ}(u) \sigma^2_t -
-        b_{\QQ}(u) \right) \\
-        \E_{\QQ}\left[\exp(-u r_{t+1}) \mvert \sigma^2_t,  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\QQ}(u)
-        \sigma^2_{t+1} - \beta_{\QQ}(u)\sigma^2_t - \gamma_{\QQ}(u) \right) 
-    \end{align}
-\end{restatable}
-
-
-Since the change of measure preserves the structure, the parametric forms and moments from above also hold in the
-risk-neutral measure.
-We will use the same notation, but use subscript $\QQ$ to differentiate the two measure. 
-For example, $\psi_{\QQ} \coloneqq \alpha_{\QQ}'(0)$ and $\phi_{\QQ} = \sqrt{1 - \abs*{\alpha''(0)}}$.
-We start by characterizing $\beta_{\QQ}$ and $\gamma_{\QQ}$.
-Before we do that, it is worth noting that as is standard in these models, the measures' absolute continuity
-implies $\phi = \phi_{\QQ}$, \parencite[17]{khrapov2016affine}.
-Since we have a risk-neutral distribution the only change between $\E_{\QQ}\left[\exp(r_{t+1}) \mvert
-\sigma^2_t\right]$ and $\E{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}, \sigma^2_t\right]$ comes from the
-increased in information.
 
 \subsection{Relating the Physical Measure Functions and the Risk Prices}
 
 \subsubsection{Deriving \texorpdfstring{$\psi$}{psi}}
 
-The goal moving forward is to solve for $\gamma$, $\beta$, and $\psi$ in terms of the risk parameters. 
-Once we do this we can use the difference in expected returns between the distribution given $\sigma^2_t$ and the
+The goal moving forward is to solve for $\gamma$, $\beta$, and $\psi$ in terms of the reduced-form parameters and
+risk prices. 
+Once we do this, we can use the difference in expected returns between the distribution given $\sigma^2_t$ and the
 distribution given $\sigma^2_{t+1}$ and $\sigma^2_t$ to separately identify the two risk prices.
-In this section, we focus on $\psi$ because it controls this difference in means.
+In this section, we focus on $\psi$ because it controls this difference in means and hence controls the strength
+of identification.
 
 In general, $\psi$ will have three parts.
 First, we have the Jensen's inequality term --- the mean will shift by a value proportional to the variance.
@@ -446,7 +412,7 @@ However, if we have a leverage effect, when we condition on $\sigma^2_{t+1}$ two
 return are moving -- the mean and variance.
 Since we now have two moments, we can identify both parameters.
 
-The discussion in the previous paragraph was very high level, and so we now turn to the details.
+The discussion in the previous paragraph was at very high level, and so we now turn to the details.
 The goal is to separate out the three components.
 The way we do this is by constructing a pseudo-return --- $\widetilde{r}_{t+1}$ --- whose mean is not affected by
 the change in variance caused by adding $\sigma^2_{t+1}$ to the information set.
@@ -456,7 +422,6 @@ We want to relate $\E\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}, \sigma^2_t \righ
 Clearly, there are two differences between these expressions.
 First, we have the SDF in the first expression.
 Second, the conditioning information differs.
-
 We can view these differences as two measure changes.
 Since prices here are conditionally log-Gaussian, the measure change  can be paramterized in terms of the
 covariance between the log SDF --- $m_{t,t+1} \coloneqq \log M_{t,t+1}$ --- and the return.
@@ -493,9 +458,9 @@ The expression in \cref{eqn:return_covarinace} is the change in the mean driven 
 is controlled by their equity risk price.
 To see this, note it equals zero if $\theta = 0$.
 
-The second term we will need is the Jensen's effect term.
+The second term we need is the Jensen's effect term.
 The mean of a conditionally log-Gaussian price depends on both the mean and variance of the underlying return.
-It has the standard form, minus one-half the conditional variance $\left(-\frac{1 - \phi^2}{2}
+It has the standard form: minus one-half the conditional variance $\left(-\frac{1 - \phi^2}{2}
 \sigma^2_{t+1}\right)$. 
 
 Having done this we can define a pseudo-return that only changes by an amount proportional to the leverage
@@ -520,11 +485,6 @@ Once we have this we only have to worry about the change in the mean, and can so
     \end{equation}
 \end{restatable}
 
-Since all of the terms we are subtracting from $r_{t+1}$ are proportional to $\sigma^2_{t+1}$, we can define
-$\widetilde{\psi} = \psi + \frac{1-\phi^2}{2} + (1 - \phi^2)\theta$.
-Once we do that  $\E\left[\widetilde{r}_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1} \right] = \widetilde{\psi}
-\sigma^2_{t+1} + f\left(\sigma^2_t\right)$ for some function $f$.
-
 This is not the only way we can compute $\Var\left[r_{t+1} \mvert \sigma^2_t \right]$.
 We can also use the law of total variance.
 
@@ -536,8 +496,7 @@ We can also use the law of total variance.
 
 Since $\sigma^2_{t+1}$ is constant given $\sigma^2_{t+1}, \sigma^2_t$, the conditional variance of
 $\widetilde{r}_{t+1}$ is the same as $r_{t+1}$.
-
-Now, we can fill in the values for both of the inside variables on the right-hand side and
+We can now fill in the values for both of the inside variables on the right-hand side and
 \cref{eqn:return_var_versus_expected_vol_pp} on the left-hand side and taking unconditional expectations of all of
 the variables.
 
@@ -564,13 +523,14 @@ We can substitute back in the definition of $\tilde{\psi}$ in terms of $\psi$ an
     (1 + \rho)}} - \frac{1 - \phi^2}{2}  + (1 - \phi^2) \theta
 \end{equation}
 
-Now that we have a formula for $\psi$, we can derive the formulas for $|beta$ and $\gamma$ in terms of the
+Now that we have a formula for $\psi$, we can derive the formulas for $\beta$ and $\gamma$ in terms of the
 other reduced-form parameters and the risk prices. 
 I use subscript $\QQ$ notation to refer the risk-neutral analogues of the parameters.
 
 \begin{restatable}[Reparamaterizing the Physical Distribution]{lemma}{physicalMeasureFunctions}
 
     
+    \label{lemma:reparamterizing_physical_dist}
     Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
     \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}, and assume that the risk-neutral
     measures have distributions with the same parametric forms.
@@ -596,6 +556,9 @@ I use subscript $\QQ$ notation to refer the risk-neutral analogues of the parame
 
 \end{restatable}
 
+As can be seen in \cref{lemma:reparamterizing_physical_dist}, $\psi$ has the form we derived above.
+$\beta(\pi, \theta)$ and $\gamma(\pi, \theta$ have the form of $\beta(v)$ and $\gamma(v)$, but where we use the
+risk-neutral versions and evaluate them at $\mu(\pi, \theta)$.
 
 \subsection{Identification of the Risk Prices}
 
@@ -624,15 +587,14 @@ $\sigma^2_t$.
         = \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi) \sigma^2_t}
 %
     \intertext{Similar to above, we used the law of iterated expectations to substitute in the conditional Laplace
-        transforms of $rx_{t+1}$ and $\sigma^2_{t+1}$.}
+        transforms of $r_{t+1}$ and $\sigma^2_{t+1}$.}
 %
     \E\left[\exps*{- a\left(\pi + \alpha(\theta -1)\right) \sigma^2_t - b(\pi) -
     \beta(\theta-1) \sigma^2_t - \gamma(\theta-1)} \mvert \sigma^2_t \right] = \exps*{- m_0(\theta,
     \pi) - m_1(\theta, \pi) \sigma^2_t} 
 \end{gather}
 
-Similar to above, we can now match the coefficients of the $\F_t$-measurable variables in the above moment
-condition. 
+We now match the coefficients of the $\F_t$-measurable variables in the above moment condition. 
 We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ that we derived in
 \cref{sec:deriving_sdf_functions}.
 
@@ -658,8 +620,8 @@ We can characterize the identification restrictions in \cref{eqn:identification_
 
         If \cref{eqn:lack_of_id_condition} holds, then some simple algebra shows that $\gamma(\theta) =
         \gamma(\theta-1)$ and $\beta(\theta) = \beta(\theta-1)$.
-        In this situation, clearly, regardless of the value of $\pi$, we can satisfy these
-        \cref{eqn:identification_eqn_1} and \cref{eqn:identification_eqn_2}.
+        In this situation, we can satisfy these \cref{eqn:identification_eqn_1} and
+        \cref{eqn:identification_eqn_2}, regardless of the value of $\pi$.
         In other words, the asset pricing equation does not identify $\pi$. 
         As noted by \textcite{khrapov2016affine}, this is in line with the common belief that the econometrician
         needs options data to be able to identify the price of volatility risk. 
@@ -676,16 +638,11 @@ We now show that if $\phi = 0$, then \cref{eqn:lack_of_id_condition} will hold, 
 \neq 0$.
 In other words, as mentioned in \textcite[13]{khrapov2016affine}, a leverage effect will allow us to separately
 identify $\theta$ and $\pi$.
-
 To see why this is the case note the following.
-To see when this will happen consider a 2nd-order Taylor series expansion of $\alpha$, which since returns
-are conditionally Gaussian is an exact expansion.
 
 \begin{align}
-    \alpha(\theta) - \alpha(\theta - 1) &= \alpha'(0)  + \alpha''(0) \left(\theta - \frac{1}{2}\right)
-    \\
+    \alpha(\theta) - \alpha(\theta - 1) &= \alpha'(0)  + \alpha''(0) \left(\theta - \frac{1}{2}\right) \\
 %
-    \label{eqn:lack_of_id}
     &=  \psi + (1 - \phi^2) \left(\theta - \frac{1}{2}\right)  \\
 %
     \intertext{Then filling in the definition of $\psi$ from \cref{eqn:psi_pp_as_func_of_params}.}
@@ -699,9 +656,12 @@ are conditionally Gaussian is an exact expansion.
     &= \frac{\phi}{\sqrt{c (1 + \rho )}} 
 \end{align}
 
-Clearly, if \cref{eqn:alpha_difference} equals zero if and only if $\phi = 0$.
-If $\phi \neq 0$, , the derivatives of \cref{eqn:identification_eqn_1} and \cref{eqn:identification_eqn_2}  do not
-equal at $\theta$ and $\theta-1$ since $a$ and $b$ are not linear functions.
+In other words, the leverage effect leads to a wedge between $\alpha(\theta)$ and $\alpha(\theta-1)$ proprotional
+to $\frac{\phi}{\sqrt{c (1 + \rho )}}$.
+Clearly, this equals zero if and only if $\phi = 0$.
+If $\phi \neq 0$,on the other hand, the derivatives of \cref{eqn:identification_eqn_1} and
+\cref{eqn:identification_eqn_2}  do not equal at $\theta$ and $\theta-1$ since $a$ and $b$ are not linear
+functions.
 Consequently, we can separately identify $\pi$ and $\theta$.
 
 \section{GMM}\label{sec:GMM}
@@ -710,6 +670,8 @@ To estimate the model we use the various moment conditions that we have derived.
 The one that we have yet to derive is the ones implied by the continuous-time model that allow us to estimate
 $\phi$ and $\psi$.
 Deriving them is straightforward because we constructed what the discrete-time equations, and they are linear.
+
+\subsection{Moment Conditions}\label{sec:moment_conditions}
 
 First, we define two functions that we use to reparameterize the moment conditions.
 We do this because the model creates some cross-equation equations to eliminate two of the redundant parameters.
@@ -741,6 +703,8 @@ log-cumulant function equaling the conditional mean.
 \end{align}
 \end{defn}
 
+\subsection{Instruments}\label{sec:instruments}
+
 To fully specify the GMM conditions, we need to also specify the instruments we are using.
 Doing this correctly is somewhat subtle because we need to only use $\F_{t-1}$-measurable variables in order to
 satisfy the necessary exogeneity conditions, while providing instruments for both $\sigma^2_t$ and
@@ -764,6 +728,8 @@ hence are optimal.}
         Z_t \coloneqq 1, \sigma^2_{t+1}, \sigma^4_{t+1}, \sigma^2_{t}, \sigma^4_{t}
     \end{equation}
 \end{defn}
+
+\subsection{Identified Sett}\label{sec:identified_set}
 
 Having constructed the moments and the instruments, we can use GMM to estimate the parameters.
 We do need to run a constricted optimization though, because only certain values of the parameters are valid. 
@@ -1035,6 +1001,39 @@ applies to $\widetilde{r}_{t+1}$ but not to $r_{t+1}$.
 \physicalMeasureFunctions*
 
 \begin{proof}
+
+The conditions in \cref{eqn:sdf_functions_vs_physical_functions} are not yet usable in estimation because they
+relate a series of unknown functions.
+To simplify these equations we impose some restrictions that must hold in the risk-neutral model. 
+We know that risk-neutral expected returns must equal zero.
+Consequently, any expected returns in the physical measure must be caused by the change of measure.
+
+As we did above, we will use conditional Laplace transforms to parameterize the distributions.
+In this case, the Laplace functions maintain the same structure for some functions $a_{\QQ}, b_{\QQ},
+\alpha_{\QQ}, \beta_{\QQ}$, and $\gamma_{\QQ}$.
+
+\begin{restatable}[The Limited Information Model under the Risk-Neutral Measure]{defn}{riskNeutralMeasureModel}
+    \label{defn:risk_neutral_model}
+    \begin{align}
+        \E_{\QQ} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t \right] &= \exp\left( - a_{\QQ}(u) \sigma^2_t -
+        b_{\QQ}(u) \right) \\
+        \E_{\QQ}\left[\exp(-u r_{t+1}) \mvert \sigma^2_t,  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\QQ}(u)
+        \sigma^2_{t+1} - \beta_{\QQ}(u)\sigma^2_t - \gamma_{\QQ}(u) \right) 
+    \end{align}
+\end{restatable}
+
+
+Since the change of measure preserves the structure, the parametric forms and moments from above also hold in the
+risk-neutral measure.
+We will use the same notation, but use subscript $\QQ$ to differentiate the two measure. 
+For example, $\psi_{\QQ} \coloneqq \alpha_{\QQ}'(0)$ and $\phi_{\QQ} = \sqrt{1 - \abs*{\alpha''(0)}}$.
+We start by characterizing $\beta_{\QQ}$ and $\gamma_{\QQ}$.
+Before we do that, it is worth noting that as is standard in these models, the measures' absolute continuity
+implies $\phi = \phi_{\QQ}$, \parencite[17]{khrapov2016affine}.
+Since we have a risk-neutral distribution the only change between $\E_{\QQ}\left[\exp(r_{t+1}) \mvert
+\sigma^2_t\right]$ and $\E{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}, \sigma^2_t\right]$ comes from the
+increased in information.
+
 We characterize $a_{\QQ}$ and $b_{\QQ}$ by deriving the restrictions that risk-neutrality implies upon the
 risk-neutral measure functions.
 Risk-neutrality means that the expectation of $\exp(r_{t+1}) = 1$.
