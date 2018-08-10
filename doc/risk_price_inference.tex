@@ -473,19 +473,19 @@ We want a pseudo-return $\widetilde{r}_{t+1}$ where $\E\left[\widetilde{r}_{t+1}
 Once we have this we only have to worry about the change in the mean, and can solve for $\tilde{\psi}$.
 
 \begin{restatable}[Separating the Leverage Effect from the Measure Changes]{lemma}{leverageVersusMeasureChange}
+    \label{lemma:separating_leverage_effect}
 
-    Let $\tilde{r}_{t+1} \coloneqq r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} - (1 - \phi^2) \theta
-    \sigma^2_{t+1}$, and let the log SDF have the form given by \cref{eqn:log_sdf}.
+    Let $\tilde{r}_{t+1} \coloneqq r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} + (1 - \phi^2) \theta
+    \sigma^2_{t+1}$, and let the $m_{t+1}$ have the form given by \cref{eqn:log_sdf}.
     
     Then 
     
     \begin{equation}
-        \E\left[\Var\left[\tilde{r}_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] \mvert \sigma^2_t\right]   =
-        \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right]
+        \Var\left[\tilde{r}_{t+1} \mvert \sigma^2_t \right] = \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right].
     \end{equation}
 \end{restatable}
 
-This is not the only way we can compute $\Var\left[r_{t+1} \mvert \sigma^2_t \right]$.
+This is not the only way we can compute $\Var\left[\tilde{r}_{t+1} \mvert \sigma^2_t \right]$.
 We can also use the law of total variance.
 
 \begin{equation}
@@ -496,31 +496,32 @@ We can also use the law of total variance.
 
 Since $\sigma^2_{t+1}$ is constant given $\sigma^2_{t+1}, \sigma^2_t$, the conditional variance of
 $\widetilde{r}_{t+1}$ is the same as $r_{t+1}$.
-We can now fill in the values for both of the inside variables on the right-hand side and
-\cref{eqn:return_var_versus_expected_vol_pp} on the left-hand side and taking unconditional expectations of all of
-the variables.
+In addition, $\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right]  = \psi \sigma^2_{t+1} - \frac{1-\phi^2}{2}
+\sigma^2_{t+1} + (1- \phi^2) \theta \sigma^2_{t+1}$ plus $\sigma^2_t$-measurable terms.
+We now fill in the values for both of the inside variables on the right-hand side using the formulas for
+$r_{t+1}$, and we use \cref{lemma:separating_leverage_effect} on the left-hand side. 
+We then take unconditional expectations of both sides, giving  us
 
 \begin{equation}
     \E\left[\sigma^2_{t+1} \right]  = \E[ \E\left[(1 - \phi^2) \sigma^2_{t+1} \right]] +
-    \E\left[\Var\left[\widetilde{\psi} \sigma^2_{t+1} \mvert \sigma^2_t\right]\right] 
+    \E\left[\Var\left[\left(\psi + \frac{1-\phi^2}{2} - (1-\phi^2)\theta\right) \sigma^2_{t+1} \mvert
+    \sigma^2_t\right]\right].
 \end{equation}
 
-Solving for $\widetilde{\psi}$ gives the following.
+Rearranging terms implies 
 
 \begin{equation}
     \label{eqn:psi_tilde_eqn}
-    \widetilde{\psi} = \phi \sqrt{\frac{\E\left[\sigma^2_{t+1} \right]}{\E
-    \left[\Var\left(\sigma^2_{t+1} \mvert \sigma^2_t\right)\right]}}  
+    \left(\psi - \frac{1-\phi^2}{2} + (1-\phi^2)\theta\right) = \phi \sqrt{\frac{\E\left[\sigma^2_{t+1}
+    \right]}{\E \left[\Var\left(\sigma^2_{t+1} \mvert \sigma^2_t\right)\right]}}.
 \end{equation}
 
-We can substitute back in the definition of $\tilde{\psi}$ in terms of $\psi$ and derive the moments in
-\cref{eqn:psi_tilde_eqn} from \cref{remark:vol_moment_conditions} through some elementary calculations. 
+We can now solve for $\psi$, and replace the moments on the right hand side by deriving the expectations from
+\cref{remark:vol_moment_conditions} and some elementary calculations. 
 
 \begin{equation}
     \label{eqn:psi_pp_as_func_of_params}
-    \psi = \phi \sqrt{\frac{c \delta / (1 - \rho)}{2 c \rho \left(c \delta /
-    (1 - \rho)\right) + c^2 \delta}} - \frac{1- \phi^2}{2} - (1 - \phi^2) \theta = \frac{\phi}{\sqrt{c
-    (1 + \rho)}} - \frac{1 - \phi^2}{2}  + (1 - \phi^2) \theta
+    \psi = \frac{\phi}{\sqrt{c (1 + \rho)}} + \frac{1 - \phi^2}{2}  - (1 - \phi^2) \theta
 \end{equation}
 
 Now that we have a formula for $\psi$, we can derive the formulas for $\beta$ and $\gamma$ in terms of the
@@ -949,36 +950,42 @@ functions.
 
 \begin{proof}
 
-\begin{align}
-    &\phantom{=} \log \E\left[\widetilde{r}_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1} \right]
-%
-    \intertext{We can expand $\widetilde{r}_{t+1}$.}
-%
-    &= \log \E\left[r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} - (1 - \phi^2) \theta \sigma^2_{t+1}
-       \mvert \sigma^2_t, \sigma^2_{t+1} \right]
-%
-    \intertext{The first term variance term is the appropriate Jensen convexity correction, and the second term is
-    measurable with respect to the conditioning information.}
-%
-    &= \log \E\left[\exp(r_{t+1})  \exp\left(- (1 - \phi^2) \theta \sigma^2_{t+1}\right) \mvert \sigma^2_t,
-       \sigma^2_{t+1} \right]
-%
-    \intertext{We can divide through by $\exp(r_t)$  and $m_{t-1,t}$ because they are contained within the
-    conditioning set, and the remainder of the SDF is also contained within the information set, and so we can add
-it  as well (\cref{eqn:log_sdf}).}
-%
-    &\propto \log \E\left[\frac{\exp(r_{t+1})}{\exp(r_t)} \frac{M_{t,t+1}}{M_{t-1,t}} \mvert \sigma^2_t,
-      \sigma^2_{t+1} \right]
-%
-    \intertext{This is the expectation of the change in the price discounted by the change in the SDF, and so it
-    equals zero after we take logs.}
-%
-    &= 0
-\end{align}
+    We start by considering the expectation of $\widetilde{r}_{t+1}$ and show that it equals zero.
 
+    \begin{align}
+        \E\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t} \right]  &= \E\left[\E\left[r_{t+1} - \frac{1 - \phi^2}{2}
+        \sigma^2_{t+1} + (1 - \phi^2) \theta \sigma^2_{t+1}\mvert \sigma^2_{t}, \sigma^2_{t+1}  \right] \mvert
+        \sigma^2_t\right] \\
+%
+        \intertext{By the conditional Gaussianity of $r_{t+1}$, we can absorb the convexity correction into an
+        exponential. Normally, it would introduce a $1/2$ variance term, but that cancels. The second term is a
+        measurable with respect to the conditioning information and so is not affected.}
+%
+        &= \E\left[\log \E\left[\exp(r_{t+1}) \exp((1 - \phi^2) \theta \sigma^2_{t+1})\mvert \sigma^2_{t},
+           \sigma^2_{t+1}  \right] \mvert \sigma^2_t\right] \\
+%
+        \intertext{We note that normally, the covariance term would cause the mean to fall, but again that term
+        cancels with the second term. We can divide through by $\exp(r_t)$  and $m_{t-1,t}$ because they are
+        measurable with respect to $\F_t$, and the remainder of the SDF is also contained within the information
+        set, and so we can add it as well (\cref{eqn:log_sdf}).} 
+%
+        &\propto \E\left[\log \E\left[\frac{\exp(r_{t+1})}{\exp(r_t)} \frac{M_{t,t+1}}{M_{t-1,t}} \mvert
+          \sigma^2_t, \sigma^2_{t+1} \right] \mvert \sigma^2_t \right]
+%
+        \intertext{We can pull the log outside of the outer expectation while adding at most a
+        $\sigma^2_t$-measurable term.}
+%
+        &\propto \log \E\left[\frac{\exp(r_{t+1})}{\exp(r_t)} \frac{M_{t,t+1}}{M_{t-1,t}} \mvert \sigma^2_t
+          \right]
+%
+        \intertext{This is the log expectation of a price change in the price discounted by the change in the
+        SDF.}
+%
+        &= 0
+    \end{align}
 
-Because the mean of $\tilde{r}_{t+1}$ does not change in expectation when we condition on $\sigma^2_{t+1}$ we can
-apply the \Ito\ Isometry.
+Because the mean of $\tilde{r}_{t+1}$ given $\sigma^2_t$  does not change in expectation when we condition on
+$\sigma^2_{t+1}$ we can apply the \Ito\ Isometry.
 
 \begin{equation}
     \label{eqn:return_var_versus_expected_vol_pp}
