@@ -148,9 +148,9 @@ higher-order  moments of the process in way that would likely bias our inference
 
 As far as estimation is concerned, we derive a series of conditional means and variances.
 We then take these means and variances and plug them into a general method of moments (GMM) criterion.
-The data we use are the bivariate series $\begin{pmatrix} r_{t+1}, \sigma^2_{t+1} \end{pmatrix}$.
+The data we use are the bivariate series $(r_{t+1}, \sigma^2_{t+1})$.
 $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$.
-We go into further detail in \cref{sec:data} regarding how we obtained it, the time-span covered, and so on.
+We go into further detail in \cref{sec:data} regarding how we obtained it, the time-span covered, and so forth.
 
 \section{Literature Review}\label{sec:lit_review}
 
@@ -265,15 +265,12 @@ This implies that we can parameterize the process using the $a$ and $b$ defined 
     \label{defn:physical_vol_dynamics}
     \begin{align}
         \label{defn:a_PP}
-        a(v) &= \frac{\rho v}{1 + c v} \\
+        a(v) &= \frac{\rho v}{1 + c v}, \\
         \label{defn:b_PP}
-        b(v) &= \delta \log(1 + c v)
+        b(v) &= \delta \log(1 + c v),\\
+% 
+        \text{with}&\  \rho \in [0,1), \quad c > 0, \quad \delta > 0. \nonumber
     \end{align}
-    
-    with 
-    \begin{equation}
-        \rho \in [0,1), \quad c > 0, \quad \delta > 0
-    \end{equation}
 
 \end{defn}
 
@@ -311,12 +308,12 @@ We start by specifying a parametric form for $\alpha(v)$ and $\beta(v)$, and $\g
 We parameterize $\alpha(v)$ in the way that we do because it gives $\phi$ a nice interpretation.
 It is a leverage effect parameter.
 
-\begin{defn}{Return Dynamics Functions}
+\begin{defn}{Reduced-Form Functions}
     \label{defn:physical_return_dynamics}
     \begin{align}
-        \alpha(v) &\coloneqq \psi v + \frac{1 - \phi^2}{2} v^2 \\
-        \beta(v) &\coloneqq \beta v  \\
-        \gamma(v) &\coloneqq \gamma v  
+        \alpha(v) &\coloneqq \psi v + \frac{1 - \phi^2}{2} v^2, \\
+        \beta(v) &\coloneqq \beta v,  \\
+        \gamma(v) &\coloneqq \gamma v. 
     \end{align}
 \end{defn}
 
@@ -326,7 +323,8 @@ It might seem as first, that imposing linearity for $\beta(v)$ and $\gamma(v)$ i
 This is not actually the case.
 Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility and hence greater than $\Var\left(r_{t+1}
 \mvert \sigma^2_{t+1}, \sigma^2_{t}\right)$ and variances must be positive, the model implies that they must be
-linear, (\cref{lemma:linearity_of_physical_functions}).
+linear\footnote{We show this in \cref{lemma:linearity_of_physical_functions} which is located in
+\cref{app:model_characterization}.}
 
 
 Again, we start by computing the moments of the conditional distributions of $\left. r_{t+1} \mvert
@@ -365,7 +363,7 @@ $M_{t,t+1}$ must integrate to $1$ for all $\sigma^2_t$.
 We can view $m_{0}$ and $m_1$ as integration constants.
 By plugging in the Laplace transforms for $\sigma^2_{t+1}$ and $r_{t+1}$ we can derive the following.
 
-\begin{restatable}[Uniform Convergence under Strong Identification]{lemma}{sdfConstants}
+\begin{restatable}[Characterizing the SDF Integration Constants]{lemma}{sdfConstants}
     Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
     \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}.
 
@@ -391,7 +389,7 @@ functions ($\alpha$, $\beta$, etc.) are \textquote{sufficiently} invertible.
 
 \subsection{Relating the Physical Measure Functions and the Risk Prices}
 
-\subsubsection{Deriving \texorpdfstring{$\psi$}{psi}}
+\subsubsection{Deriving the Conditional Mean}
 
 The goal moving forward is to solve for $\gamma$, $\beta$, and $\psi$ in terms of the reduced-form parameters and
 risk prices. 
@@ -526,42 +524,26 @@ We can now solve for $\psi$, and replace the moments on the right hand side by d
 
 Now that we have a formula for $\psi$, we can derive the formulas for $\beta$ and $\gamma$ in terms of the
 other reduced-form parameters and the risk prices. 
-I use subscript $\QQ$ notation to refer the risk-neutral analogues of the parameters.
 
 \begin{restatable}[Reparamaterizing the Physical Distribution]{lemma}{physicalMeasureFunctions}
 
+    \label{lemma:psi_function}
     
-    \label{lemma:reparamterizing_physical_dist}
     Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
-    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}, and assume that the risk-neutral
-    measures have distributions with the same parametric forms.
-    Let $\mu(\pi, \theta) \coloneqq -\psi - (1-\phi^2)\left(\theta - \frac{1}{2}\right)$, and $\chi(\pi, \theta)
-    \coloneqq 1 + c (1+ \alpha(\theta))$. 
-    Then the following three equations hold.
+    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}. 
+    Then the following equation holds
 
-
-    \begin{align}
-        \label{eqn:psi_function}
-        \psi(\pi, \theta) &= \frac{\phi}{\sqrt{c \cdot (1 + \rho)}} + \frac{1 - \phi^2}{2} - (1 - \phi^2)
-        \theta  \\
-%
-        \label{eqn:beta_function}
-        \beta(\pi, \theta) &\coloneqq \frac{\rho_{Q} \cdot \mu(\pi, \theta)}{1 + c_{\QQ} \cdot \mu(\pi, \theta)} =
-        \frac{\rho}{\chi(\pi, \theta)} \cdot \frac{\mu}{\chi\left(\pi, \theta\right) + c \cdot \mu(\pi,
-        \theta)}  \\
-    %
-        \label{eqn:gamma_function}
-        \gamma(\pi, \theta) &\coloneqq \delta \log\left(1 + c_{\QQ} \cdot \mu(\pi, \theta)\right) = \delta
-        \log\left(1 + \frac{c}{\chi(\pi,\theta)} \cdot \mu(\pi,\theta) \right) 
-    \end{align}
-
+    \begin{equation}
+        \psi(\pi, \theta) = \frac{\phi}{\sqrt{c (1 + \rho)}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta.  
+    \end{equation}
 \end{restatable}
 
-As can be seen in \cref{lemma:reparamterizing_physical_dist}, $\psi$ has the form we derived above.
-$\beta(\pi, \theta)$ and $\gamma(\pi, \theta$ have the form of $\beta(v)$ and $\gamma(v)$, but where we use the
-risk-neutral versions and evaluate them at $\mu(\pi, \theta)$.
+\begin{proof}
+    This is a straightforward implication of \cref{lemma:separating_leverage_effect} and the derivation in the
+    text.
+\end{proof}
 
-\subsection{Identification of the Risk Prices}
+\subsubsection{Deriving the other Reduced-Form Parameters}
 
 The final goal is to identify the risk-prices $\theta$ and $\pi$.
 In the previous sections, we have derived a series of moment conditions in terms of the parameters.
@@ -595,20 +577,37 @@ $\sigma^2_t$.
     \pi) - m_1(\theta, \pi) \sigma^2_t} 
 \end{gather}
 
-We now match the coefficients of the $\F_t$-measurable variables in the above moment condition. 
-We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ that we derived in
-\cref{sec:deriving_sdf_functions}, and rearrange to solve for $\gamma$ and $\beta$.
+We can now derive forms for $\beta$ and $\gamma$ as functions of the reduced-form parameters and risk-prices.
 
-\begin{align}
-   \label{eqn:identification_eqn_1}
-   \gamma  &= b(\pi + \alpha(\theta - 1) -  b(\pi + \alpha(\theta))  \\
-%
-    \label{eqn:identification_eqn_2}
-    \beta &=   a(\pi + \alpha(\theta -1)) - a(\pi + \alpha(\theta)) 
-\end{align}
+\begin{lemma}[Reparamterizing $\beta$ and $\gamma$]
+    \label{lemma:reparamterizing_beta_and_gamma}
+    Let the SDF be given as in \cref{defn:SDF}, and the model be paramterized as in
+    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics} and assume that the risk-neutral
+    measures have distributions with the same parametric forms.  
 
-We can characterize the identification restrictions in \cref{eqn:identification_eqn_1} and
-\cref{eqn:identification_eqn_2} in two different cases.\footnote{These equations are Equation 3.7 in
+
+    \begin{align}
+       \label{eqn:beta_function}
+       \gamma  &= b(\pi + \alpha(\theta - 1) -  b(\pi + \alpha(\theta))  \\
+    %
+        \label{eqn:gamma_function}
+        \beta &=   a(\pi + \alpha(\theta -1)) - a(\pi + \alpha(\theta)) 
+    \end{align}
+
+\end{lemma}
+
+\begin{proof}
+    This comes from matching the coefficients of the $\F_t$-measurable variables in the above moment condition and
+    using the linearity of $\beta$ and $\gamma$ from \cref{lemma:linearity_of_physical_functions}. 
+    We also substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ that we derived in
+    \cref{sec:deriving_sdf_functions}, and rearrange to solve for $\gamma$ and $\beta$.
+
+\end{proof}
+ 
+\subsection{Identification of the Risk Prices}
+
+We can characterize the identification restrictions in \cref{lemma:reparamterizing_beta_and_gamma} in two
+different cases.\footnote{These equations are Equation 3.7 in
 \textcite{khrapov2016affine}.}
 
 \begin{enumerate}
@@ -620,9 +619,8 @@ We can characterize the identification restrictions in \cref{eqn:identification_
 
         If \cref{eqn:lack_of_id_condition} holds, then some simple algebra shows that $\gamma(\theta) =
         \gamma(\theta-1)$ and $\beta(\theta) = \beta(\theta-1)$.
-        In this situation, we can satisfy these \cref{eqn:identification_eqn_1} and
-        \cref{eqn:identification_eqn_2}, regardless of the value of $\pi$.
-        In other words, the asset pricing equation does not identify $\pi$. 
+        In this situation, we can satisfy these \cref{lemma:reparamterizing_beta_and_gamma}, regardless of the
+        value of $\pi$.  In other words, the asset pricing equation does not identify $\pi$. 
         As noted by \textcite{khrapov2016affine}, this is in line with the common belief that the econometrician
         needs options data to be able to identify the price of volatility risk. 
 
@@ -659,9 +657,8 @@ To see why this is the case note the following.
 In other words, the leverage effect leads to a wedge between $\alpha(\theta)$ and $\alpha(\theta-1)$ proprotional
 to $\frac{\phi}{\sqrt{c (1 + \rho )}}$.
 Clearly, this equals zero if and only if $\phi = 0$.
-If $\phi \neq 0$,on the other hand, the derivatives of \cref{eqn:identification_eqn_1} and
-\cref{eqn:identification_eqn_2}  do not equal at $\theta$ and $\theta-1$ since $a$ and $b$ are not linear
-functions.
+If $\phi \neq 0$,on the other hand, the derivatives of \cref{lemma:reparamterizing_beta_and_gamma} do not equal at
+$\theta$ and $\theta-1$ since $a$ and $b$ are not linear functions.
 Consequently, we can separately identify $\pi$ and $\theta$.
 
 \section{GMM}\label{sec:GMM}
@@ -680,7 +677,7 @@ case.
 Note, we are only specifying values for the return conditional on both $\sigma^2_{t+1}$ and $\sigma^2_t$ because
 the other moments can be derived from them and the volatility moments.
 Also, it is worth noting that we consider \cref{eqn:beta_function}, \cref{eqn:gamma_function}, and
-\cref{eqn:psi_function} as implicitly defining those parameters as functions of the other parameters.
+\cref{lemma:psi_function} as implicitly defining those parameters as functions of the other parameters.
 \cref{eqn:cond_expected_rtn_moment} can be derived from those equation and the first derivative of the conditional
 log-cumulant function equaling the conditional mean.
 
@@ -852,7 +849,7 @@ We characterize these drifting sequences of distributions by sequences of true p
 \begin{appendices}
 
 
-\section{Model Characterization}
+\section{Model Characterization}\label{app:model_characterization}
 
 \begin{lemma}[Linearity of $\beta$ and $\gamma$]
     \label{lemma:linearity_of_physical_functions}
@@ -867,7 +864,7 @@ We characterize these drifting sequences of distributions by sequences of true p
     returns' predictable information set $\F^r_{t-}$.  
 
     \begin{equation}
-        \Var\left(r_{tau+1}\mvert \F_{tau-}\right) \leq \E\left(r^2_{tau+1} \mvert \F_{tau-}\right) 
+        \Var\left(r_{\tau+1}\mvert \F_{\tau-}\right) \leq \E\left(r^2_{\tau+1} \mvert \F_{\tau-}\right) 
         = \E\left(\sigma^2_{t+1}\mvert \F_{\tau-}\right)
     \end{equation}
 
@@ -1002,176 +999,6 @@ applies to $\widetilde{r}_{t+1}$ but not to $r_{t+1}$.
 
 \end{proof}
 
-
-
-\physicalMeasureFunctions*
-
-\begin{proof}
-
-The conditions in \cref{eqn:sdf_functions_vs_physical_functions} are not yet usable in estimation because they
-relate a series of unknown functions.
-To simplify these equations we impose some restrictions that must hold in the risk-neutral model. 
-We know that risk-neutral expected returns must equal zero.
-Consequently, any expected returns in the physical measure must be caused by the change of measure.
-
-As we did above, we will use conditional Laplace transforms to parameterize the distributions.
-In this case, the Laplace functions maintain the same structure for some functions $a_{\QQ}, b_{\QQ},
-\alpha_{\QQ}, \beta_{\QQ}$, and $\gamma_{\QQ}$.
-
-\begin{restatable}[The Limited Information Model under the Risk-Neutral Measure]{defn}{riskNeutralMeasureModel}
-    \label{defn:risk_neutral_model}
-    \begin{align}
-        \E_{\QQ} \left[\exp(-u \sigma^2_{t+1}) \mvert \sigma^2_t \right] &= \exp\left( - a_{\QQ}(u) \sigma^2_t -
-        b_{\QQ}(u) \right) \\
-        \E_{\QQ}\left[\exp(-u r_{t+1}) \mvert \sigma^2_t,  \sigma^2_{t+1}\right] &= \exp\left(- \alpha_{\QQ}(u)
-        \sigma^2_{t+1} - \beta_{\QQ}(u)\sigma^2_t - \gamma_{\QQ}(u) \right) 
-    \end{align}
-\end{restatable}
-
-
-Since the change of measure preserves the structure, the parametric forms and moments from above also hold in the
-risk-neutral measure.
-We will use the same notation, but use subscript $\QQ$ to differentiate the two measure. 
-For example, $\psi_{\QQ} \coloneqq \alpha_{\QQ}'(0)$ and $\phi_{\QQ} = \sqrt{1 - \abs*{\alpha''(0)}}$.
-We start by characterizing $\beta_{\QQ}$ and $\gamma_{\QQ}$.
-Before we do that, it is worth noting that as is standard in these models, the measures' absolute continuity
-implies $\phi = \phi_{\QQ}$, \parencite[17]{khrapov2016affine}.
-Since we have a risk-neutral distribution the only change between $\E_{\QQ}\left[\exp(r_{t+1}) \mvert
-\sigma^2_t\right]$ and $\E{\QQ}\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}, \sigma^2_t\right]$ comes from the
-increased in information.
-
-We characterize $a_{\QQ}$ and $b_{\QQ}$ by deriving the restrictions that risk-neutrality implies upon the
-risk-neutral measure functions.
-Risk-neutrality means that the expectation of $\exp(r_{t+1}) = 1$.
-
-\begin{align}
-    1 &= \E_{\QQ}\left[\E_{\QQ}\left[\exp(r_{t+1}) \mvert \sigma_t^2, \sigma^2_{t+1}\right]  \mvert \sigma^2_t
-        \right] \\
-%
-    \intertext{This is the conditional Laplace transform of $r_{t+1}$ evaluated at $-1$.}
-%
-      \label{eqn:risk_neutral_at_neg_1}
-    &= \E_{\QQ}\left[ \exp\left(-\alpha_{\QQ}(-1) \sigma^2_{t+1}\right)  \mvert \sigma^2_t \right]
-       \exp\left(-\beta_{\QQ}(-1) \sigma^2_t - \gamma_{\QQ}(-1)\right)   \\
-%
-    \intertext{The first term is the Laplace transform of $\sigma^2_{t+1}$ evaluated at $\alpha(-1)$.}
-%
-      &= \exp(-a_{\QQ}(\alpha_{\QQ}(-1)) \sigma^2_t - b_{\QQ}(\alpha_{\QQ}(-1))) \exp\left(-\beta_{\QQ}(-1)
-         \sigma^2_t - \gamma_{\QQ}(-1)\right)  
-\end{align}
-
-Since this equation must hold for all $\sigma_t^2$ and $\exp(0) = 1$, we have the following two equations.
-
-\begin{align}
-    a_{\QQ}(\alpha_{\QQ}(-1)) = - \beta_{\QQ}(-1) \\
-    b_{\QQ}(\alpha_{\QQ}(-1)) = - \gamma_{\QQ}(-1) 
-\end{align}
-
-
-The linearity of $\beta$ and $\gamma$ as shown by \cref{lemma:linearity_of_physical_functions} implies that the
-physical and risk-neutral forms of these functions coincide \textcite[Proposition 5]{khrapov2016affine}. 
-Hence we can substitute in the physical forms for $\beta_{\QQ}$ and $\beta$.
-
-\begin{gather}
-    \label{eqn:beta_qq_at_minus_one}
-    \phantom{\implies}   - \beta(-1) = a_{\QQ}(\alpha_{\QQ}(-1))\\
-%
-    \intertext{Filling in the formula for $\alpha_{\QQ}$ and recalling that $\phi_{\QQ} = \phi$ gives.}
-%
-    \implies \beta'(0) = a_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  \\
-%
-    \intertext{Then we can fill in the formula for $a_{\QQ}$ from \cref{defn:a_PP} because the change of measure
-    preserves the structure.}
-%
-    \implies \beta'(0) = \frac{\rho_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)}{1 + c_{\QQ}
-    \left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)} 
-    \label{eqn:beta_function_QQ}
-\end{gather}
-
-Before we derive $\rho_{\QQ}$, $c_{\QQ}$, and $\psi_{\QQ}$ in terms of the physical measure functions, we perform
-a similar calculation for $\gamma_{\QQ}(-1)$.
-
-\begin{equation}
-    \label{eqn:gamma_qq_at_minus_one}
-    \gamma'(0) = b_{\QQ}(\alpha_{\QQ}(-1))  = b_{\QQ}\left(-\psi_{\QQ} + \frac{1}{2} (1- \phi^2)\right)  
-\end{equation}
-
-We can fill in the formula for $b_{\QQ}$ from \cref{defn:b_PP} because that the measure change is structure
-preserving.
-
-\begin{equation}
-    \implies \gamma'(0) = \delta \log\left(1 + c_{\QQ} \left(-\psi_{\QQ} + \frac{1}{2} (1-
-    \phi^2)\right)\right)
-    \label{eqn:gamma_function_QQ}
-\end{equation}
-
-To simplify \cref{eqn:beta_function} and \cref{eqn:gamma_function} further, we need to solve for $c_{\QQ}$,
-$b_{\QQ}$, and $\psi_{\QQ}$  in terms of their physical counterparts.
-We can take the equations in \textcite[Proposition 5]{khrapov2016affine} and differentiate and derive the
-following relationship between $a_{\QQ}, b_{\QQ}$ and $a, b$.
-
-\begin{align}
-    a_{\QQ}'(v) &= a'(v + \pi + \alpha(\theta))  \nonumber \\
-%
-    b_{\QQ}'(v) &= b'(v + \pi + \alpha(\theta))  \\
-%
-    b_{\QQ}''(v) &= b''(v + \pi + \alpha(\theta))  \nonumber \\
-%
-    \intertext{Filling in parameterization of the right-hand sides, and evaluating the equations at $0$ gives the
-    following.} 
-%
-    a_{\QQ}'(0) &= \frac{\rho}{1 + c(\pi + \alpha(\theta_2))} \nonumber \\
-%
-    b_{\QQ}'(0) &= \frac{c \delta}{1 + c(\pi + \alpha(\theta_2))} \\
-%
-    b_{\QQ}''(0) &= -\frac{c^2 \delta}{(1 + c(\pi + \alpha(\theta_2)))^2} \nonumber \\
-%
-    \intertext{Then since the left hand sides of the equation above are $\rho_{\QQ}$ and $c_{\QQ} \delta$, we
-    have the following expressions.}
-%
-    \rho_{\QQ} &= \frac{\rho}{1 + c(\pi + \alpha(\theta_2))} \nonumber \\
-%
-    \label{eqn:c_rho_delta_QQ}
-    c_{\QQ} \delta_{\QQ} &= \frac{c \delta}{1 + c(\pi + \alpha(\theta_2))}  \\
-%
-    -c_{\QQ}^2 \delta_{\QQ} &= -\frac{c^2 \delta}{(1 + c(\pi + \alpha(\theta_2)))^2}
-    \nonumber
-\end{align}
-
-To simplify notation, define the following rescaling function.
-
-\begin{equation}
-    \chi(\pi, \theta) \coloneqq 1 + c(\pi + \alpha(\theta))
-\end{equation}
-
-We can use \cref{eqn:c_rho_delta_QQ} and substitute in $\chi(\pi, \theta)$ to get the following.
-
-\begin{align}
-    \delta_{\QQ} &= \delta \\
-    \rho_{\QQ} &= \frac{\rho}{\chi^2(\pi, \theta)} \\
-    c_{\QQ} &= \frac{c}{\chi(\pi, \theta)} 
-\end{align}
-
-The one value we have yet to derive is $\psi_{\QQ}$.
-Again we use \textcite[Proposition 5]{khrapov2016affine}, to relate $\psi$ and $\psi_{\QQ}$. 
-Since the $\alpha$ functions are quadratic, we have the following.
-
-\begin{align}
-    \alpha_{\QQ}(v) = \psi_{\QQ} v + \frac{1- \phi^2_{\QQ}}{2} v^2  \\
-%
-    \alpha(v) = \psi v + \frac{1- \phi^2}{2} v^2  
-\end{align}
-
-As in \cref{eqn:risk_neutral_at_neg_1}, $\alpha_{\QQ}(-1) = \alpha(\theta)$, recalling that $\phi =
-\phi_{\QQ}$, we can differentiate and get the following.
-
-\begin{align}
-    \implies \alpha_{\QQ}'(0) = \alpha'(0) + (1 - \phi^2) \theta
-%
-    \implies \psi_{\QQ} = \psi + (1 - \phi^2) \theta
-\end{align}
-
-\end{proof}
 
 \section{Identification Proofs}
 
