@@ -9,29 +9,29 @@ import statsmodels.api as sm
 import statsmodels.tsa.api as tsa
 import sympy as sym
 import logging
-
+from collections import OrderedDict
 
 # We define some functions
-x, y, rho, c, delta, phi, psi_sym = sym.symbols('x y rho c delta phi psi_sym')
+x, y, rho, scale, delta, phi, psi_sym = sym.symbols('x y rho scale delta phi psi_sym')
 theta, pi = sym.symbols('theta pi')
 
 # We define the link functions.
-psi_sym = phi / sym.sqrt(c + (1 + rho)) + (( 1 - phi**2) / 2 - (1 - phi**2) * theta)
-a_func = rho * x / ( 1 + c * x)
+psi_sym = phi / sym.sqrt(scale + (1 + rho)) + (( 1 - phi**2) / 2 - (1 - phi**2) * theta)
+a_func = rho * x / ( 1 + scale * x)
 alpha = psi_sym * x + (( 1 -phi**2) / 2) * x**2
-b_func = delta * sym.log(1 + c * x)
+b_func = delta * sym.log(1 + scale * x)
 beta_sym = a_func.replace(x, pi + alpha.replace(x, theta - 1)) - a_func.replace(x, pi + alpha.replace(x, theta)) 
 gamma_sym = b_func.replace(x, pi + alpha.replace(x, theta-1)) - b_func.replace(x, pi + alpha.replace(x, theta))
 
 
 # We create the link functions.
-gamma = sym.lambdify((rho, c, delta, phi, pi, theta), gamma_sym)
-beta = sym.lambdify((rho, c, phi, pi, theta), beta_sym)
-psi = sym.lambdify((rho, c, phi,  theta), psi_sym)
+gamma = sym.lambdify((delta, phi, pi, rho, scale, theta), gamma_sym)
+beta = sym.lambdify((phi, pi, rho, scale, theta), beta_sym)
+psi = sym.lambdify((phi, rho, scale, theta), psi_sym)
 
 # We define some moments.
-mean = rho * x + c * delta
-var = 2 * c * rho * x + c**2 * delta
+mean = rho * x + scale * delta
+var = 2 * scale * rho * x + scale**2 * delta
 mom1 = y - mean
 mom2 = (y- mean) * x
 mom3 = (y**2 - (var + mean**2))
@@ -40,22 +40,24 @@ mom5 = (y**2 - (var + mean**2)) * x**2
 
 # We collect those moments into a function.
 vol_moments_sym = sym.Matrix([mom1,mom2, mom3, mom4, mom5])
-vol_moments_lambda = sym.lambdify((x, y, c, rho, delta), vol_moments_sym)
+vol_moments_lambda = sym.lambdify((x, y, delta, rho, scale), vol_moments_sym)
 
 # Setup the link function.
-second_stage_moments_sym = sym.Matrix([beta_sym, c, delta, gamma_sym, phi**2, psi_sym, rho])
+second_stage_moments_sym = sym.Matrix([beta_sym, delta, gamma_sym, phi**2, psi_sym, rho, scale])
 second_stage_moments_sym.simplify()
-second_stage_moments = sym.lambdify((c, delta, phi, pi, rho, theta), second_stage_moments_sym)
+second_stage_moments = sym.lambdify((delta, phi, pi, rho, scale, theta), second_stage_moments_sym)
 
 # Define the gradients of the link function.
 
-link1_grad_in = sym.lambdify((c, delta, phi, pi,rho, theta),  second_stage_moments_sym.jacobian([c,delta, rho]))
+link1_grad_in = sym.lambdify((delta, phi, pi, rho, scale, theta),  second_stage_moments_sym.jacobian([delta, rho,
+                                                                                                      scale]))
 
 
-link2_grad_in = sym.lambdify((rho, c, delta, phi, pi, theta), second_stage_moments_sym.jacobian([rho, c, delta,
-                                                                                                 phi, pi, theta]))
+link2_grad_in = sym.lambdify((rho, delta, phi, pi,scale, theta), 
+                             second_stage_moments_sym.jacobian([delta, phi, pi, rho, scale, phi, pi, theta]))
 
-def simulate_autoregressive_gamma(rho=0, scale=1, delta=1, initial_point=None, time_dim=100,
+
+def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
                                   state_date='2000-01-01'):
     """
     This function provides draws from the ARG(1) process of Gourieroux & Jaiak
@@ -91,7 +93,7 @@ def simulate_autoregressive_gamma(rho=0, scale=1, delta=1, initial_point=None, t
     return draws
 
 
-def simulate_conditional_gaussian(vol_data, rho=0, scale=.1, delta=1, phi=0, vol_price=0, equity_price=1):
+def simulate_conditional_gaussian(vol_data, delta=1, equity_price=1, phi=0, rho=0, scale=.1, vol_price=0):
     """
     This function simulates conditional Gaussian random variables with mean
     
@@ -116,9 +118,9 @@ def simulate_conditional_gaussian(vol_data, rho=0, scale=.1, delta=1, phi=0, vol
         This contains both the vol_data and the return data
     """
     
-    gamma_val = gamma(rho=rho, c=scale, delta=delta, phi=phi, pi=vol_price, theta=equity_price)
-    beta_val = beta(rho=rho, c=scale, phi=phi, pi=vol_price, theta=equity_price)
-    psi_val = psi(rho=rho, c=scale, phi=phi, theta=equity_price)
+    gamma_val = gamma(rho=rho, scale=scale, delta=delta, phi=phi, pi=vol_price, theta=equity_price)
+    beta_val = beta(rho=rho, scale=scale, phi=phi, pi=vol_price, theta=equity_price)
+    psi_val = psi(rho=rho, scale=scale, phi=phi, theta=equity_price)
     
     mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
     var = (1 - phi**2) * vol_data
@@ -165,31 +167,31 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
     return data
 
 
-def vol_moments(vol_data, scale, rho,delta):    
+def vol_moments(vol_data, delta, rho, scale):    
     """ Computes the moments for the volatility. """ 
 
-    return pd.DataFrame(np.squeeze(vol_moments_lambda(vol_data.values[1:], vol_data.values[:-1], c=scale, rho=rho,
-                                                      delta=delta)).T)
+    returnmat = np.squeeze(vol_moments_lambda(x=vol_data.values[1:], y=vol_data.values[:-1], scale=scale, rho=rho,
+                                              delta=delta)).T 
+    return pd.DataFrame(returnmat)
 
 
-def vol_moments_grad(vol_data, scale, delta, rho):
-    """ Computes the jacobian of the volatility moments. """
-    x = vol_data.values[:-1]
-    y = vol_data.values[:-1]
-
-    cond_mean = scale * delta * rho * x
-
-    row1 = np.array([-np.full(x.shape, delta), -x, -np.full(x.shape,scale)])
-    row2 = x * row1 
-    row3 = np.array([-2 * scale * delta - 2 * rho * x - 2 * delta * cond_mean, -2 * scale * x - 2 * x * cond_mean, -
-                     scale**2 - 2 * scale * cond_mean])
-    row4 = x * row3
-    row5 = x**2 * row3
-    
-    mom_grad_in  = np.row_stack([np.mean(row1, axis=1), np.mean(row2, axis=1), np.mean(row3, axis=1),
-                                 np.mean(row4, axis=1), np.mean(row5, axis=1)])
-
-    return mom_grad_in
+def vol_moments_grad(vol_data, delta, rho, scale):                                                                 
+    """ Computes the negative of the jacobian of the volatility moments. """                                       
+    x = vol_data.values[:-1]                                                                                       
+    y = vol_data.values[:-1]                                                                                       
+                                                                                                                   
+    mean = rho * x + scale * delta                                                                            
+                                                                                                                   
+    row1 = np.array([np.full(x.shape, scale), x, np.full(x.shape, delta)])                                         
+    row2 = x * row1                                                                                                
+    row3 = np.array([scale**2  + 2 * scale * mean, 2 * scale * x + 2 * x * mean, 2 * mean + 2 * delta * mean])                                                                                   
+    row4 = x * row3                                                                                                
+    row5 = x**2 * row3                                                                                             
+                                                                                                                   
+    mom_grad_in  = np.row_stack([np.mean(row1, axis=1), np.mean(row2, axis=1), np.mean(row3, axis=1),              
+                                 np.mean(row4, axis=1), np.mean(row5, axis=1)])                                    
+                                                                                                                   
+    return pd.DataFrame(mom_grad_in, columns=['delta', 'rho','scale'])  
 
 
 
@@ -197,7 +199,7 @@ def compute_init_constants(vol_data):
     """ 
     Computes some guesses for the volatlity paramters that we can use to initialize the optimization.
     
-    From the model, we know that intercept = $ c * \delta$. We also know that the average error variance equals $
+    From the model, we know that intercept = $ scale * \delta$. We also know that the average error variance equals $
     c^2 \delta * (2 \rho / 1 - \rho) + 1)$. Consequently, $c = error\_var / ( intercept * (2 \rho / 1 - \rho) +
     1))$, and  $\delta = \text{intercept} / c$.
       
@@ -265,13 +267,15 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     cov : ndarray
     """
     if bounds is None:
-        bounds = [(-1+1e-5,1-1e-5),(1e-5, 20), (1e-5,20)]
+        bounds = [(-1+1e-5,20),(-1, 1), (1e-5,.5)]
 
     if options is None:
         options = {'maxiter':200}
         
+    init_constants = OrderedDict(sorted(init_constants.items(), key=lambda t: t[0]))
+
     x0 = list(init_constants.values())
-    
+
     initial_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments),
                                        x0=x0, method="SLSQP", bounds=bounds, options=options)
     
@@ -362,9 +366,9 @@ def link_grad_reduced(delta, equity_price, phi, rho, scale, vol_price):
     
     Paramters
     ---------
-    scale : scalar
     equity_price : scalar
     phi : scalar
+    scale : scalar
     rho : scalar
     vol_price : scalar
     
@@ -373,7 +377,7 @@ def link_grad_reduced(delta, equity_price, phi, rho, scale, vol_price):
     ndarray
     """
     return_mat = np.zeros((7,7))
-    mat2 = link1_grad_in(phi=phi, rho=rho, c=scale, delta=delta, theta=equity_price, pi=vol_price)
+    mat2 = link1_grad_in(phi=phi, rho=rho, scale=scale, delta=delta, theta=equity_price, pi=vol_price)
     return_mat[0,0] = 1
     return_mat[:,1] = mat2[:,0]
     return_mat[:,2] = mat2[:,1]
@@ -403,7 +407,7 @@ def link_grad_structural(rho, scale, delta, phi, equity_price, vol_price):
     ndarray
     
     """
-    return_mat = link2_grad_in(phi=phi, rho=rho, c=scale, delta=delta, theta=equity_price, pi=vol_price)
+    return_mat = link2_grad_in(phi=phi, rho=rho, scale=scale, delta=delta, theta=equity_price, pi=vol_price)
     
     return return_mat
 
@@ -424,9 +428,10 @@ def second_criterion(structural_params, link_params, weight=None):
     
     """
     # _, beta, delta_link, gamma_val, psi, phi_squared, rho_link = link_params
-    scale, delta, equity_price, phi, rho, vol_price = structural_params
+    delta, equity_price, phi, rho, scale, vol_price = structural_params
     
-    part1 = second_stage_moments(rho=rho, c=scale, delta=delta, theta=equity_price, phi=phi, pi=vol_price).ravel()
+    part1 = second_stage_moments(rho=rho, scale=scale, delta=delta, theta=equity_price, phi=phi,
+                                 pi=vol_price).ravel()
     part2 = np.array([link_params[key] for key in sorted(link_params)])
 
     diff = part1 - part2
@@ -445,7 +450,7 @@ def compute_stage2_weight(reduced_form_cov, structural_params):
 def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None):
     
     if bounds is None:
-        bounds = ([0,.5], [0, np.inf], [0, 10], [-1,1], [0,1], [-50, 50])
+        bounds = ([0, 20], [0, 5], [-1, 1], [-1,1], [0,.5], [-10, 10])
     if opts is None:
         opts = {'maxiter':200}
         
@@ -459,16 +464,16 @@ def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None)
                                     options=opts, bounds=bounds)
     estimates = {key:val for key, val in zip(sorted(price_guess.keys()), init_result.x)}
     
-    weight = np.linalg.pinv(link_grad_reduced(**estimates).T @ reduced_form_cov.sort_index().T.sort_index() 
-               @ link_grad_reduced(**estimates))
+    # weight = np.linalg.pinv(link_grad_reduced(**estimates).T @ reduced_form_cov.sort_index().T.sort_index() 
+    #            @ link_grad_reduced(**estimates))
     
-    final_result = optimize.minimize(lambda x: second_criterion(x, reduced_form_params, weight=weight),
-                                     x0=init_result.x, method="SLSQP",  options=opts, bounds=bounds)
+    # final_result = optimize.minimize(lambda x: second_criterion(x, reduced_form_params, weight=weight),
+    #                                  x0=init_result.x, method="SLSQP",  options=opts, bounds=bounds)
                                      
-    estimates = {key:val for key, val in zip(sorted(price_guess.keys()), final_result.x)}
+    # estimates = {key:val for key, val in zip(sorted(price_guess.keys()), final_result.x)}
     
-    if not final_result.success:
-        logging.warning("Convergence results are %s.\n", final_result)
+    # if not final_result.success:
+    #     logging.warning("Convergence results are %s.\n", final_result)
                   
     return estimates
 
