@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from scipy import stats, optimize
+from scipy import optimize
 from scipy import linalg as scilin
 import statsmodels.api as sm
 import statsmodels.tsa.api as tsa
@@ -72,50 +72,11 @@ def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, t
     initial_point = (scale * delta) / (1 - rho)
     
     draws = _simulate_autoregressive_gamma(delta=delta,rho=rho,scale=scale,initial_point=initial_point,
-                                             time_dim=time_dim)
+                                           time_dim=time_dim)
     
     draws = pd.DataFrame(draws, pd.date_range(start=state_date, freq='D', periods=time_dim))
 
     return draws
-
-
-def simulate_conditional_gaussian(vol_data, delta=1, equity_price=1, phi=0, rho=0, scale=.1, vol_price=0):
-    """
-    This function simulates conditional Gaussian random variables with mean
-    
-    $$E[r_{t+1} | \sigma^2_t, \sigma^2_{t+1}] = \psi \sigma^2_{t+1} + \beta \sigma^2_t + \gamma$$
-    $$Var[r_{+t} | \sigma^2_t, \sigma^2_{t+1}] = (1 - \phi^2) \sigma^2_{t+1}$$
-    
-    Parameters
-    ----------
-    vol_data : pandas dataframe
-        The volatility data. It must always be positive.
-    rho : scalar
-    scale : scalar
-    delta : scalar
-    phi : scalar 
-        It must be in [-1,1]
-    vol_price : scalar
-    equity_price : scalar
-    
-    Returns
-    -------
-    data : pandas dataframe 
-        This contains both the vol_data and the return data
-    """
-    
-    gamma_val = gamma(rho=rho, scale=scale, delta=delta, phi=phi, pi=vol_price, theta=equity_price)
-    beta_val = beta(rho=rho, scale=scale, phi=phi, pi=vol_price, theta=equity_price)
-    psi_val = psi(rho=rho, scale=scale, phi=phi, theta=equity_price)
-    
-    mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
-    var = (1 - phi**2) * vol_data
-    
-    draws =  mean + np.sqrt(var) * pd.DataFrame(_threadsafe_gaussian_rvs(var.size), index=vol_data.index)
-    data = pd.concat([vol_data, draws], axis=1).dropna()
-    data.columns = ['vol', 'rtn']
-    
-    return data
 
 
 def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, initial_point=None, time_dim=100,
@@ -128,7 +89,7 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
     equity_price: scalar
     vol_price : scalar
     phi : scalar
-        leverage
+        leverage. It must lie in [-1,1]
     rho : scalar
         persistence
     scale : positive scalar
@@ -147,8 +108,17 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
     vol_data = simulate_autoregressive_gamma(rho=rho, scale=scale, delta=delta, initial_point=initial_point,
                                              state_date=pd.to_datetime(state_date) - pd.Timedelta('1 day'),
                                              time_dim=time_dim + 1)
-    data = simulate_conditional_gaussian(vol_data, rho=rho, scale=scale, delta=delta, phi=phi,
-                                         vol_price=vol_price, equity_price=equity_price)
+
+    gamma_val = gamma(rho=rho, scale=scale, delta=delta, phi=phi, pi=vol_price, theta=equity_price)
+    beta_val = beta(rho=rho, scale=scale, phi=phi, pi=vol_price, theta=equity_price)
+    psi_val = psi(rho=rho, scale=scale, phi=phi, theta=equity_price)
+    
+    mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
+    var = (1 - phi**2) * vol_data
+    
+    draws =  mean + np.sqrt(var) * pd.DataFrame(_threadsafe_gaussian_rvs(var.size), index=vol_data.index)
+    data = pd.concat([vol_data, draws], axis=1).dropna()
+    data.columns = ['vol', 'rtn']
 
     return data
 
@@ -265,15 +235,20 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     initial_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments),
                                        x0=x0, method="SLSQP", bounds=bounds, options=options)
     
-    weight_matrix = scilin.pinv(vol_moments(vol_data, *initial_result.x).cov())
+    moment_cov  = vol_moments(vol_data, *initial_result.x).cov()
     
-    final_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
-                                      x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
-    estimates = {key:val for key,val in zip(init_constants.keys(), final_result.x)}
+    # final_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
+    #                                   x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
+    # estimates = {key:val for key,val in zip(init_constants.keys(), final_result.x)}
 
-    weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
+    # weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
     moment_derivative = vol_moments_grad(vol_data, **estimates)
-    cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
+    # cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
+    #                    columns=list(init_constants.keys()), index=list(init_constants.keys()))
+    GprimeG = scilin.pinv(moment_derivative.T @ moment_derivative)
+    inner_part = moment_derivative.T @ moment_cov @ moment_derivative
+
+    cov = pd.DataFrame(np.linalg.pinv(GprimeG @ moment_derivative @ inner_part @ GprimeG.T),
                        columns=list(init_constants.keys()), index=list(init_constants.keys()))
     
     if not final_result.success:
