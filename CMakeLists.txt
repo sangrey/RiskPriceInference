@@ -25,7 +25,7 @@ if (OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}") 
 endif()    
 
-set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/riskpriceinference.cpp")
+set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/volpriceinference.cpp")
 
 pybind11_add_module(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${NUMPY_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include
