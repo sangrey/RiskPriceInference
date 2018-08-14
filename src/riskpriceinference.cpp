@@ -12,7 +12,7 @@ using namespace std::string_literals;
 using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;                                               
 
 
-npdouble abs_gaussian_moments(npulong power, npdouble scale=1) {
+double abs_gaussian_moments(npulong power, npdouble scale=1) {
 
     npdouble log_moment =  0.5 * power * std::log(2);
     log_moment +=  std::lgamma(0.5 * (power + 1));
