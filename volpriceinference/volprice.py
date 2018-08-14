@@ -136,11 +136,11 @@ def vol_moments_grad(vol_data, delta, rho, scale):
     mean = rho * x + scale * delta                                                                            
                                                                                                                    
     row1 = np.column_stack([np.full(x.shape, scale), x, np.full(x.shape, delta)])                                         
-    row2 = x * row1 
+    row2 = (row1.T * x).T
     row3 = np.column_stack([scale**2  + 2 * scale * mean, 2 * scale * x + 2 * x * mean,
                             2 * rho * x + 2 * scale * delta + 2 * delta * mean])
-    row4 = x * row3                                                                                                
-    row5 = x**2 * row3                                                                                             
+    row4 = (row3.T * x).T                                                                                                
+    row5 = (row.T * x**2).T 
                                                                                                                    
     mom_grad_in  = -np.row_stack([np.mean(row1, axis=0), np.mean(row2, axis=0), np.mean(row3, axis=0),
                                     np.mean(row4, axis=0), np.mean(row5, axis=0)])                                    
