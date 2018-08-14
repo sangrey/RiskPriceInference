@@ -46,7 +46,7 @@ std::vector<double> simulate_autoregressive_gamma(double delta, double rho, doub
           draws.push_back(gamma_dist(generator));
     }
 
-    std::vector return_draws(draws.begin() + 1, draws.end());
+    std::vector<double> return_draws(draws.begin() + 1, draws.end());
 
     return return_draws;
 }
