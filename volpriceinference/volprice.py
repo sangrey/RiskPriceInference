@@ -195,14 +195,12 @@ def compute_mean_square(x, data, func, weight=None):
     scalar
     """
 
-    func_data = func(data, *x)
+    func_data = np.mean(func(data, *x), axis=0)
     
     if weight is None:
-        root_weight = np.eye(len(func_data.T))
-    else:
-        root_weight = scilin.cholesky(weight)
+        weight = np.eye(len(func_data.T))
     
-    return np.asscalar(np.mean(np.ravel((func_data @  root_weight)**2)))
+    return np.asscalar(func_data @ weight @ func_data.T)
 
 
 def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
