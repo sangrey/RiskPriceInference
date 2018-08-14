@@ -7,7 +7,7 @@ import statsmodels.tsa.api as tsa
 import sympy as sym
 import logging
 from collections import OrderedDict
-from volpriceinference import _simulate_autoregressive_gamma, _threadsave_gaussian_rvs
+from volpriceinference import _simulate_autoregressive_gamma, _threadsafe_gaussian_rvs
 
 # We define some functions
 x, y, rho, scale, delta, phi, psi_sym = sym.symbols('x y rho scale delta phi psi_sym')
