@@ -239,7 +239,8 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     
     # final_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
     #                                   x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
-    estimates = {key:val for key,val in zip(init_constants.keys(), initial_result.x)}
+    final_result = initial_result
+    estimates = {key:val for key,val in zip(init_constants.keys(), final_result.x)}
 
     # weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
     moment_derivative = vol_moments_grad(vol_data, **estimates)
