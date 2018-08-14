@@ -40,6 +40,8 @@ std::vector<double> simulate_autoregressive_gamma(double delta, double rho, doub
 
     for(size_t idx=0; idx<time_dim; ++idx) {
         
+        /* The conditional distribution of an ARG(1) process is non-centered Gamma, which has a representation as
+         * a Poisson mixture of Gamma */
           std::poisson_distribution<int> poi_dist(rho * draws.back() / scale);
           int latent_var = poi_dist(generator);
           std::gamma_distribution<double> gamma_dist(delta + latent_var, scale);
@@ -51,10 +53,29 @@ std::vector<double> simulate_autoregressive_gamma(double delta, double rho, doub
     return return_draws;
 }
 
+std::vector<double> threadsafe_gaussian_rvs(size_t time_dim) {
+
+    std::normal_distribution dist(0,1);
+    thread_local auto& generator = initialize_mt_generator();
+
+    std::vector<double> return_draws(time_dim);
+
+    for (auto& x : return_draws) {
+        x = dist(generator);
+    }
+    
+    return return_draws;
+}
+
+
 PYBIND11_MODULE(libvolpriceinference, m) {
 
     m.def("_simulate_autoregressive_gamma", &simulate_autoregressive_gamma, stream_redirect(), 
           "This function provides draws from the ARG(1) process of Gourieroux & Jaiak",
-          "delta"_a=1, "rho"_a=0, "scale"_a=.1, "time_dim"_a=2, "initial_point"_a=.1); 
+          "delta"_a=1, "rho"_a=0, "scale"_a=.1, "time_dim"_a=100, "initial_point"_a=.1); 
+    
+    m.def("_threadsafe_gaussian_rvs", &threadsafe_gaussian_rvs, stream_redirect(), 
+          "This function provides a vector of Gaussian random variates that are drawn in a thread safe manner.",
+          "time_dim"_a=100); 
 
 }

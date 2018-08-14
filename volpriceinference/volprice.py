@@ -7,6 +7,7 @@ import statsmodels.tsa.api as tsa
 import sympy as sym
 import logging
 from collections import OrderedDict
+from volpriceinference import _simulate_autoregressive_gamma, _threadsave_gaussian_rvs
 
 # We define some functions
 x, y, rho, scale, delta, phi, psi_sym = sym.symbols('x y rho scale delta phi psi_sym')
@@ -70,17 +71,10 @@ def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, t
     
     initial_point = (scale * delta) / (1 - rho)
     
-    # The conditional distribution of an ARG(1) process is non-centered Gamma, which has a representation as a 
-    # Poisson mixture of Gamma
+    draws = _simulate_autoregressive_gamma(delta=delta,rho=rho,scale=scale,initial_point=initial_point,
+                                             time_dim=time_dim)
     
-    draws = [initial_point]
-    
-    for _ in range(time_dim):
-        
-        latent_var = stats.poisson.rvs(mu = rho * draws[-1] / scale)
-        draws.append(stats.gamma.rvs(a=delta+latent_var, scale=scale))
-    
-    draws = pd.DataFrame(draws[1:], pd.date_range(start=state_date, freq='D', periods=time_dim))
+    draws = pd.DataFrame(draws, pd.date_range(start=state_date, freq='D', periods=time_dim))
 
     return draws
 
@@ -117,7 +111,7 @@ def simulate_conditional_gaussian(vol_data, delta=1, equity_price=1, phi=0, rho=
     mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
     var = (1 - phi**2) * vol_data
     
-    draws =  mean + pd.DataFrame(stats.norm.rvs(0, scale=var.apply(np.sqrt)), index=vol_data.index)
+    draws =  mean + np.sqrt(var) * pd.DataFrame(_threadsafe_gaussian_rvs(var.size), index=vol_data.index)
     data = pd.concat([vol_data, draws], axis=1).dropna()
     data.columns = ['vol', 'rtn']
     
