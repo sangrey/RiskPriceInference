@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <cmath>
+#include <cassert>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "pybind11/operators.h"
@@ -11,20 +12,48 @@ using namespace pybind11::literals;
 using namespace std::string_literals;
 using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;                                               
 
+/* 
+ * Initializes a random generator in a thread_save way to be used globally througout the entire library. 
+ */
+inline
+std::mt19937_64& initialize_mt_generator() { 
+    
+    thread_local std::random_device rd; 
+    thread_local std::mt19937_64 engine(rd());
+    
+    return engine; 
 
-double abs_gaussian_moments(int power, double scale=1) {
+}
 
-    double log_moment =  0.5 * power * std::log(2);
-    log_moment +=  std::lgamma(0.5 * (power + 1));
-    log_moment += power * std::log(static_cast<double>(scale));
+std::vector<double> simulate_autoregressive_gamma(double delta, double rho, double scale, size_t time_dim, double
+        initial_point) {
+    
+    assert (time_dim > 1);
 
-    return std::exp(log_moment);
+    std::vector<double> draws;
+    draws.reserve(time_dim+1);
 
+    /* We start at the initial point. */
+    draws.push_back(initial_point);
+    thread_local auto& generator = initialize_mt_generator();
+
+    for(size_t idx=0; idx<time_dim; ++idx) {
+        
+          std::poisson_distribution<int> poi_dist(rho * draws.back() / scale);
+          int latent_var = poi_dist(generator);
+          std::gamma_distribution<double> gamma_dist(delta + latent_var, scale);
+          draws.push_back(gamma_dist(generator));
+    }
+
+    std::vector return_draws(draws.begin() + 1, draws.end());
+
+    return return_draws;
 }
 
 PYBIND11_MODULE(libvolpriceinference, m) {
 
-    m.def("abs_gaussian_moments", &abs_gaussian_moments, stream_redirect(), 
-            "Computes the centered abolute gaussian moment of order p.", "power"_a, "scale"_a=1); 
+    m.def("_simulate_autoregressive_gamma", &simulate_autoregressive_gamma, stream_redirect(), 
+          "This function provides draws from the ARG(1) process of Gourieroux & Jaiak",
+          "delta"_a=1, "rho"_a=0, "scale"_a=.1, "time_dim"_a=2, "initial_point"_a=.1); 
 
 }
