@@ -245,10 +245,10 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     moment_derivative = vol_moments_grad(vol_data, **estimates)
     # cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
     #                    columns=list(init_constants.keys()), index=list(init_constants.keys()))
-    GprimeG = scilin.pinv(moment_derivative.T @ moment_derivative)
+    GprimeG = scilin.inv(moment_derivative.T @ moment_derivative)
     inner_part = moment_derivative.T @ moment_cov @ moment_derivative
 
-    cov = pd.DataFrame(np.linalg.pinv(GprimeG @ moment_derivative @ inner_part @ GprimeG.T),
+    cov = pd.DataFrame(np.linalg.inv(GprimeG @ inner_part @ GprimeG.T),
                        columns=list(init_constants.keys()), index=list(init_constants.keys()))
     
     if not final_result.success:
