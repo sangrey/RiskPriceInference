@@ -1,4 +1,4 @@
-from libvolpriceinference import abs_gaussian_moments 
+from libvolpriceinference import _simualte_autoregressive_gamma
 from .version import __version__
 from .volprice import *
 
