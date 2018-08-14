@@ -113,7 +113,7 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
 def vol_moments(vol_data, delta, rho, scale):    
     """ Computes the moments for the volatility. """ 
     x = vol_data.values[:-1]                                                                                       
-    y = vol_data.values[:-1]                                                                                       
+    y = vol_data.values[1:]                                                                                       
 
     mean = rho * x + scale * delta
     var = 2 * scale * rho * x + scale**2 * delta
@@ -131,7 +131,7 @@ def vol_moments(vol_data, delta, rho, scale):
 def vol_moments_grad(vol_data, delta, rho, scale):                                                                 
     """ Computes the jacobian of the volatility moments. """                                       
     x = vol_data.values[:-1]                                                                                       
-    y = vol_data.values[:-1]                                                                                       
+    y = vol_data.values[1:]                                                                                       
                                                                                                                    
     mean = rho * x + scale * delta                                                                            
                                                                                                                    
