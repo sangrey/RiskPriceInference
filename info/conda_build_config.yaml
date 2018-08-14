@@ -1,0 +1,14 @@
+numpy:
+    - 1.13
+    - 1.14
+
+python:
+    - 3.6
+
+armadillo: 
+    - 8
+
+pin_run_as_build:
+    numpy: x.x
+    armadillo: x.x
+

@@ -1,0 +1,43 @@
+package:
+  name: volpriceinference 
+  version:  {{environ.get('GIT_DESCRIBE_TAG', ' ') }}     
+
+build:
+  number: {{environ.get('GIT_DESCRIBE_NUMBER', 0)}}               
+
+source:
+  git_url: ../
+
+
+requirements:
+  build: 
+    - cmake >=3.3
+    - {{compiler('cxx')}}
+  host:
+    - python {{python}}
+    - numpy  {{numpy}}
+    - pybind11 2.2
+  run:
+    - python 
+    - numpy
+    - scipy
+    - pandas 
+    - statsmodels
+    - sympy
+
+about:
+  home: https://gitlab.com/sangrey/LaplaceJumps
+  license: Apache 2.0
+  license_file: LICENSE
+  summary: > 
+    This package contains files that are used to estimate and simulate volatlity risk prices in a way that is
+    robust to weak identification.
+
+extra:
+  maintainers:
+    - Paul Sangrey
+  email:
+    - paul@sangrey.io 
+  website:
+    - sangrey.io 
+
