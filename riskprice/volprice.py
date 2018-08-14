@@ -1,10 +1,7 @@
 import numpy as np
 import pandas as pd
-from tqdm import tqdm_notebook
 from scipy import stats, optimize
 from scipy import linalg as scilin
-from itertools import product
-import seaborn as sns
 import statsmodels.api as sm
 import statsmodels.tsa.api as tsa
 import sympy as sym
@@ -22,7 +19,6 @@ alpha = psi_sym * x + (( 1 -phi**2) / 2) * x**2
 b_func = delta * sym.log(1 + scale * x)
 beta_sym = a_func.replace(x, pi + alpha.replace(x, theta - 1)) - a_func.replace(x, pi + alpha.replace(x, theta)) 
 gamma_sym = b_func.replace(x, pi + alpha.replace(x, theta-1)) - b_func.replace(x, pi + alpha.replace(x, theta))
-
 
 # We create the link functions.
 gamma = sym.lambdify((delta, phi, pi, rho, scale, theta), gamma_sym)
@@ -48,13 +44,8 @@ second_stage_moments_sym.simplify()
 second_stage_moments = sym.lambdify((delta, phi, pi, rho, scale, theta), second_stage_moments_sym)
 
 # Define the gradients of the link function.
-
-link1_grad_in = sym.lambdify((delta, phi, pi, rho, scale, theta),  second_stage_moments_sym.jacobian([delta, rho,
-                                                                                                      scale]))
-
-
-link2_grad_in = sym.lambdify((rho, delta, phi, pi,scale, theta), 
-                             second_stage_moments_sym.jacobian([delta, phi, pi, rho, scale, phi, pi, theta]))
+link2_grad_in = sym.lambdify((delta, phi, pi, rho, scale, theta), 
+                             second_stage_moments_sym.jacobian([delta, phi, pi, rho, scale, theta]))
 
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
@@ -84,12 +75,13 @@ def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, t
     
     draws = [initial_point]
     
-    for _ in tqdm_notebook(range(time_dim)):
+    for _ in range(time_dim):
         
         latent_var = stats.poisson.rvs(mu = rho * draws[-1] / scale)
         draws.append(stats.gamma.rvs(a=delta+latent_var, scale=scale))
     
     draws = pd.DataFrame(draws[1:], pd.date_range(start=state_date, freq='D', periods=time_dim))
+
     return draws
 
 
@@ -211,11 +203,11 @@ def compute_init_constants(vol_data):
     -----
     dict
     """
-    intercept, persistence = tsa.AR(vol_data).fit(maxlag=1).params
-    error_var = tsa.AR(vol_data).fit(maxlag=1).sigma2
-    tsa.AR(vol_data).fit(maxlag=1).conf_int()
-    init_constants = {'rho': persistence}
+    model = tsa.AR(vol_data).fit(maxlag=1) 
+    intercept, persistence = model.params
+    error_var = model.sigma2
 
+    init_constants = {'rho': persistence}
     init_constants['scale'] = error_var / ( intercept * ( 2 * persistence / ( 1- persistence) + 1) )
     init_constants['delta'] = intercept / init_constants['scale']
 
@@ -285,6 +277,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
                                       x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
     estimates = {key:val for key,val in zip(init_constants.keys(), final_result.x)}
 
+    weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
     moment_derivative = vol_moments_grad(vol_data, **estimates)
     cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
                        columns=list(init_constants.keys()), index=list(init_constants.keys()))
@@ -342,7 +335,7 @@ def cov_to_corr(cov):
 def compute_step2(data, parameter_mapping=None):
     
     if parameter_mapping is None:
-        parameter_mapping = {'vol':'psi', 'vol.shift(1)':'beta', 'intercept':'gamma'}
+        parameter_mapping = {'vol':'psi', 'vol.shift(1)':'beta', 'Intercept':'gamma'}
     
     wls_results = sm.WLS.from_formula('rtn ~ 1+ vol.shift(1) + vol', weights=data.vol**(-1), data=data).fit()
     
@@ -356,50 +349,39 @@ def compute_step2(data, parameter_mapping=None):
     return_cov = wls_results.cov_params().rename(columns=parameter_mapping).rename(parameter_mapping)
     return_cov = return_cov.merge(phi2_cov, left_index=True, right_index=True, how='outer').fillna(0)
     
-    return estimates, return_cov
+    return dict(estimates), return_cov
 
 
-def link_grad_reduced(delta, equity_price, phi, rho, scale, vol_price):
+def link_grad_reduced():
     """
     This function computes the jacobian of the link function with respect to the reduced form paramters
-    beta, c, delta, gamma, phi^2, psi, rho
-    
-    Paramters
-    ---------
-    equity_price : scalar
-    phi : scalar
-    scale : scalar
-    rho : scalar
-    vol_price : scalar
+    beta, delta, gamma, phi^2, psi, rho, scale
     
     Returns
     --------
     ndarray
     """
-    return_mat = np.zeros((7,7))
-    mat2 = link1_grad_in(phi=phi, rho=rho, scale=scale, delta=delta, theta=equity_price, pi=vol_price)
-    return_mat[0,0] = 1
-    return_mat[:,1] = mat2[:,0]
-    return_mat[:,2] = mat2[:,1]
-    return_mat[3,3] = 1
-    return_mat[4,4] = 1
-    return_mat[5,5] = 1
-    return_mat[:,6] = mat2[:,2]
-    
-    return return_mat
+
+    # The link function is of the form reduced_form_paramter - g(structural_paramter) and so its derivative with
+    # respect to the reduced form paramters is the identify function.
+    return_df = pd.DataFrame(np.eye(7), columns=['beta', 'delta', 'gamma', 'phi_squared', 'psi', 'rho', 'scale'],
+                             index=['beta', 'delta', 'gamma', 'phi_squared', 'psi', 'rho', 'scale'])
+   
+    return return_df
 
 
-def link_grad_structural(rho, scale, delta, phi, equity_price, vol_price):
+def link_grad_structural(delta, equity_price, phi, rho, scale, vol_price):
     """
     This function computes the jacobian of the link function with respect to the structural paramters
     phi, rho, scale, delta, equity_price, and vol_price
     
     Paramters
     ---------
+    equity_price : scalar
+    delta : scalar
+    phi : scalar
     rho : scalar
     scale : scalar
-    phi : scalar
-    equity_price : scalar
     vol_price : scalar
     
     Returns
@@ -407,9 +389,10 @@ def link_grad_structural(rho, scale, delta, phi, equity_price, vol_price):
     ndarray
     
     """
-    return_mat = link2_grad_in(phi=phi, rho=rho, scale=scale, delta=delta, theta=equity_price, pi=vol_price)
-    
-    return return_mat
+    return_mat = link2_grad_in(delta=delta, phi=phi, pi=vol_price, rho=rho, scale=scale, theta=equity_price)
+    return_df = pd.DataFrame(return_mat, columns=['delta', 'phi', 'vol_price', 'rho', 'scale', 'equity_price'])
+
+    return return_df.sort_index(axis=1)
 
 
 def second_criterion(structural_params, link_params, weight=None):
@@ -464,21 +447,23 @@ def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None)
                                     options=opts, bounds=bounds)
     estimates = {key:val for key, val in zip(sorted(price_guess.keys()), init_result.x)}
     
-    # weight = np.linalg.pinv(link_grad_reduced(**estimates).T @ reduced_form_cov.sort_index().T.sort_index() 
-    #            @ link_grad_reduced(**estimates))
+    weight = np.linalg.pinv(link_grad_reduced().T @ reduced_form_cov.sort_index().T.sort_index() @
+                            link_grad_reduced())
     
-    # final_result = optimize.minimize(lambda x: second_criterion(x, reduced_form_params, weight=weight),
-    #                                  x0=init_result.x, method="SLSQP",  options=opts, bounds=bounds)
+    final_result = optimize.minimize(lambda x: second_criterion(x, reduced_form_params, weight=weight),
+                                     x0=init_result.x, method="SLSQP",  options=opts, bounds=bounds)
                                      
-    # estimates = {key:val for key, val in zip(sorted(price_guess.keys()), final_result.x)}
+    estimates = {key:val for key, val in zip(sorted(price_guess.keys()), final_result.x)}
     
-    # if not final_result.success:
-    #     logging.warning("Convergence results are %s.\n", final_result)
+    if not final_result.success:
+        logging.warning("Convergence results are %s.\n", final_result)
+
+    cov = compute_2nd_stage_cov(estimates, reduced_form_cov)
                   
-    return estimates
+    return estimates, cov
 
 
-def compute_2nd_stage_cov(params2, cov1, time_dim):
+def compute_2nd_stage_cov(params2, cov1):
     """ 
     This function computes the second stage covariance matrix.
 
@@ -487,7 +472,7 @@ def compute_2nd_stage_cov(params2, cov1, time_dim):
     params2 : ndarray
         The second-stage paramters.
     cov1: 2d ndarray
-        The first-stage covariance matrix.
+        The first-stage covariance matrix. It should be divided through by the sample size.
 
     Returns
     ------
@@ -495,12 +480,52 @@ def compute_2nd_stage_cov(params2, cov1, time_dim):
     """
     
     # This is the optimal weight matrix. 
-    weight = np.linalg.pinv(link_grad_reduced(**params2).T @ cov1.sort_index().T.sort_index() @
-                            link_grad_reduced(**params2))
+    sorted_cov = cov1.sort_index().T.sort_index() 
+    link_struct_diff = link_grad_structural(**params2)
+    link_reduced_diff = link_grad_reduced()
     
-    # This is the inverse of the bread for the sandwich
-    inv_Bmat = np.linalg.pinv(link_grad_structural(**params2).T @ weight @ link_grad_structural(**params2))
+    weight = np.linalg.pinv(link_reduced_diff.T @ sorted_cov @ link_reduced_diff)
+
+    # This is the bread for the sandwich
+    inv_Bmat = np.linalg.pinv(link_struct_diff.T @ weight @ link_struct_diff)
     
-    cov2 = pd.DataFrame((inv_Bmat @ link_grad_structural(**params2).T @ weight @ link_grad_structural(**params2) @
-                         inv_Bmat) / time_dim, index=params2.keys(), columns=params2.keys()) 
+    # We do not need to divide through by the sample size, because sorted_cov is.
+    cov2 = pd.DataFrame(inv_Bmat @ link_struct_diff.T @ weight @ link_struct_diff @ inv_Bmat,
+                        index=params2.keys(), columns=params2.keys()) 
     return cov2
+
+
+def estimate_params(data, vol_estimates=None, vol_cov=None):
+    """ 
+    We estimate the model in one step:
+    
+    Paramters
+    ---------
+    data : ndarray
+        Must contain rtn and vol columns.
+    vol_estimates : dict
+        The volatility estimates.
+    vol_cov : dataframe
+        The volatility asymptotic covariance matrix.
+
+    Returns
+    ------
+    params_2nd_stage : dict
+    cov_2nd_stage: dataframe
+    """
+    
+    if vol_estimates is None or vol_cov is None:
+        # First we compute the volatility paramters.
+        init_constants = compute_init_constants(data.vol)
+        vol_estimates, vol_cov = compute_vol_gmm(data.vol, init_constants=init_constants)
+    
+    # Then we compute the reduced form paramters.
+    reduced_form_estimates, cov_1st_stage2 = compute_step2(data)
+    reduced_form_estimates.update(vol_estimates) 
+    reduced_form_cov = vol_cov.merge(cov_1st_stage2, left_index=True, right_index=True,
+                                     how='outer').fillna(0).sort_index(axis=1).sort_index(axis=0)
+    
+    # I now compute the 2nd stage.
+    params_2nd_stage, cov_2nd_stage  = est_2nd_stage(reduced_form_params=reduced_form_estimates,
+                                                     reduced_form_cov=reduced_form_cov)
+    return params_2nd_stage, cov_2nd_stage
