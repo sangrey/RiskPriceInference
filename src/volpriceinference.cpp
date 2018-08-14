@@ -55,7 +55,7 @@ std::vector<double> simulate_autoregressive_gamma(double delta, double rho, doub
 
 std::vector<double> threadsafe_gaussian_rvs(size_t time_dim) {
 
-    std::normal_distribution dist(0,1);
+    std::normal_distribution<double> dist(0,1);
     thread_local auto& generator = initialize_mt_generator();
 
     std::vector<double> return_draws(time_dim);
