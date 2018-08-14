@@ -26,15 +26,6 @@ gamma = sym.lambdify((delta, phi, pi, rho, scale, theta), gamma_sym)
 beta = sym.lambdify((phi, pi, rho, scale, theta), beta_sym)
 psi = sym.lambdify((phi, rho, scale, theta), psi_sym)
 
-# We define some moments.
-mean = rho * x + scale * delta
-var = 2 * scale * rho * x + scale**2 * delta
-mom1 = y - mean
-mom2 = (y- mean) * x
-mom3 = (y**2 - (var + mean**2))
-mom4 = (y**2 - (var + mean**2)) * x
-mom5 = (y**2 - (var + mean**2)) * x**2
-
 # Setup the link function.
 second_stage_moments_sym = sym.Matrix([beta_sym, delta, gamma_sym, phi**2, psi_sym, rho, scale])
 second_stage_moments_sym.simplify()
@@ -145,7 +136,7 @@ def vol_moments_grad(vol_data, delta, rho, scale):
     mean = rho * x + scale * delta                                                                            
                                                                                                                    
     row1 = np.column_stack([np.full(x.shape, scale), x, np.full(x.shape, delta)])                                         
-    row2 = row1 * x                                                                                               
+    row2 = x * row1 
     row3 = np.column_stack([scale**2  + 2 * scale * mean, 2 * scale * x + 2 * x * mean,
                             2 * rho * x + 2 * scale * delta + 2 * delta * mean])
     row4 = x * row3                                                                                                
