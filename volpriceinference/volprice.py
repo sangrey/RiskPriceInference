@@ -35,10 +35,6 @@ mom3 = (y**2 - (var + mean**2))
 mom4 = (y**2 - (var + mean**2)) * x
 mom5 = (y**2 - (var + mean**2)) * x**2
 
-# We collect those moments into a function.
-vol_moments_sym = sym.Matrix([mom1,mom2, mom3, mom4, mom5])
-vol_moments_lambda = sym.lambdify((x, y, delta, rho, scale), vol_moments_sym)
-
 # Setup the link function.
 second_stage_moments_sym = sym.Matrix([beta_sym, delta, gamma_sym, phi**2, psi_sym, rho, scale])
 second_stage_moments_sym.simplify()
@@ -125,27 +121,38 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
 
 def vol_moments(vol_data, delta, rho, scale):    
     """ Computes the moments for the volatility. """ 
+    x = vol_data.values[:-1]                                                                                       
+    y = vol_data.values[:-1]                                                                                       
 
-    returnmat = np.squeeze(vol_moments_lambda(x=vol_data.values[1:], y=vol_data.values[:-1], scale=scale, rho=rho,
-                                              delta=delta)).T 
-    return pd.DataFrame(returnmat)
+    mean = rho * x + scale * delta
+    var = 2 * scale * rho * x + scale**2 * delta
 
+    row1 = y - mean
+    row2 = row1 * x
+    row3 = (y**2 - (var + mean**2))
+    row4 = row3 * x
+    row5 = row3 * x**2
+
+    returndf = pd.DataFrame(np.column_stack([row1, row2, row3, row4, row5]))
+
+    return returndf
 
 def vol_moments_grad(vol_data, delta, rho, scale):                                                                 
-    """ Computes the negative of the jacobian of the volatility moments. """                                       
+    """ Computes the jacobian of the volatility moments. """                                       
     x = vol_data.values[:-1]                                                                                       
     y = vol_data.values[:-1]                                                                                       
                                                                                                                    
     mean = rho * x + scale * delta                                                                            
                                                                                                                    
-    row1 = np.array([np.full(x.shape, scale), x, np.full(x.shape, delta)])                                         
-    row2 = x * row1                                                                                                
-    row3 = np.array([scale**2  + 2 * scale * mean, 2 * scale * x + 2 * x * mean, 2 * mean + 2 * delta * mean])                                                                                   
+    row1 = np.column_stack([np.full(x.shape, scale), x, np.full(x.shape, delta)])                                         
+    row2 = row1 * x                                                                                               
+    row3 = np.column_stack([scale**2  + 2 * scale * mean, 2 * scale * x + 2 * x * mean,
+                            2 * rho * x + 2 * scale * delta + 2 * delta * mean])
     row4 = x * row3                                                                                                
     row5 = x**2 * row3                                                                                             
                                                                                                                    
-    mom_grad_in  = np.row_stack([np.mean(row1, axis=1), np.mean(row2, axis=1), np.mean(row3, axis=1),              
-                                 np.mean(row4, axis=1), np.mean(row5, axis=1)])                                    
+    mom_grad_in  = -np.row_stack([np.mean(row1, axis=0), np.mean(row2, axis=0), np.mean(row3, axis=0),
+                                    np.mean(row4, axis=0), np.mean(row5, axis=0)])                                    
                                                                                                                    
     return pd.DataFrame(mom_grad_in, columns=['delta', 'rho','scale'])  
 
