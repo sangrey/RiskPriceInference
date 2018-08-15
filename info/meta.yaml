@@ -25,8 +25,18 @@ requirements:
     - statsmodels
     - sympy
 
+
+test:
+  source_files:
+      - tests/test_riskprice.py
+  commands:
+      - python -m pytest tests/test_riskprice.py
+  requires:
+      - python >=3.6
+      - pytest 
+
 about:
-  home: https://gitlab.com/sangrey/LaplaceJumps
+  home: https://gitlab.com/sangrey/RiskPriceInference
   license: Apache 2.0
   license_file: LICENSE
   summary: > 
