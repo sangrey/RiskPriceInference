@@ -124,14 +124,13 @@ def vol_moments(vol_data, delta, rho, scale):
     row4 = row3 * x
     row5 = row3 * x**2
 
-    returndf = pd.DataFrame(np.column_stack([row1, row2, row3, row4, row5]))
+    returndf = pd.DataFrame(np.column_stack([row1, row2, row3, row4, row5]), index=vol_data.index[1:])
 
     return returndf
 
 def vol_moments_grad(vol_data, delta, rho, scale):                                                                 
     """ Computes the jacobian of the volatility moments. """                                       
     x = vol_data.values[:-1]                                                                                       
-    y = vol_data.values[1:]                                                                                       
                                                                                                                    
     mean = rho * x + scale * delta                                                                            
                                                                                                                    
@@ -245,8 +244,8 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     GprimeG = scilin.inv(moment_derivative.T @ moment_derivative)
     inner_part = moment_derivative.T @ moment_cov @ moment_derivative
 
-    cov = pd.DataFrame(np.linalg.inv(GprimeG @ inner_part @ GprimeG.T), columns=list(init_constants.keys()),
-                       index=list(init_constants.keys()))
+    cov = pd.DataFrame(GprimeG @ inner_part @ GprimeG.T, columns=list(init_constants.keys()),
+                       index=list(init_constants.keys())
     
     if not final_result.success:
         logging.warning("Convergence results are %s.\n", final_result)
