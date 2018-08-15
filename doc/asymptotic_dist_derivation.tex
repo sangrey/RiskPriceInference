@@ -83,7 +83,7 @@ We have
     \E\left[h_{\omega_r}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]\right)^{-1}
 \end{equation}
 
-We estimate this by replacing the population expectations and covariances by their sample counterparts.
+\noindent We estimate this by replacing the population expectations and covariances by their sample counterparts.
 
 \subsection{$\xi_1$}\label{sec:est_xi2}
 
@@ -117,17 +117,17 @@ Consequently, we have the following result, where the WLS covariance matrix has 
 
 We know that $\Var(r_{t+1} \vert \sigma^2_{t+1} \sigma^2_t) = (1-\phi^2) \sigma^2_{t+1}$.
 This implies $\Var(\frac{r_{t+1}}{\sigma_{t+1}} \vert \sigma^2_{t+1}, \sigma^2_t) = 1 - \phi^2$.
-Since we consistently estimate the conditional mean of $r_{t+1}$ in \cref{sec:est_xi2}, the residuals
+Since we consistently estimate the conditional mean of $r_{t+1}$ in \cref{sec:est_xi2}, the residuals ---
 $\widehat{u}_t = \frac{r_{t+1} - \widehat{\gamma} - \widehat{\beta}\sigma^2_t - \widehat{\psi}
-\sigma^2_{t+1}}{\sigma_{t+1}}$ satisfy $\frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
-Define $\widehat{\xi}_2 \coloneqq 1 - \frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
+\sigma^2_{t+1}}{\sigma_{t+1}}$ --- satisfy $\frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
 
-Now, $\widehat{\xi}_2 \dto N(0, \Omega_{\xi_2})$ for some covariance matrix $\Omega_{\xi_2}$, since this is a  GMM
+Define $\widehat{\xi}_2 \coloneqq 1 - \frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
+Then $\widehat{\xi}_2 \dto N(0, \Omega_{\xi_2})$ for some covariance matrix $\Omega_{\xi_2}$, since this is a  GMM
 estimator.
 What is $\Omega_{\xi_2}$.
-Since we are just identified, standard GMM theory tells us that it will be the covariance of the moment condition
-scaled by the appropriate derivative. 
-However, since we are estimating a mean shifted by a constant, this derivative equals $1$.
+Since we are just identified, standard GMM theory says it is the covariance of the moment condition scaled by the
+appropriate derivative. 
+Since we are estimating a mean shifted by a constant, the derivative equals $1$.
 Consequently, $\Omega_{\xi_2} = \Var(\frac{u^2_t}{\sigma^2_{t+1}})$, which can be estimated by
 $\frac{1}{T} \sum_{t=1}^T (\frac{\widehat{u}_t^2}{\sigma^2_{t+1}} - \frac{1}{T} \sum_{t=1}^T
 \frac{\widehat{u}_t^2}{\sigma^2_{t+1}})^2$, i.e.\@ the sample covariance of the squared residuals. 
@@ -137,35 +137,35 @@ $\frac{1}{T} \sum_{t=1}^T (\frac{\widehat{u}_t^2}{\sigma^2_{t+1}} - \frac{1}{T} 
 Each of $\Omega_{\xi_i}$ are of the form $(\E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i)]'
 \Var(h(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i) \ivert \xi_i)^{-1} \E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t
 \ivert \xi_i) \ivert \xi_i])^{-1}$.
-Consequently, off-diagonal blocks of the joint covariance matrix $\Omega$ can come from two places.
-They can come from the derivatives or the covariance
-of the moments.  Since the moments in the first stage do not depend on the parameters in the second stage, and
-vice-versa, no co-movement can be coming from the derivatives between them.  The other cases are trickier, and so
-we will consider them each in turn.
+Consequently, the off-diagonal blocks of the joint covariance matrix $\Omega$ come from two places:
+the derivatives and the covariance of the moments.  
+Since the moments in the first stage do not depend on the parameters in the second stage, and vice-versa, the
+derivatives to not cause any co-movement. 
+The other cases are trickier, and so we consider them each in turn.
 
 Consider the covariance between $h(\sigma^2_{t+1}, \sigma^2_t, \omega_r)$ and $h(\sigma^2_{t+1}, \sigma^2_t,
 \xi_2)$, which we can rearrange since the moments are mean zero.  
 
-\begin{align}
-    &\phantom{=} \Cov\left(h\left(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t \mvert \omega_{r} \right) ,
-      h\left(\sigma^2_{t+1} \sigma^2_t \mvert \xi_2 \right) \right) \\
+\begin{gather}
+    \Cov\left(h\left(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t \mvert \omega_{r} \right) ,
+      h\left(\sigma^2_{t+1} \sigma^2_t \mvert \xi_2 \right) \right) 
 %
 %
-    &= \E\left[h(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r) h\left(\sigma^2_{t+1}, \sigma^2_t \mvert
+    = \E\left[h(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r) h\left(\sigma^2_{t+1}, \sigma^2_t \mvert
        \xi_2 \right) \right]
 %
 %
        \intertext{By the law of iterated expectations.}
 %
 %
-    &= \E\left[\E[h\left(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r\right) \mvert \sigma^2_{t+1},
+    = \E\left[\E[h\left(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r\right) \mvert \sigma^2_{t+1},
        \sigma^2_t] \E\left[h\left(\sigma^2_{t+1}, \sigma^2_t \mvert \xi_2 \right) \mvert \sigma^2_{t+1},
        \sigma^2_t\right] \right]
-\end{align}
+\end{gather}
 
 The first term in the expression above equals zero, and, hence, so does the entire expression.
 In other words, the first two set of moment conditions are independent.  
-By an identical argument, the first and third moments are independent.
+By an identical argument, the first and third moments are independent as well.
 
 We now consider how the second and their sets of moments are related.
 Since the derivatives are with respect to different parameters (and constant) no dependence arises from there.
@@ -178,10 +178,10 @@ Let $u_t$ denote the error term in that regression (as it did above).
     \E\left[\frac{(r_{t+1} - \E\left[r_{t+1} \mvert \sigma^2_{t+1} \sigma^2_t\right])^2}{\sigma^2_{t+1}}\right]
     \right] 
 %
-    \E\left[\E\left[\frac{u_t u_t^2}{\sigma^2_{t+1}}\right] \mvert \sigma^2_t, \sigma^2_{t+1} \right] 
+    = \E\left[\E\left[\frac{u_t u_t^2}{\sigma^2_{t+1}}\right] \mvert \sigma^2_t, \sigma^2_{t+1} \right]  = 0
 \end{equation}
 
-Then since $u_t$ is conditionally Gaussian, its conditional third moment equals zero.  
+Since $u_t$ is conditionally Gaussian, its conditional third moment equals zero.  
 By the law of iterated expectations, its unconditional moment does as well.
 
 In other words, the second and third set of moments are uncorrelated.
@@ -199,7 +199,7 @@ optimal weighting matrix for $\xi$, not just its components.
 
 In this stage, we convert the estimates for $\xi$ into estimates for $\omega$. 
 We do this by specifying a link function.
-Since $(\rho, c, \delta)'$ shows up in both $\xi$ and $\omega$ the link function for those parameters is the
+Since $(\rho, c, \delta)'$ shows up in both $\xi$ and $\omega$, the link function for those parameters is the
 identify function.
 The third set of parameters $\xi_3 = \phi^2$, and so we use that as a link function.
 We also use the reduced-form estimates as link functions, as well, i.e.\@
@@ -210,21 +210,21 @@ We also use the reduced-form estimates as link functions, as well, i.e.\@
 \end{equation}
 
 We specify $g(\xi, \omega)$ in this way because it gives us the correct off-diagonal elements.
-If we estimated $(\rho, c, \delta)$ by themselves, and just plugged them in here, we would have to relate the
+If we estimated $(\rho, c, \delta)$ by themselves and just plugged them in here, we would have to relate the
 off-diagonal terms in a separate step.
 In addition, by using the optimal weight matrix for this stage, we estimate all of the parameters as efficiently
 possible using our moment conditions.
 
-
-It does mean we must be careful in treating the $\rho,c$, and $\delta$ on each side of the equation as different.
+Doing this implies we must be careful and treat the $\rho,c$, and $\delta$ on each sides of the equation as
+different.
 The 2nd-stage sample criterion function is 
 
 \begin{equation}
-    Q_T(\omega) \coloneqq \frac{1}{2} g(\widehat{\xi}_T, \omega)' \W_{T} g(\widehat{\xi}_T, \omega).
+    Q_T(\omega) \coloneqq \frac{1}{2} g(\widehat{\xi}_T, \omega)' \W_{T} g(\widehat{\xi}_T, \omega)
 \end{equation}
 
 \noindent  with second stage weight matrix $\W_T$.
-We want to estimate $\omega$, and so we differentiate and get the first-order condition at $\omega_0$, where $\W
+We need to estimate $\omega$, and so we differentiate and get the first-order condition at $\omega_0$, where $\W
 \coloneqq \lim_{T \to \infty} \E[W_T]$.
 This gives
 
@@ -263,7 +263,7 @@ $\omega$.
     &\pto g_{\omega}\left(\omega, \xi_0\right)' \W g_{\omega} \left(\omega, \xi_0\right) + 0. 
 \end{align}
 
-\noindent if we use the optimal weight matrix Let $\W \coloneqq \E[g_{\omega_s}(\theta_0, \xi_0)]$.
+\noindent if we use the optimal weight matrix --- $\W \coloneqq \E[g_{\omega_s}(\theta_0, \xi_0)]$.
 Standard extremum estimator theory gives
 
 \begin{equation}
@@ -272,8 +272,8 @@ Standard extremum estimator theory gives
 \end{equation}
 
 \noindent The covariance in the middle is GMM-covariance of the reduced-form parameters.
-We can estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives.
-We can estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
+We estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives.
+We estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
 
 
 \end{document}
