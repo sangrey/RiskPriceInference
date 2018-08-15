@@ -231,21 +231,22 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
                                        x0=x0, method="SLSQP", bounds=bounds, options=options)
     
     moment_cov = vol_moments(vol_data, *initial_result.x).cov()
+    weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov());
     
-    # final_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
-    #                                   x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
-    final_result = initial_result
+    final_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
+                                      x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
+    # final_result = initial_result
     estimates = {key:val for key,val in zip(init_constants.keys(), final_result.x)}
 
-    # weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
+    weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
     moment_derivative = vol_moments_grad(vol_data, **estimates)
-    # cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
-    #                    columns=list(init_constants.keys()), index=list(init_constants.keys()))
-    GprimeG = scilin.inv(moment_derivative.T @ moment_derivative)
-    inner_part = moment_derivative.T @ moment_cov @ moment_derivative
+    cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
+                       columns=list(init_constants.keys()), index=list(init_constants.keys()))
+    # GprimeG = scilin.inv(moment_derivative.T @ moment_derivative)
+    # inner_part = moment_derivative.T @ moment_cov @ moment_derivative
 
-    cov = pd.DataFrame(GprimeG @ inner_part @ GprimeG.T, columns=list(init_constants.keys()),
-                       index=list(init_constants.keys()))
+    # cov = pd.DataFrame(GprimeG @ inner_part @ GprimeG.T, columns=list(init_constants.keys()),
+    #                    index=list(init_constants.keys()))
     
     if not final_result.success:
         logging.warning("Convergence results are %s.\n", final_result)
