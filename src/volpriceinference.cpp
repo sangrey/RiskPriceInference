@@ -17,11 +17,11 @@ using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;
  * Initializes a random generator in a thread_save way to be used globally througout the entire library. 
  */
 inline
-thread_local std::mt19937_64& initialize_mt_generator() { 
+std::mt19937_64& initialize_mt_generator() { 
     
-    static thread_local std::random_device rd; 
+    thread_local std::random_device rd; 
     std::seed_seq seed{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
-    static thread_local std::mt19937_64 engine(rd());
+    thread_local std::mt19937_64& engine(rd());
     
     return engine; 
 
