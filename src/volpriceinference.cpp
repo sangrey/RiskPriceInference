@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cassert>
 #include <random>
+#include <algorithm>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "pybind11/operators.h"
@@ -18,10 +19,13 @@ using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;
  */
 inline
 std::mt19937_64& initialize_mt_generator() { 
-    
-    thread_local std::random_device rd; 
-    std::seed_seq seed{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
-    thread_local std::mt19937_64& engine(rd());
+
+    constexpr size_t state_size = std::mt19937_64::state_size * std::mt19937_64::word_size / 32;
+    std::vector<uint32_t> random_data(state_size);
+    thread_local std::random_device source{}; 
+    std::generate(random_data.begin(), random_data.end(), std::ref(source));
+    thread_local std::seed_seq seeds(random_data.begin(), random_data.end());
+    thread_local static std::mt19937_64 engine(seeds);
     
     return engine; 
 
