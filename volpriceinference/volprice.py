@@ -245,7 +245,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     inner_part = moment_derivative.T @ moment_cov @ moment_derivative
 
     cov = pd.DataFrame(GprimeG @ inner_part @ GprimeG.T, columns=list(init_constants.keys()),
-                       index=list(init_constants.keys())
+                       index=list(init_constants.keys()))
     
     if not final_result.success:
         logging.warning("Convergence results are %s.\n", final_result)
