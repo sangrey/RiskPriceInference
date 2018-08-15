@@ -7,6 +7,7 @@
 \newcommand*{\dto}{\overset{d}{\longrightarrow}}
 \newcommand*{\pto}{\overset{p}{\longrightarrow}}
 \newcommand*{\mvert}{\,\middle\vert\,}
+\newcommand*{\ivert}{\,\vert\,}
 \newcommand*{\W}{\mathcal{W}}
 \DeclareMathOperator*{\Var}{\mathbb{V}ar}
 \DeclareMathOperator*{\Cov}{\mathbb{C}ov}
@@ -21,80 +22,78 @@
 
 \maketitle
 
-Let $\omega \coloneqq (\rho, c, \delta, \gamma, \beta, \psi, \phi, \pi, \theta)'$ be the vector of parameters.
-We split $\omega$ into two parts.
-The first, $\omega_r \coloneqq (\rho, c, \delta, \gamma, \beta, \psi, \phi)'$, is the vector of reduced-form
-parameters.
-The second, $\xi \coloneqq (\phi, \pi, \theta)'$, is the vector of structural parameters. 
-We further split $\xi$ into three parts. 
-$\xi_1 \coloneqq (\rho, c, \delta)'$ consists of the reduced-form parameters that we estimate using $GMM$ and will
-remain in the limit.
-The second $\xi_2 \coloneqq (\gamma, \beta, \psi)'$ consists of three parameters that are eliminated in our final
-results. 
-We view them as functions of the other parameters, and estimate them in the first stage, but \textquote{invert}
-them in the second stage, to estimate the final parameters.
-The third $\xi_3 \coloneqq \phi^2$ will be estimated by itself, but it will not remain in the final analysis.
-In the second stage, we use $\xi_3$ to estimate $\phi$.
+We want to estimate $\omega \coloneqq (\rho, c, \delta, \phi, \pi, \theta)'$ and get its asymptotic distribution.
+We also have some auxiliary parameters: $\xi_1 \coloneqq (\beta, \gamma, \psi)'$ and $\xi_2 \coloneqq \phi^2$.
+The way we do this by splitting $\omega$ in two parts.
+The first $\omega_s$ is the vector of purely structural parameters: $(\phi, \pi, \theta)'$.
+The second part $\omega_r$ is composed of parameters that we can estimate directly without model-based
+cross-equation restrictions, but are of interest.
+We collect all of the reduced parameters into a vector: $\xi \coloneqq (\omega_r', \xi_a)'$.
+We start by constructing a GMM estimator for $\xi$, we will then show how to convert this into an estimator for
+$\omega$.
+Throughout, I will denote the partial derivative of some function $f$ with respect to some variable $x$ with
+$f_x$.
 
 \section{Stage 1}
 
 We view estimating the first stage as a particular form of GMM.
-From standard GMM theory, we know that the following holds.
+From standard GMM theory, we know that the following holds, for some asymptotic covariance matrix $\Omega_{\xi}$.
 
 \begin{equation}
     \sqrt{T} (\hat{\xi} - \xi)  \dto N\left(0, \Omega_{\xi}\right)
 \end{equation}
 
-
-We will construct $\Omega$ in two steps.
-First, we will derive the asymptotic covariance matrices for each of $\xi_1, \xi_2, \xi_3$.
+We will construct $\Omega_{\xi}$ in three steps.
+First, we will derive the asymptotic covariance matrices for each of $\omega_r, \xi_1, \xi_2$.
 Then we will show how to combine them into one joint covariance matrix.
 
-\subsection{Step 1: $\xi_1$}
+\subsection{$\omega_r$}\label{sec:omega_r}
 
 \begin{equation}
-    h(\sigma^2_{t},\sigma^2_{t+1}, \xi_1) \coloneqq 
+    h\left(\sigma^2_{t},\sigma^2_{t+1} \mvert \omega_r\right) \coloneqq 
 \begin{bmatrix}
-    - c \delta - \rho \sigma^2_{t} + \sigma^2_{t+1}\\
+    \sigma^2_{t+1} - (c \delta + \rho \sigma^2_{t}) \\
 %
-    \sigma^2_{t} \left(- c \delta - \rho \sigma^2_{t} + \sigma^2_{t+1}\right)\\
+    \sigma^2_{t} \left(\sigma^2_{t+1} - (c \delta + \rho \sigma^2_{t})\right)\\
 %
-    - c^{2} \delta - 2 c \rho \sigma^2_{t} + \sigma^4_{t+1} - \left(c \delta + \rho \sigma^2_{t}\right)^{2}\\
-%
-    \sigma^2_{t} \left(- c^{2} \delta - 2 c \rho \sigma^2_{t} + \sigma^4_{t+1} - \left(c \delta + \rho
+    \sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
     \sigma^2_{t}\right)^{2}\right)\\
 %
-    \sigma^4_{t} \left(- c^{2} \delta - 2 c \rho \sigma^2_{t} + \sigma^4_{t+1} - \left(c \delta + \rho
-    \sigma^2_{t}\right)^{2}\right)
+    \sigma^2_{t} \left(\sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
+    \sigma^2_{t}\right)^{2}\right)\right)\\
+
+    \sigma^4_{t} \left(\sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
+    \sigma^2_{t}\right)^{2}\right)\right)\\
 \end{bmatrix}
 \end{equation}
 
-By standard GMM theory, the following holds if we construct the weight matrix $W_{\xi_1,T}$ such that
-$W_{{\xi}_1,T} \pto \Var(h(\sigma^2_{t},\sigma^2_{t+1}, \xi_1))^{-1}$.
+By standard GMM theory, the following holds, if the weighting matrix \newline $W_{\omega_r,T} \pto \E[h(\sigma^2_t,
+\sigma^2_{t+1} \ivert \omega_r)' h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)]^{-1}$.
 We have 
 
 \begin{equation}
-    \sqrt{T}(\hat{\xi}_1 - \xi_1) \dto N\left(0, \Omega_{\xi_1}\right).
+    \sqrt{T}(\widehat{\omega}_r - \omega_r) \dto N\left(0, \Omega_{\omega_r}\right),
 \end{equation}
 
-In addition, 
+\noindent where
 
 \begin{equation}
-    \Omega_{\xi_1} \coloneqq \E\left[h_{\xi_1}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]' W_{\xi_1}
-    \E\left[h_{\xi_1}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right] 
+    \Omega_{\omega_r} \coloneqq \left(\E\left[h_{\omega_r}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]'
+    \E[h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)' h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)]^{-1}
+    \E\left[h_{\omega_r}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]\right)^{-1}
 \end{equation}
 
 We estimate this by replacing the population expectations and covariances by their sample counterparts.
 
-\subsection{Step 2: $\xi_2$}\label{sec:est_xi2}
+\subsection{$\xi_1$}\label{sec:est_xi2}
 
-We estimate $\xi_2$ by weighted least squares, a special case of GMM. 
+We estimate $\xi_1$ by weighted least squares, a special case of GMM. 
 
 \begin{equation}
     \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  = \gamma + \beta \sigma^2_t + \psi \sigma^2_{t+1}
 \end{equation}
 
-The only unusual part is we know that $\Var\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) = (1-\phi^2)
+The only unusual part is we know that $\Var(r_{t+1} \ivert \sigma^2_t, \sigma^2_{t+1}) = (1-\phi^2)
 \sigma^2_{t+1}$.
 Consequently, the regression results  are more efficient if we adjust for heteroskedasticity.
 However, we do not know $\phi$, and so this might seem impossible.
@@ -102,64 +101,73 @@ However, since time-invariant parts of heteroskedasticity adjustments cancel, re
 $\sigma^2_{t+1}$ achieves is equivalent to the optimal reweighting. 
 Also, since $\sigma^2_{t+1}$ is contained in the conditioning set, the fact that it is viewed as a random variable
 in other parts  of the regression is irrelevant.
+Let $u_t = \frac{r_{t+1} - (\gamma + \beta \sigma^2_{t} + \psi \sigma^2_{t+1}}{\sigma^2_{t+1}}$.
 
 Since this regression is exactly identified, any positive-definite weight matrix, including the identity is
 optimal.
-Consequently, we have the following result, where $\Omega_{\xi_1} = \Var(\frac{r_{t+1} - \gamma - \beta
-\sigma^2_{t} - \psi \sigma^2_{t+1}}{\sigma^2_{t+1}})$, i.e.\@ the standard WLS covariance matrix.
+Consequently, we have the following result, where the WLS covariance matrix has the standard form:
 
-\subsection{Step 3: $\xi_3$}
+\begin{equation}
+    \Omega_{\xi_1} = \E\left[\left(1, \sigma^2_{t}, \sigma^2_{t+1}\right) \left(1, \sigma^2_{t},
+    \sigma^2_{t+1}\right)'\right]^{-1} \Var\left(u_t\right).
+\end{equation}
+
+
+\subsection{Step 3: $\xi_2$}
 
 We know that $\Var(r_{t+1} \vert \sigma^2_{t+1} \sigma^2_t) = (1-\phi^2) \sigma^2_{t+1}$.
 This implies $\Var(\frac{r_{t+1}}{\sigma_{t+1}} \vert \sigma^2_{t+1}, \sigma^2_t) = 1 - \phi^2$.
-Since we estimated the conditional mean of $r_{t+1}$ in \cref{sec:est_xi2}, this implies that the residuals
+Since we consistently estimate the conditional mean of $r_{t+1}$ in \cref{sec:est_xi2}, the residuals
 $\widehat{u}_t = \frac{r_{t+1} - \widehat{\gamma} - \widehat{\beta}\sigma^2_t - \widehat{\psi}
-\sigma^2_{t+1}}{\sigma_{t+1}}$ satisfy
-$\frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
+\sigma^2_{t+1}}{\sigma_{t+1}}$ satisfy $\frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
+Define $\widehat{\xi}_2 \coloneqq 1 - \frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
 
-Also, $\phi^2 \dto N(0, \Omega_{\xi_3})$, since this is a  GMM estimator.
-The question is what is $\Omega_{\xi_3}$.
+Now, $\widehat{\xi}_2 \dto N(0, \Omega_{\xi_2})$ for some covariance matrix $\Omega_{\xi_2}$, since this is a  GMM
+estimator.
+What is $\Omega_{\xi_2}$.
 Since we are just identified, standard GMM theory tells us that it will be the covariance of the moment condition
 scaled by the appropriate derivative. 
-However, since we are estimating a mean shifted by a constant, this derivative is just one.
-Consequently, $\Omega_{\xi_3} = \Var(\frac{u^2_t}{\sigma^2_{t+1}})$, which can be estimated by
+However, since we are estimating a mean shifted by a constant, this derivative equals $1$.
+Consequently, $\Omega_{\xi_2} = \Var(\frac{u^2_t}{\sigma^2_{t+1}})$, which can be estimated by
 $\frac{1}{T} \sum_{t=1}^T (\frac{\widehat{u}_t^2}{\sigma^2_{t+1}} - \frac{1}{T} \sum_{t=1}^T
-\frac{\widehat{u}_t^2}{\sigma^2_{t+1}})^2$, i.e.\@ the sample covariance of the squared residuals from the
-regression in the previous stage.
+\frac{\widehat{u}_t^2}{\sigma^2_{t+1}})^2$, i.e.\@ the sample covariance of the squared residuals. 
 
-\section{Combining $\Omega_{\xi_1}, \Omega_{\xi_2}$, and $\Omega_{\xi_3}$}
+\subsection{Combining $\Omega_{\omega_r}, \Omega_{\xi_2}$, and $\Omega_{\xi_2}$}
 
-Each of $\Omega_{\xi_i}$ are of the form $\E[h_{\xi_{i}}]' \Var(h(\sigma^2_{t+1}, \sigma^2_t, \xi_i))^{-1}
-\E[h_{\xi_{i}}]$.
+Each of $\Omega_{\xi_i}$ are of the form $(\E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i)]'
+\Var(h(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i) \ivert \xi_i)^{-1} \E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t
+\ivert \xi_i) \ivert \xi_i])^{-1}$.
 Consequently, off-diagonal blocks of the joint covariance matrix $\Omega$ can come from two places.
-They can come from the derivatives or the covariance of the moments.
-Since the moments in the first stage do not depend on the parameters in the second stage, and vice-versa, no
-co-movement can be coming from the derivatives between them.
-The other cases are trickier, and so we will consider them each in turn.
+They can come from the derivatives or the covariance
+of the moments.  Since the moments in the first stage do not depend on the parameters in the second stage, and
+vice-versa, no co-movement can be coming from the derivatives between them.  The other cases are trickier, and so
+we will consider them each in turn.
 
-Consider the covariance between $h(\sigma^2_{t+1}, \sigma^2_t, \xi_1)$ and $h(\sigma^2_{t+1}, \sigma^2_t, \xi_2)$.
-For some functions $h_1$, $h_2$ we can rewrite them as follows.
+Consider the covariance between $h(\sigma^2_{t+1}, \sigma^2_t, \omega_r)$ and $h(\sigma^2_{t+1}, \sigma^2_t,
+\xi_2)$, which we can rearrange since the moments are mean zero.  
 
 \begin{align}
-    &\phantom{=} 
-    \Cov\left(h_1\left(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t\right) , h_2\left(\sigma^2_{t+1} \sigma^2_t\right)
-    \right)
+    &\phantom{=} \Cov\left(h\left(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t \mvert \omega_{r} \right) ,
+      h\left(\sigma^2_{t+1} \sigma^2_t \mvert \xi_2 \right) \right) \\
 %
-    \intertext{Since the moments are mean zero by construction.}
 %
-    &= \E\left[h_1(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t) h_2\left(\sigma^2_{t+1}, \sigma^2_t\right) \right]
+    &= \E\left[h(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r) h\left(\sigma^2_{t+1}, \sigma^2_t \mvert
+       \xi_2 \right) \right]
+%
 %
        \intertext{By the law of iterated expectations.}
 %
-    &= \E\left[\E[h_1(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t) \mvert \sigma^2_{t+1}, \sigma^2_t]
-       \E\left[h_2\left(\sigma^2_{t+1}, \sigma^2_t\right) \mvert \sigma^2_{t+1}, \sigma^2_t\right] \right]
+%
+    &= \E\left[\E[h\left(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r\right) \mvert \sigma^2_{t+1},
+       \sigma^2_t] \E\left[h\left(\sigma^2_{t+1}, \sigma^2_t \mvert \xi_2 \right) \mvert \sigma^2_{t+1},
+       \sigma^2_t\right] \right]
 \end{align}
 
-The first term in the expression above equals zero, and, hence, so does the entire expression. 
-In other words, the first two set of moment conditions are independent.
-By an identical argument, the first and third moments are also independent.
+The first term in the expression above equals zero, and, hence, so does the entire expression.
+In other words, the first two set of moment conditions are independent.  
+By an identical argument, the first and third moments are independent.
 
-The question at hand is how are the second and third moments related.
+We now consider how the second and their sets of moments are related.
 Since the derivatives are with respect to different parameters (and constant) no dependence arises from there.
 The question is how are the moment conditions in the second and third steps related.
 The second stage moment condition is a conditional mean and third stage moment is a conditional covariance.
@@ -170,12 +178,13 @@ Let $u_t$ denote the error term in that regression (as it did above).
     \E\left[\frac{(r_{t+1} - \E\left[r_{t+1} \mvert \sigma^2_{t+1} \sigma^2_t\right])^2}{\sigma^2_{t+1}}\right]
     \right] 
 %
-    \E\left[\frac{u_t u_t^2}{\sigma^2_{t+1}}\right] 
+    \E\left[\E\left[\frac{u_t u_t^2}{\sigma^2_{t+1}}\right] \mvert \sigma^2_t, \sigma^2_{t+1} \right] 
 \end{equation}
 
-Then since $u_t$ is conditionally Gaussian, its conditional (and hence unconditional) third moment is zero.  
+Then since $u_t$ is conditionally Gaussian, its conditional third moment equals zero.  
+By the law of iterated expectations, its unconditional moment does as well.
 
-In other words, these values are also uncorrelated.
+In other words, the second and third set of moments are uncorrelated.
 Now, the careful reader might be worried about filling in the population expectations instead of their estimators
 in the regression above.
 However, since the expectations are linear and consistently estimable, this error vanishes in the limit. 
@@ -188,104 +197,83 @@ optimal weighting matrix for $\xi$, not just its components.
 
 \section{Stage 2}
 
-In this stage, we convert the reduced-form parameters we estimated in the first stage into estimates of the
-structural parameters.
-The three parameters we need to estimate are $\pi, \theta$ and $\phi$.
-(We estimated $\phi^2$ in the previous stage, but we could not estimate its sign.
-We have the following four link functions.
-$\psi(\omega_s, \xi_1), \gamma(\omega_s, \xi_1), \beta(\omega_s, \xi_1), \xi_3(\omega_s)$.
-We denote the stacked link function $g\left(\omega_s, \xi\right)$.
-
-
-% \begin{align}
-%     \beta &= \frac{\rho \left(- \pi + \left(\frac{\phi^{2}}{2} - \frac{1}{2}\right) \left(\theta -
-%         1\right)^{2} - \left(\theta - 1\right) \left(- \frac{\phi^{2}}{2} + \frac{\phi}{\sqrt{c + \rho + 1}} +
-%         \theta \left(\phi^{2} - 1\right) + \frac{1}{2}\right)\right)}{c \left(- \pi + \left(\frac{\phi^{2}}{2} -
-%         \frac{1}{2}\right) \left(\theta - 1\right)^{2} + \left(\theta - 1\right) \left(\frac{\phi^{2}}{2} -
-%         \frac{\phi}{\sqrt{c + \rho + 1}} - \theta \left(\phi^{2} - 1\right) - \frac{1}{2}\right)\right) - 1}
-%         \nonumber \\
-% % 
-%     &\quad- \frac{\rho \left(- \pi + \theta^{2} \left(\frac{\phi^{2}}{2} - \frac{1}{2}\right) - \theta \left(-
-%       \frac{\phi^{2}}{2} + \frac{\phi}{\sqrt{c + \rho + 1}} + \theta \left(\phi^{2} - 1\right) +
-%       \frac{1}{2}\right)\right)}{c \left(- \pi + \theta^{2} \left(\frac{\phi^{2}}{2} - \frac{1}{2}\right) + \theta
-%       \left(\frac{\phi^{2}}{2} - \frac{\phi}{\sqrt{c + \rho + 1}} - \theta \left(\phi^{2} - 1\right) -
-%       \frac{1}{2}\right)\right) - 1} \\
-% %
-%       \gamma &= - \delta \log{\left (c \phi^{2} \theta^{2} - c \phi^{2} \theta + \frac{2 c \phi
-%         \theta}{\sqrt{c + \rho + 1}} + 2 c \pi - c \theta^{2} + c \theta + 2 \right)}  \nonumber \\
-% %
-%       &\quad + \delta \log{\left (c \phi^{2} \theta^{2} - c \phi^{2} \theta + \frac{2 c \phi \theta}{\sqrt{c +
-%         \rho + 1}} - \frac{2 c \phi}{\sqrt{c + \rho + 1}} + 2 c \pi - c \theta^{2} + c \theta + 2 \right)} \\
-% %
-%       \psi &= \phi^{2} \theta - \frac{\phi^{2}}{2} + \frac{\phi}{\sqrt{c + \rho + 1}} - \theta +
-%       \frac{1}{2} \\
-% %
-%       (\phi^2)\ \xi_3 &= \phi^2  \\
-% %
-%       \rho &= \rho \\
-% %
-%       c &= c \\
-% %
-%      \delta  &= \delta 
-% %
-% \end{align}
-
-The only confusing thing is because a few of the parameters are both structural and reduced form parameters, they
-show in $g\left(\omega_s, \xi\right)$ on both sides.
-Then the 2nd-stage sample criterion function is 
+In this stage, we convert the estimates for $\xi$ into estimates for $\omega$. 
+We do this by specifying a link function.
+Since $(\rho, c, \delta)'$ shows up in both $\xi$ and $\omega$ the link function for those parameters is the
+identify function.
+The third set of parameters $\xi_3 = \phi^2$, and so we use that as a link function.
+We also use the reduced-form estimates as link functions, as well, i.e.\@
 
 \begin{equation}
-    Q_T(\omega) = \frac{1}{2} g\left(\omega_s, \widehat{\xi}\right)' \W_{T} g\left(\omega_s, \widehat{\xi}\right).
+    g(\xi, \omega) = \xi - (\rho, c, \delta, \beta(\rho, c, \phi, \pi, \theta), \gamma(\rho, \delta, c, \phi, \pi,
+    \theta), \psi(\rho, c, \phi, \theta), \phi^2)'
+\end{equation}
+
+We specify $g(\xi, \omega)$ in this way because it gives us the correct off-diagonal elements.
+If we estimated $(\rho, c, \delta)$ by themselves, and just plugged them in here, we would have to relate the
+off-diagonal terms in a separate step.
+In addition, by using the optimal weight matrix for this stage, we estimate all of the parameters as efficiently
+possible using our moment conditions.
+
+
+It does mean we must be careful in treating the $\rho,c$, and $\delta$ on each side of the equation as different.
+The 2nd-stage sample criterion function is 
+
+\begin{equation}
+    Q_T(\omega) \coloneqq \frac{1}{2} g(\widehat{\xi}_T, \omega)' \W_{T} g(\widehat{\xi}_T, \omega).
 \end{equation}
 
 \noindent  with second stage weight matrix $\W_T$.
-We want to estimate $\omega_s$, and so we differentiate and get the first-order condition 
+We want to estimate $\omega$, and so we differentiate and get the first-order condition at $\omega_0$, where $\W
+\coloneqq \lim_{T \to \infty} \E[W_T]$.
+This gives
 
 \begin{equation}
-    \frac{\partial Q(\omega)}{\partial \omega_s} = g_{\omega_s}\left(\omega_s, \hat{\xi}\right)  \W_T
-    g\left(\omega_s, \hat{\xi}\right) = 0.
+    \frac{\partial Q_T}{\partial \omega}(\omega_0)= g_{\omega}\left(\xi_0, \omega_0\right)  \W g\left(\xi_0,
+    \omega_0\right) = 0.
 \end{equation}
 
-\noindent We now expand $\xi$ around $\xi_0$
+\noindent We now expand $\widehat{\xi}_T$ around $\xi_0$, for some $\widetilde{\xi}_T$ between $\xi_0$ and
+$\widetilde{\xi}_T$, 
 
 \begin{align}
-    \sqrt{T} \frac{\partial Q(\omega)}{\partial \omega_s} &= g_{\omega_s}\left(\omega_s, \hat{\xi}\right) \W_T
-    \left[\sqrt{T} g\left(\omega_{s,0},\xi_0\right) + g_{\xi}\left(\omega_{s,0}, \tilde{\xi}\right) \sqrt{T}
-    \left(\tilde{\xi} - \xi_0\right)\right]
+    \sqrt{T} \frac{\partial Q}{\partial \omega}(\omega_0) 
 %
-    \intertext{The first term equals zero because we choose $\omega_s$ to make it hold in-sample.}
+    &= g_{\omega}\left(\omega_0, \widehat{\xi}_T\right) \W_T \left[\sqrt{T} g\left(\omega_{0},\xi_0\right) +
+       g_{\xi}\left(\omega_{0}, \widetilde{\xi}_T\right)' \sqrt{T} \left(\widetilde{\xi}_T - \xi_0\right)\right]
 %
-&= g_{\omega_s}\left(\omega_s, \hat{\xi}\right) \W_T \left[g_{\xi}\left(\omega_{s,0}, \tilde{\xi}\right) \sqrt{T}
-   \left(\tilde{\xi} - \xi_0\right)\right]
+%
+    \intertext{The first term equals zero by assumption, and the derivative is the identity matrix.}
+%
+%
+    &= g_{\omega}\left(\omega, \widehat{\xi}_T\right) \W_T \left[ \sqrt{T} \left(\widetilde{\xi}_T -
+       \xi_0\right)\right]
 \end{align}
 
-\noindent We also need to compute the Hessian:
+\noindent We also need to compute the Hessian and evaluate it at $\widehat{\omega}_T$ a consistent estimator for
+$\omega$.
 
 \begin{align}
-    \frac{\partial^2 Q(\omega_s, \xi)}{\partial \omega_s \partial \omega_s'} &= g_{\omega_s}\left(\omega_s,
-    \hat{\xi}\right)' \W_T g_{\omega_s} \left(\omega_s, \hat{\xi}\right)+ g_{\omega_s, \omega_s}\left(\omega_s,
-    \hat{\xi}\right) \W_T g\left(\omega_s, \hat{\xi}\right)' \\
+    \frac{\partial^2 Q}{\partial \omega \partial \omega'}(\widehat{\omega}_T) &=
 %
-    &\pto g_{\omega_s}\left(\omega_s, \xi_0\right)' \W g_{\omega_s} \left(\omega_s, \xi_0\right) + 0. \\
+    g_{\omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \W_T g_{\omega} \left(\widehat{\omega}_T,
+    \widehat{\xi}_T\right)+ g_{\omega, \omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right) \W_T
+    g\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \\
+%
+    &\pto g_{\omega}\left(\omega, \xi_0\right)' \W g_{\omega} \left(\omega, \xi_0\right) + 0. 
 \end{align}
 
-\noindent Let $B \coloneqq g_{\omega_s}(\omega_{s,0}, \xi_0)' \W g_{\omega_{s}} (\omega_{s,0}, \xi_0)$
-Then by extremum estimator theory, we have 
+\noindent if we use the optimal weight matrix Let $\W \coloneqq \E[g_{\omega_s}(\theta_0, \xi_0)]$.
+Standard extremum estimator theory gives
 
 \begin{equation}
-    \sqrt{T} \left(\hat{\omega}_s - \omega_{s,0}\right)  \dto N\left(0, B^{-1} \E[g_{\omega_s}(\theta_0, \xi_0)]'
-        \Omega_{\xi} \E[g_{\omega_s}(\theta_0, \xi_0)] B^{-1}\right).
+    \sqrt{T} \left(\widehat{\omega}_T - \omega_{0}\right)  \dto N\left(0, \left(\E[g_{\omega}(\theta_0, \xi_0)]'
+    \Omega_{\xi}^{-1} \E[g_{\omega}(\theta_0, \xi_0)]\right)^{-1}\right).
 \end{equation}
-
 
 \noindent The covariance in the middle is GMM-covariance of the reduced-form parameters.
-The optimal weight matrix is $\W = (g_{\xi}' \Omega_{\xi} g_{\xi})^{-1}$.
 We can estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives.
-In this case, the $\Omega_{w_s}$ equals 
-
-\begin{equation}
-    B^{-1} g_{\omega_s}' \W g_{\omega_s} B^{-1}.
-\end{equation}
+We can estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
 
 
 \end{document}

@@ -312,24 +312,6 @@ def compute_step2(data, parameter_mapping=None):
     return dict(estimates), return_cov
 
 
-def link_grad_reduced():
-    """
-    This function computes the jacobian of the link function with respect to the reduced form paramters
-    beta, delta, gamma, phi^2, psi, rho, scale
-    
-    Returns
-    --------
-    ndarray
-    """
-
-    # The link function is of the form reduced_form_paramter - g(structural_paramter) and so its derivative with
-    # respect to the reduced form paramters is the identify function.
-    return_df = pd.DataFrame(np.eye(7), columns=['beta', 'delta', 'gamma', 'phi_squared', 'psi', 'rho', 'scale'],
-                             index=['beta', 'delta', 'gamma', 'phi_squared', 'psi', 'rho', 'scale'])
-   
-    return return_df
-
-
 def link_grad_structural(delta, equity_price, phi, rho, scale, vol_price):
     """
     This function computes the jacobian of the link function with respect to the structural paramters
@@ -385,11 +367,6 @@ def second_criterion(structural_params, link_params, weight=None):
     return .5 * diff @ weight @ diff
     
 
-def compute_stage2_weight(reduced_form_cov, structural_params):
-
-    return  np.linalg.pinv(link_grad_structural(**structural_params).T @ link_grad1(**structural_params).T)
-
-
 def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None):
     
     if bounds is None:
@@ -407,8 +384,7 @@ def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None)
                                     options=opts, bounds=bounds)
     estimates = {key:val for key, val in zip(sorted(price_guess.keys()), init_result.x)}
     
-    weight = np.linalg.pinv(link_grad_reduced().T @ reduced_form_cov.sort_index().T.sort_index() @
-                            link_grad_reduced())
+    weight = np.linalg.pinv(reduced_form_cov.sort_index().T.sort_index())
     
     final_result = optimize.minimize(lambda x: second_criterion(x, reduced_form_params, weight=weight),
                                      x0=init_result.x, method="SLSQP",  options=opts, bounds=bounds)
@@ -418,41 +394,11 @@ def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None)
     if not final_result.success:
         logging.warning("Convergence results are %s.\n", final_result)
 
-    cov = compute_2nd_stage_cov(estimates, reduced_form_cov)
+    link_derivative = link_grad_structural(**estimates)
+    cov = pd.DataFrame(scilin.pinv(link_derivative.T @ weight @ link_derivative) , index=estimates.keys(),
+                       columns=estimates.keys()) 
                   
     return estimates, cov
-
-
-def compute_2nd_stage_cov(params2, cov1):
-    """ 
-    This function computes the second stage covariance matrix.
-
-    Paramters
-    -------
-    params2 : ndarray
-        The second-stage paramters.
-    cov1: 2d ndarray
-        The first-stage covariance matrix. It should be divided through by the sample size.
-
-    Returns
-    ------
-    cov2 : 2d ndarray
-    """
-    
-    # This is the optimal weight matrix. 
-    sorted_cov = cov1.sort_index().T.sort_index() 
-    link_struct_diff = link_grad_structural(**params2)
-    link_reduced_diff = link_grad_reduced()
-    
-    weight = np.linalg.pinv(link_reduced_diff.T @ sorted_cov @ link_reduced_diff)
-
-    # This is the bread for the sandwich
-    inv_Bmat = np.linalg.pinv(link_struct_diff.T @ weight @ link_struct_diff)
-    
-    # We do not need to divide through by the sample size, because sorted_cov is.
-    cov2 = pd.DataFrame(inv_Bmat @ link_struct_diff.T @ weight @ link_struct_diff @ inv_Bmat,
-                        index=params2.keys(), columns=params2.keys()) 
-    return cov2
 
 
 def estimate_params(data, vol_estimates=None, vol_cov=None):
