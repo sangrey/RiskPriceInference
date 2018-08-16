@@ -18,14 +18,14 @@ using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;
  * Initializes a random generator in a thread_save way to be used globally througout the entire library. 
  */
 inline
-std::mt19937_64& initialize_mt_generator() { 
+std::mt19937_64 initialize_mt_generator() { 
 
     constexpr size_t state_size = std::mt19937_64::state_size * std::mt19937_64::word_size / 32;
     std::vector<uint32_t> random_data(state_size);
-    thread_local std::random_device source{}; 
+    std::random_device source{}; 
     std::generate(random_data.begin(), random_data.end(), std::ref(source));
-    thread_local std::seed_seq seeds(random_data.begin(), random_data.end());
-    thread_local static std::mt19937_64 engine(seeds);
+    std::seed_seq seeds(random_data.begin(), random_data.end());
+    std::mt19937_64 engine(seeds);
     
     return engine; 
 
@@ -41,7 +41,7 @@ std::vector<double> simulate_autoregressive_gamma(double delta, double rho, doub
 
     /* We start at the initial point. */
     draws.push_back(initial_point);
-    thread_local auto& generator = initialize_mt_generator();
+    auto generator = initialize_mt_generator();
 
     for(size_t idx=0; idx<time_dim; ++idx) {
         
@@ -61,7 +61,7 @@ std::vector<double> simulate_autoregressive_gamma(double delta, double rho, doub
 std::vector<double> threadsafe_gaussian_rvs(size_t time_dim) {
 
     std::normal_distribution<double> dist(0,1);
-    thread_local auto& generator = initialize_mt_generator();
+    auto generator = initialize_mt_generator();
 
     std::vector<double> return_draws(time_dim);
 
