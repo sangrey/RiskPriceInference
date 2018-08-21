@@ -1,6 +1,6 @@
 \documentclass[11pt, letterpaper, twoside, final]{article}
-\usepackage{amssymb} 
-\usepackage{mathtools}
+\usepackage{amssymb, amsmath, amsthm} 
+\usepackage{mathtools, thmtools}
 \usepackage{csquotes}
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
@@ -12,6 +12,7 @@
 \DeclareMathOperator*{\Var}{\mathbb{V}ar}
 \DeclareMathOperator*{\Cov}{\mathbb{C}ov}
 \DeclareMathOperator*{\E}{\mathbb{E}}
+\newtheorem{lemma}{theorem}
 
 \author{Xu Cheng and Eric Renault and Paul Sangrey} 
 \title{Derivation of Asymptotic Covariance Matrix}
@@ -229,7 +230,7 @@ We need to estimate $\omega$, and so we differentiate and get the first-order co
 This gives
 
 \begin{equation}
-    \frac{\partial Q_T}{\partial \omega}(\omega_0)= g_{\omega}\left(\xi_0, \omega_0\right)  \W g\left(\xi_0,
+    \frac{\partial Q_T}{\partial \omega}(\omega_0) =  g_{\omega}\left(\xi_0, \omega_0\right)  \W g\left(\xi_0,
     \omega_0\right) = 0.
 \end{equation}
 
@@ -274,6 +275,277 @@ Standard extremum estimator theory gives
 \noindent The covariance in the middle is GMM-covariance of the reduced-form parameters.
 We estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives.
 We estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
+
+
+\section{Asymptotic Distribution of the Reduced-Form Parameter}
+
+This section gives the asymptotic distribution of the reduced-form parameter. 
+
+Write $\omega =(\omega_{1},\omega_{2},\omega_{3}),$ where $\omega_{1}=(\rho ,c)$, $\omega_{2} = (\gamma ,\beta ,\psi)$, and $\omega_{3} = \phi ^{2}$. 
+Below we describe the estimator $\widehat{\omega}_{1},\widehat{\omega}_{2},\widehat{\omega}_{3}$ and provide
+the asymptotic distribution of $\widehat{\omega} = (\widehat{\omega}_{1},\widehat{\omega
+}_{2},\widehat{\omega}_{3})$.
+We estimate these parameters separately because $\omega_{1}$ only shows up in the conditional mean and variance of
+$r_{t+1};$ $\omega_{2}$ only shows up in the conditional mean of $\sigma_{t+1}^{2};$ and $\phi $ only shows up in
+the conditional variance of $\sigma_{t+1}^{2}.$
+
+We estimate $\omega_{1}$ by GMM based on the moment condition: 
+
+\begin{eqnarray}
+    \mathbb{E}[h_{t}(\omega_{1,0}) & = &0,\text{ where}  \nonumber \\
+%
+    h_{t}(\omega_{1}) & = &\left(
+        \begin{array}{c} 
+            \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma_{t}^{2}\right)  \\ 
+%
+            \sigma_{t}^{2}\left( \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) \right)  \\ 
+%
+            \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma_{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left(
+            c\delta +\rho \sigma_{t}^{2}\right) ^{2}\right) \right)  \\ 
+%
+            \sigma_{t}^{2}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta
+            +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right)  \\ 
+%
+            \sigma_{t}^{4}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta
+            +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) 
+        \end{array}\right).
+\end{eqnarray}
+%
+The optimal GMM estimator is
+%
+\begin{eqnarray}
+    \widehat{\omega}_{1} & = & \underset{\omega_{1}\in \Lambda_{1}}{\arg\min} 
+%
+    \overline{h}_{T}(\omega_{1})^{\prime}W_{T}\overline{h}_{T}(\omega_{1}), \text{ where}  \nonumber \\ 
+%
+    \overline{h}_{T}(\omega_{1}) & = &T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1}), \nonumber \\
+%
+    W_{T} & = &T^{-1}\sum_{t = 1}^{T}h_{t}(\widetilde{\omega}_{1})h_{t}(\widetilde{\omega}_{1})^{\prime
+   }-\overline{h}_{T}(\widetilde{\omega}_{1})\overline{h} _{T}(\widetilde{\omega}_{1})^{\prime},
+\end{eqnarray}
+%
+where $\widetilde{\omega}_{1}$ is the preliminary GMM estimator based on the identify covariance matrix.
+
+We estimate $\omega_{2}$ by the GLS estimator because $\gamma, \beta, \psi$ are the intercept and linear
+coefficients of the conditional mean function and the conditional variance is proportional to $\sigma_{t+1}^{2}$. 
+Define $x_{t} = \sigma_{t+1}^{-1}(1,\sigma_{t}^{2},\sigma_{t+1}^{2})$ and $y_{t} = \sigma_{t+1}^{-1}r_{t+1}$. 
+The GLS\ estimator of $\omega_{2}$ is
+%
+\begin{equation}
+    \widehat{\omega}_{2} = \left( \sum_{t = 1}^{T}x_{t}x_{t}^{\prime}\right) ^{-1}\sum_{t = 1}^{T}x_{t}y_{t}.
+\end{equation}
+
+We estimate $\omega_{3}$ by the sample variance estimator. 
+Define 
+%
+\begin{equation}
+    \widehat{y}_{t} = x_{t}\widehat{\omega}_{2} = \sigma_{t+1}^{-1}(\widehat{\gamma}+\widehat{\beta
+   }\sigma_{t}^{2}+\widehat{\psi}\sigma_{t+1}^{2}).
+\end{equation}
+%
+The estimator of $\omega_{3}$ is 
+\begin{equation}
+    \widehat{\omega}_{3} = \max \{1-T^{-1}\sum_{t = 1}^{T}\left( y_{t}-\widehat{y}_{t}\right) ^{2},0\}.
+\end{equation}%
+[**XC. In practice, do we need to impose the estimator is positive?]
+
+The next lemma provides the asymptotic distribution of the estimator $\widehat{\omega}$. 
+Let $h_{\omega ,t}(\omega_{1})\in \mathbb{R}^{5\times 2}$ denote the derivative of $h_{t}(\omega_{1})$ w.r.t.\@
+$\omega_{1}$.
+Define
+%
+\begin{eqnarray}
+    \Omega_{1} & = &\left \{ \mathbb{E}\left[ h_{\omega ,t}\left( \omega _{1,0}\right) \right]^{\prime}
+        \mathbb{E}[h_{t}(\omega_{1,0})h_{t}(\omega _{1,0})^{\prime}]^{-1}\mathbb{E}\left[
+    h_{\omega,t}\left(\omega_{1,0}\right) \right] \right \} ^{-1},  \notag \\ 
+%
+    \Omega_{2} & = &\mathbb{E}\left[ x_{t}x_{t}^{\prime}\right] ^{-1}\mathbb{E[(} y_{t}-x_{t}^{\prime
+   }\omega_{2,0})^{2}],  \notag \\
+%
+    \Omega_{3} & = &\mathbb{V[}\left( y_{t}-x_{t}^{\prime}\omega_{2,0}\right)^{2}]
+\end{eqnarray}
+
+\begin{lemma}
+Suppose Assumptions *** hold. Then
+
+\begin{equation}
+    T^{1/2}\left( 
+%
+    \begin{array}{c}
+        \widehat{\omega}_{1}-\omega_{1,0} \\ 
+        \widehat{\omega}_{2}-\omega_{2,0} \\ 
+        \widehat{\omega}_{3}-\omega_{3,0}%
+    \end{array}\right) 
+%
+    \rightarrow_{d}\xi_{\omega}  = 
+%
+   \left(\begin{array}{c}
+            \xi_{\omega 1} \\ 
+            \xi_{\omega 2} \\ 
+            \xi_{\omega 3}%
+   \end{array}\right) 
+%
+   \sim N\left( 0,
+%
+    \begin{array}{ccc}
+        \Omega_{1} & 0 & 0 \\ 
+        0 & \Omega_{2} & 0 \\ 
+        0 & 0 & \Omega_{3}%
+    \end{array}\right).
+\end{equation}
+\end{lemma}
+
+
+\begin{proof}
+    Will be added later.
+\end{proof}
+
+
+\section{Robust Inference for Risk Price}
+
+The reduced-form parameters are $\omega  = (\rho ,c,\gamma ,\beta ,\psi ,\phi ^{2})$. 
+Using the conditional mean and conditional variance derived in the paper, we estimate $\, \omega_{1} = (\rho ,c)$
+by the GMM estimator, estimate $\omega_{2} = (\psi ,\beta ,\gamma )$ by the GLS estimator, and estimate
+$\omega_{3} = \phi^{2}$ by the method of moments estimator for the variance.
+
+We can show that the estimator $\widehat{\omega}$ satisfies
+
+\begin{equation}
+    n^{1/2}(\widehat{\omega}-\omega_{0})\rightarrow_{d}\upsilon_{\omega}\sim N(0,V).
+\end{equation}%
+
+See the next section for details. 
+Note that these estimators do not involve the structural parameters $\theta $ and $\pi$.
+We do not plug in $\beta ,\gamma ,\psi $ as functions of $\theta $ and $\pi .$ Instead, we treat $\beta ,\gamma
+,\psi $ just as linear coefficients and estimate them by GLS.
+
+We estimate the structural parameters $\theta $ and $\pi $ using $\widehat{ \omega}$ and the link functions
+specified below. 
+First, we know that
+%
+\begin{equation}
+    \label{psi_fn} 
+    \psi_{0}=\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right) \right) ^{-1/2}+\left( 1-\phi_{0}^{2}\right)
+    /2-(1-\phi_{0}^{2})\theta_{0}
+\end{equation}
+%
+when all parameters are evaluated at the true values. 
+This equation strongly identifies $\theta_{0}$ because $\phi_{0}^{2}$ is assumed to be bounded away from 1. 
+It follows from (\cref{psi_fn}) that
+
+\begin{equation}
+    \theta_{0}=L(\omega_{0})=(1-\phi_{0}^{2})^{-1}\left[ \psi_{0}-\phi_{0}\left( c_{0}\left( 1+\rho
+   _{0}\right) \right) ^{-1/2}-\left( 1-\phi_{0}^{2}\right) /2\right] .
+\end{equation}
+%
+Thus, we estimate $\theta_{0}$ by
+%
+\begin{equation}
+    \widehat{\theta}=L(\widehat{\omega}).
+\end{equation}
+%
+By the delta method, we know that
+%
+\begin{equation}
+    T^{1/2}(\widehat{\theta}-\theta_{0})\rightarrow_{d}L_{\omega}(\omega_{0})^{\prime}\upsilon_{\omega},
+\end{equation}
+%
+where $L_{\omega}(\omega )\in R^{d_{\omega}}$ denote the derivative of $L(\omega )$ w.r.t.\@ to $\omega$. 
+The inference for $\theta $ is standard. 
+A confidence interval for $\theta $ can be obtained by inverting the $t$-statistic with a critical value obtained
+from the standard normal distribution.
+
+Next, we consider inference for the structural parameter $\pi$. 
+This is a non-standard problem because $\pi $ is potentially weakly identified. 
+Define
+%
+\begin{equation}
+    g(\pi ,\omega )=\left( 
+%
+    \begin{array}{c}
+        \gamma -\left[ B\left( \pi +C\left( \theta_{L}-1\right) \right) -B\left( \pi +C\left( \theta_{L}\right)
+        \right) \right]  \\ 
+%
+        \beta -\left[ A\left( \pi +C\left( \theta_{L}-1\right) \right) -A\left( \pi +C\left( \theta_{L}\right)
+        \right) \right] 
+    \end{array}\right),
+%
+    \text{ where}\ \theta_{L} = L(\omega).
+\end{equation}
+%
+We know 
+%
+\begin{equation}
+    g(\pi_{0}, \omega_{0})=0 \in \mathbb{R}^{2}.
+\end{equation}
+%
+Inference on $\pi $ is based on the function $g(\pi ,\widehat{\omega})$ because $\widehat{\omega}$ is a
+consistent estimator of $\omega_{0}$.
+By the consistency of $\widehat{\omega}$,
+%
+\begin{equation}
+    T^{1/2}\left[ g(\pi, \widehat{\omega}) - g(\pi,\omega_{0})\right] \Rightarrow \upsilon(\pi) = G(\pi,
+    \omega_{0})^{\prime}\upsilon_{\omega},
+\end{equation}%
+
+\noindent where $G(\pi ,\omega )$ denote the derivative of $g(\pi ,\omega )$ w.r.t.\@ to $\omega$. 
+The Gaussian process $\upsilon(\pi)$ has covariance kernel 
+%
+\begin{equation}
+    \Sigma (\pi_{1},\pi_{2})=G(\pi_{1},\omega_{0})^{\prime}VG(\pi_{2},\omega_{0}).
+\end{equation}
+%
+We can estimate $\Sigma (\pi_{1},\pi_{2})$ by 
+%
+\begin{equation}
+    \widehat{\Sigma}(\pi_{1},\pi_{2})=G(\pi_{1},\widehat{\omega})^{\prime}
+    \widehat{V}G(\pi_{2},\widehat{\omega}),
+\end{equation}
+
+\noindent where $\widehat{V}$ is a consistent estimator of $V.$
+
+We construct a confidence interval for $\pi $ by inverting tests $H_{0}:\pi =\pi_{0}$ vs $H_{0}:\pi \neq \pi_{0}$. 
+The test statistic is the QLR statistic:
+%
+\begin{equation}
+    QLR=Tg(\pi_{0},\widehat{\omega})^{\prime}\widehat{\Sigma}(\pi_{0},\pi _{0})^{-1}g(\pi_{0},\widehat{\omega})
+    - \underset{\pi \in \Pi}{\min}Tg(\pi ,\widehat{\omega})^{\prime}\widehat{\Sigma}(\pi,\pi)^{-1}
+    g(\pi,\widehat{\omega}).  
+\end{equation} 
+
+To obtain the critical value, we follow the conditional inference approach in Andrews and Mikusheva (2016). To
+this end, first construct a projection residual process:
+%
+\begin{equation}
+    h(\pi ,\widehat{\omega})=g(\pi ,\widehat{\omega})-\widehat{\Sigma}(\pi ,\pi_{0})\widehat{\Sigma
+   }(\pi_{0},\pi_{0})^{-1}g(\pi_{0},\widehat{\omega}).
+\end{equation}
+%
+By construction, $h(\pi ,\widehat{\omega})$ and $g(\pi_{0},\widehat{\omega})$ are independent asymptotically. 
+Conditional on $h(\pi ,\widehat{\omega})$, we obtain the $1-\alpha $ quantile of the QLR statistic, denoted
+$c_{\alpha}(h)$, by sampling from the asymptotic distributions of $g(\pi_{0},\widehat{\omega})$ under the null.
+Specifically, we take independent draws $\upsilon^{\ast}\sim N(0,\Sigma (\pi_{0},\pi_{0}))$ and produce simulated
+process:
+%
+\begin{equation}
+    g^{\ast}(\pi ,\widehat{\omega}) = h\left(\pi ,\widehat{\omega}\right) + \widehat{\Sigma} (\pi
+    ,\pi_{0})\widehat{\Sigma}(\pi_{0},\pi_{0})^{-1}\upsilon^{\ast}.
+\end{equation}%
+%
+We then calculate
+\begin{equation}
+    QLR^{\ast}=Tg^{\ast}(\pi_{0},\widehat{\omega})^{\prime}\widehat{\Sigma} (\pi_{0},\pi_{0})^{-1}g^{\ast
+   }(\pi_{0},\widehat{\omega})-\underset{\pi \in \Pi}{\min}Tg^{\ast}(\pi ,\widehat{\omega})^{\prime
+   }\widehat{\Sigma} (\pi ,\pi )^{-1}g^{\ast}(\pi ,\widehat{\omega}), 
+\end{equation}
+%
+which is a random drawn from the conditional distribution of the $QLR$ statistic given $h_{T}(\pi ,\widehat{\omega
+})$, when $g(\pi_{0},\widehat{ \omega})$ is drawn from its asymptotic distribution. 
+In practice, we repeat this process for a large number of times and obtain $c_{\alpha}(h)$ by simulation.
+
+We reject the null $H_{0}:\pi =\pi_{0}$ if $QLR\geq c_{\alpha}(h)$. 
+The confidence interval for $\pi $ is the collection of null values that are not rejected as the null value. 
+Note that the construction of this CI\ does not involve estimation of $\pi$.
 
 
 \end{document}
