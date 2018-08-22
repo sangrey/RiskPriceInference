@@ -17,9 +17,10 @@ theta, pi = sym.symbols('theta pi')
 psi_sym = phi / sym.sqrt(scale + (1 + rho)) + (( 1 - phi**2) / 2 - (1 - phi**2) * theta)
 a_func = rho * x / ( 1 + scale * x)
 alpha = psi_sym * x + (( 1 -phi**2) / 2) * x**2
-b_func = delta * sym.log(1 + scale * x)
+b_func_in = 1 + scale * x
 beta_sym = a_func.replace(x, pi + alpha.replace(x, theta - 1)) - a_func.replace(x, pi + alpha.replace(x, theta)) 
-gamma_sym = b_func.replace(x, pi + alpha.replace(x, theta-1)) - b_func.replace(x, pi + alpha.replace(x, theta))
+gamma_sym = delta * sym.log(b_func_in.replace(x, pi + alpha.replace(x, theta-1)) 
+                            / b_func_in.replace(x, pi + alpha.replace(x, theta)))
 
 # We create the link functions.
 gamma = sym.lambdify((delta, phi, pi, rho, scale, theta), gamma_sym)
@@ -308,6 +309,7 @@ def compute_step2(data, parameter_mapping=None):
                         columns=['phi_squared'])
     return_cov = wls_results.cov_params().rename(columns=parameter_mapping).rename(parameter_mapping)
     return_cov = return_cov.merge(phi2_cov, left_index=True, right_index=True, how='outer').fillna(0)
+    return_cov = return_cov.sort_index(axis=1).sort_index(axis=0)
     
     return dict(estimates), return_cov
 
