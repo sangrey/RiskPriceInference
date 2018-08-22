@@ -36,6 +36,13 @@ second_stage_moments = sym.lambdify((delta, phi, pi, rho, scale, theta), second_
 link2_grad_in = sym.lambdify((delta, phi, pi, rho, scale, theta), 
                              second_stage_moments_sym.jacobian([delta, phi, pi, rho, scale, theta]))
 
+# We now setup the link functions for the robust inference. 
+link_pi_sym = sym.Matrix([beta_sym, gamma_sym]).replace(theta, (1 - phi**2)**(-1) * 
+                                                        (psi - (phi / sym.sqrt(1 + rho) + ( 1 - phi**2)/2)))
+link_pi_in = sym.lambdify((delta, phi, pi, psi, rho, scale), link_pi_sym)
+link_pi_grad_in = sym.lambdify((delta, phi, pi, psi, rho, scale),
+                               link_pi_sym.jacobian((delta, phi, psi, rho, scale)))
+
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
                                   state_date='2000-01-01'):
@@ -437,3 +444,116 @@ def estimate_params(data, vol_estimates=None, vol_cov=None):
     params_2nd_stage, cov_2nd_stage  = est_2nd_stage(reduced_form_params=reduced_form_estimates,
                                                      reduced_form_cov=reduced_form_cov)
     return params_2nd_stage, cov_2nd_stage
+
+
+def link_pi(omega, pi):
+    """ Computes the link function relevent for estimating pi. """
+
+    returnval = np.squeeze(link_pi_in(delta=omega['delta'], phi=omega['phi'], psi=omega['psi'], rho=omega['rho'],
+                                      scale=omega['scale'], pi=pi))
+    return returnval
+
+
+def covariance_kernel(omega, vol_price1, vol_price2, reduced_form_cov):
+    """ This function computes the covariance kernel """
+    
+    left_bread = link_pi_grad_in(delta=omega['delta'], phi=omega['phi'], pi=vol_price1, psi=omega['psi'],
+                                 rho=omega['rho'], scale=omega['scale']).T
+    right_bread = link_pi_grad_in(delta=omega['delta'], phi=omega['phi'], pi=vol_price2, psi=omega['psi'],
+                                  rho=omega['rho'], scale=omega['scale']).T
+    
+    return np.squeeze(left_bread.T @ reduced_form_cov @ right_bread)
+
+
+def compute_omega(vol_cov, reduced_cov, params):
+    """ Combines the two covariances into one. """
+
+    omega_names = ['delta', 'phi',  'psi', 'rho', 'scale'],
+
+    reduced_cov2 = pd.merge(vol_cov, reduced_cov, how='outer', left_index=True, right_index=True).fillna(0)
+    reduced_cov2 = reduced_cov2.rename(columns={'phi_squared':'phi'}).rename(
+        {'phi_squared':'phi'}).sort_index(axis=0).sort_index(axis=1)
+    reduced_cov2['phi'] *= 2 * abs(params['psi'])
+    omega_cov = reduced_cov2.loc[omega_names, omega_names]
+    
+    return omega_cov, {name:params[name] vor name in omega_names}
+
+
+# def projection_residual_process(omega, vol_price, vol_price_true, reduced_form_cov):
+#     """ This function computes the j
+#     link1 = link_pi(omega=omega, vol_price=vol_price) 
+#     link2 = link_pi(omega=omega, vol_price=vol_price_true) 
+
+#     cov1 = covariance_kernel(omega=omega, vol_price1=vol_price, vol_price2=vol_price_true,
+#                              reduced_form_cov=reduced_form_cov)
+#     cov2 = covariance_kernel(omega=omega, vol_price1=vol_price_true, vol_price2=vol_price_true,
+#                              reduced_form_cov=reduced_form_cov)
+
+#     return np.squeeze(link1 - cov1 @ np.linalg.solve(cov2, link2))
+
+
+def qlr_stat(omega, vol_price_true, omega_cov, time_dim, bounds=None):
+    """ This function computes the qlr_stat given the omega_estimates and covariance matrix.
+    
+    Paramters
+    --------
+    omega : dict
+        Paramter estimates
+    omega_cov : dataframe
+        omega's covariance matrix.
+    vol_price_true : scalar
+    time_dim : scalar
+        number of period.
+    bounds : iterable
+        bounds on pi
+
+    Returns
+    ------
+    scalar 
+    """
+    bounds = [(bounds[0], bounds[1])] if bounds is not None else [(-50, 0)]
+    
+    cov_true_true = covariance_kernel(omega=omega, vol_price1=vol_price_true, vol_price2=vol_price_true,
+                                      omega_cov=omega_cov)
+    
+    def qlr_in(pi):
+        link_pi_in = link_pi(omega, pi=pi)
+        cov_pi = covariance_kernel(omega=omega, vol_price1=pi, vol_price2=pi, omega_cov=omega_cov)
+        
+        return np.asscalar(time_dim * link_pi_in.T @ np.linalg.solve(cov_pi, link_pi_in))
+    
+    result = optimize.minimize(lambda x: qlr_in(x), x0=vol_price_true, method="SLSQP", bounds=bounds)
+
+    return qlr_in(vol_price_true) - result.fun
+
+
+def qlr_sim(omega, vol_price_true, reduced_form_cov, time_dim):
+    
+    cov_true_true = covariance_kernel(omega=omega, vol_price1=vol_price_true, vol_price2=vol_price_true,
+                                      reduced_form_cov=reduced_form_cov)
+    
+#     # We start by simulating v_{moment_conds}
+    upsilon_star = stats.multivariate_normal.rvs(mean=np.zeros(2), cov=cov_true_true)
+    
+    def link_star(pi):
+        link_pi_in = link_pi(omega=omega, pi=pi)
+        cov_pi_true =  covariance_kernel(omega=omega, vol_price1=pi, vol_price2=vol_price_true,
+                                         reduced_form_cov=reduced_form_cov)
+        
+        # We combine computing h(pi, omega) and g_star into one step.
+        link_star_in = link_pi_in - cov_pi_true @ np.linalg.solve(cov_true_true,
+                                                                  link_pi(omega=omega,
+                                                                          pi=vol_price_true)-upsilon_star)
+        
+        return link_star_in
+    
+    def qlr_in_star(pi):
+        link_pi_in = link_star(pi=pi)
+        cov_pi_pi = covariance_kernel(omega=omega, vol_price1=pi, vol_price2=pi, reduced_form_cov=reduced_form_cov)
+        
+        return np.asscalar(time_dim * link_pi_in.T @ np.linalg.solve(cov_pi_pi, link_pi_in))   
+    
+    result = optimize.minimize(lambda x: qlr_in_star(x), x0=vol_price_true, method="SLSQP", bounds=[(-20, 0)])
+    
+    return qlr_in_star(vol_price_true) - result.fun
+    
