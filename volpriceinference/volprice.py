@@ -10,11 +10,11 @@ from collections import OrderedDict
 from volpriceinference import _simulate_autoregressive_gamma, _threadsafe_gaussian_rvs
 
 # We define some functions
-x, y, rho, scale, delta, psi_val, zeta = sym.symbols('x y rho scale delta psi_val zeta')
+x, y, beta, gamma, rho, scale, delta, psi, zeta = sym.symbols('x y beta gamma rho scale delta psi zeta')
 theta, pi = sym.symbols('theta pi')
 
 # We define the link functions.
-psi_sym = sym.sqrt(1-zeta) / sym.sqrt(scale + (1 + rho)) + (zeta / 2 - zeta * theta)
+psi_sym = sym.sqrt(1-zeta) / sym.sqrt(scale * (1 + rho)) + (zeta / 2 - zeta * theta)
 a_func = rho * x / ( 1 + scale * x)
 alpha = psi_sym * x + (zeta / 2) * x**2
 b_func_in = 1 + scale * x
@@ -23,27 +23,23 @@ gamma_sym = delta * sym.log(b_func_in.replace(x, pi + alpha.replace(x, theta-1))
                             / b_func_in.replace(x, pi + alpha.replace(x, theta)))
 
 # We create the link functions.
-gamma = sym.lambdify((delta, pi, rho, scale, theta), gamma_sym)
-beta = sym.lambdify((pi, rho, scale, theta, zeta), beta_sym)
-psi = sym.lambdify((rho, scale, theta, zeta), psi_sym)
+compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, zeta), gamma_sym)
+compute_beta = sym.lambdify((pi, rho, scale, theta, zeta), beta_sym)
+compute_psi = sym.lambdify((rho, scale, theta, zeta), psi_sym)
 
-# Setup the link function.
-second_stage_moments_sym = sym.Matrix([beta_sym, delta, gamma_sym, psi_sym, rho, scale, zeta])
-second_stage_moments_sym.simplify()
-second_stage_moments = sym.lambdify((delta, pi, rho, scale, theta, zeta), second_stage_moments_sym)
-
-# Define the gradients of the link function.
-link2_grad_in = sym.lambdify((delta, pi, rho, scale, theta, zeta), second_stage_moments_sym.jacobian(
-    [delta, pi, rho, scale, theta, zeta]))
+# # We create the link function for theta.
+# link_theta_sym = zeta**(-1) * psi + zeta**(-1) * sym.sqrt((1-zeta) / (scale * (1 + rho))) - 1/2
+# link_theta = sym.lambdify((delta, psi, rho, scale, zeta), link_theta_sym.replace(zeta, sym.Min(zeta,1)))
+# link_theta_grad_in = sym.lambdify((delta, psi, rho, scale, zeta), sym.Matrix([link_theta_sym]).jacobian(
+#     (delta, psi, rho, scale, zeta)).replace(zeta, sym.Min(zeta,1)))
 
 # We now setup the link functions for the robust inference. 
-link_pi_sym = sym.Matrix([beta_sym, gamma_sym]).replace(theta, zeta**(-1) * (psi_val - (-sym.sqrt(1-zeta)/
-                                                                                        sym.sqrt(1 + rho) +
-                                                                                        zeta/2)))
-
-link_pi_in = sym.lambdify((delta, pi, psi_val, rho, scale, zeta), link_pi_sym)
-link_pi_grad_in = sym.lambdify((delta, pi, psi_val, rho, scale, zeta), link_pi_sym.jacobian((delta, psi_val, rho,
-                                                                                             scale, zeta)))
+link_func_sym = sym.Matrix([beta - beta_sym, gamma - gamma_sym])
+compute_link = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta), 
+                       link_func_sym.replace(zeta, sym.Min(zeta,1)))
+compute_link_grad = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
+                               link_func_sym.jacobian((beta, delta, gamma, psi, rho, scale, zeta)).replace(
+                                   zeta, sym.Min(zeta,1)))
 
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
@@ -106,9 +102,9 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, zeta=1, 
                                              state_date=pd.to_datetime(state_date) - pd.Timedelta('1 day'),
                                              time_dim=time_dim + 1)
 
-    gamma_val = gamma(rho=rho, scale=scale, delta=delta, pi=vol_price, theta=equity_price, zeta=zeta)
-    beta_val = beta(rho=rho, scale=scale, pi=vol_price, theta=equity_price, zeta=zeta)
-    psi_val = psi(rho=rho, scale=scale, theta=equity_price, zeta=zeta)
+    gamma_val = compute_gamma(rho=rho, scale=scale, delta=delta, pi=vol_price, theta=equity_price, zeta=zeta)
+    beta_val = compute_beta(rho=rho, scale=scale, pi=vol_price, theta=equity_price, zeta=zeta)
+    psi_val = compute_psi(rho=rho, scale=scale, theta=equity_price, zeta=zeta)
     
     mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
     var = zeta * vol_data
@@ -302,7 +298,7 @@ def cov_to_corr(cov):
     return corr
 
 
-def compute_step2(data, parameter_mapping=None):
+def estimate_zeta(data, parameter_mapping=None):
     
     if parameter_mapping is None:
         parameter_mapping = {'vol':'psi', 'vol.shift(1)':'beta', 'Intercept':'gamma'}
@@ -313,7 +309,8 @@ def compute_step2(data, parameter_mapping=None):
     
     estimates['zeta'] = np.mean(wls_results.wresid**2)
     
-    zeta_cov = pd.DataFrame(np.atleast_2d(np.cov(wls_results.wresid**2)), index=['zeta'], columns=['zeta'])
+    zeta_cov = pd.DataFrame(np.atleast_2d(np.cov(wls_results.wresid**2)) / data.shape[0],
+                            index=['zeta'], columns=['zeta'])
     return_cov = wls_results.cov_params().rename(columns=parameter_mapping).rename(parameter_mapping)
     return_cov = return_cov.merge(zeta_cov, left_index=True, right_index=True, how='outer').fillna(0)
     return_cov = return_cov.sort_index(axis=1).sort_index(axis=0)
@@ -321,92 +318,57 @@ def compute_step2(data, parameter_mapping=None):
     return dict(estimates), return_cov
 
 
-def link_grad_structural(delta, equity_price, rho, scale, vol_price, zeta):
-    """
-    This function computes the jacobian of the link function with respect to the structural paramters
-    rho, scale, delta, equity_price, and vol_price, zeta
+# def link_grad_reduced_form(omega): 
+#     """
+#     This function computes the jacobian of the link function with respect to the reduced-form paramters
     
-    Paramters
-    ---------
-    equity_price : scalar
-    delta : scalar
-    rho : scalar
-    scale : scalar
-    vol_price : scalar
-    zeta : scalar
+#     Paramters
+#     ---------
+#     omega : dict 
+#     Returns
+#     --------
+#     ndarray
     
-    Returns
-    --------
-    ndarray
-    
-    """
-    return_mat = link2_grad_in(delta=delta, pi=vol_price, rho=rho, scale=scale, theta=equity_price, zeta=zeta)
-    return_df = pd.DataFrame(return_mat, columns=['delta', 'vol_price', 'rho', 'scale', 'equity_price', 'zeta'])
+#     """
 
-    return return_df.sort_index(axis=1)
+#     return_mat = link_theta_grad_in(delta=omega['delta'], psi=omega['psi'], rho=omega['rho'],
+#                                     scale=omega['scale'], zeta=omega['zeta'])
+#     return_df = pd.DataFrame(return_mat, columns=['delta', 'psi', 'rho', 'scale', 'zeta'])
+
+#     return return_df.sort_index(axis=1).sort_index(axis=0).T
 
 
-def second_criterion(structural_params, link_params, weight=None):
-    """
-    This function computes the weighted squared deviations as defined by the link function.
-    The paramters to estimate must be in alphabetical order.
-    
-    Paramters
-    ----------
-    structural_params : ndarray
-    link_params : ndarray
-    
-    Returns
-    ------
-    scalar
-    
-    """
-    delta, equity_price, rho, scale, vol_price, zeta = structural_params
-    
-    part1 = second_stage_moments(rho=rho, scale=scale, delta=delta, theta=equity_price, pi=vol_price, 
-                                zeta=zeta).ravel()
-    part2 = np.array([link_params[key] for key in sorted(link_params)])
+# def estimate_theta(omega, omega_cov, bounds=None, opts=None):
+#     """
+#     Uses the reduced form paramters and the link function for theta to compute theta's value and its variance.
 
-    diff = part1 - part2
-    
-    if weight is None:
-        weight = np.eye(len(diff))
-            
-    return .5 * diff @ weight @ diff
-    
+#     Paramters
+#     --------
+#     omega : dict
+#     omega_cov : dataframe
 
-def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None):
+#     Returns
+#     -------
+#     estimates : dict
+#     cov : dataframe
+#     """
     
-    if bounds is None:
-        bounds = ([0, 20], [0, 5], [-1, 1], [-1,1], [0,.5], [-10, 10])
-    if opts is None:
-        opts = {'maxiter':200}
+#     estimate = np.asscalar(link_theta(delta=omega['delta'], psi=omega['psi'], rho=omega['rho'],
+#                                       scale=omega['scale'], zeta=omega['zeta']))
+
+#     link_derivative = link_grad_reduced_form(omega)
+#     names = link_derivative.index
+#     cov_est = np.asscalar(np.ravel(link_derivative.T @ omega_cov.loc[names, names] @ link_derivative))
+#     cov = pd.DataFrame([cov_est], index=['equity_price'], columns=['equity_price'])
         
-    price_guess = {'equity_price': .5, 'vol_price': -1, 'zeta': reduced_form_params['zeta'],
-                   'rho': reduced_form_params['rho'], 'scale':reduced_form_params['scale'],
-                   'delta':reduced_form_params['delta']}
-
-    x0 = [price_guess[val] for val in sorted(price_guess.keys())]
-   
-    init_result = optimize.minimize(lambda x: second_criterion(x, reduced_form_params), x0=x0, method="SLSQP",  
-                                    options=opts, bounds=bounds)
-    estimates = {key:val for key, val in zip(sorted(price_guess.keys()), init_result.x)}
-    
-    weight = np.linalg.pinv(reduced_form_cov.sort_index().T.sort_index())
-    
-    final_result = optimize.minimize(lambda x: second_criterion(x, reduced_form_params, weight=weight),
-                                     x0=init_result.x, method="SLSQP",  options=opts, bounds=bounds)
-                                     
-    estimates = {key:val for key, val in zip(sorted(price_guess.keys()), final_result.x)}
-    
-    if not final_result.success:
-        logging.warning("Convergence results are %s.\n", final_result)
-
-    link_derivative = link_grad_structural(**estimates)
-    cov = pd.DataFrame(scilin.pinv(link_derivative.T @ weight @ link_derivative) , index=estimates.keys(),
-                       columns=estimates.keys()) 
-                  
-    return estimates, cov
+#     return_est = omega.copy()
+#     return_est['equity_price'] = estimate
+  
+#     return_cov = omega_cov.append(cov)
+#     return_cov.loc[names, 'equity_price'] = np.ravel(omega_cov.loc[names, names] @ link_derivative)
+#     return_cov.loc['equity_price', names] = np.ravel(omega_cov.loc[names, names] @ link_derivative)
+        
+#     return return_est, return_cov.fillna(0)
 
 
 def estimate_params(data, vol_estimates=None, vol_cov=None):
@@ -424,8 +386,8 @@ def estimate_params(data, vol_estimates=None, vol_cov=None):
 
     Returns
     ------
-    params_2nd_stage : dict
-    cov_2nd_stage: dataframe
+    estimates : dict
+    covariance : dataframe
     """
     
     if vol_estimates is None or vol_cov is None:
@@ -434,34 +396,24 @@ def estimate_params(data, vol_estimates=None, vol_cov=None):
         vol_estimates, vol_cov = compute_vol_gmm(data.vol, init_constants=init_constants)
     
     # Then we compute the reduced form paramters.
-    reduced_form_estimates, cov_1st_stage2 = compute_step2(data)
-    reduced_form_estimates.update(vol_estimates) 
-    reduced_form_cov = vol_cov.merge(cov_1st_stage2, left_index=True, right_index=True,
+    estimates, cov_1st_stage2 = estimate_zeta(data)
+    estimates.update(vol_estimates) 
+    covariance = vol_cov.merge(cov_1st_stage2, left_index=True, right_index=True,
                                      how='outer').fillna(0).sort_index(axis=1).sort_index(axis=0)
     
     # I now compute the 2nd stage.
-    params_2nd_stage, cov_2nd_stage  = est_2nd_stage(reduced_form_params=reduced_form_estimates,
-                                                     reduced_form_cov=reduced_form_cov)
-    return params_2nd_stage, cov_2nd_stage
+    # estimates, covariance = estimate_theta(omega=estimates_in, omega_cov=reduced_form_cov)
+
+    return estimates, covariance
 
 
-def link_pi(omega, pi):
-    """ Computes the link function relevent for estimating pi. """
-
-    returnval = np.squeeze(link_pi_in(delta=omega['delta'], psi=omega['psi'], rho=omega['rho'],
-                                      scale=omega['scale'], pi=pi, zeta=omega['zeta']))
-    return returnval
-
-
-def covariance_kernel(omega, vol_price1, vol_price2, reduced_form_cov):
+def covariance_kernel(omega, vol_price1, vol_price2, equity_price1, equity_price2, omega_cov):
     """ This function computes the covariance kernel """
     
-    left_bread = link_pi_grad_in(delta=omega['delta'], pi=vol_price1, psi=omega['psi'],
-                                 rho=omega['rho'], scale=omega['scale'], zeta=omega['zeta']).T
-    right_bread = link_pi_grad_in(delta=omega['delta'], pi=vol_price2, psi=omega['psi'],
-                                  rho=omega['rho'], scale=omega['scale'], zeta=omega['zeta']).T
+    left_bread = compute_link_grad(pi=vol_price1, theta=equity_price1,  **omega).T
+    right_bread = compute_link_grad(pi=vol_price2, theta=equity_price2, **omega).T
     
-    return np.squeeze(left_bread.T @ reduced_form_cov @ right_bread)
+    return np.squeeze(left_bread.T @ omega_cov @ right_bread)
 
 
 def compute_omega(data, vol_estimates=None, vol_cov=None):
@@ -486,10 +438,10 @@ def compute_omega(data, vol_estimates=None, vol_cov=None):
     if vol_estimates is None or vol_cov is None:
         # First we compute the volatility paramters.
         init_constants = compute_init_constants(data.vol)
-        vol_estimates, vol_cov = vl.compute_vol_gmm(data.vol, init_constants=init_constants)
+        vol_estimates, vol_cov = compute_vol_gmm(data.vol, init_constants=init_constants)
     
     # Then we compute the reduced form paramters.
-    reduced_form_estimates, cov_1st_stage2 = compute_step2(data)
+    reduced_form_estimates, cov_1st_stage2 = estimate_zeta(data)
     reduced_form_estimates.update(vol_estimates) 
     reduced_form_cov = vol_cov.merge(cov_1st_stage2, left_index=True, right_index=True,
                                      how='outer').fillna(0).sort_index(axis=1).sort_index(axis=0)
@@ -501,20 +453,7 @@ def compute_omega(data, vol_estimates=None, vol_cov=None):
     return {name:reduced_form_estimates[name] for name in omega_names}, omega_cov
 
 
-# def projection_residual_process(omega, vol_price, vol_price_true, reduced_form_cov):
-#     """ This function computes the j
-#     link1 = link_pi(omega=omega, vol_price=vol_price) 
-#     link2 = link_pi(omega=omega, vol_price=vol_price_true) 
-
-#     cov1 = covariance_kernel(omega=omega, vol_price1=vol_price, vol_price2=vol_price_true,
-#                              reduced_form_cov=reduced_form_cov)
-#     cov2 = covariance_kernel(omega=omega, vol_price1=vol_price_true, vol_price2=vol_price_true,
-#                              reduced_form_cov=reduced_form_cov)
-
-#     return np.squeeze(link1 - cov1 @ np.linalg.solve(cov2, link2))
-
-
-def qlr_stat(omega, vol_price_true, omega_cov, time_dim, bounds=None):
+def qlr_stat(omega, true_prices, omega_cov, bounds=None):
     """ This function computes the qlr_stat given the omega_estimates and covariance matrix.
     
     Paramters
@@ -523,9 +462,46 @@ def qlr_stat(omega, vol_price_true, omega_cov, time_dim, bounds=None):
         Paramter estimates
     omega_cov : dataframe
         omega's covariance matrix.
-    vol_price_true : scalar
-    time_dim : scalar
-        number of period.
+    true_prices : dict
+    bounds : iterable of iterables
+        bounds on pi
+
+    Returns
+    ------
+    scalar 
+    """
+    if bounds is None:
+        bounds = [(-10, 10), (-50, 0)]
+    
+    cov_true_true = covariance_kernel(omega=omega, vol_price1=true_prices['vol'], vol_price2=true_prices['vol'],
+                                      equity_price1=true_prices['equity'], equity_price2=true_prices['equity'],
+                                      omega_cov=omega_cov)
+    x0 = [true_prices[name] for name in sorted(true_prices.keys())]
+    
+    def qlr_in(prices):
+        link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega)) 
+        cov_pi = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
+                                   equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
+        
+        return np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
+    
+    result = optimize.minimize(lambda x: qlr_in(x), x0=x0, method="SLSQP", bounds=bounds)
+
+    return qlr_in(vol_price_true) - result.fun
+
+
+def qlr_sim(omega, true_prices, omega_cov, bounds=None):
+    """ 
+    This function simulates the qlr_stat given the omega_estimates and covariance matrix, redrawing the error
+    relevant for computing the moments projected onto (theta,pi) many times.
+    
+    Paramters
+    --------
+    omega : dict
+        Paramter estimates
+    omega_cov : dataframe
+        omega's covariance matrix.
+    true_prices : dict
     bounds : iterable
         bounds on pi
 
@@ -533,49 +509,38 @@ def qlr_stat(omega, vol_price_true, omega_cov, time_dim, bounds=None):
     ------
     scalar 
     """
-    bounds = [(bounds[0], bounds[1])] if bounds is not None else [(-50, 0)]
+    if bounds is None:
+        bounds = [(-10, 10), (-50, 0)]
     
-    cov_true_true = covariance_kernel(omega=omega, vol_price1=vol_price_true, vol_price2=vol_price_true,
+    cov_true_true = covariance_kernel(omega=omega, vol_price1=true_prices['vol'], vol_price2=true_prices['vol'],
+                                      equity_price1=true_prices['equity'], equity_price2=true_prices['equity'],
                                       omega_cov=omega_cov)
-    
-    def qlr_in(pi):
-        link_pi_in = link_pi(omega, pi=pi)
-        cov_pi = covariance_kernel(omega=omega, vol_price1=pi, vol_price2=pi, omega_cov=omega_cov)
-        
-        return np.asscalar(time_dim * link_pi_in.T @ np.linalg.solve(cov_pi, link_pi_in))
-    
-    result = optimize.minimize(lambda x: qlr_in(x), x0=vol_price_true, method="SLSQP", bounds=bounds)
-
-    return qlr_in(vol_price_true) - result.fun
-
-
-def qlr_sim(omega, vol_price_true, reduced_form_cov, time_dim):
-    
-    cov_true_true = covariance_kernel(omega=omega, vol_price1=vol_price_true, vol_price2=vol_price_true,
-                                      reduced_form_cov=reduced_form_cov)
     
 #     # We start by simulating v_{moment_conds}
     upsilon_star = stats.multivariate_normal.rvs(mean=np.zeros(2), cov=cov_true_true)
+    x0 = [true_prices[name] for name in sorted(true_prices.keys())]
     
-    def link_star(pi):
-        link_pi_in = link_pi(omega=omega, pi=pi)
-        cov_pi_true =  covariance_kernel(omega=omega, vol_price1=pi, vol_price2=vol_price_true,
-                                         reduced_form_cov=reduced_form_cov)
+    def link_star(prices):
+        link_in = np.squeeze(compute_link(pi=pi, **omega))
+        cov_pi_true = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=true_prices['vol'],
+                                      equity_price1=prices[0], equity_price2=true_prices['equity'],
+                                      omega_cov=omega_cov)
         
         # We combine computing h(pi, omega) and g_star into one step.
-        link_star_in = link_pi_in - cov_pi_true @ np.linalg.solve(cov_true_true,
-                                                                  link_pi(omega=omega,
-                                                                          pi=vol_price_true)-upsilon_star)
+        link_star_in = link_in - cov_pi_true @ np.linalg.solve(
+            cov_true_true, np.squeeze(compute_link(pi=vol_price_true, **omega))-upsilon_star)
         
         return link_star_in
     
     def qlr_in_star(pi):
-        link_pi_in = link_star(pi=pi)
-        cov_pi_pi = covariance_kernel(omega=omega, vol_price1=pi, vol_price2=pi, reduced_form_cov=reduced_form_cov)
+        link_in = link_star(prices=prices)
+        cov_pi = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
+                                   equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
         
-        return np.asscalar(time_dim * link_pi_in.T @ np.linalg.solve(cov_pi_pi, link_pi_in))   
+        # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
+        return np.asscalar(link_in.T @ np.linalg.solve(cov_pi_pi, link_in))   
     
-    result = optimize.minimize(lambda x: qlr_in_star(x), x0=vol_price_true, method="SLSQP", bounds=[(-20, 0)])
+    result = optimize.minimize(lambda x: qlr_in_star(x), x0=vol_price_true, method="SLSQP", bounds=bounds)
     
     return qlr_in_star(vol_price_true) - result.fun
     
