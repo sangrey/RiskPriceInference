@@ -27,12 +27,6 @@ compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, zeta), gamma_sym)
 compute_beta = sym.lambdify((pi, rho, scale, theta, zeta), beta_sym)
 compute_psi = sym.lambdify((rho, scale, theta, zeta), psi_sym)
 
-# # We create the link function for theta.
-# link_theta_sym = zeta**(-1) * psi + zeta**(-1) * sym.sqrt((1-zeta) / (scale * (1 + rho))) - 1/2
-# link_theta = sym.lambdify((delta, psi, rho, scale, zeta), link_theta_sym.replace(zeta, sym.Min(zeta,1)))
-# link_theta_grad_in = sym.lambdify((delta, psi, rho, scale, zeta), sym.Matrix([link_theta_sym]).jacobian(
-#     (delta, psi, rho, scale, zeta)).replace(zeta, sym.Min(zeta,1)))
-
 # We now setup the link functions for the robust inference. 
 link_func_sym = sym.Matrix([beta - beta_sym, gamma - gamma_sym])
 compute_link = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta), 
@@ -318,59 +312,6 @@ def estimate_zeta(data, parameter_mapping=None):
     return dict(estimates), return_cov
 
 
-# def link_grad_reduced_form(omega): 
-#     """
-#     This function computes the jacobian of the link function with respect to the reduced-form paramters
-    
-#     Paramters
-#     ---------
-#     omega : dict 
-#     Returns
-#     --------
-#     ndarray
-    
-#     """
-
-#     return_mat = link_theta_grad_in(delta=omega['delta'], psi=omega['psi'], rho=omega['rho'],
-#                                     scale=omega['scale'], zeta=omega['zeta'])
-#     return_df = pd.DataFrame(return_mat, columns=['delta', 'psi', 'rho', 'scale', 'zeta'])
-
-#     return return_df.sort_index(axis=1).sort_index(axis=0).T
-
-
-# def estimate_theta(omega, omega_cov, bounds=None, opts=None):
-#     """
-#     Uses the reduced form paramters and the link function for theta to compute theta's value and its variance.
-
-#     Paramters
-#     --------
-#     omega : dict
-#     omega_cov : dataframe
-
-#     Returns
-#     -------
-#     estimates : dict
-#     cov : dataframe
-#     """
-    
-#     estimate = np.asscalar(link_theta(delta=omega['delta'], psi=omega['psi'], rho=omega['rho'],
-#                                       scale=omega['scale'], zeta=omega['zeta']))
-
-#     link_derivative = link_grad_reduced_form(omega)
-#     names = link_derivative.index
-#     cov_est = np.asscalar(np.ravel(link_derivative.T @ omega_cov.loc[names, names] @ link_derivative))
-#     cov = pd.DataFrame([cov_est], index=['equity_price'], columns=['equity_price'])
-        
-#     return_est = omega.copy()
-#     return_est['equity_price'] = estimate
-  
-#     return_cov = omega_cov.append(cov)
-#     return_cov.loc[names, 'equity_price'] = np.ravel(omega_cov.loc[names, names] @ link_derivative)
-#     return_cov.loc['equity_price', names] = np.ravel(omega_cov.loc[names, names] @ link_derivative)
-        
-#     return return_est, return_cov.fillna(0)
-
-
 def estimate_params(data, vol_estimates=None, vol_cov=None):
     """ 
     We estimate the model in one step:
@@ -401,9 +342,6 @@ def estimate_params(data, vol_estimates=None, vol_cov=None):
     covariance = vol_cov.merge(cov_1st_stage2, left_index=True, right_index=True,
                                      how='outer').fillna(0).sort_index(axis=1).sort_index(axis=0)
     
-    # I now compute the 2nd stage.
-    # estimates, covariance = estimate_theta(omega=estimates_in, omega_cov=reduced_form_cov)
-
     return estimates, covariance
 
 
