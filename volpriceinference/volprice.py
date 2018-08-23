@@ -10,38 +10,40 @@ from collections import OrderedDict
 from volpriceinference import _simulate_autoregressive_gamma, _threadsafe_gaussian_rvs
 
 # We define some functions
-x, y, rho, scale, delta, phi, psi_val = sym.symbols('x y rho scale delta phi psi_val')
+x, y, rho, scale, delta, psi_val, zeta = sym.symbols('x y rho scale delta psi_val zeta')
 theta, pi = sym.symbols('theta pi')
 
 # We define the link functions.
-psi_sym = phi / sym.sqrt(scale + (1 + rho)) + (( 1 - phi**2) / 2 - (1 - phi**2) * theta)
+psi_sym = sym.sqrt(1-zeta) / sym.sqrt(scale + (1 + rho)) + (zeta / 2 - zeta * theta)
 a_func = rho * x / ( 1 + scale * x)
-alpha = psi_sym * x + (( 1 -phi**2) / 2) * x**2
+alpha = psi_sym * x + (zeta / 2) * x**2
 b_func_in = 1 + scale * x
 beta_sym = a_func.replace(x, pi + alpha.replace(x, theta - 1)) - a_func.replace(x, pi + alpha.replace(x, theta)) 
 gamma_sym = delta * sym.log(b_func_in.replace(x, pi + alpha.replace(x, theta-1)) 
                             / b_func_in.replace(x, pi + alpha.replace(x, theta)))
 
 # We create the link functions.
-gamma = sym.lambdify((delta, phi, pi, rho, scale, theta), gamma_sym)
-beta = sym.lambdify((phi, pi, rho, scale, theta), beta_sym)
-psi = sym.lambdify((phi, rho, scale, theta), psi_sym)
+gamma = sym.lambdify((delta, pi, rho, scale, theta), gamma_sym)
+beta = sym.lambdify((pi, rho, scale, theta, zeta), beta_sym)
+psi = sym.lambdify((rho, scale, theta, zeta), psi_sym)
 
 # Setup the link function.
-second_stage_moments_sym = sym.Matrix([beta_sym, delta, gamma_sym, phi**2, psi_sym, rho, scale])
+second_stage_moments_sym = sym.Matrix([beta_sym, delta, gamma_sym, psi_sym, rho, scale, zeta])
 second_stage_moments_sym.simplify()
-second_stage_moments = sym.lambdify((delta, phi, pi, rho, scale, theta), second_stage_moments_sym)
+second_stage_moments = sym.lambdify((delta, pi, rho, scale, theta, zeta), second_stage_moments_sym)
 
 # Define the gradients of the link function.
-link2_grad_in = sym.lambdify((delta, phi, pi, rho, scale, theta), 
-                             second_stage_moments_sym.jacobian([delta, phi, pi, rho, scale, theta]))
+link2_grad_in = sym.lambdify((delta, pi, rho, scale, theta, zeta), second_stage_moments_sym.jacobian(
+    [delta, pi, rho, scale, theta, zeta]))
 
 # We now setup the link functions for the robust inference. 
-link_pi_sym = sym.Matrix([beta_sym, gamma_sym]).replace(theta, (1 - phi**2)**(-1) * 
-                                                        (psi_val - (phi / sym.sqrt(1 + rho) + ( 1 - phi**2)/2)))
-link_pi_in = sym.lambdify((delta, phi, pi, psi_val, rho, scale), link_pi_sym)
-link_pi_grad_in = sym.lambdify((delta, phi, pi, psi_val, rho, scale),
-                               link_pi_sym.jacobian((delta, phi, psi_val, rho, scale)))
+link_pi_sym = sym.Matrix([beta_sym, gamma_sym]).replace(theta, zeta**(-1) * (psi_val - (-sym.sqrt(1-zeta)/
+                                                                                        sym.sqrt(1 + rho) +
+                                                                                        zeta/2)))
+
+link_pi_in = sym.lambdify((delta, pi, psi_val, rho, scale, zeta), link_pi_sym)
+link_pi_grad_in = sym.lambdify((delta, pi, psi_val, rho, scale, zeta), link_pi_sym.jacobian((delta, psi_val, rho,
+                                                                                             scale, zeta)))
 
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
@@ -74,7 +76,7 @@ def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, t
     return draws
 
 
-def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, initial_point=None, time_dim=100,
+def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, zeta=1, initial_point=None, time_dim=100,
                   state_date='2000-01-01'):
     """
     This function takes the reduced-form paramters and risk prices and returns the data
@@ -83,8 +85,6 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
     --------
     equity_price: scalar
     vol_price : scalar
-    phi : scalar
-        leverage. It must lie in [-1,1]
     rho : scalar
         persistence
     scale : positive scalar
@@ -94,6 +94,8 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
         number of periods
     start_date : datelike, optional
         The time to start the data from.
+    zeta : scalar
+        1 - leverage**2. It must lie in (0,1)
         
     Returns
     -----
@@ -104,12 +106,12 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
                                              state_date=pd.to_datetime(state_date) - pd.Timedelta('1 day'),
                                              time_dim=time_dim + 1)
 
-    gamma_val = gamma(rho=rho, scale=scale, delta=delta, phi=phi, pi=vol_price, theta=equity_price)
-    beta_val = beta(rho=rho, scale=scale, phi=phi, pi=vol_price, theta=equity_price)
-    psi_val = psi(rho=rho, scale=scale, phi=phi, theta=equity_price)
+    gamma_val = gamma(rho=rho, scale=scale, delta=delta, pi=vol_price, theta=equity_price, zeta=zeta)
+    beta_val = beta(rho=rho, scale=scale, pi=vol_price, theta=equity_price, zeta=zeta)
+    psi_val = psi(rho=rho, scale=scale, theta=equity_price, zeta=zeta)
     
     mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
-    var = (1 - phi**2) * vol_data
+    var = zeta * vol_data
     
     draws =  mean + np.sqrt(var) * pd.DataFrame(_threadsafe_gaussian_rvs(var.size), index=vol_data.index)
     data = pd.concat([vol_data, draws], axis=1).dropna()
@@ -309,40 +311,37 @@ def compute_step2(data, parameter_mapping=None):
     
     estimates = wls_results.params.rename(parameter_mapping)
     
-    # We force phi^2 >=0
-    # estimates['phi_squared'] =  np.maximum(1 - np.mean(wls_results.wresid**2), 0)
     estimates['zeta'] = np.mean(wls_results.wresid**2)
     
-    phi2_cov = pd.DataFrame(np.atleast_2d(np.cov(wls_results.wresid**2)), index=['zeta'],
-                            columns=['zeta'])
+    zeta_cov = pd.DataFrame(np.atleast_2d(np.cov(wls_results.wresid**2)), index=['zeta'], columns=['zeta'])
     return_cov = wls_results.cov_params().rename(columns=parameter_mapping).rename(parameter_mapping)
-    return_cov = return_cov.merge(phi2_cov, left_index=True, right_index=True, how='outer').fillna(0)
+    return_cov = return_cov.merge(zeta_cov, left_index=True, right_index=True, how='outer').fillna(0)
     return_cov = return_cov.sort_index(axis=1).sort_index(axis=0)
     
     return dict(estimates), return_cov
 
 
-def link_grad_structural(delta, equity_price, phi, rho, scale, vol_price):
+def link_grad_structural(delta, equity_price, rho, scale, vol_price, zeta):
     """
     This function computes the jacobian of the link function with respect to the structural paramters
-    phi, rho, scale, delta, equity_price, and vol_price
+    rho, scale, delta, equity_price, and vol_price, zeta
     
     Paramters
     ---------
     equity_price : scalar
     delta : scalar
-    phi : scalar
     rho : scalar
     scale : scalar
     vol_price : scalar
+    zeta : scalar
     
     Returns
     --------
     ndarray
     
     """
-    return_mat = link2_grad_in(delta=delta, phi=phi, pi=vol_price, rho=rho, scale=scale, theta=equity_price)
-    return_df = pd.DataFrame(return_mat, columns=['delta', 'phi', 'vol_price', 'rho', 'scale', 'equity_price'])
+    return_mat = link2_grad_in(delta=delta, pi=vol_price, rho=rho, scale=scale, theta=equity_price, zeta=zeta)
+    return_df = pd.DataFrame(return_mat, columns=['delta', 'vol_price', 'rho', 'scale', 'equity_price', 'zeta'])
 
     return return_df.sort_index(axis=1)
 
@@ -362,11 +361,10 @@ def second_criterion(structural_params, link_params, weight=None):
     scalar
     
     """
-    # _, beta, delta_link, gamma_val, psi, phi_squared, rho_link = link_params
-    delta, equity_price, phi, rho, scale, vol_price = structural_params
+    delta, equity_price, rho, scale, vol_price, zeta = structural_params
     
-    part1 = second_stage_moments(rho=rho, scale=scale, delta=delta, theta=equity_price, phi=phi,
-                                 pi=vol_price).ravel()
+    part1 = second_stage_moments(rho=rho, scale=scale, delta=delta, theta=equity_price, pi=vol_price, 
+                                zeta=zeta).ravel()
     part2 = np.array([link_params[key] for key in sorted(link_params)])
 
     diff = part1 - part2
@@ -384,8 +382,7 @@ def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None)
     if opts is None:
         opts = {'maxiter':200}
         
-    price_guess = {'equity_price': .5, 'vol_price': -1, 
-                   'phi': - np.sqrt(1 - np.maximum(reduced_form_params['zeta'], 0)),
+    price_guess = {'equity_price': .5, 'vol_price': -1, 'zeta': reduced_form_params['zeta'],
                    'rho': reduced_form_params['rho'], 'scale':reduced_form_params['scale'],
                    'delta':reduced_form_params['delta']}
 
@@ -451,18 +448,18 @@ def estimate_params(data, vol_estimates=None, vol_cov=None):
 def link_pi(omega, pi):
     """ Computes the link function relevent for estimating pi. """
 
-    returnval = np.squeeze(link_pi_in(delta=omega['delta'], phi=omega['phi'], psi=omega['psi'], rho=omega['rho'],
-                                      scale=omega['scale'], pi=pi))
+    returnval = np.squeeze(link_pi_in(delta=omega['delta'], psi=omega['psi'], rho=omega['rho'],
+                                      scale=omega['scale'], pi=pi, zeta=omega['zeta']))
     return returnval
 
 
 def covariance_kernel(omega, vol_price1, vol_price2, reduced_form_cov):
     """ This function computes the covariance kernel """
     
-    left_bread = link_pi_grad_in(delta=omega['delta'], phi=omega['phi'], pi=vol_price1, psi=omega['psi'],
-                                 rho=omega['rho'], scale=omega['scale']).T
-    right_bread = link_pi_grad_in(delta=omega['delta'], phi=omega['phi'], pi=vol_price2, psi=omega['psi'],
-                                  rho=omega['rho'], scale=omega['scale']).T
+    left_bread = link_pi_grad_in(delta=omega['delta'], pi=vol_price1, psi=omega['psi'],
+                                 rho=omega['rho'], scale=omega['scale'], zeta=omega['zeta']).T
+    right_bread = link_pi_grad_in(delta=omega['delta'], pi=vol_price2, psi=omega['psi'],
+                                  rho=omega['rho'], scale=omega['scale'], zeta=omega['zeta']).T
     
     return np.squeeze(left_bread.T @ reduced_form_cov @ right_bread)
 
