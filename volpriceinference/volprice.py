@@ -10,7 +10,7 @@ from collections import OrderedDict
 from volpriceinference import _simulate_autoregressive_gamma, _threadsafe_gaussian_rvs
 
 # We define some functions
-x, y, rho, scale, delta, phi, psi_sym = sym.symbols('x y rho scale delta phi psi_sym')
+x, y, rho, scale, delta, phi, psi_val = sym.symbols('x y rho scale delta phi psi_val')
 theta, pi = sym.symbols('theta pi')
 
 # We define the link functions.
@@ -38,10 +38,10 @@ link2_grad_in = sym.lambdify((delta, phi, pi, rho, scale, theta),
 
 # We now setup the link functions for the robust inference. 
 link_pi_sym = sym.Matrix([beta_sym, gamma_sym]).replace(theta, (1 - phi**2)**(-1) * 
-                                                        (psi - (phi / sym.sqrt(1 + rho) + ( 1 - phi**2)/2)))
-link_pi_in = sym.lambdify((delta, phi, pi, psi, rho, scale), link_pi_sym)
-link_pi_grad_in = sym.lambdify((delta, phi, pi, psi, rho, scale),
-                               link_pi_sym.jacobian((delta, phi, psi, rho, scale)))
+                                                        (psi_val - (phi / sym.sqrt(1 + rho) + ( 1 - phi**2)/2)))
+link_pi_in = sym.lambdify((delta, phi, pi, psi_val, rho, scale), link_pi_sym)
+link_pi_grad_in = sym.lambdify((delta, phi, pi, psi_val, rho, scale),
+                               link_pi_sym.jacobian((delta, phi, psi_val, rho, scale)))
 
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
@@ -310,10 +310,11 @@ def compute_step2(data, parameter_mapping=None):
     estimates = wls_results.params.rename(parameter_mapping)
     
     # We force phi^2 >=0
-    estimates['phi_squared'] =  np.maximum(1 - np.mean(wls_results.wresid**2), 0)
+    # estimates['phi_squared'] =  np.maximum(1 - np.mean(wls_results.wresid**2), 0)
+    estimates['zeta'] = np.mean(wls_results.wresid**2)
     
-    phi2_cov = pd.DataFrame(np.atleast_2d(np.cov(wls_results.wresid**2)), index=['phi_squared'],
-                        columns=['phi_squared'])
+    phi2_cov = pd.DataFrame(np.atleast_2d(np.cov(wls_results.wresid**2)), index=['zeta'],
+                            columns=['zeta'])
     return_cov = wls_results.cov_params().rename(columns=parameter_mapping).rename(parameter_mapping)
     return_cov = return_cov.merge(phi2_cov, left_index=True, right_index=True, how='outer').fillna(0)
     return_cov = return_cov.sort_index(axis=1).sort_index(axis=0)
@@ -383,7 +384,8 @@ def est_2nd_stage(reduced_form_params, reduced_form_cov, bounds=None, opts=None)
     if opts is None:
         opts = {'maxiter':200}
         
-    price_guess = {'equity_price': .5, 'vol_price': -1, 'phi': - np.sqrt(reduced_form_params['phi_squared']),
+    price_guess = {'equity_price': .5, 'vol_price': -1, 
+                   'phi': - np.sqrt(1 - np.maximum(reduced_form_params['zeta'], 0)),
                    'rho': reduced_form_params['rho'], 'scale':reduced_form_params['scale'],
                    'delta':reduced_form_params['delta']}
 
@@ -465,18 +467,41 @@ def covariance_kernel(omega, vol_price1, vol_price2, reduced_form_cov):
     return np.squeeze(left_bread.T @ reduced_form_cov @ right_bread)
 
 
-def compute_omega(vol_cov, reduced_cov, params):
-    """ Combines the two covariances into one. """
-
-    omega_names = ['delta', 'phi',  'psi', 'rho', 'scale'],
-
-    reduced_cov2 = pd.merge(vol_cov, reduced_cov, how='outer', left_index=True, right_index=True).fillna(0)
-    reduced_cov2 = reduced_cov2.rename(columns={'phi_squared':'phi'}).rename(
-        {'phi_squared':'phi'}).sort_index(axis=0).sort_index(axis=1)
-    reduced_cov2['phi'] *= 2 * abs(params['psi'])
-    omega_cov = reduced_cov2.loc[omega_names, omega_names]
+def compute_omega(data, vol_estimates=None, vol_cov=None):
+    """ 
+    We compute the reduced-form paramters and their covariance matrix. 
     
-    return omega_cov, {name:params[name] vor name in omega_names}
+    Paramters
+    ---------
+    data : ndarray
+        Must contain rtn and vol columns.
+    vol_estimates : dict
+        The volatility estimates.
+    vol_cov : dataframe
+        The volatility asymptotic covariance matrix.
+
+    Returns
+    ------
+    omega_est : dict
+    omega_cov: dataframe
+    """
+    
+    if vol_estimates is None or vol_cov is None:
+        # First we compute the volatility paramters.
+        init_constants = compute_init_constants(data.vol)
+        vol_estimates, vol_cov = vl.compute_vol_gmm(data.vol, init_constants=init_constants)
+    
+    # Then we compute the reduced form paramters.
+    reduced_form_estimates, cov_1st_stage2 = compute_step2(data)
+    reduced_form_estimates.update(vol_estimates) 
+    reduced_form_cov = vol_cov.merge(cov_1st_stage2, left_index=True, right_index=True,
+                                     how='outer').fillna(0).sort_index(axis=1).sort_index(axis=0)
+   
+    omega_names = ['beta', 'gamma', 'delta', 'zeta', 'psi', 'rho', 'scale']
+
+    omega_cov = reduced_form_cov.loc[omega_names, omega_names].sort_index(axis=0).sort_index(axis=1)
+    
+    return {name:reduced_form_estimates[name] for name in omega_names}, omega_cov
 
 
 # def projection_residual_process(omega, vol_price, vol_price_true, reduced_form_cov):

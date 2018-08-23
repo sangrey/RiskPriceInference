@@ -411,7 +411,7 @@ $\omega_{3} = \phi^{2}$ by the method of moments estimator for the variance.
 We can show that the estimator $\widehat{\omega}$ satisfies
 
 \begin{equation}
-    n^{1/2}(\widehat{\omega}-\omega_{0})\rightarrow_{d}\upsilon_{\omega}\sim N(0,V).
+    T^{1/2}(\widehat{\omega}-\omega_{0})\rightarrow_{d}\upsilon_{\omega}\sim N(0,V).
 \end{equation}%
 
 See the next section for details. 
@@ -430,12 +430,13 @@ First, we know that
 \end{equation}
 %
 when all parameters are evaluated at the true values. 
-This equation strongly identifies $\theta_{0}$ because $\phi_{0}^{2}$ is assumed to be bounded away from 1. 
+This equation strongly identifies $\theta_{0}$ because $\phi_{0}$ is assumed to be negative and bounded away from
+1 in magnitude.. 
 It follows from (\cref{psi_fn}) that
 
 \begin{equation}
-    \theta_{0}=L(\omega_{0})=(1-\phi_{0}^{2})^{-1}\left[ \psi_{0}-\phi_{0}\left( c_{0}\left( 1+\rho
-   _{0}\right) \right) ^{-1/2}-\left( 1-\phi_{0}^{2}\right) /2\right] .
+    \theta_{0} = L(\omega_{0})=(1-\phi_{0}^{2})^{-1}\left[ \psi_{0}-\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right)
+    \right)^{-1/2}-\left( 1-\phi_{0}^{2}\right) /2\right] .
 \end{equation}
 %
 Thus, we estimate $\theta_{0}$ by
@@ -450,7 +451,7 @@ By the delta method, we know that
     T^{1/2}(\widehat{\theta}-\theta_{0})\rightarrow_{d}L_{\omega}(\omega_{0})^{\prime}\upsilon_{\omega},
 \end{equation}
 %
-where $L_{\omega}(\omega )\in R^{d_{\omega}}$ denote the derivative of $L(\omega )$ w.r.t.\@ to $\omega$. 
+where $L_{\omega}(\omega )\in R^{d_{\omega}}$ denote the derivative of $L(\omega )$ w.r.t.\@ $\omega$. 
 The inference for $\theta $ is standard. 
 A confidence interval for $\theta $ can be obtained by inverting the $t$-statistic with a critical value obtained
 from the standard normal distribution.
