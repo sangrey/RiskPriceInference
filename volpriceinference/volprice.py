@@ -425,7 +425,7 @@ def qlr_stat(omega, true_prices, omega_cov, bounds=None):
     
     result = optimize.minimize(lambda x: qlr_in(x), x0=x0, method="SLSQP", bounds=bounds)
 
-    return qlr_in(vol_price_true) - result.fun
+    return qlr_in(list(true_prices.values())) - result.fun
 
 
 def qlr_sim(omega, true_prices, omega_cov, bounds=None):
@@ -480,5 +480,5 @@ def qlr_sim(omega, true_prices, omega_cov, bounds=None):
     
     result = optimize.minimize(lambda x: qlr_in_star(x), x0=vol_price_true, method="SLSQP", bounds=bounds)
     
-    return qlr_in_star(vol_price_true) - result.fun
-    
+    return qlr_in_star(list(true_prices.values())) - result.fun
+
