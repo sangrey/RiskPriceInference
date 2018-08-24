@@ -232,7 +232,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     x0 = list(init_constants.values())
 
     initial_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments),
-                                       x0=x0, method="SLSQP", bounds=bounds, options=options)
+                                       x0=x0, method="BFGS", bounds=bounds, options=options)
     
     moment_cov = vol_moments(vol_data, *initial_result.x).cov()
     weight_matrix = scilin.pinv(vol_moments(vol_data, *initial_result.x).cov());
@@ -434,7 +434,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None):
         else:
             return np.inf
         
-    result = optimize.minimize(lambda x: qlr_in(x), x0=true_prices, method="SLSQP", bounds=bounds)
+    result = optimize.minimize(lambda x: qlr_in(x), x0=true_prices, method="BFGS", bounds=bounds)
     returnval = qlr_in(true_prices) - result.fun
 
     # If the differrence above is not a number, I want the qlr_in(true_prices) to be worse.
@@ -502,8 +502,8 @@ def qlr_sim(true_prices, omega, omega_cov, bounds=None, innov_dim=10):
         return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))   
     
     results = [qlr_in_star(true_prices, innov=innov) - optimize.minimize(lambda x: qlr_in_star(x, innov=innov),
-                                                            x0=true_prices, 
-                                 method="SLSQP", bounds=bounds).fun for innov in innovations]
+                                                            x0=true_prices, method="BFGS", bounds=bounds).fun 
+               for innov in innovations]
     
     # Since we are only redrawing the second part.
     returnval = np.percentile([val if not np.isnan(val) else -np.inf for val in results], 95)
