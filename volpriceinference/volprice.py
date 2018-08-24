@@ -1,13 +1,17 @@
 import numpy as np
 import pandas as pd
-from scipy import optimize
+from scipy import optimize, stats
 from scipy import linalg as scilin
 import statsmodels.api as sm
 import statsmodels.tsa.api as tsa
 import sympy as sym
 import logging
 from collections import OrderedDict
+from functools import partial
+from itertools import product
 from volpriceinference import _simulate_autoregressive_gamma, _threadsafe_gaussian_rvs
+import tqdm
+from multiprocessing import Pool
 
 # We define some functions
 x, y, beta, gamma, rho, scale, delta, psi, zeta = sym.symbols('x y beta gamma rho scale delta psi zeta')
@@ -391,8 +395,9 @@ def compute_omega(data, vol_estimates=None, vol_cov=None):
     return {name:reduced_form_estimates[name] for name in omega_names}, omega_cov
 
 
-def qlr_stat(omega, true_prices, omega_cov, bounds=None):
-    """ This function computes the qlr_stat given the omega_estimates and covariance matrix.
+def qlr_stat(true_prices, omega, omega_cov, bounds=None):
+    """ 
+    This function computes the qlr_stat given the omega_estimates and covariance matrix.
     
     Paramters
     --------
@@ -411,24 +416,35 @@ def qlr_stat(omega, true_prices, omega_cov, bounds=None):
     if bounds is None:
         bounds = [(-10, 10), (-50, 0)]
     
-    cov_true_true = covariance_kernel(omega=omega, vol_price1=true_prices['vol'], vol_price2=true_prices['vol'],
-                                      equity_price1=true_prices['equity'], equity_price2=true_prices['equity'],
-                                      omega_cov=omega_cov)
-    x0 = [true_prices[name] for name in sorted(true_prices.keys())]
+    equity_true = true_prices[0]
+    vol_true = true_prices[1]
+    
+    cov_true_true = covariance_kernel(omega=omega, vol_price1=vol_true, vol_price2=vol_true,
+                                      equity_price1=equity_true, equity_price2=equity_true, omega_cov=omega_cov)
     
     def qlr_in(prices):
         link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega)) 
         cov_pi = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
                                    equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
+        returnval = np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
+        # Values that give nan's or infinities mean that the value given is extremely bad, which since I am 
+        # minimzing this mean it is extremely large.
+        if np.isfinite(returnval):
+            return returnval
+        else:
+            return np.inf
         
-        return np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
+    result = optimize.minimize(lambda x: qlr_in(x), x0=true_prices, method="SLSQP", bounds=bounds)
+    returnval = qlr_in(true_prices) - result.fun
+
+    # If the differrence above is not a number, I want the qlr_in(true_prices) to be worse.
+    if np.isnan(returnval):
+        returnval = np.inf
     
-    result = optimize.minimize(lambda x: qlr_in(x), x0=x0, method="SLSQP", bounds=bounds)
-
-    return qlr_in(list(true_prices.values())) - result.fun
+    return true_prices[0], true_prices[1], returnval
 
 
-def qlr_sim(omega, true_prices, omega_cov, bounds=None):
+def qlr_sim(true_prices, omega, omega_cov, bounds=None, innov_dim=10):
     """ 
     This function simulates the qlr_stat given the omega_estimates and covariance matrix, redrawing the error
     relevant for computing the moments projected onto (theta,pi) many times.
@@ -450,35 +466,84 @@ def qlr_sim(omega, true_prices, omega_cov, bounds=None):
     if bounds is None:
         bounds = [(-10, 10), (-50, 0)]
     
-    cov_true_true = covariance_kernel(omega=omega, vol_price1=true_prices['vol'], vol_price2=true_prices['vol'],
-                                      equity_price1=true_prices['equity'], equity_price2=true_prices['equity'],
-                                      omega_cov=omega_cov)
+    equity_true = true_prices[0]
+    vol_true = true_prices[1]
     
-#     # We start by simulating v_{moment_conds}
-    upsilon_star = stats.multivariate_normal.rvs(mean=np.zeros(2), cov=cov_true_true)
-    x0 = [true_prices[name] for name in sorted(true_prices.keys())]
+    cov_true_true = covariance_kernel(omega=omega, vol_price1=vol_true, vol_price2=vol_true,
+                                      equity_price1=equity_true, equity_price2=equity_true, omega_cov=omega_cov)
+    link_true = np.squeeze(compute_link(pi=vol_true, theta=equity_true, **omega)) 
+
+    def cov_params_true(prices):
+        return covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=vol_true,
+                                      equity_price1=prices[0], equity_price2=equity_true, omega_cov=omega_cov)
     
-    def link_star(prices):
-        link_in = np.squeeze(compute_link(pi=pi, **omega))
-        cov_pi_true = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=true_prices['vol'],
-                                      equity_price1=prices[0], equity_price2=true_prices['equity'],
-                                      omega_cov=omega_cov)
+    def project_resid(prices):
+            link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega)) 
+            
+            return link_in - cov_params_true(prices) @ np.linalg.solve(cov_true_true, link_true)
+
+    # Draw the innovation for the moments
+    innovations = stats.multivariate_normal.rvs(mean=np.zeros(2), size=innov_dim)
+    
+    def link_star(prices, innov):
+        returnval =  (project_resid(prices) + cov_params_true(prices) 
+                @ np.linalg.solve(np.linalg.cholesky(cov_true_true), innov))
+        if not np.any(np.isfinite(returnval)):
+            return np.array([np.inf, np.inf])
+        else: 
+            return returnval
         
-        # We combine computing h(pi, omega) and g_star into one step.
-        link_star_in = link_in - cov_pi_true @ np.linalg.solve(
-            cov_true_true, np.squeeze(compute_link(pi=vol_price_true, **omega))-upsilon_star)
-        
-        return link_star_in
-    
-    def qlr_in_star(pi):
-        link_in = link_star(prices=prices)
-        cov_pi = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
+    def qlr_in_star(prices, innov):
+        link_in = link_star(prices=prices,innov=innov)
+        cov_prices = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
                                    equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
         
         # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
-        return np.asscalar(link_in.T @ np.linalg.solve(cov_pi_pi, link_in))   
+        return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))   
     
-    result = optimize.minimize(lambda x: qlr_in_star(x), x0=vol_price_true, method="SLSQP", bounds=bounds)
+    results = [qlr_in_star(true_prices, innov=innov) - optimize.minimize(lambda x: qlr_in_star(x, innov=innov),
+                                                            x0=true_prices, 
+                                 method="SLSQP", bounds=bounds).fun for innov in innovations]
     
-    return qlr_in_star(list(true_prices.values())) - result.fun
+    # Since we are only redrawing the second part.
+    returnval = np.percentile([val if not np.isnan(val) else -np.inf for val in results], 95)
+    
+    return true_prices[0], true_prices[1], returnval
 
+
+def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vol_max=0, equity_min=0,
+                    equity_max=2,  use_tqdm=True):
+    """ This function computes the qlr statistics and organizes them into a dataframe. """
+    
+    it = product(np.linspace(0, equity_max, equity_dim), np.linspace(vol_min, 0, vol_dim))
+       
+    qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov)
+
+    with Pool(8) as pool:
+        if use_tqdm:
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=vol_dim*equity_dim))
+        else: 
+            draws = list(pool.imap_unordered(qlr_stat_in, it))
+    
+    draws_df = pd.DataFrame.from_records(draws, columns=['equity', 'vol', 'qlr'])
+    
+    return draws_df.pivot(index='vol', columns='equity',values='qlr').sort_index(axis=0).sort_index(axis=1)
+
+
+def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vol_max=0, equity_min=0,
+                    equity_max=2,  innov_dim=10, use_tqdm=True):
+    """ This function computes the qlr statistics and organizes them into a dataframe. """
+    
+    it = product(np.linspace(equity_max, equity_max, equity_dim), np.linspace(vol_min, vol_max, vol_dim))
+    
+    qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim)
+    
+    with Pool(8) as pool:
+        if use_tqdm:
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=vol_dim*equity_dim))
+        else: 
+            draws = list(pool.imap_unordered(qlr_sim_in, it))
+    
+    draws_df = pd.DataFrame.from_records(draws, columns=['equity', 'vol', 'qlr'])
+    
+    return draws_df.pivot(index='vol', columns='equity',values='qlr').sort_index(axis=0).sort_index(axis=1)
