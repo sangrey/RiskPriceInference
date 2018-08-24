@@ -18,7 +18,7 @@ x, y, beta, gamma, rho, scale, delta, psi, zeta = sym.symbols('x y beta gamma rh
 theta, pi = sym.symbols('theta pi')
 
 # We define the link functions.
-psi_sym = -sym.sqrt((1-zeta) / (scale * (1 + rho))) + (zeta / 2 - zeta * theta)
+psi_sym = -sym.sqrt((1-zeta) / (scale * (1 + rho))) + zeta / 2 - zeta * theta
 theta_sym = -zeta**(-1) * (psi + sym.sqrt((1-zeta) / (scale * (1 + rho))) -  1/2)
 a_func = rho * x / ( 1 + scale * x)
 alpha = psi * x + (zeta / 2) * x**2
@@ -29,9 +29,9 @@ gamma_sym = delta * sym.log(b_func_in.replace(x, pi + alpha.replace(x, theta-1))
 
 # We create the link functions.
 compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, zeta), gamma_sym.replace(psi, psi_sym),
-                             modules='numexpr')
-compute_beta = sym.lambdify((pi, rho, scale, theta, zeta), beta_sym.replace(psi, psi_sym), modules='numexpr')
-compute_psi = sym.lambdify((rho, scale, theta, zeta), psi_sym, modules='numexpr')
+                             modules='numpy')
+compute_beta = sym.lambdify((pi, rho, scale, theta, zeta), beta_sym.replace(psi, psi_sym), modules='numpy')
+compute_psi = sym.lambdify((rho, scale, theta, zeta), psi_sym, modules='numpy')
 
 # We now setup the link functions for the robust inference. 
 link_func_sym = sym.Matrix([beta - beta_sym, gamma - gamma_sym, (1-zeta) * (theta - theta_sym)])
@@ -614,3 +614,76 @@ def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vo
     draws_df = pd.DataFrame.from_records(draws, columns=['equity', 'vol', 'qlr'])
     
     return draws_df.pivot(index='vol', columns='equity',values='qlr').sort_index(axis=0).sort_index(axis=1)
+
+
+def compute_strong_id(omega, omega_cov):
+    """ 
+    This function computes the estimates and covariances for the strongly identified solution.
+
+    Paramters
+    --------
+    omega : dict
+        estimates
+    omega_cov : dataframe
+        estiamtes' covariance matrix.
+
+    Returns
+    -------
+    rtn_prices : dict
+        price estimates
+    return_cov : dataframe
+        Their covariance matrix
+    """
+
+    prices_init = [.5, -7]
+    
+    def qlr_in(prices, inv_weight=np.eye(3)):
+        link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega)) 
+        returnval = np.asscalar(link_in.T @ np.linalg.solve(inv_weight, link_in))
+
+        return returnval
+        
+
+    rtn_prices = optimize.minimize(qlr_in, x0=prices_init).x
+    bread = compute_link_grad(pi=rtn_prices[1], theta=rtn_prices[0],  **omega).T
+    inner_cov  = bread.T @ omega_cov @ bread
+    
+    # rtn_prices = optimize.minimize(lambda x: qlr_in(x, inv_weight=inner_cov), x0=prices_init).x
+    outer_bread = compute_link_price_grad(pi=rtn_prices[1], theta=rtn_prices[0], **omega)
+    outer_bread_inv = np.linalg.inv(outer_bread.T @ outer_bread)
+
+    names = ['equity_price', 'vol_price'] 
+    return_cov = pd.DataFrame(outer_bread_inv @ outer_bread.T @ inner_cov @ outer_bread @ outer_bread_inv.T, 
+                              columns=names, index=names)
+    
+    return {'equity_price': rtn_prices[0], 'vol_price': rtn_prices[1]}, return_cov
+
+
+def estimate_params_strong_id(data, vol_estimates=None, vol_cov=None):
+    """ 
+    We estimate the model in one step:
+    
+    Paramters
+    ---------
+    data : ndarray
+        Must contain rtn and vol columns.
+    vol_estimates : dict
+        The volatility estimates.
+    vol_cov : dataframe
+        The volatility asymptotic covariance matrix.
+
+    Returns
+    ------
+    estimates : dict
+    covariance : dataframe
+    """
+     
+    estimates, covariance = estimate_params(data, vol_estimates, vol_cov)
+    
+    price_estimates, price_cov = compute_strong_id(omega=estimates, omega_cov=covariance)
+    # Then we compute the reduced form paramters.
+    estimates.update(price_estimates) 
+    covariance = covariance.merge(price_cov, left_index=True, right_index=True,
+                                  how='outer').sort_index(axis=1).sort_index(axis=0)
+    
+    return estimates, covariance
