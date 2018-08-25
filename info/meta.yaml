@@ -32,9 +32,11 @@ test:
       - tests/test_riskprice.py
   commands:
       - python -m pytest tests/test_riskprice.py
+      - python -m flake8 --max-line-length=120 volpriceinference/volprice.py 
   requires:
       - python >=3.6
       - pytest 
+      - flake8
 
 about:
   home: https://gitlab.com/sangrey/RiskPriceInference
