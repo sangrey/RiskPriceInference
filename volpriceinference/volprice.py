@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from scipy import optimize, stats
+from scipy import stats
+from scipy.optimize import minimize
 from scipy import linalg as scilin
 import statsmodels.api as sm
 import statsmodels.tsa.api as tsa
@@ -19,7 +20,7 @@ theta, pi = sym.symbols('theta pi')
 
 # We define the link functions.
 psi_sym = -sym.sqrt((1-zeta) / (scale * (1 + rho))) + zeta / 2 - zeta * theta
-theta_sym = -zeta**(-1) * (psi + sym.sqrt((1-zeta) / (scale * (1 + rho))) -  1/2)
+theta_sym = -zeta**(-1) * (psi + sym.sqrt((1-zeta) / (scale * (1 + rho))) -  zeta / 2 )
 a_func = rho * x / ( 1 + scale * x)
 alpha = psi * x + (zeta / 2) * x**2
 b_func_in = 1 + scale * x
@@ -33,8 +34,15 @@ compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, zeta), gamma_sym.rep
 compute_beta = sym.lambdify((pi, rho, scale, theta, zeta), beta_sym.replace(psi, psi_sym), modules='numpy')
 compute_psi = sym.lambdify((rho, scale, theta, zeta), psi_sym, modules='numpy')
 
+# We create a function to compute theta
+compute_theta = sym.lambdify((psi, rho, scale, zeta), theta_sym.replace(zeta, sym.Min(zeta,1)), modules='numpy')
+pi_from_gamma = sym.solveset(gamma_sym - gamma, pi).args[0].args[0]
+compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), 
+                          pi_from_gamma.replace(zeta, sym.Min(zeta,1)), modules='numpy')
+
 # We now setup the link functions for the robust inference. 
 link_func_sym = sym.Matrix([beta - beta_sym, gamma - gamma_sym, (1-zeta) * (theta - theta_sym)])
+# link_func_sym = sym.Matrix([(1-zeta) * (theta - theta_sym)])
 link_func_sym.simplify()
 compute_link = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta), 
                        link_func_sym.replace(zeta, sym.Min(zeta,1)), modules='numpy')
@@ -48,6 +56,7 @@ link_moments_grad_sym = sym.Matrix([link_func_sym.jacobian([pi, theta])])
 link_moments_grad_sym.simplify()
 compute_link_price_grad = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
                                link_moments_grad_sym.replace(zeta, sym.Min(zeta,1)), modules='numpy')
+
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
                                   state_date='2000-01-01'):
@@ -240,14 +249,14 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     x0 = list(init_constants.values())
 
-    initial_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments),
-                                       x0=x0, method="SLSQP", options=options, bounds=bounds)
+    initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0, method="SLSQP",
+                              options=options, bounds=bounds)
     
     moment_cov = vol_moments(vol_data, *initial_result.x).cov()
     weight_matrix = scilin.pinv(vol_moments(vol_data, *initial_result.x).cov());
     
-    final_result = optimize.minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
-                                      x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
+    final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
+                            x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
     estimates = {key:val for key,val in zip(init_constants.keys(), final_result.x)}
 
     weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
@@ -442,7 +451,7 @@ def qlr_stat(true_prices, omega, omega_cov):
         else:
             return np.inf,jac
 
-    result = optimize.minimize(qlr_in, x0=true_prices, jac=True)
+    result = minimize(qlr_in, x0=true_prices, jac=True)
     returnval = qlr_in(true_prices)[0] - result.fun
 
     # If the differrence above is not a number, I want the qlr_in(true_prices) to be worse.
@@ -500,23 +509,21 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
     def qlr_in_star(prices, innov):
         link_in = link_star(prices=prices,innov=innov)
         cov_prices = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
-                                   equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
+                                       equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
         
         # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
         return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))   
     
-    results1 = []
-    results2 = [true_prices]
-    for innov in innovations:
-        x0 = np.mean(results2, axis=0) 
+    theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'],zeta=omega['zeta'])
+    pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
+                         rho=omega['scale'], zeta=omega['zeta'], theta=theta_init) 
 
-        val = optimize.minimize(lambda x: qlr_in_star(x, innov=innov), x0)
-
-        results1.append(qlr_in_star(true_prices, innov=innov) - val.fun)
-        results2.append(val.x)
+    prices_init = np.nan_to_num([theta_init, pi_init])
+    results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
+                                                                prices_init).fun for innov in innovations]
 
     # Since we are only redrawing the second part.
-    returnval = np.percentile([val if not np.isnan(val) else -np.inf for val in results1], 95)
+    returnval = np.percentile([val if not np.isnan(val) else -np.inf for val in results], 95)
     
     return true_prices[0], true_prices[1], returnval
 
@@ -634,27 +641,34 @@ def compute_strong_id(omega, omega_cov):
     return_cov : dataframe
         Their covariance matrix
     """
+    theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'],zeta=omega['zeta'])
+    pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
+                         rho=omega['scale'], zeta=omega['zeta'], theta=theta_init) 
 
-    prices_init = [.5, -7]
+    prices_init = np.nan_to_num([theta_init, pi_init])
     
-    def qlr_in(prices, inv_weight=np.eye(3)):
-        link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega)) 
+    def qlr_in(prices, inv_weight=None):
+        link_in = np.ravel(compute_link(pi=prices[1], theta=prices[0], **omega))
+
+        if inv_weight is None:
+            inv_weight = np.eye(link_in.size)
+
         returnval = np.asscalar(link_in.T @ np.linalg.solve(inv_weight, link_in))
 
         return returnval
-        
 
-    rtn_prices = optimize.minimize(qlr_in, x0=prices_init).x
+    rtn_prices = minimize(qlr_in, x0=prices_init).x
     bread = compute_link_grad(pi=rtn_prices[1], theta=rtn_prices[0],  **omega).T
     inner_cov  = bread.T @ omega_cov @ bread
     
     # rtn_prices = optimize.minimize(lambda x: qlr_in(x, inv_weight=inner_cov), x0=prices_init).x
     outer_bread = compute_link_price_grad(pi=rtn_prices[1], theta=rtn_prices[0], **omega)
-    outer_bread_inv = np.linalg.inv(outer_bread.T @ outer_bread)
+    outer_bread_inv = np.linalg.pinv(outer_bread.T @ outer_bread)
 
-    names = ['equity_price', 'vol_price'] 
+    # We use this ordering because pi is earlier than theta in the alphabet.
+    names = ['vol_price', 'equity_price'] 
     return_cov = pd.DataFrame(outer_bread_inv @ outer_bread.T @ inner_cov @ outer_bread @ outer_bread_inv.T, 
-                              columns=names, index=names)
+                              columns=names, index=names).sort_index(axis=0).sort_index(axis=1)
     
     return {'equity_price': rtn_prices[0], 'vol_price': rtn_prices[1]}, return_cov
 
