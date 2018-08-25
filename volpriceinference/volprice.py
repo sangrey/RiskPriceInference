@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from scipy.optimize import minimize
-from scipy import linalg as scilin
 import statsmodels.api as sm
 import statsmodels.tsa.api as tsa
 import sympy as sym
@@ -25,8 +24,8 @@ a_func = rho * x / (1 + scale * x)
 alpha = psi * x + (zeta / 2) * x**2
 b_func_in = 1 + scale * x
 beta_sym = a_func.replace(x, pi + alpha.replace(x, theta - 1)) - a_func.replace(x, pi + alpha.replace(x, theta))
-gamma_sym = delta * sym.log(b_func_in.replace(x, pi + alpha.replace(x, theta - 1))
-                            / b_func_in.replace(x, pi + alpha.replace(x, theta)))
+gamma_sym = delta * (sym.log(b_func_in.replace(x, pi + alpha.replace(x, theta - 1))) -
+                     sym.log(b_func_in.replace(x, pi + alpha.replace(x, theta))))
 
 # We create the link functions.
 compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, zeta), gamma_sym.replace(psi, psi_sym),
@@ -36,26 +35,30 @@ compute_psi = sym.lambdify((rho, scale, theta, zeta), psi_sym, modules='numpy')
 
 # We create a function to compute theta
 compute_theta = sym.lambdify((psi, rho, scale, zeta), theta_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
-pi_from_gamma = sym.solveset(gamma_sym - gamma, pi).args[0].args[0]
+
+pi_from_gamma = ((scale * alpha.replace(x, theta-1) - scale * alpha.replace(x, theta) * sym.exp(gamma/delta) + 1)
+                 / (scale * sym.exp(gamma/delta) - 1))
 compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta),
                           pi_from_gamma.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
 # We now setup the link functions for the robust inference.
-link_func_sym = sym.Matrix([beta - beta_sym, gamma - gamma_sym, (1 - zeta) * (theta - theta_sym)])
-# link_func_sym = sym.Matrix([(1-zeta) * (theta - theta_sym)])
-link_func_sym.simplify()
+# link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym, (1 - zeta) * (theta - theta_sym)]))
+link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym]))
 compute_link = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
                             link_func_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
-link_func_grad_sym = sym.Matrix([link_func_sym.jacobian([beta, delta, gamma, psi, rho, scale, zeta])])
-link_func_grad_sym.simplify()
+link_func_grad_sym = sym.simplify(sym.Matrix([link_func_sym.jacobian([beta, delta, gamma, psi, rho, scale,
+                                                                      zeta])]))
 compute_link_grad = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
                                  link_func_grad_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
-link_moments_grad_sym = sym.Matrix([link_func_sym.jacobian([pi, theta])])
-link_moments_grad_sym.simplify()
+link_moments_grad_sym = sym.simplify(sym.Matrix([link_func_sym.jacobian([pi, theta])]))
 compute_link_price_grad = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
                                        link_moments_grad_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
+
+constraint_sym = sym.simplify(b_func_in.replace(x, pi + alpha.replace(x, theta - 1)))
+compute_constraint = sym.lambdify((pi, psi, rho, theta, scale, zeta), 
+                                  constraint_sym.replace(zeta, sym.Min(zeta,1)), modules='numpy')
 
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
@@ -121,6 +124,10 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, zeta=1, 
     gamma_val = compute_gamma(rho=rho, scale=scale, delta=delta, pi=vol_price, theta=equity_price, zeta=zeta)
     beta_val = compute_beta(rho=rho, scale=scale, pi=vol_price, theta=equity_price, zeta=zeta)
     psi_val = compute_psi(rho=rho, scale=scale, theta=equity_price, zeta=zeta)
+
+    if compute_constraint(pi=vol_price, psi=psi_val, rho=rho, theta=equity_price, scale=scale, zeta=zeta) < 0:
+        raise ValueError(f"""The set of paramters given conflict with each other. No process exists with those
+                         paramters. You might want to make the volatility price smaller in magnitude.""")
 
     mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
     var = zeta * vol_data
@@ -252,13 +259,13 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0, method="SLSQP",
                               options=options, bounds=bounds)
 
-    weight_matrix = scilin.pinv(vol_moments(vol_data, *initial_result.x).cov())
+    weight_matrix = np.linalg.pinv(vol_moments(vol_data, *initial_result.x).cov())
 
     final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
                             x0=initial_result.x, method="SLSQP", bounds=bounds, options=options)
     estimates = {key: val for key, val in zip(init_constants.keys(), final_result.x)}
 
-    weight_matrix = scilin.pinv(vol_moments(vol_data, **estimates).cov())
+    weight_matrix = np.linalg.pinv(vol_moments(vol_data, **estimates).cov())
     moment_derivative = vol_moments_grad(vol_data, **estimates)
     cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
                        columns=list(init_constants.keys()), index=list(init_constants.keys()))
@@ -429,20 +436,27 @@ def qlr_stat(true_prices, omega, omega_cov):
     scalar
     """
 
+    def constraint(prices):
+        return compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
+                                  scale=omega['scale'], zeta=omega['zeta'])  
+
+    constraint_dict = constraints={'type':'ineq', 'fun':constraint}
+
+    # If we violate the contraint, we want to always reject.
+    if constraint(true_prices) < 0:
+        return true_prices[0], true_prices[1], np.inf
+
     def qlr_in(prices):
         link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega))
         cov_pi = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
                                    equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
         returnval = np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
 
-        # Values that give nan's or infinities mean that the value given is extremely bad, which since I am
-        # minimzing this mean it is extremely large.
-        if np.isfinite(returnval):
-            return returnval
-        else:
-            return np.inf
+        return returnval
 
-    returnval = qlr_in(true_prices) - minimize(qlr_in, x0=true_prices).fun
+    minimize_result = minimize(qlr_in, x0=true_prices, method='SLSQP', constraints=constraint_dict).fun
+
+    returnval = qlr_in(true_prices) - minimize_result
 
     # If the differrence above is not a number, I want the qlr_in(true_prices) to be worse.
     if np.isnan(returnval):
@@ -468,6 +482,15 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
     ------
     scalar
     """
+    def constraint(prices):
+        return compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
+                                  scale=omega['scale'], zeta=omega['zeta'])  
+
+    # If we violate the contraint, we want to always reject.
+    if constraint(true_prices) < 0:
+        return true_prices[0], true_prices[1], 0
+    constraint_dict = constraints={'type':'ineq', 'fun':constraint}
+
     equity_true = true_prices[0]
     vol_true = true_prices[1]
 
@@ -490,6 +513,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
     def link_star(prices, innov):
         returnval = (project_resid(prices) + cov_params_true(prices)
                      @ np.linalg.solve(np.linalg.cholesky(cov_true_true), innov))
+
         if not np.any(np.isfinite(returnval)):
             np.place(returnval, ~np.isfinite(returnval), np.inf)
             return returnval
@@ -501,19 +525,35 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
         cov_prices = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
                                        equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
 
-        # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
-        return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))
+        try: 
+            # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
+            returnval = np.asscalar(link_in.T @ np.linalg.lstsq(cov_prices, link_in, rcond=None)[0])
+        except ValueError:
+            # If we get a matrix algebra error in the previous expression we set the value of the link function to
+            # infinity.
+            returnval = np.inf
+
+        return returnval
 
     theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'], zeta=omega['zeta'])
     pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
                          rho=omega['scale'], zeta=omega['zeta'], theta=theta_init)
 
-    prices_init = np.nan_to_num([theta_init, pi_init])
-    results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
-                                                                prices_init).fun for innov in innovations]
+    prices_init = np.array([theta_init, pi_init])
 
-    # Since we are only redrawing the second part.
-    returnval = np.percentile([val if not np.isnan(val) else -np.inf for val in results], 95)
+    if not np.all(np.isfinite(prices_init)) or constraint(prices_init) <= 0:
+        prices_init = true_prices 
+
+    # from ipdb import set_trace
+    # set_trace()
+
+    results = [qlr_in_star(true_prices, innov=innov) - minimize(
+        lambda x: qlr_in_star(x, innov=innov), x0=prices_init, method='SLSQP', constraints=constraint_dict).fun
+        for innov in innovations]
+
+    # We replace all of the error values with zero because if we a lot of them we want to reject.
+    # We do not always reject because we are only redrawing part of the variation.
+    returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 95)
 
     return true_prices[0], true_prices[1], returnval
 
@@ -636,6 +676,12 @@ def compute_strong_id(omega, omega_cov):
 
     prices_init = np.nan_to_num([theta_init, pi_init])
 
+    def constraint(prices):
+        return compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
+                                  scale=omega['scale'], zeta=omega['zeta'])  
+
+    constraint_dict = constraints={'type':'ineq', 'fun':constraint}
+
     def qlr_in(prices, inv_weight=None):
         link_in = np.ravel(compute_link(pi=prices[1], theta=prices[0], **omega))
 
@@ -646,7 +692,7 @@ def compute_strong_id(omega, omega_cov):
 
         return returnval
 
-    rtn_prices = minimize(qlr_in, x0=prices_init).x
+    rtn_prices = minimize(qlr_in, x0=prices_init, method='SLSQP', constraints=constraint_dict).x
     bread = compute_link_grad(pi=rtn_prices[1], theta=rtn_prices[0], **omega).T
     inner_cov = bread.T @ omega_cov @ bread
 
