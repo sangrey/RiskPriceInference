@@ -319,6 +319,14 @@ def cov_to_corr(cov):
 
     return corr
 
+def constraint(prices, omega):
+    constraint1 = compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
+                                     scale=omega['scale'], zeta=omega['zeta'])  
+    constraint2 = - prices[1]
+
+    constraint3 = prices[0]
+
+    return np.array([constraint1, constraint2, constraint3])
 
 def estimate_zeta(data, parameter_mapping=None):
 
@@ -436,14 +444,11 @@ def qlr_stat(true_prices, omega, omega_cov):
     scalar
     """
 
-    def constraint(prices):
-        return compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
-                                  scale=omega['scale'], zeta=omega['zeta'])  
-
-    constraint_dict = constraints={'type':'ineq', 'fun':constraint}
+    constraint_in = partial(constraint, omega=omega)
+    constraint_dict = {'type':'ineq', 'fun':constraint_in}
 
     # If we violate the contraint, we want to always reject.
-    if constraint(true_prices) < 0:
+    if np.any(constraint_in(true_prices) < 0):
         return true_prices[0], true_prices[1], np.inf
 
     def qlr_in(prices):
@@ -482,14 +487,12 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
     ------
     scalar
     """
-    def constraint(prices):
-        return compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
-                                  scale=omega['scale'], zeta=omega['zeta'])  
+    constraint_in = partial(constraint, omega=omega)
+    constraint_dict = constraints={'type':'ineq', 'fun':constraint_in}
 
     # If we violate the contraint, we want to always reject.
-    if constraint(true_prices) < 0:
+    if np.any(constraint_in(true_prices) < 0):
         return true_prices[0], true_prices[1], 0
-    constraint_dict = constraints={'type':'ineq', 'fun':constraint}
 
     equity_true = true_prices[0]
     vol_true = true_prices[1]
@@ -541,7 +544,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
 
     prices_init = np.array([theta_init, pi_init])
 
-    if not np.all(np.isfinite(prices_init)) or constraint(prices_init) <= 0:
+    if not np.all(np.isfinite(prices_init)) or np.any(constraint_in(prices_init) <= 0):
         prices_init = true_prices 
 
     # from ipdb import set_trace
@@ -670,17 +673,17 @@ def compute_strong_id(omega, omega_cov):
     return_cov : dataframe
         Their covariance matrix
     """
-    theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'], zeta=omega['zeta'])
+    theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['rho'], zeta=omega['zeta'])
     pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
-                         rho=omega['scale'], zeta=omega['zeta'], theta=theta_init)
+                         rho=omega['rho'], zeta=omega['zeta'], theta=theta_init)
 
     prices_init = np.nan_to_num([theta_init, pi_init])
 
-    def constraint(prices):
-        return compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
-                                  scale=omega['scale'], zeta=omega['zeta'])  
+    constraint_in = partial(constraint, omega=omega)
+    constraint_dict = {'type':'ineq', 'fun':constraint_in}
 
-    constraint_dict = constraints={'type':'ineq', 'fun':constraint}
+    if np.any(constraint_in(prices_init) < 0):
+        prices_init = np.array([-1, 1])
 
     def qlr_in(prices, inv_weight=None):
         link_in = np.ravel(compute_link(pi=prices[1], theta=prices[0], **omega))
