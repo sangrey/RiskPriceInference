@@ -1,0 +1,134 @@
+\documentclass[11pt, letterpaper, twoside, final]{article}
+\usepackage{amssymb, amsmath, amsthm} 
+\usepackage{mathtools, thmtools}
+\usepackage{csquotes}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+\newcommand*{\dto}{\overset{d}{\longrightarrow}}
+\newcommand*{\pto}{\overset{p}{\longrightarrow}}
+\newcommand*{\mvert}{\,\middle\vert\,}
+\newcommand*{\ivert}{\,\vert\,}
+\newcommand*{\W}{\mathcal{W}}
+\DeclareMathOperator*{\Var}{\mathbb{V}ar}
+\DeclareMathOperator*{\Cov}{\mathbb{C}ov}
+\DeclareMathOperator*{\E}{\mathbb{E}}
+\newtheorem{lemma}{theorem}
+
+\author{Xu Cheng and Eric Renault and Paul Sangrey} 
+\title{Derivation of Asymptotic Covariance Matrix}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+One of the link functions is of the following form. 
+
+\begin{equation}   
+    \gamma = B(\pi + C(\theta-1)) - B(\pi + C(\theta)) 
+           = \delta \log(1 + c (\pi + C(\theta-1)) - \log(1 + c (\pi + C(\theta-1)) - 
+\end{equation}
+
+
+This implies that $1 + c(\pi + C(\theta-1)) > 0$.
+(If the second term is negative, the link function equals infinity, and so is obviously not rejected.)
+
+
+We can rewrite this in terms of the reduced form parameters as follows.
+
+\begin{equation}
+    1 + c (\pi + \psi (\theta-1) + \frac{\zeta}{2} (\theta-1)^2 > 0
+\end{equation}
+%
+or in terms of the structural parameters:
+%
+\begin{equation}
+    \label{eqn:constraint}
+    1 + c\left(\pi + \left(\frac{\phi}{\sqrt{c(1+\rho)}} + \frac{1-\phi^2}{2} - (1 -\phi^2)\theta\right)(\theta-1)
+    + \frac{1-\phi^2}{2} (\theta-1)^2\right) > 0.
+\end{equation}
+%
+This does not create any inferential difficulties in general because we can simply impose that there exists
+$\epsilon > 0$, such that the true parameters lie within that slightly smaller compact set.
+However, it is something that needs to be imposed in the estimation process as it significantly reduces the size
+of the resultant parameter space for $(\pi, \theta)'$.
+Since the equation has a nice clean form in terms of the reduced-form parameters, it is clearly consistently
+estimable as a subset of $\mathbb{R}^2$.
+
+Now, if $\phi > 0$, we have a second identification strategy for $\theta$. 
+We can solve 
+\begin{equation}
+    \label{eqn:psi_versus_theta}
+    \psi = \frac{-\sqrt{1-\zeta}}{\sqrt{c(1+\rho)}} + \frac{\zeta}{2} - \zeta \theta
+\end{equation}
+%
+for $\theta$.
+However, since the derivative of $\sqrt{1-\zeta}$ diverges as $\zeta \to 1$, we cannot do standard inference.
+However, we can get around this by doing the following.
+%
+Note that the \cref{eqn:psi_versus_theta} holding automatically implies the following holds as well: 
+%
+\begin{equation}
+    \label{eqn:smoothed_equation}
+    (1-\zeta)\left(\psi - \frac{-\sqrt{1-\zeta}}{\sqrt{c(1+\rho)}} + \frac{\zeta}{2} - \zeta \theta\right) = 0.
+\end{equation}
+%
+As long as $\zeta \in (0, 1)$, \cref{eqn:smoothed_equation} identifies $\theta$.  
+In addition, this equation is smooth. 
+Its derivative w.r.t.\@ $\theta$ converges to zero as $\zeta \to 1$.
+Consequently, we still cannot estimate $\theta$ from this equation and plug it in the second stage when we
+estimate $\pi$. 
+However, since it allows us to consistently estimate $\theta$, and \cref{eqn:constraint}  is an analytic  function
+of $(\theta, \pi)'$, we can use this condition to consistently estimate an identified set for $(\theta, \pi)'$ as
+well.
+
+In practice, we can use the robust identification strategy we used elsewhere in the paper to estimate a confidence
+region for $\theta$ from \cref{eqn:smoothed_equation} because this equation weakly identifies $\theta$.
+We can then combine this with the identified set where we do the joint analysis.
+
+We can then take the intersection of the two confidence regions to form a confidence region for the joint problem.
+(We use the Bonferronni correction, since we are now doing multiple tests).
+This gives us a valid confidence region for $(\pi, \theta)'$.
+
+The one main complication that this moment condition adds is that the covariance function $\Sigma(\xi, \xi )$ is
+no longer uniformly positive-definite.
+If $\zeta_0 = 1$, this moment condition has zero variance.
+In practice, you must replace inverting $\Sigma(\xi, \xi)$ with using the least-squares solution, (equivalently
+the Moore-Penrose pseudo-inverse). 
+This likely affects the proofs. 
+I conjecture that it does not invalidate them.
+
+The reason for this is as follows.
+Let $m_T$ be the moment condition for a sample size $T$ and $m_0$ be the true moment condition:
+
+\begin{equation}
+    T \Var\left((1 - \widehat{\zeta}_T) m_T -  (1 - \zeta_0) m_0\right).
+\end{equation}
+%
+We can rewrite that expression as 
+%
+\begin{align}
+    &\phantom{=} T \Var\left((1 - (\zeta_0 + \zeta_0 - \widehat{\zeta}_T) m_T -  (1 - \zeta_0) m_0\right) \\
+%
+    &= T \Var\left((1 - \zeta_0)  m_T -  (1 - \zeta_0) m_0 + (\zeta_0 - \widehat{\zeta}_T) m_T \right) \\
+    &= T \Var\left((1 - \zeta_0)  m_T -  (1 - \zeta_0) m_0\right)  + T o_p(1/T) \\
+    &= T (1 - \zeta_0)^2 \Var\left( m_T -   m_0\right)  + T o_p(1). 
+\end{align}
+%
+We can simplify the quadratic criterion function for any $\zeta_T \neq 1$: 
+%
+\begin{equation}
+    Q_T =  T (1- \widehat{\zeta}) m_T \Var_T\left((1-\widehat{\zeta}_T) m_T\right)^{-1} (1- \widehat{\zeta}) m_T  
+%
+    = T m_T \Var_T(m_T)^{-1} m_T  + o_p(1)
+\end{equation}
+
+This is uniformly continuous in $\zeta_T$.
+We are modifying the criterion function at $\zeta_T = 1$, but since $\theta$ is parameters not identified at this
+point, the modification is innocuous. 
+
+
+\end{document}
+
+

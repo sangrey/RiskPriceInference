@@ -43,7 +43,8 @@ compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta),
 
 # We now setup the link functions for the robust inference.
 # link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym, (1 - zeta) * (theta - theta_sym)]))
-link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym]))
+# link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym]))
+link_func_sym = sym.simplify(sym.Matrix([(1-zeta) * (theta - theta_sym)]))
 compute_link = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
                             link_func_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
@@ -387,7 +388,7 @@ def covariance_kernel(omega, vol_price1, vol_price2, equity_price1, equity_price
     left_bread = compute_link_grad(pi=vol_price1, theta=equity_price1, **omega).T
     right_bread = compute_link_grad(pi=vol_price2, theta=equity_price2, **omega).T
 
-    return np.squeeze(left_bread.T @ omega_cov @ right_bread)
+    return np.atleast_2d(np.squeeze(left_bread.T @ omega_cov @ right_bread))
 
 
 def compute_omega(data, vol_estimates=None, vol_cov=None):
@@ -452,7 +453,7 @@ def qlr_stat(true_prices, omega, omega_cov):
         return true_prices[0], true_prices[1], np.inf
 
     def qlr_in(prices):
-        link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega))
+        link_in = np.ravel(compute_link(pi=prices[1], theta=prices[0], **omega))
         cov_pi = covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=prices[1],
                                    equity_price1=prices[0], equity_price2=prices[0], omega_cov=omega_cov)
         returnval = np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
@@ -470,7 +471,7 @@ def qlr_stat(true_prices, omega, omega_cov):
     return true_prices[0], true_prices[1], returnval
 
 
-def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
+def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=5):
     """
     This function simulates the qlr_stat given the omega_estimates and covariance matrix, redrawing the error
     relevant for computing the moments projected onto (theta,pi) many times.
@@ -499,23 +500,23 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
 
     cov_true_true = covariance_kernel(omega=omega, vol_price1=vol_true, vol_price2=vol_true,
                                       equity_price1=equity_true, equity_price2=equity_true, omega_cov=omega_cov)
-    link_true = np.squeeze(compute_link(pi=vol_true, theta=equity_true, **omega))
+    link_true = np.ravel(compute_link(pi=vol_true, theta=equity_true, **omega))
 
     def cov_params_true(prices):
         return covariance_kernel(omega=omega, vol_price1=prices[1], vol_price2=vol_true,
                                  equity_price1=prices[0], equity_price2=equity_true, omega_cov=omega_cov)
 
     def project_resid(prices):
-        link_in = np.squeeze(compute_link(pi=prices[1], theta=prices[0], **omega))
+        link_in = np.ravel(compute_link(pi=prices[1], theta=prices[0], **omega))
 
         return link_in - cov_params_true(prices) @ np.linalg.solve(cov_true_true, link_true)
 
     # Draw the innovation for the moments
-    innovations = stats.multivariate_normal.rvs(mean=np.zeros(link_true.shape[0]), size=innov_dim)
+    innovations = stats.multivariate_normal.rvs(mean=np.zeros(link_true.size), size=innov_dim)
 
     def link_star(prices, innov):
-        returnval = (project_resid(prices) + cov_params_true(prices)
-                     @ np.linalg.solve(np.linalg.cholesky(cov_true_true), innov))
+        returnval = np.ravel(project_resid(prices) + cov_params_true(prices) @
+                             np.linalg.solve(np.linalg.cholesky(cov_true_true), np.ravel(innov)))
 
         if not np.any(np.isfinite(returnval)):
             np.place(returnval, ~np.isfinite(returnval), np.inf)
@@ -556,7 +557,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10):
 
     # We replace all of the error values with zero because if we a lot of them we want to reject.
     # We do not always reject because we are only redrawing part of the variation.
-    returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 95)
+    returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 100-alpha)
 
     return true_prices[0], true_prices[1], returnval
 
@@ -609,7 +610,7 @@ def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, 
 
 
 def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vol_max=0, equity_min=0,
-                    equity_max=2, innov_dim=10, use_tqdm=True):
+                    equity_max=2, innov_dim=10, use_tqdm=True, alpha=5):
     """
     This function computes the qlr statistics and organizes them into a dataframe.
 
@@ -643,7 +644,7 @@ def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vo
 
     it = product(np.linspace(equity_min, equity_max, equity_dim), np.linspace(vol_min, vol_max, vol_dim))
 
-    qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim)
+    qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha)
 
     with Pool(8) as pool:
         if use_tqdm:
