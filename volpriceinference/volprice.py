@@ -598,7 +598,8 @@ def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, 
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=vol_dim * equity_dim))
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=vol_dim * equity_dim,
+                                            leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
@@ -646,7 +647,8 @@ def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vo
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=vol_dim * equity_dim))
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=vol_dim * equity_dim,
+                                            leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_sim_in, it))
 
