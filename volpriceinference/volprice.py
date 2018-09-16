@@ -12,7 +12,7 @@ from functools import partial
 from itertools import product
 from volpriceinference import _simulate_autoregressive_gamma, _threadsafe_gaussian_rvs
 import tqdm
-import multiprocessing as mp
+from multiprocessing import Pool
 
 # We define some functions
 x, y, beta, gamma, rho, scale, delta, psi, zeta = sym.symbols('x y beta gamma rho scale delta psi zeta')
@@ -482,11 +482,11 @@ def qlr_stat(true_prices, omega, omega_cov):
     return true_prices[0], true_prices[1], returnval
 
 
-def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=5):
+def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=.05):
     """
     Simulate the qlr_stat given the omega_estimates and covariance matrix, redrawing the error.
 
-    It computes the erorr relevant for computing the moments projected onto (theta,pi) many times.
+    It computes the erorr relevant for computing the moments projected onto (theta, pi) many times.
 
     Paramters
     --------
@@ -567,7 +567,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=5):
 
     # We replace all of the error values with zero because if we a lot of them we want to reject.
     # We do not always reject because we are only redrawing part of the variation.
-    returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 100 - alpha)
+    returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 100 * (1 - alpha))
 
     return true_prices[0], true_prices[1], returnval
 
@@ -607,7 +607,7 @@ def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, 
 
     qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov)
 
-    with mp.get_context('forkserver').Pool(8) as pool:
+    with Pool(8) as pool:
         if use_tqdm:
             draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=vol_dim * equity_dim,
                                             leave=False))
@@ -620,7 +620,7 @@ def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, 
 
 
 def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vol_max=0, equity_min=0,
-                    equity_max=2, innov_dim=10, use_tqdm=True, alpha=5):
+                    equity_max=2, innov_dim=10, use_tqdm=True, alpha=.05):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -656,7 +656,7 @@ def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vo
 
     qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha)
 
-    with mp.get_context('forkserver').Pool(8) as pool:
+    with Pool(8) as pool:
         if use_tqdm:
             draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=vol_dim * equity_dim,
                                             leave=False))
@@ -746,7 +746,20 @@ def estimate_params_strong_id(data, vol_estimates=None, vol_cov=None):
     return estimates, covariance
 
 
-def compute_rejection_proportion(est_arr, true_params, alpha=.05, use_tqdm=True):
+def _compute_qlr_reject(params, true_prices, innov_dim, alpha):
+    """Compute the qlr statistic and the robust qlr quantile."""
+    param_est, param_cov = params
+    names = ['equity_price', 'vol_price']
+    omega = {name: val for name, val in param_est.items() if name not in names}
+    omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
+
+    qlr = qlr_stat(true_prices, omega, omega_cov)[-1]
+    qlr_quantile = qlr_sim(true_prices, omega, omega_cov, innov_dim, alpha)[-1]
+
+    return qlr, qlr_quantile
+
+
+def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True):
     """
     Compute the proportion rejected by the model.
 
@@ -758,30 +771,30 @@ def compute_rejection_proportion(est_arr, true_params, alpha=.05, use_tqdm=True)
         The value to consider rejecting.
     alpha : scalar in [0,1], optional
         The signficance level of the test.
+    innov_dim : positive scalar, optional
+        The number of simulations inside the conditional simulation.
     use_tqdm : bool, optional
         Whether to wrap the iterable using tqdm.
 
     Returns
-    ------ statistics : ndarray
+    ------
+    results : dataframe
         The QLR statistics.
-    prop : ndarray of bool
-        Whether each value was accepted or rejected.
 
     """
-    names = ['equity_price', 'vol_price']
-    statistics = []
+    true_prices = true_params['equity_price'], true_params['vol_price']
 
-    if use_tqdm:
-        it = tqdm.tqdm_notebook(est_arr)
-    else:
-        it = est_arr
+    qlr_reject_in = partial(_compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha)
 
-    for param_est, param_cov in it:
-        omega = {name: val for name, val in param_est.items() if name not in names}
-        omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
+    with Pool(8) as pool:
+        if use_tqdm:
+            results = pd.DataFrame(list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_reject_in, est_arr),
+                                                           total=len(est_arr))))
+        else:
+            results = pd.DataFrame(list(pool.imap_unordered(qlr_reject_in, est_arr)))
 
-        qlr = qlr_stat([true_params['equity_price'], true_params['vol_price']], omega, omega_cov)[-1]
+    results.columns = ['qlr_stat', 'robust_qlr_qauntile']
+    results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=3)
+    results['robust'] = results.loc[:, 'qlr_stat'] >= results.loc[:, 'robust_qlr_qauntile']
 
-        statistics.append(qlr)
-
-    return np.array(statistics), (np.array(statistics) >= stats.chi2.ppf(1 - alpha, df=3))
+    return results
