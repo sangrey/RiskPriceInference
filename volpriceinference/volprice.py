@@ -43,15 +43,16 @@ compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta),
                           pi_from_gamma.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
 # We now setup the link functions for the robust inference.
-link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym, (theta - theta_sym)]))
+link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym, 4 * (1 - zeta) * (theta - theta_sym)]))
 # link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym]))
 # link_func_sym = sym.simplify(sym.Matrix([(1-zeta) * (theta - theta_sym)]))
 compute_link = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
                             link_func_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
-link_func_grad_sym = sym.simplify(sym.Matrix([link_func_sym.jacobian([beta, delta, gamma, psi, rho, scale,
-                                                                      zeta])]))
-compute_link_grad = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
+link_func_grad_sym = sym.simplify(sym.Matrix([link_func_sym.jacobian( 
+    [beta, delta, gamma, psi, rho, scale, zeta])]))
+
+compute_link_grad_in = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
                                  link_func_grad_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
 link_moments_grad_sym = sym.simplify(sym.Matrix([link_func_sym.jacobian([pi, theta])]))
@@ -62,6 +63,23 @@ constraint_sym = sym.simplify(b_func_in.replace(x, pi + alpha.replace(x, theta -
 compute_constraint = sym.lambdify((pi, psi, rho, theta, scale, zeta),
                                   constraint_sym.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
+mean = (rho * x + scale * delta)
+var = 2 * scale * rho * x + scale**2 * delta
+row1 = y - mean
+row3 = y**2 - (mean**2 + var)
+_vol_moments = sym.Matrix([row1, row1 * x, row3, row3 * x, row3 * x**2])
+vol_moment_lambda = sym.lambdify([x, y, rho, scale, delta], _vol_moments, modules='numpy')
+vol_moments_grad_lambda = sym.lambdify([x, y, rho, scale, delta], _vol_moments.jacobian([delta, rho, scale])[:],
+                                       modules='numpy')
+
+def compute_link_grad(beta, delta, gamma, pi, psi, rho, scale, theta, zeta):
+    
+    grad = compute_link_grad_in(beta, delta, gamma, pi, psi, rho, scale, theta, zeta)
+
+    grad[np.isnan(grad)] = np.inf
+
+    return grad
+    
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
                                   state_date='2000-01-01'):
@@ -141,42 +159,66 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, zeta=1, 
     return data
 
 
+# def vol_moments(vol_data, delta, rho, scale):
+#     """Compute the moments for the volatility."""
+#     x = vol_data.values[:-1]
+#     y = vol_data.values[1:]
+
+#     mean = rho * x + scale * delta
+#     var = 2 * scale * rho * x + scale**2 * delta
+
+#     row1 = y - mean
+#     row2 = row1 * x
+#     row3 = y**2 - (var + mean**2)
+
+#     row4 = row3 * x 
+#     row5 = row3 * x**2 
+
+#     returndf = pd.DataFrame(np.column_stack([row1, row2, row3, row4, row5]), index=vol_data.index[1:])
+#     # returndf = pd.DataFrame(np.column_stack([row1, row2, row3, row4]), index=vol_data.index[1:])
+
+#     return returndf
+
+
 def vol_moments(vol_data, delta, rho, scale):
-    """Compute the moments for the volatility."""
     x = vol_data.values[:-1]
     y = vol_data.values[1:]
-
-    mean = rho * x + scale * delta
-    var = 2 * scale * rho * x + scale**2 * delta
-
-    row1 = y - mean
-    row2 = row1 * x
-    row3 = (y**2 - (var + mean**2))
-    row4 = row3 * x
-    row5 = row3 * x**2
-
-    returndf = pd.DataFrame(np.column_stack([row1, row2, row3, row4, row5]), index=vol_data.index[1:])
-
-    return returndf
+    
+    return pd.DataFrame(np.squeeze(vol_moment_lambda(x, y, rho, scale,delta)).T)
 
 
 def vol_moments_grad(vol_data, delta, rho, scale):
     """Compute the jacobian of the volatility moments."""
     x = vol_data.values[:-1]
+    y = vol_data.values[1:]
 
-    mean = rho * x + scale * delta
+    delta_mom = [np.mean(val) for val in vol_moments_grad_lambda(x, y, rho, scale, delta)]
 
-    row1 = np.column_stack([np.full(x.shape, scale), x, np.full(x.shape, delta)])
-    row2 = (row1.T * x).T
-    row3 = np.column_stack([scale**2 + 2 * scale * mean, 2 * scale * x + 2 * x * mean, 2 * rho * x + 2 * scale *
-                            delta + 2 * delta * mean])
-    row4 = (row3.T * x).T
-    row5 = (row3.T * x**2).T
+    return pd.DataFrame(np.reshape(delta_mom, (len(delta_mom) // 3, 3)), columns=['delta', 'rho', 'scale'])
 
-    mom_grad_in = -np.row_stack([np.mean(row1, axis=0), np.mean(row2, axis=0), np.mean(row3, axis=0),
-                                 np.mean(row4, axis=0), np.mean(row5, axis=0)])
+# def vol_moments_grad(vol_data, delta, rho, scale):
+#     """Compute the jacobian of the volatility moments."""
+#     x = vol_data.values[:-1]
+#     y = vol_data.values[1:]
+#     # row3 = 2 * (row1.T * (y - mean)).T - np.column_stack([np.zeros(x.shape), np.full(x.shape, 2 * scale),
+#     #                                                       np.full(x.shape, 2 * scale * delta)])
 
-    return pd.DataFrame(mom_grad_in, columns=['delta', 'rho', 'scale'])
+#     mean = rho * x + scale * delta
+
+#     row1 = np.column_stack([np.full(x.shape, scale), x, np.full(x.shape, delta)])
+#     row2 = (row1.T * x).T
+
+#     row3 = np.column_stack([scale**2 + 2 * scale * mean, 2 * scale * x + 2 * x * mean, 2 * rho * x + 2 * scale
+#                             * delta + 2 * delta * mean])
+#     row4 = (row3.T * x).T
+#     row5 = (row3.T * x**2).T
+
+#     mom_grad_in = -np.row_stack([np.mean(row1, axis=0), np.mean(row2, axis=0), np.mean(row3, axis=0),
+#                                  np.mean(row4, axis=0), np.mean(row5, axis=0)])
+#     # mom_grad_in = -np.row_stack([np.mean(row1, axis=0), np.mean(row2, axis=0), np.mean(row3, axis=0),
+#     #                              np.mean(row4, axis=0)])
+
+#     return pd.DataFrame(mom_grad_in, columns=['delta', 'rho', 'scale'])
 
 
 def compute_init_constants(vol_data):
@@ -262,10 +304,18 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0,
                               options=options, bounds=bounds)
+
+    if not initial_result['success']:
+        logging.warning(initial_result)
+
     weight_matrix = np.linalg.pinv(vol_moments(vol_data, *initial_result.x).cov())
 
     final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
                             x0=initial_result.x, method="L-BFGS-B", bounds=bounds, options=options)
+
+    if not final_result['success']:
+        logging.warning(final_result)
+
     estimates = {key: val for key, val in zip(init_constants.keys(), final_result.x)}
 
     weight_matrix = np.linalg.pinv(vol_moments(vol_data, **estimates).cov())
@@ -326,11 +376,11 @@ def constraint(prices, omega):
     """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
     constraint1 = compute_constraint(pi=prices[1], theta=prices[0], psi=omega['psi'], rho=omega['rho'],
                                      scale=omega['scale'], zeta=omega['zeta'])
-    constraint2 = - prices[1]
+    # constraint2 = - prices[1]
 
-    constraint3 = prices[0]
+    # constraint3 = prices[0]
 
-    return np.array([constraint1, constraint2, constraint3])
+    return np.array([constraint1])
 
 
 def estimate_zeta(data, parameter_mapping=None):
@@ -471,9 +521,12 @@ def qlr_stat(true_prices, omega, omega_cov):
         return true_prices[0], true_prices[1], np.inf
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, True), x0=true_prices, method='COBYLA',
-                               constraints=constraint_dict).fun
+                               constraints=constraint_dict)
 
-    returnval = _qlr_in(true_prices, omega, omega_cov, True) - minimize_result
+    if not minimize_result['success']:
+        logging.warning(minimize_result)
+
+    returnval = _qlr_in(true_prices, omega, omega_cov, True) - minimize_result.fun
 
     # If the differrence above is not a number, I want the qlr_in(true_prices) to be worse.
     if np.isnan(returnval):
@@ -699,8 +752,12 @@ def compute_strong_id(omega, omega_cov):
     if np.any(constraint_in(prices_init) < 0):
         prices_init = np.array([-1, 1])
 
-    rtn_prices = minimize(lambda x: _qlr_in(x, omega, omega_cov), x0=prices_init, method='COBYLA',
-                          constraints=constraint_dict).x
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov), x0=prices_init, method='COBYLA',
+                          constraints=constraint_dict)
+    rtn_prices  = minimize_result.x
+
+    if not minimize_result['success']:
+        logging.warning(minimize_result)
 
     bread = compute_link_grad(pi=rtn_prices[1], theta=rtn_prices[0], **omega).T
     inner_cov = bread.T @ omega_cov @   bread
@@ -746,20 +803,44 @@ def estimate_params_strong_id(data, vol_estimates=None, vol_cov=None):
     return estimates, covariance
 
 
-def _compute_qlr_reject(params, true_prices, innov_dim, alpha):
-    """Compute the qlr statistic and the robust qlr quantile."""
+def compute_qlr_reject(params, true_prices, innov_dim, alpha, robust_quantile=True):
+    """
+    Compute the proportion rejected by the model.
+
+    Paramters
+    --------
+    params: tuple of dict, dataframe
+        The paramter estimates and their covariances.
+    true_prices : iterable of length 2
+        The prices under the null.
+    innov_dim : positive scalar, optional
+        The number of simulations inside the conditional simulation.
+    alpha : scalar in [0,1], optional
+        The signficance level of the test.
+
+    Returns
+    ------
+    qlr : scalar
+        The QLR statistic 
+    qlr__quantile : scalar
+        The weak identificaton robust conditional qlr quantile.
+
+    """
     param_est, param_cov = params
     names = ['equity_price', 'vol_price']
     omega = {name: val for name, val in param_est.items() if name not in names}
     omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
 
     qlr = qlr_stat(true_prices, omega, omega_cov)[-1]
-    qlr_quantile = qlr_sim(true_prices, omega, omega_cov, innov_dim, alpha)[-1]
 
-    return qlr, qlr_quantile
+    if robust_quantile:
+        qlr_quantile = qlr_sim(true_prices, omega, omega_cov, innov_dim, alpha)[-1]
+        return qlr, qlr_quantile
+    else:
+        return qlr
 
 
-def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True):
+def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True, robust_quantile=True):
     """
     Compute the proportion rejected by the model.
 
@@ -775,16 +856,19 @@ def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use
         The number of simulations inside the conditional simulation.
     use_tqdm : bool, optional
         Whether to wrap the iterable using tqdm.
+    robust_quantile : bool, optional
+        Whether to compute and return the robust conditional QLR quantiles.
 
     Returns
     ------
     results : dataframe
-        The QLR statistics.
+        The QLR statistics, quantiles, and rejection proportions.
 
     """
     true_prices = true_params['equity_price'], true_params['vol_price']
 
-    qlr_reject_in = partial(_compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha)
+    qlr_reject_in = partial(compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha,
+                            robust_quantile=robust_quantile)
 
     with Pool(8) as pool:
         if use_tqdm:
@@ -793,8 +877,12 @@ def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use
         else:
             results = pd.DataFrame(list(pool.imap_unordered(qlr_reject_in, est_arr)))
 
-    results.columns = ['qlr_stat', 'robust_qlr_qauntile']
-    results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=3)
-    results['robust'] = results.loc[:, 'qlr_stat'] >= results.loc[:, 'robust_qlr_qauntile']
+    if robust_quantile:
+        results.columns = ['qlr_stat', 'robust_qlr_qauntile']
+        results['robust'] = results.loc[:, 'qlr_stat'] >= results.loc[:, 'robust_qlr_qauntile']
+    else:
+        results.columns = ['qlr_stat']
+
+    results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=2)
 
     return results
