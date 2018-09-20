@@ -43,7 +43,8 @@ compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta),
                           pi_from_gamma.replace(zeta, sym.Min(zeta, 1)), modules='numpy')
 
 # We now setup the link functions for the robust inference.
-link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym, 4 * (1 - zeta) * (theta - theta_sym)]))
+link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym, 
+                                         4 * (1 - zeta) * (theta - theta_sym)]))
 # link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym]))
 # link_func_sym = sym.simplify(sym.Matrix([(1-zeta) * (theta - theta_sym)]))
 compute_link = sym.lambdify((beta, delta, gamma, pi, psi, rho, scale, theta, zeta),
@@ -752,8 +753,8 @@ def compute_strong_id(omega, omega_cov):
     if np.any(constraint_in(prices_init) < 0):
         prices_init = np.array([-1, 1])
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov), x0=prices_init, method='COBYLA',
-                          constraints=constraint_dict)
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, True), x0=prices_init, method='COBYLA',
+                               constraints=constraint_dict)
     rtn_prices  = minimize_result.x
 
     if not minimize_result['success']:
