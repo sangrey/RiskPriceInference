@@ -44,7 +44,7 @@ pi_from_gamma = sym.solveset(gamma / delta - (b_func_in.replace(x, pi + alpha.re
 compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), pi_from_gamma.replace(
     phi, -sym.sqrt(1 - zeta)), modules='numpy')
 
-link_func_sym = sym.simplify(sym.Matrix([pi - pi_from_gamma, beta - beta_sym, psi - psi_sym, 1 - (zeta + phi**2)]))
+link_func_sym = sym.simplify(sym.Matrix([beta - beta_sym, gamma - gamma_sym, psi - psi_sym, 1 - (zeta + phi**2)]))
 
 compute_link_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), link_func_sym[-1],
                                 modules='numpy')
@@ -52,6 +52,56 @@ compute_link_in1 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, s
                                 modules='numpy')
 compute_link_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta), link_func_sym[-2:],
                                 modules='numpy')
+compute_link_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta), link_func_sym[1:],
+                                modules='numpy')
+
+
+def compute_constraint_prices(omega, case):
+
+    phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
+    theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'], zeta=omega['zeta'])
+    pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
+                         rho=omega['scale'], zeta=omega['zeta'], theta=theta_init)
+
+    if case == 0:
+        prices_init = np.nan_to_num([phi_init])
+    elif case == 2:
+        prices_init = np.nan_to_num([phi_init, theta_init])
+    else:
+        prices_init = np.nan_to_num([phi_init, pi_init, theta_init])
+
+    constraint_in = partial(constraint, omega=omega, case=case)
+    constraint_dict = {'type': 'ineq', 'fun': constraint_in}
+
+    if constraint_in(prices_init) < 0:
+        prices_init[1] = 0 
+    
+    if constraint_in(prices_init) < 0:
+        prices_init[2] = 0
+
+    return constraint_dict, prices_init
+
+def compute_names(case):
+
+    if case == 0:
+        names = ['phi']
+    elif case == 2:
+        names = ['phi', 'theta']
+    else:
+        names = ['phi', 'pi', 'theta']
+
+    return names
+
+def compute_bounds(case):
+
+    if case == 0:
+        bounds = [(-.9, 0)]
+    elif case == 2:
+        bounds = [(-.9, 0), (-10, None)]
+    else: 
+        bounds = [(-.9, 0), (None, 10), (-10, None)]
+
+    return bounds
 
 
 def compute_link(prices, omega, case):
@@ -62,6 +112,10 @@ def compute_link(prices, omega, case):
         compute_link_in = compute_link_in1
     elif case == 2:
         compute_link_in = compute_link_in2
+    elif case == 3:
+        compute_link_in = compute_link_in3
+    else:
+        raise NotImplementedError
 
     return compute_link_in(*prices, **omega)
 
@@ -74,6 +128,8 @@ compute_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, r
                                      link_func_grad_sym, modules='numpy')
 compute_link_grad_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta),
                                      link_func_grad_sym[-2:, :], modules='numpy')
+compute_link_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
+                                     link_func_grad_sym[1:, :], modules='numpy')
 
 
 def compute_link_grad(prices, omega, case):
@@ -84,6 +140,10 @@ def compute_link_grad(prices, omega, case):
         compute_link_grad_in = compute_link_grad_in1
     elif case == 2:
         compute_link_grad_in = compute_link_grad_in2
+    elif case == 3:
+        compute_link_grad_in = compute_link_grad_in3
+    else:
+        raise NotImplementedError
 
     return compute_link_grad_in(*prices, **omega)
 
@@ -96,6 +156,8 @@ compute_link_price_grad_in1 = sym.lambdify((phi, pi, theta, beta, delta, gamma, 
                                            link_moments_grad_sym, modules='numpy')
 compute_link_price_grad_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta),
                                            link_moments_grad_sym[-2:, [0, 2]], modules='numpy')
+compute_link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
+                                           link_moments_grad_sym[1:, :], modules='numpy')
 
 
 def compute_link_price_grad(prices, omega, case):
@@ -106,6 +168,10 @@ def compute_link_price_grad(prices, omega, case):
         compute_link_price_grad_in = compute_link_price_grad_in1
     elif case == 2:
         compute_link_price_grad_in = compute_link_price_grad_in2
+    elif case == 3:
+        compute_link_price_grad_in = compute_link_price_grad_in3
+    else:
+        raise NotImplementedError
 
     return np.atleast_2d(compute_link_price_grad_in(*prices, **omega))
 
@@ -116,12 +182,12 @@ compute_constraint1 = sym.lambdify((phi, pi, theta, psi, rho, scale), constraint
 
 def constraint(prices, omega, case=1):
     """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
-    if case != 1:
+    if case == 0 or case == 2:
         return 1
 
     constraint1 = compute_constraint1(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
 
-    return np.array([constraint1])
+    return constraint1
 
 
 mean = (rho * x + scale * delta)
@@ -150,9 +216,12 @@ covariance_kernel_in1 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi,
 covariance_kernel_in2 = sym.lambdify((phi1, theta1, phi2, theta2, psi, beta, delta, gamma, rho, scale, zeta,
                                       omega_cov), link_grad_left[-2:,:] * omega_cov * link_grad_left[-2:,:].T,
                                      modules='numpy')
+covariance_kernel_in3 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, delta, gamma, rho, scale,
+                                      zeta, omega_cov), link_grad_left[1:,:] * omega_cov * link_grad_left[1:,:].T,
+                                     modules='numpy')
 
 
-def covariance_kernel(prices1, prices2, omega, omega_cov, case=1):
+def covariance_kernel(prices1, prices2, omega, omega_cov, case):
 
     if case == 0:
         covariance_kernel_in = covariance_kernel_in0
@@ -160,6 +229,10 @@ def covariance_kernel(prices1, prices2, omega, omega_cov, case=1):
         covariance_kernel_in = covariance_kernel_in1
     elif case == 2:
         covariance_kernel_in = covariance_kernel_in2
+    elif case == 3:
+        covariance_kernel_in = covariance_kernel_in3
+    else:
+        raise NotImplementedError
 
     return covariance_kernel_in(*prices1, *prices2, omega_cov=omega_cov, **omega)
 
@@ -194,15 +267,15 @@ def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, t
     return draws
 
 
-def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, initial_point=None, time_dim=100,
+def simulate_data(theta=1, pi=0, rho=0, scale=1, delta=1, phi=0, initial_point=None, time_dim=100,
                   start_date='2000-01-01', case=1):
     """
     Take the reduced-form paramters and risk prices and returns the data.
 
     Parameters
     --------
-    equity_price: scalar
-    vol_price : scalar
+    theta: scalar
+    pi : scalar
     rho : scalar
         persistence
     scale : positive scalar
@@ -224,12 +297,12 @@ def simulate_data(equity_price=1, vol_price=0, rho=0, scale=1, delta=1, phi=0, i
                                              start_date=pd.to_datetime(start_date) - pd.Timedelta('1 day'),
                                              time_dim=time_dim + 1)
 
-    gamma_val = compute_gamma(rho=rho, scale=scale, delta=delta, pi=vol_price, theta=equity_price, phi=phi)
-    beta_val = compute_beta(rho=rho, scale=scale, pi=vol_price, theta=equity_price, phi=phi)
-    psi_val = compute_psi(rho=rho, scale=scale, theta=equity_price, phi=phi)
+    gamma_val = compute_gamma(rho=rho, scale=scale, delta=delta, pi=pi, theta=theta, phi=phi)
+    beta_val = compute_beta(rho=rho, scale=scale, pi=pi, theta=theta, phi=phi)
+    psi_val = compute_psi(rho=rho, scale=scale, theta=theta, phi=phi)
 
     if case == 1:
-        price_in = (phi, vol_price, equity_price)
+        price_in = (phi, pi, theta)
         if constraint(prices=price_in, omega={'psi': psi_val, 'rho': rho, 'scale': scale}, case=case) < 0:
             raise ValueError(f"""The set of paramters given conflict with each other. No process exists with those
                              paramters. You might want to make the volatility price smaller in magnitude.""")
@@ -333,7 +406,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     """
     if bounds is None:
-        bounds = [(0, 20), (-1, 1), (0, 20)]
+        bounds = [(0, None), (0, 1), (0, None)]
 
     if options is None:
         options = {'maxiter': 200}
@@ -535,16 +608,10 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     constraint_dict = {'type': 'ineq', 'fun': constraint_in}
 
     # If we violate the contraint, we want to always reject.
-    if np.any(constraint_in(true_prices) < 0):
+    if constraint_in(true_prices) < 0:
         return tuple(true_prices) + (np.inf,)
 
-    if bounds is None:
-        if case == 0:
-            bounds = [(-.9, .9)]
-        elif case == 1:
-            bounds = [(-.9, .9), (None, 0), (0, None)]
-        elif case == 2:
-            bounds = [(-.9, .9), (0, None)]
+    bounds = bounds if bounds is not None else compute_bounds(case) 
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=true_prices, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
@@ -585,7 +652,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=.05, bounds=None,
     constraint_dict = {'type': 'ineq', 'fun': constraint_in}
 
     # If we violate the contraint, we want to always reject.
-    if np.any(constraint_in(true_prices) < 0):
+    if constraint_in(true_prices) < 0:
         return tuple(true_prices) + (0,)
 
     cov_true_true = covariance_kernel(true_prices, true_prices, omega_cov=omega_cov, omega=omega, case=case)
@@ -625,29 +692,9 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=.05, bounds=None,
             returnval = np.inf
 
         return returnval
-
-    phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
-    theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'], zeta=omega['zeta'])
-    pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
-                         rho=omega['scale'], zeta=omega['zeta'], theta=theta_init)
-
-    if case == 0:
-        prices_init = np.array([phi_init])
-    elif case == 1:
-        prices_init = np.array([phi_init, pi_init, theta_init])
-    elif case == 2:
-        prices_init = np.array([phi_init, theta_init])
-
-    if not np.all(np.isfinite(prices_init)) or np.any(constraint_in(prices_init) <= 0):
-        prices_init = true_prices
-
-    if bounds is None:
-        if case == 0:
-            bounds = [(-.9, .9)]
-        elif case == 1:
-            bounds = [(-.9, .9), (None, 0), (0, None)]
-        elif case == 2:
-            bounds = [(-.9, .9), (0, None)]
+    
+    constraint_dict, prices_init = compute_constraint_prices(omega, case)
+    bounds = bounds if bounds is not None else compute_bounds(case) 
 
     results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
                                                                 x0=prices_init, method='SLSQP',
@@ -777,36 +824,8 @@ def compute_strong_id(omega, omega_cov, bounds=None, case=1):
         Their covariance matrix
 
     """
-    theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['rho'], zeta=omega['zeta'])
-    phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
-    pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
-                         rho=omega['rho'], zeta=omega['zeta'], theta=theta_init)
-
-    if case == 0:
-        prices_init = np.nan_to_num([phi_init])
-    elif case == 1:
-        prices_init = np.nan_to_num([phi_init, pi_init, theta_init])
-    elif case == 2:
-        prices_init = np.nan_to_num([phi_init, theta_init])
-
-    constraint_in = partial(constraint, omega=omega, case=case)
-    constraint_dict = {'type': 'ineq', 'fun': constraint_in}
-
-    if np.any(constraint_in(prices_init) < 0):
-        if case == 0:
-            prices_init = np.array([phi_init])
-        elif case == 1:
-            prices_init = np.array([phi_init, 0, 0])
-        elif case == 2:
-            prices_init = np.array([phi_init, 0])
-
-    if bounds is None:
-        if case == 0:
-            bounds = [(-.9, .9)]
-        elif case == 1:
-            bounds = [(-.9, .9), (None, 0), (0, None)]
-        elif case == 2:
-            bounds = [(-.9, .9), (0, None)]
+    constraint_dict, prices_init = compute_constraint_prices(omega, case)
+    bounds = bounds if bounds is not None else compute_bounds(case) 
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=prices_init, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
@@ -822,12 +841,7 @@ def compute_strong_id(omega, omega_cov, bounds=None, case=1):
     outer_bread_inv = np.linalg.pinv(outer_bread.T @ outer_bread)
 
     # We use this ordering because pi is earlier than theta in the alphabet.
-    if case == 0:
-        names = ['phi']
-    elif case == 1:
-        names = ['phi', 'vol_price', 'equity_price']
-    elif case == 2:
-        names = ['phi', 'equity_price']
+    names = compute_names(case)
 
     return_cov = pd.DataFrame(outer_bread_inv @ outer_bread.T @ inner_cov @ outer_bread @ outer_bread_inv.T,
                               columns=names, index=names).sort_index(axis=0).sort_index(axis=1)
@@ -889,7 +903,7 @@ def compute_qlr_reject(params, true_prices, innov_dim, alpha, robust_quantile=Tr
 
     """
     param_est, param_cov = params
-    names = ['equity_price', 'phi', 'vol_price']
+    names = ['theta', 'phi', 'pi']
     omega = {name: val for name, val in param_est.items() if name not in names}
     omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
 
@@ -902,7 +916,8 @@ def compute_qlr_reject(params, true_prices, innov_dim, alpha, robust_quantile=Tr
         return qlr
 
 
-def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True, robust_quantile=True):
+def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True, robust_quantile=True,
+                            case=1):
     """
     Compute the proportion rejected by the model.
 
@@ -927,7 +942,7 @@ def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use
         The QLR statistics, quantiles, and rejection proportions.
 
     """
-    true_prices = true_params['equity_price'], true_params['vol_price']
+    true_prices = [true_params[name] for name in compute_names(case)] 
 
     qlr_reject_in = partial(compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha,
                             robust_quantile=robust_quantile)
@@ -945,6 +960,6 @@ def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use
     else:
         results.columns = ['qlr_stat']
 
-    results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=2)
+    results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha,df=len(true_prices))
 
     return results
