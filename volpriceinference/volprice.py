@@ -719,8 +719,8 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=.05, bounds=None,
     return tuple(true_prices) + (returnval,)
 
 
-def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vol_max=0, equity_min=0,
-                      equity_max=2, use_tqdm=True, case=1):
+def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0,
+                      theta_max=2, use_tqdm=True, case=1):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -730,17 +730,17 @@ def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, 
         estimates
     omega_cov : dataframe
         estimates' covariance matrix.
-    equity_dim : positive scalar, optional
-        The number of grid points for the equity price.
-    vol_dim : positive scalar, optional
-        The number of grid points for the vol price.
-    vol_min : scalar, optional
+    theta_dim : positive scalar, optional
+        The number of grid points for the theta price.
+    pi_dim : positive scalar, optional
+        The number of grid points for the pi price.
+    pi_min : scalar, optional
         The minimum grid point for the volatility price
-    vol_max : scalar, optional
+    pi_max : scalar, optional
         The maximum grid point for the volatility price
-    equity_min : scalar, optional
+    theta_min : scalar, optional
         The minimum grid point for the equity price
-    equity_max : scalar, optional
+    theta_max : scalar, optional
         The maximum grid point for the equity price
     use_tqdm : bool, optional
         Whehter to use tqdm.
@@ -750,24 +750,26 @@ def compute_qlr_stats(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, 
     draws_df : dataframe
 
     """
-    it = product(np.linspace(equity_min, equity_max, equity_dim), np.linspace(vol_min, vol_max, vol_dim))
+    it = product(np.linspace(-1, 1, phi_dim), np.linspace(pi_min, pi_max, pi_dim), np.linspace(theta_min,
+                                                                                                  theta_max,
+                                                                                                  theta_dim))
 
     qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, case=case)
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=vol_dim * equity_dim,
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=pi_dim * theta_dim,
                                             leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
-    draws_df = pd.DataFrame.from_records(draws, columns=['equity', 'vol', 'qlr'])
+    draws_df = pd.DataFrame.from_records(draws, columns=['theta', 'pi', 'qlr'])
 
-    return draws_df.pivot(index='vol', columns='equity', values='qlr').sort_index(axis=0).sort_index(axis=1)
+    return draws_df.pivot(index='pi', columns='theta', values='qlr').sort_index(axis=0).sort_index(axis=1)
 
 
-def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vol_max=0, equity_min=0,
-                    equity_max=2, innov_dim=10, use_tqdm=True, alpha=.05, case=1):
+def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0,
+                    theta_max=2, innov_dim=10, use_tqdm=True, alpha=.05, case=1):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -777,17 +779,17 @@ def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vo
         estimates
     omega_cov : dataframe
         estimates' covariance matrix.
-    equity_dim : positive scalar, optional
+    theta_dim : positive scalar, optional
         The number of grid points for the equity price.
-    vol_dim : positive scalar, optional
+    pi_dim : positive scalar, optional
         The number of grid points for the vol price.
-    vol_min : scalar, optional
+    pi_min : scalar, optional
         The minimum grid point for the volatility price
-    vol_max : scalar, optional
+    pi_max : scalar, optional
         The maximum grid point for the volatility price
-    equity_min : scalar, optional
+    theta_min : scalar, optional
         The minimum grid point for the equity price
-    equity_max : scalar, optional
+    theta_max : scalar, optional
         The maximum grid point for the equity price
     innov_dim : scalar, optional
         The number of draws to inside the simulation.
@@ -799,20 +801,20 @@ def compute_qlr_sim(omega, omega_cov, equity_dim=20, vol_dim=20, vol_min=-20, vo
     draws_df : dataframe
 
     """
-    it = product(np.linspace(equity_min, equity_max, equity_dim), np.linspace(vol_min, vol_max, vol_dim))
+    it = product(np.linspace(theta_min, theta_max, theta_dim), np.linspace(pi_min, pi_max, pi_dim))
 
     qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha)
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=vol_dim * equity_dim,
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=pi_dim * theta_dim,
                                             leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_sim_in, it))
 
-    draws_df = pd.DataFrame.from_records(draws, columns=['equity', 'vol', 'qlr'])
+    draws_df = pd.DataFrame.from_records(draws, columns=['theta', 'pi', 'qlr'])
 
-    return draws_df.pivot(index='vol', columns='equity', values='qlr').sort_index(axis=0).sort_index(axis=1)
+    return draws_df.pivot(index='pi', columns='theta', values='qlr').sort_index(axis=0).sort_index(axis=1)
 
 
 def compute_strong_id(omega, omega_cov, bounds=None, case=1):
