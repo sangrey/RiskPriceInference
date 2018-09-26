@@ -309,7 +309,7 @@ We use the conditional autoregressive CAR(1) model here, which we take from
 This model  specifies the conditional Laplace transform of the return as a function of $r_{t+1}$ given
 $\sigma^2_{t+1}, \sigma^2_t$.
 We start by specifying a parametric form for $C(x)$ and $D(x)$, and $E(x)$.
-We paramtrerize $C(x)$ using a quadratic form, which, along with our other rescritions, implies that the return is
+We paramterize $C(x)$ using a quadratic form, which, along with our other rescritions, implies that the return is
 conditionall Gaussian.
 
 \begin{defn}{Reduced-Form Functions}
@@ -325,7 +325,7 @@ In addition, as these functions parameterize the Laplace transform, they equal z
 It might seem as first, that imposing linearity for $D(x)$ and $E(x)$ is a strong restriction.
 This is not actually the case.
 Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility and hence greater than $\Var(r_{t+1}
-\ivert \sigma^2_{t+1}, \sigma^2_{t})$ and variances are positixe, the model implies they are linear.\footnote{We
+\ivert \sigma^2_{t+1}, \sigma^2_{t})$ and variances are positive, the model implies they are linear.\footnote{We
 show this in \cref{lemma:linearity_of_physical_functions} which is located in \cref{app:model_characterization}.}
 
 

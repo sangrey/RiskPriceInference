@@ -10,15 +10,17 @@ import logging
 from collections import OrderedDict
 from functools import partial
 from itertools import product
-from volpriceinference import _simulate_autoregressive_gamma, _threadsafe_gaussian_rvs
+from libvolpriceinference import _simulate_autoregressive_gamma
 import tqdm
 from multiprocessing import Pool
 
 # We define some functions
 _x, _y, beta, gamma, rho, scale, delta, psi, zeta = sym.symbols('_x _y beta gamma rho scale delta psi zeta')
 theta, pi, phi = sym.symbols('theta pi phi')
+pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols("""pi1 pi2 theta1 theta2 phi1 phi2""")
 
-# We define the link functions.
+
+#  We define the functions that specify the model.
 _psi_sym = (phi / sym.sqrt(scale * (1 + rho))) + (1 - phi**2) / 2 - (1 - phi**2) * theta
 _theta_sym = sym.solveset(psi - _psi_sym, theta).args[0]
 _A_func = rho * _x / (1 + scale * _x)
@@ -29,13 +31,14 @@ _beta_sym = (_A_func.replace(_x, pi + _C_func.replace(_x, theta - 1)) - _A_func.
 _gamma_sym = delta * (sym.log(_B_func_in.replace(_x, pi + _C_func.replace(_x, theta - 1))) -
                       sym.log(_B_func_in.replace(_x, pi + _C_func.replace(_x, theta))))
 
+
 # We create the link functions.
 compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, phi), _gamma_sym.replace(psi, _psi_sym),
                              modules='numpy')
 compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym.replace(psi, _psi_sym), modules='numpy')
 compute_psi = sym.lambdify((rho, scale, theta, phi), _psi_sym, modules='numpy')
 
-# We create a function to compute theta
+# We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
 compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.replace(phi, -sym.sqrt(1 - zeta)),
                              modules='numpy')
 _pi_from_gamma = sym.solveset(gamma / delta - (_B_func_in.replace(_x, pi + _C_func.replace(_x, theta - 1)) /
@@ -45,6 +48,8 @@ _pi_from_gamma = sym.solveset(gamma / delta - (_B_func_in.replace(_x, pi + _C_fu
 compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), _pi_from_gamma.replace(
     phi, -sym.sqrt(1 - zeta)), modules='numpy')
 
+
+# We create the functions to jointly specify the links.
 _link_sym = sym.simplify(sym.Matrix([beta - _beta_sym, gamma - _gamma_sym, psi - _psi_sym, 1 - (zeta + phi**2)]))
 
 _link_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_sym[-1],
@@ -55,6 +60,84 @@ _link_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta)
                          modules='numpy')
 _link_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta), _link_sym[1:],
                          modules='numpy')
+
+# We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
+# be positive.
+_constraint_sym = sym.simplify(_B_func_in.replace(_x, pi + _C_func.replace(_x, theta - 1)))
+_constraint1 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym, modules='numpy')
+_constraint2 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym.replace(theta-1, theta), 
+                            modules='numpy')
+
+# We define the moments used to estimate the volatility paramters.
+_mean = (rho * _x + scale * delta)
+_var = 2 * scale * rho * _x + scale**2 * delta
+_row1 = _y - _mean
+_row3 = _y**2 - (_mean**2 + _var)
+_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
+# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
+
+compute_vol_moments = sym.lambdify([_x, _y, rho, scale, delta], _vol_moments, modules='numpy')
+compute_vol_moments_grad = sym.lambdify([_x, _y, rho, scale, delta], _vol_moments.jacobian([delta, rho, scale])[:],
+                                        modules='numpy')
+
+
+# Define the gradient of the link function with respect to the reduced form paramters.
+_link_grad_sym = sym.simplify(sym.Matrix([_link_sym.jacobian([beta, delta, gamma, psi, rho, scale, zeta])]))
+
+_link_grad_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_grad_sym[-1, :],
+                              modules='numpy')
+_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta), _link_grad_sym,
+                              modules='numpy')
+_link_grad_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta), _link_grad_sym[-2:, :],
+                              modules='numpy')
+_link_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
+                              _link_grad_sym[1:, :], modules='numpy')
+
+omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
+
+# Define the gradient of the link function with respect to the structural paramters.
+_link_price_grad_sym = sym.simplify(sym.Matrix([_link_sym.jacobian([phi, pi, theta])]))
+
+_link_price_grad_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_price_grad_sym[-1, 0],
+                                    modules='numpy')
+_link_price_grad_in1 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
+                                    _link_price_grad_sym, modules='numpy')
+_link_price_grad_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta),
+                                    _link_price_grad_sym[-2:, [0, 2]], modules='numpy')
+_link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
+                                    _link_price_grad_sym[1:, :], modules='numpy')
+
+# I now define the covariance kernel.
+_link_grad_left = _link_grad_sym.replace(pi, pi1).replace(theta, theta1).replace(phi, phi1)
+_link_grad_right = _link_grad_sym.replace(pi, pi2).replace(theta, theta2).replace(phi, phi2)
+
+_cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, delta, gamma, rho, scale, zeta, omega_cov),
+                               _link_grad_left[-1, :] * omega_cov * _link_grad_right[-1, :].T, modules='numpy')
+
+_cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, delta, gamma, rho, scale, zeta,
+                                omega_cov), _link_grad_left * omega_cov * _link_grad_right.T, modules='numpy')
+
+_cov_kernel_in2 = sym.lambdify((phi1, theta1, phi2, theta2, psi, beta, delta, gamma, rho, scale, zeta, omega_cov),
+                               _link_grad_left[-2:, :] * omega_cov * _link_grad_right[-2:, :].T, modules='numpy')
+
+_cov_kernel_in3 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, delta, gamma, rho, scale, zeta,
+                                omega_cov), _link_grad_left[1:, :] * omega_cov * _link_grad_right[1:, :].T,
+                               modules='numpy')
+
+
+
+
+def constraint(prices, omega, case=1):
+    """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
+    if case == 0 or case == 2:
+        return 1
+
+    # This needs to be fixed.
+
+    constraint1 = _constraint1(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
+    constraint2 = _constraint1(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
+
+    return np.minimum(constraint1, constraint2)
 
 
 def compute_constraint_prices(omega, case):
@@ -120,18 +203,7 @@ def compute_link(prices, omega, case):
     else:
         raise NotImplementedError
 
-    return compute_link_in(*prices, **omega)
-
-
-_link_grad_sym = sym.simplify(sym.Matrix([_link_sym.jacobian([beta, delta, gamma, psi, rho, scale, zeta])]))
-_link_grad_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_grad_sym[-1, :],
-                              modules='numpy')
-_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta), _link_grad_sym,
-                              modules='numpy')
-_link_grad_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta), _link_grad_sym[-2:, :],
-                              modules='numpy')
-_link_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
-                              _link_grad_sym[1:, :], modules='numpy')
+    return np.ravel(compute_link_in(*prices, **omega))
 
 
 def compute_link_grad(prices, omega, case):
@@ -150,18 +222,6 @@ def compute_link_grad(prices, omega, case):
     return compute_link_grad_in(*prices, **omega)
 
 
-_link_price_grad_sym = sym.simplify(sym.Matrix([_link_sym.jacobian([phi, pi, theta])]))
-
-_link_price_grad_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_price_grad_sym[-1, 0],
-                                    modules='numpy')
-_link_price_grad_in1 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
-                                    _link_price_grad_sym, modules='numpy')
-_link_price_grad_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta),
-                                    _link_price_grad_sym[-2:, [0, 2]], modules='numpy')
-_link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta),
-                                    _link_price_grad_sym[1:, :], modules='numpy')
-
-
 def compute_link_price_grad(prices, omega, case):
     """Compute the gradient of the link function with respect to the structural parameters."""
     if case == 0:
@@ -176,54 +236,6 @@ def compute_link_price_grad(prices, omega, case):
         raise NotImplementedError
 
     return np.atleast_2d(compute_link_price_grad_in(*prices, **omega))
-
-
-_constraint_sym = sym.simplify(_B_func_in.replace(_x, pi + _C_func.replace(_x, theta - 1)))
-_constraint1 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym, modules='numpy')
-
-
-def constraint(prices, omega, case=1):
-    """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
-    if case == 0 or case == 2:
-        return 1
-
-    constraint1 = _constraint1(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
-
-    return constraint1
-
-
-_mean = (rho * _x + scale * delta)
-_var = 2 * scale * rho * _x + scale**2 * delta
-row1 = _y - _mean
-row3 = _y**2 - (_mean**2 + _var)
-_vol_moments = sym.Matrix([row1, row1 * _x, row3, row3 * _x, row3 * _x**2])
-
-
-compute_vol_moments = sym.lambdify([_x, _y, rho, scale, delta], _vol_moments, modules='numpy')
-compute_vol_moments_grad = sym.lambdify([_x, _y, rho, scale, delta], _vol_moments.jacobian([delta, rho, scale])[:],
-                                        modules='numpy')
-
-# I now define the covariance kernel.
-omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
-pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols("""pi1 pi2 theta1 theta2 phi1 phi2""")
-
-
-_link_grad_left = _link_grad_sym.replace(pi, pi1).replace(theta, theta1).replace(phi, phi1)
-_link_grad_right = _link_grad_sym.replace(pi, pi2).replace(theta, theta2).replace(phi, phi2)
-
-
-_cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, delta, gamma, rho, scale, zeta, omega_cov),
-                               _link_grad_left[-1, :] * omega_cov * _link_grad_right[-1, :].T, modules='numpy')
-
-_cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, delta, gamma, rho, scale, zeta,
-                                omega_cov), _link_grad_left * omega_cov * _link_grad_right.T, modules='numpy')
-
-_cov_kernel_in2 = sym.lambdify((phi1, theta1, phi2, theta2, psi, beta, delta, gamma, rho, scale, zeta, omega_cov),
-                               _link_grad_left[-2:, :] * omega_cov * _link_grad_right[-2:, :].T, modules='numpy')
-
-_cov_kernel_in3 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, delta, gamma, rho, scale, zeta,
-                                omega_cov), _link_grad_left[1:, :] * omega_cov * _link_grad_right[1:, :].T,
-                               modules='numpy')
 
 
 def covariance_kernel(prices1, prices2, omega, omega_cov, case):
@@ -262,14 +274,14 @@ def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, t
     """
     # If initial_point is not specified, we start at the unconditional mean.
 
-    initial_point = (scale * delta) / (1 - rho)
+    initial_point = (scale * delta) / (1 - rho) if initial_point is None else initial_point
 
     draws = _simulate_autoregressive_gamma(delta=delta, rho=rho, scale=scale, initial_point=initial_point,
                                            time_dim=time_dim)
 
-    draws = pd.DataFrame(draws, pd.date_range(start=start_date, freq='D', periods=time_dim))
+    draws_df = pd.Series(draws, pd.date_range(start=start_date, freq='D', periods=len(draws))).to_frame()
 
-    return draws
+    return draws_df
 
 
 def simulate_data(theta=1, pi=0, rho=0, scale=1, delta=1, phi=0, initial_point=None, time_dim=100,
@@ -315,7 +327,7 @@ def simulate_data(theta=1, pi=0, rho=0, scale=1, delta=1, phi=0, initial_point=N
     mean = gamma_val + beta_val * vol_data.shift(1) + psi_val * vol_data
     var = (1 - phi**2) * vol_data
 
-    draws = mean + np.sqrt(var) * pd.DataFrame(_threadsafe_gaussian_rvs(var.size), index=vol_data.index)
+    draws = mean + np.sqrt(var) * pd.DataFrame(np.random.standard_normal(var.size), index=vol_data.index)
     data = pd.concat([vol_data, draws], axis=1).dropna()
     data.columns = ['vol', 'rtn']
 
@@ -576,14 +588,14 @@ def compute_omega(data, vol_estimates=None, vol_cov=None):
 
     omega_names = ['beta', 'gamma', 'delta', 'zeta', 'psi', 'rho', 'scale']
 
-    omega_cov = reduced_form_cov.loc[omega_names, omega_names].sort_index(axis=0).sort_index(axis=1)
+    covariance = reduced_form_cov.loc[omega_names, omega_names].sort_index(axis=0).sort_index(axis=1)
 
-    return {name: reduced_form_estimates[name] for name in omega_names}, omega_cov
+    return {name: reduced_form_estimates[name] for name in omega_names}, covariance
 
 
 def _qlr_in(prices, omega, omega_cov, case):
 
-    link_in = np.ravel(compute_link(prices=prices, omega=omega, case=case))
+    link_in = compute_link(prices=prices, omega=omega, case=case)
 
     cov_pi = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
 
@@ -613,14 +625,12 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     scalar
 
     """
-    constraint_in = partial(constraint, omega=omega, case=case)
-    constraint_dict = {'type': 'ineq', 'fun': constraint_in}
+    constraint_dict = compute_constraint_prices(omega, case)[0]
+    bounds = bounds if bounds is not None else compute_bounds(case)
 
     # If we violate the contraint, we want to always reject.
-    if constraint_in(true_prices) < 0:
+    if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0: 
         return tuple(true_prices) + (np.inf,)
-
-    bounds = bounds if bounds is not None else compute_bounds(case)
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=true_prices, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
@@ -639,7 +649,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     return tuple(true_prices) + (returnval,)
 
 
-def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=.05, bounds=None, case=1):
+def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None, case=1):
     """
     Simulate the qlr_stat given the omega_estimates and covariance matrix, redrawing the error.
 
@@ -653,42 +663,35 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=.05, bounds=None,
         omega's covariance matrix.
     true_prices : dict
     bounds : iterable of tuples, optional
+    alpha : scalar in (0,1), optional
+        If alpha is none return all the draws otherwise return the (1-alpha) precentile.
 
     Returns
     ------
     scalar
 
     """
-    constraint_in = partial(constraint, omega=omega, case=case)
-    constraint_dict = {'type': 'ineq', 'fun': constraint_in}
+    constraint_dict = compute_constraint_prices(omega, case)[0]
+    bounds = bounds if bounds is not None else compute_bounds(case)
 
     # If we violate the contraint, we want to always reject.
-    if constraint_in(true_prices) < 0:
+    if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0: 
         return tuple(true_prices) + (0,)
 
     cov_true_true = covariance_kernel(true_prices, true_prices, omega_cov=omega_cov, omega=omega, case=case)
-    link_true = np.ravel(compute_link(true_prices, omega, case=case))
-
-    def cov_params_true(prices):
-        return covariance_kernel(prices, true_prices, omega_cov=omega_cov, omega=omega, case=case)
+    link_true = compute_link(true_prices, omega, case=case)
+    cov_params_true = partial(covariance_kernel, prices2=true_prices, omega=omega, omega_cov=omega_cov, case=case)
 
     def project_resid(prices):
-        link_in = np.ravel(compute_link(prices, omega, case=case))
-
-        return link_in - cov_params_true(prices) @ np.linalg.solve(cov_true_true, link_true)
+        link_in = compute_link(prices, omega, case=case)
+        return np.ravel(link_in - cov_params_true(prices) @ np.linalg.solve(cov_true_true, link_true))
 
     # Draw the innovation for the moments
-    innovations = stats.multivariate_normal.rvs(mean=np.zeros(link_true.size), size=innov_dim)
+    innovations = stats.multivariate_normal.rvs(cov=cov_true_true, size=innov_dim)
 
     def link_star(prices, innov):
-        returnval = np.ravel(project_resid(prices) + cov_params_true(prices) @
-                             np.linalg.solve(np.linalg.cholesky(cov_true_true), np.ravel(innov)))
-
-        if not np.any(np.isfinite(returnval)):
-            np.place(returnval, ~np.isfinite(returnval), np.inf)
-            return returnval
-        else:
-            return returnval
+        return project_resid(prices) + cov_params_true(prices) @ np.linalg.solve(cov_true_true,
+                                                                                 np.atleast_1d(innov))
 
     def qlr_in_star(prices, innov):
         link_in = link_star(prices=prices, innov=innov)
@@ -696,31 +699,32 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=.05, bounds=None,
 
         try:
             # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
-            returnval = np.asscalar(link_in.T @ np.linalg.lstsq(cov_prices, link_in, rcond=None)[0])
-        except ValueError:
+            returnval = np.asscalar(link_in.T @ np.linalg.pinv(cov_prices) @ link_in)
+        except np.linalg.LinAlgError:
             # If we get a matrix algebra error in the previous expression we set the value of the link function to
             # infinity.
             returnval = np.inf
 
         return returnval
 
-    constraint_dict, prices_init = compute_constraint_prices(omega, case)
-    bounds = bounds if bounds is not None else compute_bounds(case)
-
     results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
-                                                                x0=prices_init, method='SLSQP',
+                                                                x0=true_prices, method='SLSQP',
                                                                 constraints=constraint_dict, bounds=bounds).fun
                for innov in innovations]
 
-    # We replace all of the error values with zero because if we a lot of them we want to reject.
-    # We do not always reject because we are only redrawing part of the variation.
-    returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 100 * (1 - alpha))
+    if alpha is None:
+        return results
+    else:
+        # We replace all of the error values with zero because if we a lot of them we want to reject. We do not
+        # always reject because we are only redrawing part of the variation.
+        returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 100 * (1 - alpha),
+                              interpolation='lower')
 
-    return tuple(true_prices) + (returnval,)
+        return tuple(true_prices) + (returnval,)
 
 
 def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0,
-                      theta_max=2, use_tqdm=True, case=1):
+                      theta_max=2, phi_dim=20, use_tqdm=True, case=1):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -742,6 +746,8 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
         The minimum grid point for the equity price
     theta_max : scalar, optional
         The maximum grid point for the equity price
+    phi_dim: positive scalar, optional
+        THe number of gridpoints in the phi dimension.
     use_tqdm : bool, optional
         Whehter to use tqdm.
 
@@ -750,9 +756,8 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
     draws_df : dataframe
 
     """
-    it = product(np.linspace(-1, 1, phi_dim), np.linspace(pi_min, pi_max, pi_dim), np.linspace(theta_min,
-                                                                                                  theta_max,
-                                                                                                  theta_dim))
+    it = product(np.linspace(-.9, .9, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
+                 np.linspace(theta_min, theta_max, theta_dim))
 
     qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, case=case)
 
@@ -763,13 +768,13 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
-    draws_df = pd.DataFrame.from_records(draws, columns=['theta', 'pi', 'qlr'])
+    draws_df = pd.DataFrame.from_records(draws, columns=['phi', 'pi', 'theta', 'qlr'])
 
-    return draws_df.pivot(index='pi', columns='theta', values='qlr').sort_index(axis=0).sort_index(axis=1)
+    return draws_df
 
 
 def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0,
-                    theta_max=2, innov_dim=10, use_tqdm=True, alpha=.05, case=1):
+                    theta_max=2, phi_dim=20, innov_dim=10, use_tqdm=True, alpha=.05, case=1):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -779,6 +784,8 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
         estimates
     omega_cov : dataframe
         estimates' covariance matrix.
+    phi_dim : positive scalar, optional
+        The number of gridpoints for phi.
     theta_dim : positive scalar, optional
         The number of grid points for the equity price.
     pi_dim : positive scalar, optional
@@ -801,9 +808,10 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
     draws_df : dataframe
 
     """
-    it = product(np.linspace(theta_min, theta_max, theta_dim), np.linspace(pi_min, pi_max, pi_dim))
+    it = product(np.linspace(-1, 0, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
+                 np.linspace(theta_min, theta_max, theta_dim))
 
-    qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha)
+    qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha, case=case)
 
     with Pool(8) as pool:
         if use_tqdm:
@@ -812,9 +820,9 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
         else:
             draws = list(pool.imap_unordered(qlr_sim_in, it))
 
-    draws_df = pd.DataFrame.from_records(draws, columns=['theta', 'pi', 'qlr'])
+    draws_df = pd.DataFrame.from_records(draws, columns=['phi', 'pi', 'theta', 'qlr'])
 
-    return draws_df.pivot(index='pi', columns='theta', values='qlr').sort_index(axis=0).sort_index(axis=1)
+    return draws_df
 
 
 def compute_strong_id(omega, omega_cov, bounds=None, case=1):
@@ -923,7 +931,7 @@ def compute_qlr_reject(params, true_prices, innov_dim, alpha, robust_quantile=Tr
     omega = {name: val for name, val in param_est.items() if name not in names}
     omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
 
-    qlr = qlr_stat(true_prices, omega, omega_cov, case=case)[-1]
+    qlr = qlr_stat(true_prices=true_prices, omega=omega, omega_cov=omega_cov, case=case)[-1]
 
     if robust_quantile:
         qlr_quantile = qlr_sim(true_prices, omega, omega_cov, innov_dim=innov_dim, alpha=alpha, case=case)[-1]
@@ -961,7 +969,7 @@ def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use
     true_prices = [true_params[name] for name in compute_names(case)]
 
     qlr_reject_in = partial(compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha,
-                            robust_quantile=robust_quantile)
+                            case=case, robust_quantile=robust_quantile)
 
     with Pool(8) as pool:
         if use_tqdm:

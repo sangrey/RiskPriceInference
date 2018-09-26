@@ -50,7 +50,8 @@ std::vector<double> simulate_autoregressive_gamma(double delta, double rho, doub
           std::poisson_distribution<int> poi_dist(rho * draws.back() / scale);
           int latent_var = poi_dist(generator);
           std::gamma_distribution<double> gamma_dist(delta + latent_var, scale);
-          draws.push_back(gamma_dist(generator));
+        /* I force the draws to be bounded away from zero. Otherwise we can get stuck there.*/
+          draws.push_back(std::max(gamma_dist(generator), 1e-5));
     }
 
     std::vector<double> return_draws(draws.begin() + 1, draws.end());
