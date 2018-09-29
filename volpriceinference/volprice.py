@@ -15,10 +15,10 @@ import tqdm
 from multiprocessing import Pool
 
 # We define some functions
-_x, _y, beta, gamma, rho, scale, delta, psi, zeta = sym.symbols('_x _y beta gamma rho scale delta psi zeta')
-theta, pi, phi = sym.symbols('theta pi phi')
-pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols("""pi1 pi2 theta1 theta2 phi1 phi2""")
-
+_x, _y, beta, gamma, psi = sym.symbols('_x _y beta gamma psi', real=True, positive=True)
+rho, scale, delta, zeta = sym.symbols('rho scale delta zeta', real=True, positive=True)
+theta, pi, phi, pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols('theta pi phi pi1 pi2 theta1 theta2 phi1 phi2',
+                                                                   real=True)
 
 #  We define the functions that specify the model.
 _psi_sym = (phi / sym.sqrt(scale * (1 + rho))) + (1 - phi**2) / 2 - (1 - phi**2) * theta
@@ -26,31 +26,32 @@ _theta_sym = sym.solveset(psi - _psi_sym, theta).args[0]
 _A_func = rho * _x / (1 + scale * _x)
 _C_func = psi * _x + ((1 - phi**2) / 2) * _x**2
 _B_func_in = 1 + scale * _x
-_beta_sym = (_A_func.replace(_x, pi + _C_func.replace(_x, theta - 1)) - _A_func.replace(
-    _x, pi + _C_func.replace(_x, theta)))
-_gamma_sym = delta * (sym.log(_B_func_in.replace(_x, pi + _C_func.replace(_x, theta - 1))) -
-                      sym.log(_B_func_in.replace(_x, pi + _C_func.replace(_x, theta))))
-
+_beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x : theta - 1})}) - 
+             _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})) 
+_gamma_sym = delta * (sym.log(_B_func_in.xreplace({_x : pi + _C_func.xreplace({_x : theta - 1})})) -
+                      sym.log(_B_func_in.xreplace({_x : pi + _C_func.xreplace({_x : theta})})))
 
 # We create the link functions.
-compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, phi), _gamma_sym.replace(psi, _psi_sym),
+compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, phi), _gamma_sym.xreplace({psi : _psi_sym}),
                              modules='numpy')
-compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym.replace(psi, _psi_sym), modules='numpy')
+compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym.xreplace({psi : _psi_sym}), modules='numpy')
 compute_psi = sym.lambdify((rho, scale, theta, phi), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
-compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.replace(phi, -sym.sqrt(1 - zeta)),
+compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.xreplace({phi : -sym.sqrt(1 - zeta)}),
                              modules='numpy')
-_pi_from_gamma = sym.solveset(gamma / delta - (_B_func_in.replace(_x, pi + _C_func.replace(_x, theta - 1)) /
-                                               (_B_func_in.replace(_x, pi + _C_func.replace(_x, theta)))),
-                              pi).args[0].args[0].simplify()
-
-compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), _pi_from_gamma.replace(
-    phi, -sym.sqrt(1 - zeta)), modules='numpy')
-
+_pi_from_gamma_in  = _B_func_in.xreplace({_x : pi + _C_func})
+_pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) - 
+                                                     (_pi_from_gamma_in.xreplace({_x  : theta-1}) /
+                                                      _pi_from_gamma_in.xreplace({_x : theta})),
+                                                     pi).args[0].args[0]))
+compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), _pi_from_gamma.xreplace(
+    { phi : -sym.sqrt(1 - zeta)}), modules='numpy')
 
 # We create the functions to jointly specify the links.
-_link_sym = sym.simplify(sym.Matrix([beta - _beta_sym, gamma - _gamma_sym, psi - _psi_sym, 1 - (zeta + phi**2)]))
+_link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym.xreplace({psi : _psi_sym}), gamma -
+                                               _gamma_sym.xreplace({psi : _psi_sym}), psi - _psi_sym,
+                                               1 - (zeta + phi**2)])))
 
 _link_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_sym[-1],
                          modules='numpy')
@@ -63,9 +64,9 @@ _link_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, z
 
 # We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
 # be positive.
-_constraint_sym = sym.simplify(_B_func_in.replace(_x, pi + _C_func.replace(_x, theta - 1)))
+_constraint_sym = _B_func_in.xreplace({_x : pi + _C_func.replace(_x, theta - 1)})
 _constraint1 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym, modules='numpy')
-_constraint2 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym.replace(theta-1, theta), 
+_constraint2 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym.xreplace({theta-1 : theta}),
                             modules='numpy')
 
 # We define the moments used to estimate the volatility paramters.
@@ -73,8 +74,8 @@ _mean = (rho * _x + scale * delta)
 _var = 2 * scale * rho * _x + scale**2 * delta
 _row1 = _y - _mean
 _row3 = _y**2 - (_mean**2 + _var)
-_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
-# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
+# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
+_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
 
 compute_vol_moments = sym.lambdify([_x, _y, rho, scale, delta], _vol_moments, modules='numpy')
 compute_vol_moments_grad = sym.lambdify([_x, _y, rho, scale, delta], _vol_moments.jacobian([delta, rho, scale])[:],
@@ -82,7 +83,8 @@ compute_vol_moments_grad = sym.lambdify([_x, _y, rho, scale, delta], _vol_moment
 
 
 # Define the gradient of the link function with respect to the reduced form paramters.
-_link_grad_sym = sym.simplify(sym.Matrix([_link_sym.jacobian([beta, delta, gamma, psi, rho, scale, zeta])]))
+_link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, delta, gamma, psi, rho, scale,
+                                                                        zeta])])))
 
 _link_grad_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_grad_sym[-1, :],
                               modules='numpy')
@@ -96,7 +98,7 @@ _link_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, sca
 omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
 
 # Define the gradient of the link function with respect to the structural paramters.
-_link_price_grad_sym = sym.simplify(sym.Matrix([_link_sym.jacobian([phi, pi, theta])]))
+_link_price_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([phi, pi, theta])])))
 
 _link_price_grad_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_price_grad_sym[-1, 0],
                                     modules='numpy')
@@ -108,8 +110,8 @@ _link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rh
                                     _link_price_grad_sym[1:, :], modules='numpy')
 
 # I now define the covariance kernel.
-_link_grad_left = _link_grad_sym.replace(pi, pi1).replace(theta, theta1).replace(phi, phi1)
-_link_grad_right = _link_grad_sym.replace(pi, pi2).replace(theta, theta2).replace(phi, phi2)
+_link_grad_left = _link_grad_sym.xreplace({pi : pi1, theta : theta1, phi : phi1})
+_link_grad_right = _link_grad_sym.xreplace({pi : pi2, theta : theta2, phi : phi2})
 
 _cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, delta, gamma, rho, scale, zeta, omega_cov),
                                _link_grad_left[-1, :] * omega_cov * _link_grad_right[-1, :].T, modules='numpy')
@@ -125,8 +127,6 @@ _cov_kernel_in3 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta,
                                modules='numpy')
 
 
-
-
 def constraint(prices, omega, case=1):
     """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
     if case == 0 or case == 2:
@@ -135,7 +135,7 @@ def constraint(prices, omega, case=1):
     # This needs to be fixed.
 
     constraint1 = _constraint1(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
-    constraint2 = _constraint1(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
+    constraint2 = _constraint2(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
 
     return np.minimum(constraint1, constraint2)
 
@@ -424,7 +424,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     """
     if bounds is None:
-        bounds = [(0, None), (0, 1), (0, None)]
+        bounds = [(1e-5, None), (1e-4, 1), (1e-5, None)]
 
     if options is None:
         options = {'maxiter': 200}
@@ -629,7 +629,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     bounds = bounds if bounds is not None else compute_bounds(case)
 
     # If we violate the contraint, we want to always reject.
-    if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0: 
+    if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=true_prices, method='SLSQP',
@@ -675,7 +675,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     bounds = bounds if bounds is not None else compute_bounds(case)
 
     # If we violate the contraint, we want to always reject.
-    if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0: 
+    if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (0,)
 
     cov_true_true = covariance_kernel(true_prices, true_prices, omega_cov=omega_cov, omega=omega, case=case)
@@ -718,7 +718,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
         # We replace all of the error values with zero because if we a lot of them we want to reject. We do not
         # always reject because we are only redrawing part of the variation.
         returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 100 * (1 - alpha),
-                              interpolation='lower')
+                                  interpolation='lower')
 
         return tuple(true_prices) + (returnval,)
 
