@@ -26,31 +26,31 @@ _theta_sym = sym.solveset(psi - _psi_sym, theta).args[0]
 _A_func = rho * _x / (1 + scale * _x)
 _C_func = psi * _x + ((1 - phi**2) / 2) * _x**2
 _B_func_in = 1 + scale * _x
-_beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x : theta - 1})}) - 
-             _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})) 
-_gamma_sym = delta * (sym.log(_B_func_in.xreplace({_x : pi + _C_func.xreplace({_x : theta - 1})})) -
-                      sym.log(_B_func_in.xreplace({_x : pi + _C_func.xreplace({_x : theta})})))
+_beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
+             _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})}))
+_gamma_sym = delta * (sym.log(_B_func_in.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})})) -
+                      sym.log(_B_func_in.xreplace({_x: pi + _C_func.xreplace({_x: theta})})))
 
 # We create the link functions.
-compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, phi), _gamma_sym.xreplace({psi : _psi_sym}),
+compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, phi), _gamma_sym.xreplace({psi: _psi_sym}),
                              modules='numpy')
-compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym.xreplace({psi : _psi_sym}), modules='numpy')
+compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym.xreplace({psi: _psi_sym}), modules='numpy')
 compute_psi = sym.lambdify((rho, scale, theta, phi), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
-compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.xreplace({phi : -sym.sqrt(1 - zeta)}),
+compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.xreplace({phi: -sym.sqrt(1 - zeta)}),
                              modules='numpy')
-_pi_from_gamma_in  = _B_func_in.xreplace({_x : pi + _C_func})
-_pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) - 
-                                                     (_pi_from_gamma_in.xreplace({_x  : theta-1}) /
-                                                      _pi_from_gamma_in.xreplace({_x : theta})),
+_pi_from_gamma_in = _B_func_in.xreplace({_x: pi + _C_func})
+_pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) -
+                                                     (_pi_from_gamma_in.xreplace({_x: theta - 1}) /
+                                                      _pi_from_gamma_in.xreplace({_x: theta})),
                                                      pi).args[0].args[0]))
 compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), _pi_from_gamma.xreplace(
-    { phi : -sym.sqrt(1 - zeta)}), modules='numpy')
+    {phi: -sym.sqrt(1 - zeta)}), modules='numpy')
 
 # We create the functions to jointly specify the links.
-_link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym.xreplace({psi : _psi_sym}), gamma -
-                                               _gamma_sym.xreplace({psi : _psi_sym}), psi - _psi_sym,
+_link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym.xreplace({psi: _psi_sym}), gamma -
+                                               _gamma_sym.xreplace({psi: _psi_sym}), psi - _psi_sym,
                                                1 - (zeta + phi**2)])))
 
 _link_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_sym[-1],
@@ -64,9 +64,9 @@ _link_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, z
 
 # We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
 # be positive.
-_constraint_sym = _B_func_in.xreplace({_x : pi + _C_func.replace(_x, theta - 1)})
+_constraint_sym = _B_func_in.xreplace({_x: pi + _C_func.replace(_x, theta - 1)})
 _constraint1 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym, modules='numpy')
-_constraint2 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym.xreplace({theta-1 : theta}),
+_constraint2 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym.xreplace({theta - 1: theta}),
                             modules='numpy')
 
 # We define the moments used to estimate the volatility paramters.
@@ -110,8 +110,8 @@ _link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rh
                                     _link_price_grad_sym[1:, :], modules='numpy')
 
 # I now define the covariance kernel.
-_link_grad_left = _link_grad_sym.xreplace({pi : pi1, theta : theta1, phi : phi1})
-_link_grad_right = _link_grad_sym.xreplace({pi : pi2, theta : theta2, phi : phi2})
+_link_grad_left = _link_grad_sym.xreplace({pi: pi1, theta: theta1, phi: phi1})
+_link_grad_right = _link_grad_sym.xreplace({pi: pi2, theta: theta2, phi: phi2})
 
 _cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, delta, gamma, rho, scale, zeta, omega_cov),
                                _link_grad_left[-1, :] * omega_cov * _link_grad_right[-1, :].T, modules='numpy')
@@ -140,12 +140,16 @@ def constraint(prices, omega, case=1):
     return np.minimum(constraint1, constraint2)
 
 
-def compute_constraint_prices(omega, case):
+def compute_constraint_prices(omega, omega_cov, bounds, case):
     """Compute the slackness in the nonlinear constraint."""
     phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
     theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'], zeta=omega['zeta'])
-    pi_init = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], scale=omega['scale'],
-                         rho=omega['scale'], zeta=omega['zeta'], theta=theta_init)
+
+    vals = np.linspace(bounds[1][0], bounds[1][1], 100)
+    if case != 0 and case != 2:
+        arg_list = [(val, _qlr_in([phi_init, val, theta_init], omega, omega_cov, case=case)) for val in vals]
+
+        pi_init = pd.DataFrame(arg_list).sort_values(1).iloc[0, 0]
 
     if case == 0:
         prices_init = np.nan_to_num([phi_init])
@@ -157,6 +161,7 @@ def compute_constraint_prices(omega, case):
     constraint_in = partial(constraint, omega=omega, case=case)
     constraint_dict = {'type': 'ineq', 'fun': constraint_in}
 
+    # I ensure that the constraint is satisfied at the initial point.
     if constraint_in(prices_init) < 0:
         prices_init[1] = -.1
 
@@ -253,20 +258,6 @@ def covariance_kernel(prices1, prices2, omega, omega_cov, case):
 
     return covariance_kernel_in(*prices1, *prices2, omega_cov=omega_cov, **omega)
 
-
-def compute_initial_point(init, omega, omega_cov, bounds, case):
-    """Computes the inital point for the volatilty price."""
-
-    if case == 0 or case == 2:
-        return init
-    else: 
-        vals = np.linspace(bounds[1][0], bounds[1][1], 10) 
-        arg_list = [((init[0], val, init[2]), _qlr_in([init[0], val, init[2]], omega, omega_cov, case=case)) 
-                    for val in vals]
-
-        returnval = pd.DataFrame(arg_list).sort_values(1).iloc[0,0]
-
-    return returnval
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
                                   start_date='2000-01-01'):
@@ -447,7 +438,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     x0 = list(init_constants.values())
 
-    initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0, options=options, 
+    initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0, options=options,
                               bounds=bounds)
 
     if not initial_result['success']:
@@ -455,7 +446,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     weight_matrix = np.linalg.pinv(vol_moments(vol_data, *initial_result.x).cov())
 
-    final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix), 
+    final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
                             x0=initial_result.x, method="L-BFGS-B", bounds=bounds, options=options)
 
     if not final_result['success']:
@@ -639,14 +630,12 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     scalar
 
     """
-    constraint_dict = compute_constraint_prices(omega, case)[0]
     bounds = bounds if bounds is not None else compute_bounds(case)
+    constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
 
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
-
-    init = compute_initial_point(true_prices, omega=omega, omega_cov=omega_cov, bounds=bounds, case=case) 
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=init, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
@@ -687,8 +676,8 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     scalar
 
     """
-    constraint_dict = compute_constraint_prices(omega, case)[0]
     bounds = bounds if bounds is not None else compute_bounds(case)
+    constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
 
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
@@ -723,9 +712,8 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
         return returnval
 
-    init = compute_initial_point(true_prices, omega=omega, omega_cov=omega_cov, bounds=bounds, case=case) 
-    results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov), x0=init, 
-                                                                method='SLSQP', constraints=constraint_dict, 
+    results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov), x0=init,
+                                                                method='SLSQP', constraints=constraint_dict,
                                                                 bounds=bounds).fun for innov in innovations]
 
     if alpha is None:
@@ -861,9 +849,8 @@ def compute_strong_id(omega, omega_cov, bounds=None, case=1):
         Their covariance matrix
 
     """
-    constraint_dict, prices_init = compute_constraint_prices(omega, case)
     bounds = bounds if bounds is not None else compute_bounds(case)
-    init = compute_initial_point(prices_init, omega=omega, omega_cov=omega_cov, bounds=bounds, case=case) 
+    constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=init, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
@@ -873,7 +860,7 @@ def compute_strong_id(omega, omega_cov, bounds=None, case=1):
         logging.warning(minimize_result)
 
     if np.any(np.isnan(rtn_prices)):
-        rtn_prices = prices_init
+        rtn_prices = init
 
     bread = compute_link_grad(rtn_prices, omega, case=case).T
     inner_cov = bread.T @ omega_cov @ bread
@@ -944,14 +931,14 @@ def compute_qlr_reject(params, true_prices, innov_dim, alpha=None, robust_quanti
 
     """
     param_est, param_cov = params
-    names = compute_names(case) 
+    names = compute_names(case)
     omega = {name: val for name, val in param_est.items() if name not in names}
     omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
 
     qlr = qlr_stat(true_prices=true_prices, omega=omega, omega_cov=omega_cov, case=case)[-1]
 
     if robust_quantile:
-        qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega, alpha=alpha, omega_cov=omega_cov, 
+        qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega, alpha=alpha, omega_cov=omega_cov,
                                innov_dim=innov_dim, case=case)
         if alpha is None:
             return (qlr,) + tuple(qlr_quantile)
