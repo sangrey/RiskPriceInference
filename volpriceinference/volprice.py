@@ -181,11 +181,11 @@ def compute_names(case):
 def compute_bounds(case):
     """Compute the bounds for the structural parameters."""
     if case == 0:
-        bounds = [(-.9, .9)]
+        bounds = [(-.9, 0)]
     elif case == 2:
-        bounds = [(-.9, .9), (0, None)]
+        bounds = [(-.9, 0), (0, 20)]
     else:
-        bounds = [(-.9, .9), (None, 0), (0, None)]
+        bounds = [(-.9, 0), (-10, 0), (0, 20)]
 
     return bounds
 
@@ -253,6 +253,20 @@ def covariance_kernel(prices1, prices2, omega, omega_cov, case):
 
     return covariance_kernel_in(*prices1, *prices2, omega_cov=omega_cov, **omega)
 
+
+def compute_initial_point(init, omega, omega_cov, bounds, case):
+    """Computes the inital point for the volatilty price."""
+
+    if case == 0 or case == 2:
+        return init
+    else: 
+        vals = np.linspace(bounds[1][0], bounds[1][1], 10) 
+        arg_list = [((init[0], val, init[2]), _qlr_in([init[0], val, init[2]], omega, omega_cov, case=case)) 
+                    for val in vals]
+
+        returnval = pd.DataFrame(arg_list).sort_values(1).iloc[0,0]
+
+    return returnval
 
 def simulate_autoregressive_gamma(delta=1, rho=0, scale=1, initial_point=None, time_dim=100,
                                   start_date='2000-01-01'):
@@ -433,15 +447,15 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     x0 = list(init_constants.values())
 
-    initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0,
-                              options=options, bounds=bounds)
+    initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0, options=options, 
+                              bounds=bounds)
 
     if not initial_result['success']:
         logging.warning(initial_result)
 
     weight_matrix = np.linalg.pinv(vol_moments(vol_data, *initial_result.x).cov())
 
-    final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
+    final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix), 
                             x0=initial_result.x, method="L-BFGS-B", bounds=bounds, options=options)
 
     if not final_result['success']:
@@ -632,7 +646,9 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=true_prices, method='SLSQP',
+    init = compute_initial_point(true_prices, omega=omega, omega_cov=omega_cov, bounds=bounds, case=case) 
+
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=init, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
 
     if not minimize_result['success']:
@@ -707,10 +723,10 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
         return returnval
 
-    results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
-                                                                x0=true_prices, method='SLSQP',
-                                                                constraints=constraint_dict, bounds=bounds).fun
-               for innov in innovations]
+    init = compute_initial_point(true_prices, omega=omega, omega_cov=omega_cov, bounds=bounds, case=case) 
+    results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov), x0=init, 
+                                                                method='SLSQP', constraints=constraint_dict, 
+                                                                bounds=bounds).fun for innov in innovations]
 
     if alpha is None:
         return results
@@ -847,8 +863,9 @@ def compute_strong_id(omega, omega_cov, bounds=None, case=1):
     """
     constraint_dict, prices_init = compute_constraint_prices(omega, case)
     bounds = bounds if bounds is not None else compute_bounds(case)
+    init = compute_initial_point(prices_init, omega=omega, omega_cov=omega_cov, bounds=bounds, case=case) 
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=prices_init, method='SLSQP',
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=init, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
     rtn_prices = minimize_result.x
 
