@@ -183,9 +183,9 @@ def compute_bounds(case):
     if case == 0:
         bounds = [(-.9, .9)]
     elif case == 2:
-        bounds = [(-.9, .9), (-10, None)]
+        bounds = [(-.9, .9), (0, None)]
     else:
-        bounds = [(-.9, .9), (None, 10), (-10, None)]
+        bounds = [(-.9, .9), (None, 0), (0, None)]
 
     return bounds
 
@@ -903,7 +903,7 @@ def estimate_params_strong_id(data, vol_estimates=None, vol_cov=None, case=1):
     return estimates, covariance
 
 
-def compute_qlr_reject(params, true_prices, innov_dim, alpha, robust_quantile=True, case=1):
+def compute_qlr_reject(params, true_prices, innov_dim, alpha=None, robust_quantile=True, case=1):
     """
     Compute the proportion rejected by the model.
 
@@ -927,15 +927,19 @@ def compute_qlr_reject(params, true_prices, innov_dim, alpha, robust_quantile=Tr
 
     """
     param_est, param_cov = params
-    names = ['theta', 'phi', 'pi']
+    names = compute_names(case) 
     omega = {name: val for name, val in param_est.items() if name not in names}
     omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
 
     qlr = qlr_stat(true_prices=true_prices, omega=omega, omega_cov=omega_cov, case=case)[-1]
 
     if robust_quantile:
-        qlr_quantile = qlr_sim(true_prices, omega, omega_cov, innov_dim=innov_dim, alpha=alpha, case=case)[-1]
-        return qlr, qlr_quantile
+        qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega, alpha=alpha, omega_cov=omega_cov, 
+                               innov_dim=innov_dim, case=case)
+        if alpha is None:
+            return (qlr,) + tuple(qlr_quantile)
+        else:
+            return (qlr, qlr_quantile[-1])
     else:
         return qlr
 

@@ -25,6 +25,7 @@ requirements:
     - statsmodels
     - sympy
     - tqdm
+    - cdpm >=0.03
 
 
 test:
