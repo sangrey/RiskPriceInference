@@ -38,7 +38,7 @@ compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym.xreplace({ps
 compute_psi = sym.lambdify((rho, scale, theta, phi), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
-compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.xreplace({phi: -sym.sqrt(1 - zeta)}),
+compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.xreplace({phi: sym.Min(0,-sym.sqrt(1 - zeta))}),
                              modules='numpy')
 _pi_from_gamma_in = _B_func_in.xreplace({_x: pi + _C_func})
 _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) -
@@ -46,7 +46,7 @@ _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) -
                                                       _pi_from_gamma_in.xreplace({_x: theta})),
                                                      pi).args[0].args[0]))
 compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), _pi_from_gamma.xreplace(
-    {phi: -sym.sqrt(1 - zeta)}), modules='numpy')
+    {phi: sym.Min(-sym.sqrt(1 - zeta),0)}), modules='numpy')
 
 # We create the functions to jointly specify the links.
 _link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym.xreplace({psi: _psi_sym}), gamma -
@@ -145,9 +145,14 @@ def compute_constraint_prices(omega, omega_cov, bounds, case):
     phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
     theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'], zeta=omega['zeta'])
 
-    vals = np.linspace(bounds[1][0], bounds[1][1], 100)
+    vals = np.linspace(bounds[1][0], bounds[1][1], 20)
     if case != 0 and case != 2:
         arg_list = [(val, _qlr_in([phi_init, val, theta_init], omega, omega_cov, case=case)) for val in vals]
+
+        pi_est = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], rho=omega['rho'],
+                            scale=omega['scale'], theta=theta_init, zeta=omega['zeta'])
+        if np.isfinite(pi_est):
+            arg_list.append((pi_est, _qlr_in([phi_init, pi_est, theta_init], omega, omega_cov, case=case)))
 
         pi_init = pd.DataFrame(arg_list).sort_values(1).iloc[0, 0]
 
@@ -712,9 +717,13 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
         return returnval
 
-    results = [qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov), x0=init,
-                                                                method='SLSQP', constraints=constraint_dict,
-                                                                bounds=bounds).fun for innov in innovations]
+    results = np.array([qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
+                                                                         x0=init, method='SLSQP',
+                                                                         constraints=constraint_dict,
+                                                                         bounds=bounds).fun for innov in
+                        innovations])
+
+    results[results <= 0] = 0
 
     if alpha is None:
         return results
