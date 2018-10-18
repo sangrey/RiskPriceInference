@@ -27,18 +27,24 @@ _A_func = rho * _x / (1 + scale * _x)
 _C_func = psi * _x + ((1 - phi**2) / 2) * _x**2
 _B_func_in = 1 + scale * _x
 _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
-             _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})}))
-_gamma_sym = delta * (sym.log(_B_func_in.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})})) -
-                      sym.log(_B_func_in.xreplace({_x: pi + _C_func.xreplace({_x: theta})})))
+             _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})).xreplace({psi: _psi_sym})
+
+# We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
+# be positive.
+_constraint_sym = _B_func_in.xreplace({_x: pi + _C_func}).xreplace({psi: _psi_sym})
+_gamma_sym = delta * (sym.log(_constraint_sym.xreplace({_x: theta-1})) -
+                      sym.log(_constraint_sym.xreplace({_x: theta})))
+_constraint1 = sym.lambdify((phi, pi, theta, rho, scale), _constraint_sym.xreplace({_x: theta-1}),
+                            modules='numpy')
+_constraint2 = sym.lambdify((phi, pi, theta, rho, scale), _constraint_sym.xreplace({_x: theta}), modules='numpy')
 
 # We create the link functions.
-compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, phi), _gamma_sym.xreplace({psi: _psi_sym}),
-                             modules='numpy')
-compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym.xreplace({psi: _psi_sym}), modules='numpy')
+compute_gamma = sym.lambdify((delta, pi, rho, scale, theta, phi), _gamma_sym, modules='numpy')
+compute_beta = sym.lambdify((pi, rho, scale, theta, phi), _beta_sym, modules='numpy')
 compute_psi = sym.lambdify((rho, scale, theta, phi), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
-compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.xreplace({phi: sym.Min(0,-sym.sqrt(1 - zeta))}),
+compute_theta = sym.lambdify((psi, rho, scale, zeta), _theta_sym.xreplace({phi: sym.Min(0, -sym.sqrt(1 - zeta))}),
                              modules='numpy')
 _pi_from_gamma_in = _B_func_in.xreplace({_x: pi + _C_func})
 _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) -
@@ -46,11 +52,10 @@ _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) -
                                                       _pi_from_gamma_in.xreplace({_x: theta})),
                                                      pi).args[0].args[0]))
 compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), _pi_from_gamma.xreplace(
-    {phi: sym.Min(-sym.sqrt(1 - zeta),0)}), modules='numpy')
+    {phi: sym.Min(-sym.sqrt(1 - zeta), 0)}), modules='numpy')
 
 # We create the functions to jointly specify the links.
-_link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym.xreplace({psi: _psi_sym}), gamma -
-                                               _gamma_sym.xreplace({psi: _psi_sym}), psi - _psi_sym,
+_link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym, gamma - _gamma_sym, psi - _psi_sym,
                                                1 - (zeta + phi**2)])))
 
 _link_in0 = sym.lambdify((phi, beta, delta, gamma, psi, rho, scale, zeta), _link_sym[-1],
@@ -62,12 +67,6 @@ _link_in2 = sym.lambdify((phi, theta, beta, delta, gamma, psi, rho, scale, zeta)
 _link_in3 = sym.lambdify((phi, pi, theta, beta, delta, gamma, psi, rho, scale, zeta), _link_sym[1:],
                          modules='numpy')
 
-# We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
-# be positive.
-_constraint_sym = _B_func_in.xreplace({_x: pi + _C_func.replace(_x, theta - 1)})
-_constraint1 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym, modules='numpy')
-_constraint2 = sym.lambdify((phi, pi, theta, psi, rho, scale), _constraint_sym.xreplace({theta - 1: theta}),
-                            modules='numpy')
 
 # We define the moments used to estimate the volatility paramters.
 _mean = (rho * _x + scale * delta)
@@ -134,8 +133,8 @@ def constraint(prices, omega, case=1):
 
     # This needs to be fixed.
 
-    constraint1 = _constraint1(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
-    constraint2 = _constraint2(*prices, psi=omega['psi'], rho=omega['rho'], scale=omega['scale'])
+    constraint1 = _constraint1(*prices, rho=omega['rho'], scale=omega['scale'])
+    constraint2 = _constraint2(*prices, rho=omega['rho'], scale=omega['scale'])
 
     return np.minimum(constraint1, constraint2)
 
@@ -642,7 +641,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=init, method='SLSQP',
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=true_prices, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
 
     if not minimize_result['success']:
@@ -718,7 +717,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
         return returnval
 
     results = np.array([qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
-                                                                         x0=init, method='SLSQP',
+                                                                         x0=true_prices, method='SLSQP',
                                                                          constraints=constraint_dict,
                                                                          bounds=bounds).fun for innov in
                         innovations])
@@ -736,8 +735,8 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
         return tuple(true_prices) + (returnval,)
 
 
-def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0,
-                      theta_max=2, phi_dim=20, use_tqdm=True, case=1):
+def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0, theta_max=2,
+                      phi_dim=20, use_tqdm=True, case=1):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -769,15 +768,15 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
     draws_df : dataframe
 
     """
-    it = product(np.linspace(-.9, .9, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
+    it = product(np.linspace(-.9, 0, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
                  np.linspace(theta_min, theta_max, theta_dim))
 
     qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, case=case)
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=pi_dim * theta_dim,
-                                            leave=False))
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=pi_dim * theta_dim *
+                                            phi_dim, leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
@@ -821,15 +820,15 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
     draws_df : dataframe
 
     """
-    it = product(np.linspace(-1, 0, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
+    it = product(np.linspace(-.9, 0, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
                  np.linspace(theta_min, theta_max, theta_dim))
 
     qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha, case=case)
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=pi_dim * theta_dim,
-                                            leave=False))
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=pi_dim * theta_dim *
+                                            phi_dim, leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_sim_in, it))
 
