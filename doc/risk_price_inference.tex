@@ -2,7 +2,8 @@
 \usepackage{risk_price_inference}
 \addbibresource{riskpriceinference.bib}
 
-\author{Xu Cheng\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}} \and Eric Renault\thanks{Brown University, Department of Economics -- Box B, 64 Waterman Street, Providence, RI 02912, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}} \and Paul Sangrey\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}
+\author{Xu Cheng\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}} \and Eric Renault\thanks{Brown University, Department of Economics -- Box B, 64 Waterman Street, Providence, RI 02912, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}} \and Paul Sangrey\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
+
 \title{Identification Robust Inference for Risk Prices in Structural Stochastic Volatility Models}
 
 \date{\today}
@@ -16,9 +17,11 @@
 \thispagestyle{empty}
 \addtocounter{page}{-1}
 
-\begin{abstract} \singlespacing \noindent 
+\begin{abstract} 
 
+\singlespacing \noindent 
 In structural stochastic volatility asset pricing models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to bear high volatility in order to get high expected returns as measured by the market risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. Disentangling these channels is difficult and poses a subtle identification problem that invalidates standard inference. We adopt the discrete-time exponentially affine model of \textcite{khrapov2016affine}, which links the identification of volatility risk price to the leverage effect. In particular, we develop a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to the well-behaved reduced-form parameters governing the return and volatility's joint distribution. The link functions are almost flat if the leverage effect is close to zero, making estimating the volatility risk price difficult. We adapt the conditional quasi-likelihood ratio test \textcite{andrews2016conditional} develop in a nonlinear GMM framework to a minimum distance framework. The resulting conditional quasi-likelihood ratio test is uniformly valid. We invert this test to derive robust confidence sets that provide correct coverage for the prices regardless of the leverage effect's magnitude. 
+
 \end{abstract} 
 
 \vspace{\baselineskip}
@@ -27,7 +30,7 @@ In structural stochastic volatility asset pricing models, changes in volatility 
 
 \vspace{\baselineskip}
 
-\keywords{identification, robust inference, stochastic volatility, leverage, equity risk premium, volatility risk premium, risk price, confidence set, asymptotic size}
+\keywords{weak identification, robust inference, stochastic volatility, leverage, equity risk premium, volatility risk premium, risk price, confidence set, asymptotic size}
 
 \end{titlepage}
 
@@ -63,8 +66,6 @@ The obvious next step is considering how we need to do this in practice. Since t
 This model has a few nice features.  First, it has both equity and volatility prices and a leverage effect.  As such, it is the natural discrete-time analogue of the \textcite{heston1993closedform} option pricing model.  It has an exponentially affine stochastic discount factor and shares with \textcite{heston1993closedform} the advantage of having a structure preserving change of measure between the physical and risk-neutral models. By doing our analysis in discrete-time we are able to more directly compare our results to risk-premia estimates outside of the option pricing literature and the jumps in high-frequency innovations will not dramatically affect our results.  If we were to use a diffusion process in continuous time, we would be severely counterfactually constraining the higher-order moments of the process in way that would likely bias our inference. 
 
 As far as estimation is concerned, we derive a series of conditional means and variances. We then take these means and variances and plug them into a general method of moments (GMM) criterion. The data we use are the bivariate series $(r_{t+1}, \sigma^2_{t+1})$. $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$. We go into further detail in \cref{sec:data} regarding how we obtained it, the time-span covered, and so forth.
-
-\section{Literature Review}\label{sec:lit_review}
 
 \section{The Model}\label{sec:model}
 
@@ -404,9 +405,9 @@ We now show that if $\phi = 0$, then \cref{eqn:lack_of_id_condition} holds, but 
 
 This shows the leverage effect creates a wedge between $C(\theta)$ and $C(\theta-1)$ proportional to $\frac{\phi}{\sqrt{c (1 + \rho )}}$. Clearly, this equals zero if and only if $\phi = 0$. Consequently, if $\phi \neq 0$, we can separately identify $\pi$ and $\theta$.
 
-\section{GMM}\label{sec:GMM}
+\section{The Estimation Criterion in Population}\label{sec:EstimationCriterion}
 
-To estimate the model we use the various moment conditions that we have derived. The one that we have yet to derive is the ones implied by the continuous-time model that allow us to estimate $\phi$ and $\psi$. Deriving them is straightforward because we constructed what the discrete-time equations, and they are linear.
+To estimate the model we use the various moment conditions that we have derived. The one that we have yet to derive is the ones implied by the continuous-time model that allow us to estimate $\phi$ and $\psi$. Deriving them is straightforward because we constructed what the discrete-time equations, and they are linear.  
 
 \subsection{Moment Conditions for Reduced-Form Parameters}\label{sec:moment_conditions}
 
@@ -457,60 +458,472 @@ Having constructed the moments and the instruments, we can use GMM to estimate t
 \end{restatable}
 
 
+We want to estimate $\omega \coloneqq (\rho, c, \delta, \phi, \pi, \theta)'$ and get its asymptotic distribution.
+We also have some auxiliary parameters: $\xi_1 \coloneqq (\beta, \gamma, \psi)'$ and $\xi_2 \coloneqq \phi^2$.
+The way we do this by splitting $\omega$ in two parts.
+The first $\omega_s$ is the vector of purely structural parameters: $(\phi, \pi, \theta)'$.
+The second part $\omega_r$ is composed of parameters that we can estimate directly without model-based
+cross-equation restrictions, but are of interest.
+We collect all of the reduced parameters into a vector: $\xi \coloneqq (\omega_r', \xi_a)'$.
+We start by constructing a GMM estimator for $\xi$, we will then show how to convert this into an estimator for
+$\omega$.
+Throughout, I will denote the partial derivative of some function $f$ with respect to some variable $x$ with
+$f_x$.
 
-\section{Weak Identification Setup}
+\section{Estimating the Reduced-Form Parameters}\label{sec:EstimatingReducedForm}
 
-In this section, take the model described in the previous sections and place it in the setup of \textcite{andrews2014Gmm} so that we ca analyze the effects of possible lack of identification in the model in a nice clean way. The goal here is to perform valid inference for $\pi, \theta$ even when $\phi$ might be zero. 
+We view estimating the first stage as a particular form of GMM.
+From standard GMM theory, we know that the following holds, for some asymptotic covariance matrix $\Omega_{\xi}$,
+%
+\begin{equation}
+    \sqrt{T} (\hat{\xi} - \xi)  \dto N\left(0, \Omega_{\xi}\right)
+\end{equation}
 
+We construct $\Omega_{\xi}$ in three steps.
+First, we will derive the asymptotic covariance matrices for each of $\omega_r, \xi_1, \xi_2$.
+Then we will show how to combine them into one joint covariance matrix.
 
-From the discussion above, we can collect the parameters discussed above into a parameter vector of the following form,i.e.\@ recall the following: $\omega = \lbrace \rho, c, \delta, \phi, \pi, \theta \rbrace$ To write it in the notation of \textcite{andrews2014Gmm}, we partition $\omega$ into three subsets.
-
-\begin{align}
-  \phi &\coloneqq \phi \in (-1, 1) \\ 
-  \zeta &\coloneqq \lbrace \rho, c, \delta, \theta \rbrace \in [0,1) \times \R_{++} \times \R_{++} \times
-  \R \\
-  \pi &\coloneqq \pi \in \R
-\end{align}
-
-Let $\omega$ be the set of possible $\omega$, that as defined above. It is worth noting that the parameter space has a product form, i.e.\@ the values do not affect the valid values of the other parameters.
-
-In this environment, $\pi$ is not identified when $\phi = 0$.
-Both $\phi$ and $\zeta$ are always identified, and $\zeta$ does not affect the identification of $\pi$.
-
-Let $Q_T(\omega)$ be the GMM criterion function, then the GMM estimator $\hat{\omega}_T$ satisfies the following.
-
+\subsection{Covariance of the Reduced-Form Parameters}\label{sec:omega_r}
 
 \begin{equation}
-  \widehat{\omega}_T \in \omega\ \text{and}\ Q_T(\hat{\omega}_T) = \inf_{\omega \in \Omega} Q_T(\omega) +
-  o\left(T^{-1}\right) 
+    h\left(\sigma^2_{t},\sigma^2_{t+1} \mvert \omega_r\right) \coloneqq 
+\begin{bmatrix}
+    \sigma^2_{t+1} - (c \delta + \rho \sigma^2_{t}) \\
+%
+    \sigma^2_{t} \left(\sigma^2_{t+1} - (c \delta + \rho \sigma^2_{t})\right)\\
+%
+    \sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
+    \sigma^2_{t}\right)^{2}\right)\\
+%
+    \sigma^2_{t} \left(\sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
+    \sigma^2_{t}\right)^{2}\right)\right)\\
+
+    \sigma^4_{t} \left(\sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
+    \sigma^2_{t}\right)^{2}\right)\right)\\
+\end{bmatrix}
+\end{equation}
+
+By standard GMM theory, the following holds, if the weighting matrix \newline $W_{\omega_r,T} \pto \E[h(\sigma^2_t,
+\sigma^2_{t+1} \ivert \omega_r)' h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)]^{-1}$.
+We have 
+
+\begin{equation}
+    \sqrt{T}(\widehat{\omega}_r - \omega_r) \dto N\left(0, \Omega_{\omega_r}\right),
+\end{equation}
+%
+where
+%
+\begin{equation}
+    \Omega_{\omega_r} \coloneqq \left(\E\left[h_{\omega_r}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]'
+    \E[h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)' h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)]^{-1}
+    \E\left[h_{\omega_r}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]\right)^{-1}
+\end{equation}
+%
+We estimate this by replacing the population expectations and covariances by their sample counterparts.
+
+\subsection[Covariance Computation Step 2]{Covariance of $\xi_1$}\label{sec:est_xi2}
+
+We estimate $\xi_1$ by weighted least squares, a special case of GMM: 
+%
+\begin{equation}
+    \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right]  = \gamma + \beta \sigma^2_t + \psi \sigma^2_{t+1}.
+\end{equation}
+
+The only unusual part is we know that $\Var(r_{t+1} \ivert \sigma^2_t, \sigma^2_{t+1}) = (1-\phi^2) \sigma^2_{t+1}$.  Consequently, the regression results  are more efficient if we adjust for heteroskedasticity.  However, we do not know $\phi$, and so this might seem impossible.  However, since time-invariant parts of heteroskedasticity adjustments cancel, reweighting by the inverse of $\sigma^2_{t+1}$ achieves is equivalent to the optimal reweighting.  Also, since $\sigma^2_{t+1}$ is contained in the conditioning set, the fact that it is viewed as a random variable in other parts  of the regression is irrelevant.  Let $u_t = \frac{r_{t+1} - (\gamma + \beta \sigma^2_{t} + \psi \sigma^2_{t+1}}{\sigma^2_{t+1}}$.
+
+Since this regression is exactly identified, any positive-definite weight matrix, including the identity is optimal. Consequently, we have the following result, where the WLS covariance matrix has the standard form:
+
+\begin{equation}
+    \Omega_{\xi_1} = \E\left[\left(1, \sigma^2_{t}, \sigma^2_{t+1}\right) \left(1, \sigma^2_{t},
+    \sigma^2_{t+1}\right)'\right]^{-1} \Var\left(u_t\right).
 \end{equation}
 
 
-Now that we have defined the parameters, we can characterize the set of assumptions necessary for valid inference. We will work through the assumptions described in \textcite{andrews2014Gmm}. The set of necessary assumptions is relatively complicated because we have to characterize the asymptotic distribution under several different estimation strengths simultaneously, and the assumptions required to do that  differ in the various cases.  In what follows, we will use 
+\subsection[Covariance Computation Step 3]{Covariance of $\xi_2$}
 
-The first assumption specifies the basic identification problem. It also provides conditions that are used to determine the probability limit of the GMM estimator, when it exists, under all categories of drifting sequences of distributions. Let $\xi$ index the part of the distribution of the data $r_{t+1}, \sigma^2_{t+1}$ that is not determined by the moment equations. In general, it is a (likely infinite-dimensional) nuisance parameter that affects the distribution of the data. 
+We know that $\Var(r_{t+1} \vert \sigma^2_{t+1} \sigma^2_t) = (1-\phi^2) \sigma^2_{t+1}$.
+This implies $\Var(\frac{r_{t+1}}{\sigma_{t+1}} \vert \sigma^2_{t+1}, \sigma^2_t) = 1 - \phi^2$.
+Since we consistently estimate the conditional mean of $r_{t+1}$ in \cref{sec:est_xi2}, the residuals ---
+$\widehat{u}_t = \frac{r_{t+1} - \widehat{\gamma} - \widehat{\beta}\sigma^2_t - \widehat{\psi}
+\sigma^2_{t+1}}{\sigma_{t+1}}$ --- satisfy $\frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
+
+Define $\widehat{\xi}_2 \coloneqq 1 - \frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
+Then $\widehat{\xi}_2 \dto N(0, \Omega_{\xi_2})$ for some covariance matrix $\Omega_{\xi_2}$, since this is a  GMM
+estimator.
+What is $\Omega_{\xi_2}$.
+Since we are just identified, standard GMM theory says it is the covariance of the moment condition scaled by the
+appropriate derivative. 
+Since we are estimating a mean shifted by a constant, the derivative equals $1$.
+Consequently, $\Omega_{\xi_2} = \Var(\frac{u^2_t}{\sigma^2_{t+1}})$, which can be estimated by
+$\frac{1}{T} \sum_{t=1}^T (\frac{\widehat{u}_t^2}{\sigma^2_{t+1}} - \frac{1}{T} \sum_{t=1}^T
+\frac{\widehat{u}_t^2}{\sigma^2_{t+1}})^2$, i.e.\@ the sample covariance of the squared residuals. 
+
+\subsection[Combining the Covariance Matrices]{Combining $\Omega_{\omega_r}, \Omega_{\xi_2}$, and $\Omega_{\xi_2}$}
+
+Each of $\Omega_{\xi_i}$ are of the form $(\E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i)]' \Var(h(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i) \ivert \xi_i)^{-1} \E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i) \ivert \xi_i])^{-1}$.  Consequently, the off-diagonal blocks of the joint covariance matrix $\Omega$ come from two places: the derivatives and the covariance of the moments.  Since the moments in the first stage do not depend on the parameters in the second stage, and vice-versa, the derivatives to not cause any co-movement.  The other cases are trickier, and so we consider them each in turn.  
+
+Consider the covariance between $h(\sigma^2_{t+1}, \sigma^2_t, \omega_r)$ and $h(\sigma^2_{t+1}, \sigma^2_t, \xi_2)$, which we can rearrange since the moments are mean zero.  
+%
+\begin{equation}
+    \Cov\left(h\left(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t \mvert \omega_{r} \right) ,
+      h\left(\sigma^2_{t+1} \sigma^2_t \mvert \xi_2 \right) \right) 
+%
+    = \E\left[h(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r) h\left(\sigma^2_{t+1}, \sigma^2_t \mvert
+       \xi_2 \right) \right]
+\end{equation}
+%
+By the law of iterated expectation, that equals 
+%
+\begin{equation}
+    \E\left[\E[h\left(r_{t+1},  \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r\right) \mvert \sigma^2_{t+1},
+       \sigma^2_t] \E\left[h\left(\sigma^2_{t+1}, \sigma^2_t \mvert \xi_2 \right) \mvert \sigma^2_{t+1},
+       \sigma^2_t\right] \right].
+\end{equation}
+
+The first term in the expression above equals zero, and, hence, so does the entire expression.  In other words, the first two set of moment conditions are independent.  By an identical argument, the first and third moments are independent as well.
+
+We now consider how the second and their sets of moments are related.  Since the derivatives are with respect to different parameters (and constant) no dependence arises from there.  The question is how are the moment conditions in the second and third steps related.  The second stage moment condition is a conditional mean and third stage moment is a conditional covariance.  Let $u_t$ denote the error term in that regression (as it did above). Then
+%
+\begin{equation}
+    \E\left[\E\left[\frac{r_{t+1} - \E\left[r_{t+1}\mvert \sigma^2_{t+1} \sigma^2_t\right]}{\sigma_{t+1}} \right]
+    \E\left[\frac{(r_{t+1} - \E\left[r_{t+1} \mvert \sigma^2_{t+1} \sigma^2_t\right])^2}{\sigma^2_{t+1}}\right]
+    \right] 
+%
+    = \E\left[\E\left[\frac{u_t u_t^2}{\sigma^2_{t+1}}\right] \mvert \sigma^2_t, \sigma^2_{t+1} \right]  = 0.
+\end{equation}
+%
+Since $u_t$ is conditionally Gaussian, its conditional third moment equals zero. By the law of iterated expectations, its unconditional moment does as well.
+
+In other words, the second and third set of moments are uncorrelated.  Now, the careful reader might be worried about filling in the population expectations instead of their estimators in the regression above.  However, since the expectations are linear and consistently estimable, this error vanishes in the limit.  Intuitively, OLS mean and variance estimates are asymptotically independent.
+
+In addition, since all three components are asymptotically independent; the inverse of a block-diagonal matrix is block-diagonal, and we using optimal weighting matrices in each part, we are using an optimal weighting matrix for $\xi$, not just its components.
+
+\subsection{Asymptotic Distribution of the Reduced-Form Parameter}
+
+This section gives the asymptotic distribution of the reduced-form parameter.  Write $\omega =(\omega_{1},\omega_{2},\omega_{3}),$ where $\omega_{1}=(\rho ,c)$, $\omega_{2} = (\gamma ,\beta ,\psi)$, and $\omega_{3} = \phi ^{2}$.  Below we describe the estimator $\widehat{\omega}_{1},\widehat{\omega}_{2},\widehat{\omega}_{3}$ and provide the asymptotic distribution of $\widehat{\omega} = (\widehat{\omega}_{1},\widehat{\omega }_{2},\widehat{\omega}_{3})$.  We estimate these parameters separately because $\omega_{1}$ only shows up in the conditional mean and variance of $r_{t+1};$ $\omega_{2}$ only shows up in the conditional mean of $\sigma_{t+1}^{2};$ and $\phi $ only shows up in the conditional variance of $\sigma_{t+1}^{2}.$ 
+
+We estimate $\omega_{1}$ by GMM based on the moment condition: 
+%
+\begin{eqnarray}
+    \mathbb{E}[h_{t}(\omega_{1,0})] & = &0,\text{ where}  \nonumber \\
+%
+    h_{t}(\omega_{1}) & = &\left(
+        \begin{array}{c} 
+            \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma_{t}^{2}\right)  \\ 
+%
+            \sigma_{t}^{2}\left( \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) \right)  \\ 
+%
+            \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma_{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left(
+            c\delta +\rho \sigma_{t}^{2}\right) ^{2}\right) \right)  \\ 
+%
+            \sigma_{t}^{2}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta
+            +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right)  \\ 
+%
+            \sigma_{t}^{4}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta
+            +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) 
+        \end{array}\right).
+\end{eqnarray}
+%
+The optimal GMM estimator is
+%
+\begin{eqnarray}
+    \widehat{\omega}_{1} & = & \underset{\omega_{1}\in \Lambda_{1}}{\arg\min} 
+%
+    \overline{h}_{T}(\omega_{1})^{\prime}W_{T}\overline{h}_{T}(\omega_{1}), \text{ where}  \nonumber \\ 
+%
+    \overline{h}_{T}(\omega_{1}) & = &T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1}), \nonumber \\
+%
+    W_{T} & = &T^{-1}\sum_{t = 1}^{T}h_{t}(\widetilde{\omega}_{1})h_{t}(\widetilde{\omega}_{1})^{\prime
+   }-\overline{h}_{T}(\widetilde{\omega}_{1})\overline{h} _{T}(\widetilde{\omega}_{1})^{\prime},
+\end{eqnarray}
+%
+where $\widetilde{\omega}_{1}$ is the preliminary GMM estimator based on the identify covariance matrix.
+
+We estimate $\omega_{2}$ by the GLS estimator because $\gamma, \beta, \psi$ are the intercept and linear
+coefficients of the conditional mean function and the conditional variance is proportional to $\sigma_{t+1}^{2}$. 
+Define $x_{t} = \sigma_{t+1}^{-1}(1,\sigma_{t}^{2},\sigma_{t+1}^{2})$ and $y_{t} = \sigma_{t+1}^{-1}r_{t+1}$. 
+The GLS\ estimator of $\omega_{2}$ is
+%
+\begin{equation}
+    \widehat{\omega}_{2} = \left( \sum_{t = 1}^{T}x_{t}x_{t}^{\prime}\right) ^{-1}\sum_{t = 1}^{T}x_{t}y_{t}.
+\end{equation}
+
+We estimate $\omega_{3}$ by the sample variance estimator. 
+Define 
+%
+\begin{equation}
+    \widehat{y}_{t} = x_{t}\widehat{\omega}_{2} = \sigma_{t+1}^{-1}(\widehat{\gamma}+\widehat{\beta
+   }\sigma_{t}^{2}+\widehat{\psi}\sigma_{t+1}^{2}).
+\end{equation}
+%
+The estimator of $\omega_{3}$ is 
+\begin{equation}
+    \widehat{\omega}_{3} = \max \{1-T^{-1}\sum_{t = 1}^{T}\left( y_{t}-\widehat{y}_{t}\right) ^{2},0\}.
+\end{equation}%
+[**XC. In practice, do we need to impose the estimator is positive?]
+
+The next lemma provides the asymptotic distribution of the estimator $\widehat{\omega}$.  Let $h_{\omega ,t}(\omega_{1})\in \mathbb{R}^{5\times 2}$ denote the derivative of $h_{t}(\omega_{1})$ w.r.t.\@ $\omega_{1}$.  Define 
+%
+\begin{eqnarray}
+    \Omega_{1} & = &\left \{ \mathbb{E}\left[ h_{\omega ,t}\left( \omega _{1,0}\right) \right]^{\prime}
+        \mathbb{E}[h_{t}(\omega_{1,0})h_{t}(\omega _{1,0})^{\prime}]^{-1}\mathbb{E}\left[
+    h_{\omega,t}\left(\omega_{1,0}\right) \right] \right \} ^{-1},  \notag \\ 
+%
+    \Omega_{2} & = &\mathbb{E}\left[ x_{t}x_{t}^{\prime}\right] ^{-1}\mathbb{E[(} y_{t}-x_{t}^{\prime
+   }\omega_{2,0})^{2}],  \notag \\
+%
+    \Omega_{3} & = &\mathbb{V[}\left( y_{t}-x_{t}^{\prime}\omega_{2,0}\right)^{2}].
+\end{eqnarray}
+
+\begin{lemma}
+Suppose Assumptions *** hold. Then
+
+\begin{equation}
+    T^{1/2}\left( 
+%
+    \begin{array}{c}
+        \widehat{\omega}_{1}-\omega_{1,0} \\ 
+        \widehat{\omega}_{2}-\omega_{2,0} \\ 
+        \widehat{\omega}_{3}-\omega_{3,0}%
+    \end{array}\right) 
+%
+    \rightarrow_{d}\xi_{\omega}  = 
+%
+   \left(\begin{array}{c}
+            \xi_{\omega 1} \\ 
+            \xi_{\omega 2} \\ 
+            \xi_{\omega 3}%
+   \end{array}\right) 
+%
+   \sim N\left( 0,
+%
+    \begin{array}{ccc}
+        \Omega_{1} & 0 & 0 \\ 
+        0 & \Omega_{2} & 0 \\ 
+        0 & 0 & \Omega_{3}%
+    \end{array}\right).
+\end{equation}
+\end{lemma}
 
 
-We collect the parameters that we are estimating $\omega$ and the nuisance parameter $\xi$ into one parameter, $\gamma$ and associated parameter space $\Gamma$. In the previous discussion we characterized the parameter spaces in a non-compact fashion, let $\omega^{*}$ be a compact subset of $\omega$, where the true parameter values live.
-
-\begin{defn}{Complete Parameter Space}
-  \begin{equation}
-    \Gamma \coloneqq \left\lbrace \gamma = (\omega, \xi) \mvert \omega \in \Omega, \xi \in \Xi \right\rbrace 
-  \end{equation}
-\end{defn}
-
-We characterize these drifting sequences of distributions by sequences of true parameters $\gamma_T \coloneqq (\omega_T, \phi_T)$.  \purple{TODO Add discussion of the limiting process.}
-\purple{Verify that the assumptions on the parameter space hold.}
-\purple{Discuss what happens if we lack identification and hence cannot consistently estimate the parameter.}
+\begin{proof}
+    Will be added later.
+\end{proof}
 
 
-\begin{restatable}[Inference for $\omega$ under Weak Identification]{theorem}{InferenceWeakID}
-  Let that $\phi_0 \in \left(\underline{\phi}_0,1\right)$, for some $\underline{\phi}_0 > -1$. 
-  $\rho_0 \in \left[0,1\right)$, and $c_0 > 0$. 
 
-  \purple{TODO Add Conclusion}
-\end{restatable}
+\section{Estimating the Structural Parameters}\label{sec:EstimatingStructural}
 
+\subsection{Constructing the Link Function}\label{sec:construct_link_func}
+
+In this stage, we convert the estimates for $\xi$ into estimates for $\omega$.  We do this by specifying a link function.  Since $(\rho, c, \delta)'$ shows up in both $\xi$ and $\omega$, the link function for those parameters is the identify function.  The third set of parameters $\xi_3 = \phi^2$, and so we use that as a link function.  We also use the reduced-form estimates as link functions, as well, i.e.,
+%
+\begin{equation}
+    g(\xi, \omega) = \xi - (\rho, c, \delta, \beta(\rho, c, \phi, \pi, \theta), \gamma(\rho, \delta, c, \phi, \pi,
+    \theta), \psi(\rho, c, \phi, \theta), \phi^2)'.
+\end{equation}
+
+We specify $g(\xi, \omega)$ in this way because it gives us the correct off-diagonal elements.  If we estimated $(\rho, c, \delta)$ by themselves and just plugged them in here, we would have to relate the off-diagonal terms in a separate step.  In addition, by using the optimal weight matrix for this stage, we estimate all of the parameters as efficiently possible using our moment conditions.
+
+Doing this implies we must be careful and treat the $\rho,c$, and $\delta$ on each sides of the equation as different.  The 2nd-stage sample criterion function is 
+%
+\begin{equation}
+    Q_T(\omega) \coloneqq \frac{1}{2} g(\widehat{\xi}_T, \omega)' \W_{T} g(\widehat{\xi}_T, \omega),
+\end{equation}
+%
+with second stage weight matrix $\W_T$.
+We need to estimate $\omega$, and so we differentiate and get the first-order condition at $\omega_0$, where $\W
+\coloneqq \lim_{T \to \infty} \E[W_T]$.
+This gives
+%
+\begin{equation}
+    \frac{\partial Q_T}{\partial \omega}(\omega_0) =  g_{\omega}\left(\xi_0, \omega_0\right)  \W g\left(\xi_0,
+    \omega_0\right) = 0.
+\end{equation}
+%
+We now expand $\widehat{\xi}_T$ around $\xi_0$, for some $\widetilde{\xi}_T$ between $\xi_0$ and $\widetilde{\xi}_T$, 
+%
+\begin{align}
+    \sqrt{T} \frac{\partial Q}{\partial \omega}(\omega_0) 
+%
+    &= g_{\omega}\left(\omega_0, \widehat{\xi}_T\right) \W_T \left[\sqrt{T} g\left(\omega_{0},\xi_0\right) +
+       g_{\xi}\left(\omega_{0}, \widetilde{\xi}_T\right)' \sqrt{T} \left(\widetilde{\xi}_T - \xi_0\right)\right]
+%
+%
+    \intertext{The first term equals zero by assumption, and the derivative is the identity matrix.}
+%
+%
+    &= g_{\omega}\left(\omega, \widehat{\xi}_T\right) \W_T \left[ \sqrt{T} \left(\widetilde{\xi}_T -
+       \xi_0\right)\right]
+\end{align}
+%
+We also need to compute the Hessian and evaluate it at $\widehat{\omega}_T$ a consistent estimator for $\omega$.
+%
+\begin{align}
+    \frac{\partial^2 Q}{\partial \omega \partial \omega'}(\widehat{\omega}_T) &=
+%
+    g_{\omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \W_T g_{\omega} \left(\widehat{\omega}_T,
+    \widehat{\xi}_T\right)+ g_{\omega, \omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right) \W_T
+    g\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \\
+%
+    &\pto g_{\omega}\left(\omega, \xi_0\right)' \W g_{\omega} \left(\omega, \xi_0\right) + 0. 
+\end{align}
+%
+if we use the optimal weight matrix --- $\W \coloneqq \E[g_{\omega_s}(\theta_0, \xi_0)]$.  Standard extremum estimator theory gives
+%
+\begin{equation}
+    \sqrt{T} \left(\widehat{\omega}_T - \omega_{0}\right)  \dto N\left(0, \left(\E[g_{\omega}(\theta_0, \xi_0)]'
+    \Omega_{\xi}^{-1} \E[g_{\omega}(\theta_0, \xi_0)]\right)^{-1}\right).
+\end{equation}
+%
+The covariance in the middle is GMM-covariance of the reduced-form parameters.  We estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives.  We estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
+
+\subsection{Robust Inference for Risk Price}
+
+The reduced-form parameters are $\omega  = (\rho ,c,\gamma ,\beta ,\psi ,\phi ^{2})$. 
+Using the conditional mean and conditional variance derived in the paper, we estimate $\, \omega_{1} = (\rho ,c)$
+by the GMM estimator, estimate $\omega_{2} = (\psi ,\beta ,\gamma )$ by the GLS estimator, and estimate
+$\omega_{3} = \phi^{2}$ by the method of moments estimator for the variance.
+
+We can show that the estimator $\widehat{\omega}$ satisfies
+
+\begin{equation}
+    T^{1/2}(\widehat{\omega}-\omega_{0})\rightarrow_{d}\upsilon_{\omega}\sim N(0,V).
+\end{equation}%
+
+See the next section for details. 
+Note that these estimators do not involve the structural parameters $\theta $ and $\pi$.
+We do not plug in $\beta ,\gamma ,\psi $ as functions of $\theta $ and $\pi .$ Instead, we treat $\beta ,\gamma
+,\psi $ just as linear coefficients and estimate them by GLS.
+
+We estimate the structural parameters $\theta $ and $\pi $ using $\widehat{ \omega}$ and the link functions
+specified below. 
+First, we know that
+%
+\begin{equation}
+    \label{psi_fn} 
+    \psi_{0}=\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right) \right) ^{-1/2} - \left( 1-\phi_{0}^{2}\right)
+    /2-(1-\phi_{0}^{2})\theta_{0}
+\end{equation}
+%
+when all parameters are evaluated at the true values. 
+This equation strongly identifies $\theta_{0}$ because $\phi_{0}$ is assumed to be negative and bounded away from
+1 in magnitude.. 
+It follows from (\cref{psi_fn}) that
+
+\begin{equation}
+    \theta_{0} = L(\omega_{0})=-(1-\phi_{0}^{2})^{-1}\left[ \psi_{0}-\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right)
+    \right)^{-1/2}-\left( 1-\phi_{0}^{2}\right) /2\right] .
+\end{equation}
+%
+Thus, we estimate $\theta_{0}$ by
+%
+\begin{equation}
+    \widehat{\theta}=L(\widehat{\omega}).
+\end{equation}
+%
+By the delta method, we know that
+%
+\begin{equation}
+    T^{1/2}(\widehat{\theta}-\theta_{0})\rightarrow_{d}L_{\omega}(\omega_{0})^{\prime}\upsilon_{\omega},
+\end{equation}
+%
+where $L_{\omega}(\omega )\in R^{d_{\omega}}$ denote the derivative of $L(\omega )$ w.r.t.\@ $\omega$. 
+The inference for $\theta $ is standard. 
+A confidence interval for $\theta $ can be obtained by inverting the $t$-statistic with a critical value obtained
+from the standard normal distribution.
+
+Next, we consider inference for the structural parameter $\pi$. 
+This is a non-standard problem because $\pi $ is potentially weakly identified. 
+Define
+%
+\begin{equation}
+    g(\pi ,\omega )=\left( 
+%
+    \begin{array}{c}
+        \gamma -\left[ B\left( \pi +C\left( \theta_{L}-1\right) \right) -B\left( \pi +C\left( \theta_{L}\right)
+        \right) \right]  \\ 
+%
+        \beta -\left[ A\left( \pi +C\left( \theta_{L}-1\right) \right) -A\left( \pi +C\left( \theta_{L}\right)
+        \right) \right] 
+    \end{array}\right),
+%
+    \text{ where}\ \theta_{L} = L(\omega).
+\end{equation}
+%
+We know 
+%
+\begin{equation}
+    g(\pi_{0}, \omega_{0})=0 \in \mathbb{R}^{2}.
+\end{equation}
+%
+Inference on $\pi $ is based on the function $g(\pi ,\widehat{\omega})$ because $\widehat{\omega}$ is a
+consistent estimator of $\omega_{0}$.
+By the consistency of $\widehat{\omega}$,
+%
+\begin{equation}
+    T^{1/2}\left[ g(\pi, \widehat{\omega}) - g(\pi,\omega_{0})\right] \Rightarrow \upsilon(\pi) = G(\pi,
+    \omega_{0})^{\prime}\upsilon_{\omega},
+\end{equation}%
+
+\noindent where $G(\pi ,\omega )$ denote the derivative of $g(\pi ,\omega )$ w.r.t.\@ to $\omega$. 
+The Gaussian process $\upsilon(\pi)$ has covariance kernel 
+%
+\begin{equation}
+    \Sigma (\pi_{1},\pi_{2})=G(\pi_{1},\omega_{0})^{\prime}VG(\pi_{2},\omega_{0}).
+\end{equation}
+%
+We can estimate $\Sigma (\pi_{1},\pi_{2})$ by 
+%
+\begin{equation}
+    \widehat{\Sigma}(\pi_{1},\pi_{2})=G(\pi_{1},\widehat{\omega})^{\prime}
+    \widehat{V}G(\pi_{2},\widehat{\omega}),
+\end{equation}
+
+\noindent where $\widehat{V}$ is a consistent estimator of $V.$
+
+We construct a confidence interval for $\pi $ by inverting tests $H_{0}:\pi =\pi_{0}$ vs $H_{0}:\pi \neq \pi_{0}$. 
+The test statistic is the QLR statistic:
+%
+\begin{equation}
+    QLR=Tg(\pi_{0},\widehat{\omega})^{\prime}\widehat{\Sigma}(\pi_{0},\pi _{0})^{-1}g(\pi_{0},\widehat{\omega})
+    - \underset{\pi \in \Pi}{\min}Tg(\pi ,\widehat{\omega})^{\prime}\widehat{\Sigma}(\pi,\pi)^{-1}
+    g(\pi,\widehat{\omega}).  
+\end{equation} 
+
+To obtain the critical value, we follow the conditional inference approach in Andrews and Mikusheva (2016). To
+this end, first construct a projection residual process:
+%
+\begin{equation}
+    h(\pi ,\widehat{\omega})=g(\pi ,\widehat{\omega})-\widehat{\Sigma}(\pi ,\pi_{0})\widehat{\Sigma
+   }(\pi_{0},\pi_{0})^{-1}g(\pi_{0},\widehat{\omega}).
+\end{equation}
+%
+By construction, $h(\pi ,\widehat{\omega})$ and $g(\pi_{0},\widehat{\omega})$ are independent asymptotically. 
+Conditional on $h(\pi ,\widehat{\omega})$, we obtain the $1-\alpha $ quantile of the QLR statistic, denoted
+$c_{\alpha}(h)$, by sampling from the asymptotic distributions of $g(\pi_{0},\widehat{\omega})$ under the null.
+Specifically, we take independent draws $\upsilon^{\ast}\sim N(0,\Sigma (\pi_{0},\pi_{0}))$ and produce simulated
+process:
+%
+\begin{equation}
+    g^{\ast}(\pi ,\widehat{\omega}) = h\left(\pi ,\widehat{\omega}\right) + \widehat{\Sigma} (\pi
+    ,\pi_{0})\widehat{\Sigma}(\pi_{0},\pi_{0})^{-1}\upsilon^{\ast}.
+\end{equation}%
+%
+We then calculate
+\begin{equation}
+    QLR^{\ast}=Tg^{\ast}(\pi_{0},\widehat{\omega})^{\prime}\widehat{\Sigma} (\pi_{0},\pi_{0})^{-1}g^{\ast
+   }(\pi_{0},\widehat{\omega})-\underset{\pi \in \Pi}{\min}Tg^{\ast}(\pi ,\widehat{\omega})^{\prime
+   }\widehat{\Sigma} (\pi ,\pi )^{-1}g^{\ast}(\pi ,\widehat{\omega}), 
+\end{equation}
+%
+which is a random drawn from the conditional distribution of the $QLR$ statistic given $h_{T}(\pi ,\widehat{\omega
+})$, when $g(\pi_{0},\widehat{ \omega})$ is drawn from its asymptotic distribution. 
+In practice, we repeat this process for a large number of times and obtain $c_{\alpha}(h)$ by simulation.
+
+We reject the null $H_{0}:\pi =\pi_{0}$ if $QLR\geq c_{\alpha}(h)$. 
+The confidence interval for $\pi $ is the collection of null values that are not rejected as the null value. 
+Note that the construction of this CI\ does not involve estimation of $\pi$.
 
 \section{Simulations}
 
@@ -724,446 +1137,6 @@ applies to $\widetilde{r}_{t+1}$ but not to $r_{t+1}$.
   This will be important later.
   
 \end{proof}
-
-\section{Inference Assumptions}
-
-  In what follows, three sets of drifting sequences $\lbrace \gamma_T \rbrace$ are key. 
-  
-  \begin{defn}{Drifting Sequence Parameter Spaces}
-    \begin{align}
-      \Gamma\left(\gamma_0\right) &\coloneqq \left\lbrace \left\lbrace \gamma_T \in \Gamma \right\rbrace
-      \mvert \gamma_T \to \gamma_0 \in \Gamma \right\rbrace\\ 
-      \Gamma(\gamma_0, 0, b) &\coloneqq \left\lbrace \lbrace \gamma_T \rbrace \in \Gamma(\gamma_0) \mvert
-      \phi_0 = 0\ \text{and}\ \sqrt{T} \phi_T \to b \in (\R \cup \lbrace \pm \infty) \right\rbrace \\
-      \Gamma(\gamma_0, \infty, b_0) &\coloneqq \left\lbrace \lbrace \gamma_T \rbrace \in \Gamma (\gamma_0)
-      \mvert \sqrt{T} \norm{\phi_T} \to \infty\ \text{and}\ \frac{\phi_T}{\norm{\phi_T}} \to b_0
-      \right\rbrace 
-    \end{align}
-  \end{defn}
-  
-  These are the standard GMM regularity conditions appropriately adjusted for the lack of identification when
-  $\phi =0$.
-  
-  \begin{assump}[GMM 1]\label{ass:GMM1}
-  \begin{assumplist}
-    \item If $\phi_0=0$, $\sampmom(\omega)$ and $\W_{T}(\omega)$ do not depend on $\pi$ for all $\omega \in \Omega$,
-      for all $T \geq 1$, and for all $\gamma^{*}\in \Gamma.$ 
-      \label{ass:GMM1a}
-    \item If $\lbrace \gamma_{T} \rbrace \in \Gamma\left(\gamma_0\right)$, $\sup_{\omega \in \Omega}
-      \norm*{\sampmom(\omega) - \E\left[g\left(\omega \mvert \gamma_0\right)\right]} \pto 0$ and $\sup_{\omega
-      \in \omega} \norm{\W_{T}(\omega)-\E\left[\W\left(\omega \mvert \gamma_0\right)\right]} \pto 0$.
-      \label{ass:GMM1b}
-    \item When $\phi_0 = 0$, $g_0\left(\phi, \zeta ,\pi \mvert \gamma_0\right) = 0$ if and only if $\phi
-      =\phi_0$ and $\zeta = \zeta_0$ for all $\pi \in \Pi$ and for all $\gamma_0 \in \Gamma.$
-      \label{ass:GMM1c}
-    \item When $\phi_0 \neq 0$, $g_0\left(\omega \mvert \gamma_0\right)=0$ if and only if $\omega =\omega_0$ for all
-      $\gamma_0 \in \Gamma.$
-      \label{ass:GMM1d}
-    \item $g_0\left(\omega \mvert \gamma_0\right)$ is continuously differentiable in $\omega $ on $\omega$ with
-      partial derivatives with respect to $\omega$ and $\xi$ denoted by $g_{\omega}\left(\theta \mvert
-      \gamma_0\right) \in R^{k\times d_{\omega }}$ and $g_{\xi }\left(\omega \mvert \gamma_0\right)\in R^{k\times
-      d_{\xi }}$, respectively.
-      \label{ass:GMM1e}
-    \item $\W\left(\omega \mvert \gamma_0\right)$ is continuous in $\omega$ on $\omega$ for all $\gamma_0\in
-      \Gamma$. \label{ass:GMM1f}
-    \item $0 < \lambda_{\min}(\W\left(\xi_0, \pi \mvert \gamma_0\right))\leq \lambda_{\max }(\W\left(\xi_0,\pi
-      \mvert \gamma_0\right)) < \infty$, $\forall \pi \in \Pi$, for all $\gamma_0 \in \Gamma$.
-      \label{ass:GMM1g}
-    \item $\lambda_{\min} (g_{\xi}\left(\xi_0,\pi \mvert \gamma_0\right)^{\prime} \W\left(\xi_0,\pi \mvert
-      \gamma_0\right)g_{\xi }\left(\xi_0,\pi \mvert \gamma_0\right))>0$, for all $\pi \in \Pi$, and for all 
-      $\gamma_0 \in \Gamma$ with $\phi_0=0.$
-      \label{ass:GMM1h}
-    \item$\Xi(\pi)$ is compact for all $\pi \in \Pi$, and both $\Pi$ and $\omega$ are compact.
-      \label{ass:GMM1i}
-    \item For all $\epsilon > 0$, there exits a $\delta > 0$ such that $d_{H}\left(\Xi \left(\pi_{1}\right),
-      \Xi \left( \pi_{2}\right) \right) < \epsilon$ for $\pi_{1}, \pi_{2} \in \Pi$ with
-      $\norm*{\pi_{1}-\pi_{2}} < \delta$, where $d_{H}\left( \cdot \right)$ is the Hausdorff metric.
-      \label{ass:GMM1j}
-  \end{assumplist}
-  \end{assump}
-  
-  
-  
-  \begin{assump}[GMM 2*]\label{ass:GMM2}
-  \begin{assumplist}
-    \item $\sampmom(\omega)$ is continuously differentiable in $\omega$ for all $T \geq 1$. 
-      \label{ass:GMM2a}
-    \item If $\{\gamma_T\} \in \Gamma\left(\gamma_0, 0, b\right)$, $\sup_{\left\lbrace \omega \in \Omega \mvert
-      \norm*{(\phi, \zeta')' - (\phi_T, \zeta_0')} \leq \delta_T \right\rbrace}
-      \norm*{\frac{\partial}{\partial (\phi, \zeta')'} \sampmom(\omega) - \E\left[\popmom_{(\phi,
-      \zeta')'}(\omega) \mvert \gamma_0\right]} = o_p(1)$ for all deterministic sequences $\delta_T \to 0$.
-      \label{ass:GMM2b}
-    \item Let $\omega_T \coloneqq \left\lbrace \omega \in \Omega \mvert \norm*{(\phi, \zeta_) - (\phi_T, \zeta_T)}
-      \leq \delta_T \norm*{\beta_T}\, \text{and}\, \norm*{\pi - \pi_T} \leq \delta_T \right\rbrace$. Let
-      $\delta_T$ be a deterministic sequence that converges to zero. If $\{\gamma_T \} \in
-      \Gamma\left(\gamma_0, \infty, b_0\right)$, then we have the following asymptotic behavior.
-      $\sup_{\omega \in \Omega_T} \norm*{\left(\frac{\partial}{\partial \omega'} \overline{g}_T -
-      \E\left[g_{\omega}(\omega) \mvert \gamma_0\right]\right) \diag\left(1_{1+d_\zeta}',
-      (1/\phi_T)_{d_{\pi}}'\right)} = o_p(1)$. 
-      \label{ass:GMM2c}
-  \end{assumplist}
-  \end{assump}
-  
-  Once we have \nameref{ass:GMM1} and \nameref{ass:GMM2}, we use \nameref{ass:GMM3} to derive the asymptotic
-  distribution under weak and semi-strong identification.
-  These conditions will be characterized using the expected derivative of the population moment conditions. 
-  
-  \begin{defn}
-    \label{defn:moment_derivative_func}
-    \begin{equation}
-      K_{T,g}\left(\omega \mvert \gamma^{*}\right) \coloneqq \frac{1}{T} \sum_{i=1}^T \frac{\partial}{\partial
-      \phi^{*}} \E \left[ \popmom(W_T, \omega) \mvert \gamma^{*} \right]
-    \end{equation}
-  \end{defn}
-  
-  
-  \begin{assump}[GMM 3]\label{ass:GMM3}
-  \begin{assumplist}
-    \item $\sampmom(\omega) = \frac{1}{T} \sum_{i=1}^T \popmom(W_T, \omega)$ for some function $\popmom(W_T,
-      \omega) : \R^{k \times k} \times \omega \to \R^k$.
-      \label{ass:GMM3a}
-    \item $\E\left[\popmom(W_T, \beta_0, \zeta^{*}, \pi) \mvert \gamma^{*} \right] = 0$ for all $\pi \in \Pi$ and
-      for all $i \geq 1$ if $\gamma^{*} = \left(0,\zeta^{*}, \pi^{*}, \xi^{*} \right) \in \Gamma$.
-      \label{ass:GMM3b}
-    \item If $\{ \gamma_T \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{\sqrt{T}} \sum_{i=1}^T \left(g(W_T,
-      \zeta_{0,T}, \pi_T) - \E \left[g(W_T, \zeta_{0,T}, \pi_T)\mvert \gamma_T \right]\right) \dto \N\left(0,
-      \aleph(\gamma_0)\right)$, where $\aleph(\gamma_0)$ is a $k \times k$ matrix.
-      \label{ass:GMM3c}
-    \item 
-      \label{ass:GMM3d}
-      \begin{enumerate}
-        \item $K_{T,g}\left(\omega \mvert \gamma^{*}\right)$ exists for all $\{\omega, \gamma^{*} \} \in
-          \left(\omega_{\delta} \times \Gamma_{0}\right)$ and for all $T \geq 1$.
-        \item $K_{T,g}\left(\phi_T, \zeta_T, \pi \mvert \widetilde{\gamma}_T\right)$ uniformly converges
-          to some non-stochastic matrix-valued function $K_{g}\left(0, \zeta_0, \pi \mvert
-          \gamma_0\right)$ over $\pi \in \Pi$ for all deterministic sequences $\{\phi_T, \zeta_T,
-          \widetilde{\gamma}_T \}$ satisfying $\widetilde{\gamma}_T \in \Gamma$, $\widetilde{\gamma}_T
-          \to \gamma_0 \coloneqq (0, \zeta_0, \pi_0, \xi)$, $\{\phi_T, \zeta_T, \pi \} \in \omega$ and
-          $\{\phi_T, \zeta_T \} \to (0, \zeta_0)$.
-        \item $K_g\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right)$ is continuous on $\Pi$ for all
-          $\gamma_0 \in \Gamma$ with $\phi_0 = 0$.
-      \end{enumerate}
-      \item $K\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right) = \popmom_{\phi, \zeta}\left(\phi_0,
-        \pi\mvert \gamma_0\right) x$ for some $x \in \R^{1+d_{\zeta}}$ if and only $\pi =
-        \pi_0$.\footnote{Since $\dim(\phi) = 1$, we can assume without loss of generality that the
-        $\omega_0$ from \textcite{andrews2014Gmm} equals $1$.}
-        \label{ass:GMM3e}
-      \item If $\{ \gamma_T \} \in \Gamma(\gamma_0, 0, b)$, $\frac{1}{T} \sum_{i=1}^T
-        \frac{\partial}{\partial \omega} \E\left[ \popmom\left(W_T, \omega_T \right ) \mvert \gamma_T \right]
-        \to \popmom_{\omega}\left(\omega_0 \mvert \gamma_0\right)$.
-      \label{ass:GMM3f}
-  \end{assumplist}
-  \end{assump}
-
-  \begin{defn}{\popmom*}
-    \begin{equation}
-      g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right) =
-      \left[g_{\phi}\left(\phi_0, \zeta_0, \pi_1 \mvert \gamma_0\right) , g_{\phi}\left(\phi_0, \zeta_0,
-      \pi_2 \mvert \gamma_0\right) , g_{\zeta} \left(\phi_0, \zeta_0 \mvert \gamma_0\right) \right] \in
-      \R^{k \times (d_{\zeta} + 2)}
-    \end{equation}
-  \end{defn}
-
-
-  \begin{assump}[GMM 4]\label{ass:GMM4}
-  \begin{assumplist}
-    \item $\phi$ is a scalar.
-      \label{ass:GMM4a}
-    \item $g_{\phi, \zeta}^{*}\left(\phi_0, \zeta_0, \pi_1, \pi_2 \mvert \gamma_0\right)$ has full column
-      rank. 
-      \label{ass:GMM4b}
-    \item $\aleph(\gamma_0)$ is positive definite for all $\gamma_0 \in \gamma $ with $\phi_0 = 0$. 
-      \label{ass:GMM4c}
-  \end{assumplist}
-  \end{assump}
-
-\section{Inference Proofs}
-
-
-\begin{restatable}[Uniform Convergence under Strong Identification]{lemma}{UllnStrongID}
-  \label{lemma:UniformConvergenceStrongID}
-  Let $\omega$ be the identified set.
-  Further assume that $\phi_0 \neq 0$. 
-  Let $\sampmom$ be the sample moment condition defined above, and $\W_T$ be the associated optimal weight matrix
-  estimator.
-  Then we have the following convergence.
-
-  \begin{align}
-    &\sup_{\omega \in \Omega} \norm*{\sampmom(\omega) - \E\left[g\left(\omega \mvert
-     \gamma_0\right)\right]}_{Fro} \pto 0 \\ 
-    &\sup_{\omega \in \Omega} \norm{\W_{T}(\omega)-\E\left[\W\left(\omega \mvert \gamma_0\right)\right]} \pto 
-  \end{align}
-
-\end{restatable}
-
-\begin{proof}
-
-  In this proof we rely heavily on the continuity of the moment conditions over their domain. 
-  This can be seen from simple inspection since we assumed that $\phi_0 \geq \underline{\phi} -1$.
-  Furthermore since $\omega$ is compact, this continuity implies uniform continuity.
-  
-  For any positive definite weight-matrix by \textcite[Lemma 2.3]{newey1994large} our criterion function has
-  a unique optimum.
-  The data, $\sigma^2_{t+1}, r_{t+1}$, are ergodic and stationary.
-  Since the moment conditions are not redundant the optimal (GMM) weight matrix $\W$ is positive definite. 
-  In addition, $\popmom$ is continuous at each $\omega$, given the restrictions above and properties of
-  characteristic functions imply that $\popmom$ is uniformly bounded. 
-  For convenience, we assume that the space of $\omega$ is compact.
-  This should not be an issue here because the parameters are either a priori bounded, such as $\phi$ or we
-  have substantial a priori knowledge on their plausible magnitudes.
-  Hence, \textcite[Theroem 2.6]{newey1994large} implies our estimator is consistent.
-  
-  However, when we allow for weak identification late on, we need this convergence to be uniform. 
-  One straightforward way to show this is to show that our criterion function is globally Lipschitz in a set of
-  high probability. 
-  
-  The other issue is that we need the weight matrix to converge uniformly to its expectation.
-  Since the moments are continuous functions over their domain as is the square function.
-  This convergence is uniform if and only if the matrix inverse is continuous.
-    
-    Since we have a finite number of non-redundant moments, the minimum eigenvalue, \\
-    $\lambda_{min}\left(\W\left(\phi_0, \zeta_0, \pi \mvert \gamma_0\right)\right) > 0$, and so the matrix inverse
-    is uniformly continuous in $\gamma_0$ with respect to the Frobenius norm, which is the sum of the eigenvalues.
-    (Recall, that the eigenvalues of the inverse are the inverse of the eigenvalues.)
-
-
-\end{proof}
-
-
-\begin{assump}[Weak Dependence]
-    \label{assumption:weak_dependence}
-    $z_t \coloneqq \begin{pmatrix} r_{t+1} \\ \sigma^2_{t+1} \end{pmatrix}$ are $\alpha$-mixing with $\alpha_t =
-       O\left(T^{-5}\right)$
-\end{assump}
-
-
-\begin{theorem}[Inference for $\omega$ under Strong Identification]
-    Assume that $\phi_0  \in (-1,1) \setminus 0$, $\rho_0 \in [0,1)$, and $c_0 > 0$. 
-    Further assume that the data are ergodic, stationary, and satisfy \cref{assumption:weak_dependence}.
-    Then the following convergence in distribution holds.
-
-    \begin{equation}
-    \sqrt{T} (\widehat{\omega}_T - \omega_0) \dto \N\left(0, \left(G' \E[\W] G\right)^{-1}\right)
-    \end{equation}
-\end{theorem}
-
-\begin{proof}
-
-    By the above arguments, we have a consistent estimator for $\omega$ and the optimal weight matrix $\W \coloneqq
-    (\E\left[g g'\right])^{-1}$, and we will assume that the true value $\omega_{0}$ is in the interior of its
-    sample space $\omega$.\footnote{Throughout we will use subscript \num{0}  to denote true values for parameters.}
-    Let $G \coloneqq \E\left[\frac{\partial}{\partial \omega} \popmom \right]$ Clearly, $g$ is continuously
-    differentiable, and its derivative $G$ is continuous.
-    In addition, by the identification discussion $G' W \nabla G$ is nonsingular.
-    
-    %TODO Replace this with strong (alpha) mixing of order (1+\epsilon). 
-    %Don't you need a lot more than this...?
-
-    Since, $\norm*{g_t}$ is almost surely bounded by $1$ it has all of its moments and $z_t$ being $\alpha$-mixing
-    implies $g_t$ is as well by the central limit theorem for strongly mixing process $\sqrt{T} \sampmom(\omega^{*})
-    \dto \N\left(0, \E\left[\W\right]^{-1}\right)$ as required. 
-    Consequently, by \textcite[theorem 3.2]{newey1994large} we have convergence in distribution as well as
-    convergence in probability.
-    
-
-\end{proof}
-
-
-\InferenceWeakID*
-
-\begin{proof}
-We prove this result by showing that Assumptions GMM 1-4 are satisfied.
-
-\begin{proofpart}
-    \label{part:main_theorem_proof_part1}
-    In this part, we show that \nameref{ass:GMM1} is satisfied. 
-    To do this, we break \nameref{ass:GMM1}  down into three subsections.
-    Assumptions \namedref{ass:GMM1a}, \namedref{ass:GMM1b}, \namedref{ass:GMM1c}, and \namedref{ass:GMM1d} state
-    that when $\phi = 0$, the moment conditions contain no information regarding $\pi$, but when $\phi \neq 0$,
-    the model is identified.
-    
-    \purple{We need to show the above statement}
-
-    We further showed the relevant uniform convergence to verity \namedref{ass:GMM1b} in
-    \cref{lemma:UniformConvergenceStrongID}.
-    
-    The next two assumptions (\namedref{ass:GMM1e} and \namedref{ass:GMM1f}) are  technical conditions regarding
-    the behavior of the moment conditions and weight matrix. 
-    Since our moment conditions are derived from an infinitely-differentiable  characteristic function and the
-    weight matrix is the optimal one, they both hold trivially.
-    
-    The third subsection of Assumption \nameref{ass:GMM1} concerns the weight matrix.
-    Since we are using the inverse covariance matrix of valid non-redundant model, assumptions
-    \namedref{ass:GMM1g} and \namedref{ass:GMM1h} automatically hold.
-    
-    The last two assumptions, \namedref{ass:GMM1i} and \namedref{ass:GMM1j} require that the parameter spaces do
-    not vary too much with the parameters and are compact.
-    Since $\omega$ is compact, \namedref{ass:GMM1i} holds trivially, and since it has  has a product form,
-    \namedref{ass:GMM1j}  holds trivially as well.
-    
-\end{proofpart}
-
-
-\begin{proofpart}
-    \label{part:mainTheoremProofPart2}
-
-    In this section, we show that the derivatives of the moment conditions have the correct behavior locally to
-    the true parameters.
-    We have to do this for the different classes of drifting sequences.
-    We will do this by verifitying \cref{ass:GMM2}.
-    This is valid since \textcite{andrews2014Gmm} show that this is a sufficient condition for their Assumption
-    GMM2, which is what we actually need. 
-
-    Our moment conditions are sample averages of the characteristic function, they satisfy \namedref{ass:GMM2a}
-    automatically. 
-    Since characteristic functions are uniformly bounded, by the dominated convergence theorem we can interchange the 
-    expectation and derivative operators. 
-    Hence \namedref{ass:GMM2b} and \namedref{ass:GMM2c} are equivalent to the statements in terms of the moment
-    conditions themselves mutatis mutandis.  
-    In addition, sice the derivate is a linear operator, we can pull it outside of the norm.
-    The reason that the uniform law of large numbers in \cref{part:main_theorem_proof_part1} does not trivially
-    imply this result is because we are not considering sequences $\phi_T \to \phi_0$. 
-
-
-    We create a mean value expansions around around $(\phi_0, \zeta_T, \pi_T)$ of the sample moment condition and
-    around $(\phi_0, \zeta_0, \pi_0)$ for the population moment condition.
-    (This is not the same in both cases, not is it the true parameter for the drifting sequence in the case of the
-    sample moment condition.)
-    In addition, also since we are considering continuous functions of compact spaces --- the $\delta_T$ ball in
-    $\R^{\dim(\omega)}$ --- pointwise convergence implies uniform convergence, and so we only need to show pointwise
-    convergence below.
-
-    \begin{alignat}{2}
-        & &&\norm*{\sampmom(\phi_T, \zeta_T, \pi_T) -  \E\left[\popmom(\phi_T, \zeta_T, \pi_T) \mvert
-          \gamma_0\right] } \\ 
-        \intertext{We take a mean value expansion of both functions around $\omega_0$. The point at which the
-        derivative in the two locations is taken may not be the same.}
-        &= &&\left\lVert \sampmom(\phi_0, \zeta_0, \pi_0) + \frac{\partial}{\partial (\phi, \zeta,
-           \pi)}\sampmom(\widetilde{\phi}^s, \widetilde{\zeta}^s, \widetilde{\pi}^s)\left((\phi_0, \zeta_0, \pi_0)
-            - (\phi, \zeta, \pi)\right)\right. \\
-        &  &&\quad \left. - \E\left[\popmom(\phi_0, \zeta_0, \pi_0) \mvert \gamma_0\right] + 
-           \frac{\partial}{\partial (\phi, \zeta, \pi)} \E\left[\popmom(\widetilde{\phi}^p, \widetilde{\zeta}^p,
-           \widetilde{\pi}^p)\mvert \gamma_0\right] \left((\phi_0, \zeta_0, \pi_0) - (\phi, \zeta,
-           \pi)\right) \right\rVert \\ 
-        \intertext{By the triangle inequality.}
-        &\leq && \norm*{\sampmom(\phi_0, \zeta_0, \pi_0) - \E\left[\popmom(\phi_0, \zeta_0, \pi_0) \mvert
-           \gamma_0\right]}  \\
-        &+  && \norm*{\frac{\partial}{\partial (\phi, \zeta)}\sampmom(\widetilde{\phi}^s, \widetilde{\zeta}^s,
-          \widetilde{\pi}^s)\left((\phi_0, \zeta_0)  - (\phi, \zeta)\right) -  \frac{\partial}{\partial (\phi,
-          \zeta)} \E\left[\popmom(\widetilde{\phi}^s, \widetilde{\zeta}^p, \widetilde{\pi}^p)\mvert \gamma_0\right]
-          \left((\phi_0, \zeta_0) - (\phi, \zeta)\right)} \\
-        &+  && \norm*{\frac{\partial}{\partial \pi}\sampmom(\widetilde{\phi}^s, \widetilde{\zeta}^s,
-          \widetilde{\pi}^s)\left(\pi_0 - \pi\right) -  \frac{\partial}{\partial \pi}
-          \E\left[\popmom(\widetilde{\phi}^p, \widetilde{\zeta}^p, \widetilde{\pi}^p)\mvert \gamma_0\right]
-          \left(\pi_0 - \pi\right)} 
-          \label{eqn:pi_derivative_term}
-    \end{alignat}
-
-    By the uniform law of law numbers in \cref{part:main_theorem_proof_part1}, the first equation is $o_p(1)$.
-    For $(\phi_0, \zeta_0) - (\phi, \zeta)$ small, the middle term is bounded by the quantity below. 
-
-
-    \begin{equation}
-        \norm*{\frac{\partial}{\partial (\phi, \zeta)}\sampmom(\widetilde{\phi}^s, \widetilde{\zeta}^s,
-        \widetilde{\pi}^s) -  \frac{\partial}{\partial (\phi, \zeta)} \E\left[\popmom(\widetilde{\phi}^s,
-        \widetilde{\zeta}^p, \widetilde{\pi}^p)\mvert \gamma_0\right]} \norm*{(\phi_0, \zeta_0) - (\phi, \zeta)}
-    \end{equation}
-
-    The first term is almost surely bounded, and the second term is less than $\delta_T$ by assumption, and so the
-    product is $o_p(1)$.
-
-    The hard part is the third expression.
-    Like before we can bound the pull the $\pi_0 - \pi$ term out of the equation.
-    However, this term is no longer converges to zero.
-    We will consider the two cases, separately.
-    Throughout, we will refer to the behavior of the following equation, which bounds
-    \cref{eqn:pi_derivative_term}.
-
-
-    \begin{equation}
-        \norm*{\frac{\partial}{\partial \pi}\sampmom(\widetilde{\phi}^s, \widetilde{\zeta}^s, \widetilde{\pi}^s) -
-        \frac{\partial}{\partial \pi} \E\left[\popmom(\widetilde{\phi}^p, \widetilde{\zeta}^p,
-        \widetilde{\pi}^p)\mvert \gamma_0\right] } \norm*{\pi_0 - \pi} 
-        \label{eqn:pi_derivative_norm_bound}
-    \end{equation}
-
-    In general, $\tilde{\pi}^s$ and $\tilde{\pi}^p$ can be arbitrarily far apart.
-    However, since $\sampmom \pto \E\left[\popmom \mvert \gamma_0\right]$, and the limiting value is independent of
-    $\pi$, the derivative does not depend upon $\pi$ asymptotically by the dominated convergence theorem.
-    This applies that the difference between the two derivatives evaluated at different $\pi$ converges to zero.
-    Consequently, \cref{eqn:pi_derivative_norm_bound} is $o_p(1)$ and we have shown \namedref{ass:GMM2b}.
-
-    \begin{equation}
-        \norm*{\abs*{\frac{\partial}{\partial \pi}\sampmom(\widetilde{\phi}^s, \widetilde{\zeta}^s,
-        \widetilde{\pi}^s) - \frac{\partial}{\partial \pi} \E\left[\popmom(\widetilde{\phi}^p,
-        \widetilde{\zeta}^p, \widetilde{\pi}^p)\mvert \gamma_0\right]} (1, 1, T)} \norm*{\pi_0 - \pi} 
-        \label{eqn:pi_derivative_rescaled_bound}
-    \end{equation}
-
-    If we consider the setup in \namedref{ass:GMM2c}, $\tilde{\pi}^s$ and $\tilde{\pi}^p$ are now close together.
-    However, we need to show that \cref{eqn:pi_derivative_rescaled_bound} is $o_p(1)$.
-    Since we are considering the limiting behavior of a function with a continuous derivative, we can assume that
-    the derivative is uniformly bounded without loss of generality. 
-    (The constant might depend upon the true value, but not $T$.)
-    By a Taylor series expansion of $\sampmom$ around the true value, $\frac{\widetilde{\pi}^p}{\sqrt{T}} \to 0$,
-    and $\norm{\pi_0 - \pi} \propto \delta_T$ the result follows.
-
-\end{proofpart}
-
-\begin{proofpart}
-    \label{part:mainTheoremProofPart3}
-
-    Assumption \namedref{ass:GMM3a} is trivially satisfied,  and we showed that \namedref{ass:GMM3b} is satisfied
-    in \cref{sec:GMM}.  
-        
-    The conceptual idea driving the reulsts this section is that moment conditions for each $T$ minus their
-    conditional exceptions converge to a normal random variable.
-    In other words, we are almost in a standard triangular C.L.T.\@ setup with weak time-dependence.
-
-    In particular, both $\sigma^2_t$ and $r_t$ are infinitely differentiable functions of the innovations to
-    the volatility and return processes and $\popmom$ are infinitely differentiable functions of $r_{t+1}$ and
-    $r_t$ and the innovations are i.i.d.\@ across time by assumption.
-    (Note, i.i.d.\@ implies strong mixing of any size.)
-    Consequently, $\popmom$ is near epoch dependent (NED) of any size as defined in
-    \textcite{andrews1991empirical}.  
-    (Take $s>2.$) 
-    By \textcite[Theorem 3]{andrews1991empirical}, we have the necessary finite-dimensional convergence in
-    distribution to a Gaussian random variable. 
-
-    We now show that \namedref{ass:GMM3d} holds.
-    Clearly, $K_{t,g}\left(\omega \mvert \gamma^{*}\right)$ always exists.
-    It uniformly converges because the derivatives of the moments are continuous functions of the data and the
-    parameters, the process is ergodic, and the characteristic function lives on a compact set.
-    It is also clearly continuous.
-    By the dominated convergence theorem, we can exchange the derivative and expectations.
-    In addition, since \popmom\ does not depend upon $\phi_T$, the limiting behavior is independent of the value
-    of $\phi_T$.
-    Hence \namedref{ass:GMM1d} holds.
-    
-    \namedref{ass:GMM3e} says the derivative of the moment function does not depend the true parameter $\phi$ if
-    and only if  $\pi =  \pi_0$. 
-    We showed this in the proof of \cref{part:mainTheoremProofPart2}.
-    \namedref{ass:GMM3f} follows directly from the compactness of the parameter space and the continuity of the
-    cross derivatives of \popmom\ by the dominated convergence theorem.
-
-\end{proofpart}
-
-\begin{proofpart}
-    \label{mainTheoremProofPart4}
-   
-    \namedref{ass:GMM4a} holds trivially.
-
-    \purple{This is no longer true.}
-    We verified \namedref{ass:GMM4b} when we showed that $\pi$ and $\zeta$ are strongly identified
-
-    \namedref{ass:GMM4c} holds because the identification conditions do not create any singularity in the
-    asymptotic covariance matrix. 
-
-\end{proofpart}
-
-\end{proof}
-
-
 
 
 
