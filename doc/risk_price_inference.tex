@@ -10,7 +10,7 @@
     \and  Paul Sangrey\thanks{University of Pennsylvania, The Perelman Center for Political Science and
     Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
     
-\title{Inference for Risk Prices using Equity Data}
+\title{Identification Robust Inference for Risk Prices in Structural Stochastic Volatility Models}
 
 \date{\today}
 
@@ -19,29 +19,36 @@
 \begin{titlepage}
 
 
-    \maketitle
-    \thispagestyle{empty}
-    \addtocounter{page}{-1}
+\maketitle
+\thispagestyle{empty}
+\addtocounter{page}{-1}
 
-    \begin{abstract} \singlespacing \noindent 
-        How risks and returns are traded off is arguably the central object of study in modern asset pricing. 
-        Even though the theoretical literature cohesively argues there should be a strong positive correlation
-        between expected returns and volatility, empirically measuring it has proven difficult. 
-        In addition, the option pricing literature shows that volatility enters as its own risk factor, not just
-        as a predictor of returns.
-        However, because as there is a negative contemporaneous correlation between the volatility and return
-        processes and the return and volatility relationship is inherently nonlinear measuring these risk prices
-        have proven delicate. 
-        We develop methods to provide  valid inference for the prices of equity and volatility risk using only
-        equity data that directly handles this identification problem. 
-        We do this by adapting the results in weak identification literature that uses drifting sequences in order
-        to be robust to the various parameters' identification strength. 
-    \end{abstract}
+\begin{abstract} \singlespacing \noindent 
 
-    \jelcodes{C12, C14, C38,  C58, G12}
+In structural stochastic volatility asset pricing models, changes in volatility affect risk premia through two
+channels: (1) the investor's willingness to bear high volatility in order to get high expected returns as measured
+by the market risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by
+the volatility risk price. Disentangling these channels is difficult and poses a subtle identification problem
+that invalidates standard inference. We adopt the discrete-time exponentially affine model of
+\textcite{khrapov2016affine}, which links the identification of volatility risk price to the leverage effect. In
+particular, we develop a minimum distance criterion that links the market risk price, the volatility risk price,
+and the leverage effect to the well-behaved reduced-form parameters governing the return and volatility's joint
+distribution. The link functions are almost flat if the leverage effect is close to zero, making estimating the
+volatility risk price difficult. We adapt the conditional quasi-likelihood ratio test
+\textcite{andrews2016conditional} develop in a nonlinear GMM framework to a minimum distance framework. The
+resulting conditional quasi-likelihood ratio test is uniformly valid. We invert this test to derive robust
+confidence sets that provide correct coverage for the prices regardless of the leverage effect's magnitude. 
 
-    \keywords{identification, robust inference, stochastic volatility, leverage, equity risk premium, volatility
-    risk premium, risk price, confidence set, asymptotic size}
+\end{abstract}
+
+\vspace{\baselineskip}
+
+\jelcodes{C12, C14, C38,  C58, G12}
+
+\vspace{\baselineskip}
+
+\keywords{identification, robust inference, stochastic volatility, leverage, equity risk premium, volatility
+risk premium, risk price, confidence set, asymptotic size}
 
 \end{titlepage}
 
@@ -51,26 +58,22 @@
 \phantomsection
 \addcontentsline{toc}{section}{Introduction}
 
-Modern finance is all about the risk return trade offs that investors face and how to optimally respond to them. 
-In particular, the central question of asset pricing is what drives expected returns.
-Standard economic theory predicts you must compensate investors with higher expected returns when they face more
-risk.
-In other words, we would expect a positive relationship between the mean and volatility of returns.
-In \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected
-return varies proportionally with the volatility of the market return.
-However, to price option prices well, we need not only a price of equity risk that loads upon the market variance,
-but also a price of volatility risk as well \parencite{christoffersen2013capturing}.
-Investors care not just about how their returns co-move with the market return but also how they co-move with the
-market volatility.
+Modern finance is all about the risk return trade offs that investors face and how to optimally respond to them.
+In particular, the central question of asset pricing is what drives expected returns.  Standard economic theory
+predicts you must compensate investors with higher expected returns when they face more risk.  In other words, we
+would expect a positive relationship between the mean and volatility of returns.  In
+\gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected return varies
+proportionally with the volatility of the market return.  However, to price option prices well, we need not only a
+price of equity risk that loads upon the market variance, but also a price of volatility risk as well
+\parencite{christoffersen2013capturing}.  Investors care not just about how their returns co-move with the market
+return but also how they co-move with the market volatility.
 
 This implies that current volatility will affect expected returns in two ways. 1) Through investors' preferences
-over future market returns. 2) Through investors' preferences over future volatility. 
-As one might expect distinguishing these two effects is quite difficult. 
-The difference between how the two effect risk premia comes through their different nonlinear relationships in the
-presence of contemporaneous correlation between the volatility and return processes. 
-We adopt the framework of \textcite{khrapov2016affine}, which is a discrete-time exponentially-affine stochastic
-volatility model.
-They mention a potential identification strategy in that paper. 
+over future market returns. 2) Through investors' preferences over future volatility.  As one might expect
+distinguishing these two effects is quite difficult.  The difference between how the two effect risk premia comes
+through their different nonlinear relationships in the presence of contemporaneous correlation between the
+volatility and return processes.  We adopt the framework of \textcite{khrapov2016affine}, which is a discrete-time
+exponentially-affine stochastic volatility model.  They mention a potential identification strategy in that paper.
 We develop this strategy,  characterizing how the identification strength of the risk prices varies over the
 parameter space, and show how to perform uniformly valid inference.
 
