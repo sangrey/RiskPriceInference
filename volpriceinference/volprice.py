@@ -195,7 +195,7 @@ def compute_bounds(case):
     elif case == 2:
         bounds = [(-.9, 0), (0, 20)]
     else:
-        bounds = [(-.9, 0), (-10, 0), (0, 20)]
+        bounds = [(-.9, 0), (-20, 0), (0, 20)]
 
     return bounds
 
