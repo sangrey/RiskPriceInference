@@ -1,5 +1,8 @@
 \documentclass[11pt, letterpaper, twoside, final]{article}
 \usepackage{risk_price_inference}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\usepackage{booktabs}
 \addbibresource{riskpriceinference.bib}
 
 \author{Xu Cheng\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}} \and Eric Renault\thanks{Brown University, Department of Economics -- Box B, 64 Waterman Street, Providence, RI 02912, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}} \and Paul Sangrey\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
@@ -65,7 +68,7 @@ The obvious next step is considering how we need to do this in practice. Since t
 
 This model has a few nice features.  First, it has both equity and volatility prices and a leverage effect.  As such, it is the natural discrete-time analogue of the \textcite{heston1993closedform} option pricing model.  It has an exponentially affine stochastic discount factor and shares with \textcite{heston1993closedform} the advantage of having a structure preserving change of measure between the physical and risk-neutral models. By doing our analysis in discrete-time we are able to more directly compare our results to risk-premia estimates outside of the option pricing literature and the jumps in high-frequency innovations will not dramatically affect our results.  If we were to use a diffusion process in continuous time, we would be severely counterfactually constraining the higher-order moments of the process in way that would likely bias our inference. 
 
-As far as estimation is concerned, we derive a series of conditional means and variances. We then take these means and variances and plug them into a general method of moments (GMM) criterion. The data we use are the bivariate series $(r_{t+1}, \sigma^2_{t+1})$. $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$. We go into further detail in \cref{sec:data} regarding how we obtained it, the time-span covered, and so forth.
+As far as estimation is concerned, we derive a series of conditional means and variances. We then take these means and variances and plug them into a general method of moments (GMM) criterion. The data we use are the bivariate series $(r_{t+1}, \sigma^2_{t+1})$. $r_{t+1}$ is the daily return on some asset, and we use its associated realized volatility for $\sigma^2_{t+1}$. We go into further detail in \cref{sec:empirics} regarding how we obtained it, the time-span covered, and so forth.
 
 \section{The Model}\label{sec:model}
 
@@ -925,11 +928,74 @@ We reject the null $H_{0}:\pi =\pi_{0}$ if $QLR\geq c_{\alpha}(h)$.
 The confidence interval for $\pi $ is the collection of null values that are not rejected as the null value. 
 Note that the construction of this CI\ does not involve estimation of $\pi$.
 
-\section{Simulations}
+\section{Simulations}\label{sec:simulation}
 
-\section{Data}\label{sec:data}
+In this section, we verify that the asymptotic  approximations we derived work well in practice. 
+Since we have a parametric model, we can simulate from it directly.
+To investigate the robustness of the procedure with respect to various
+identification strengths, we vary both $T$ and $\phi$.
 
-\section{Empirical Results}
+\begin{table}[htb]
+    
+    \centering
+    \caption{Simulation Parameters}
+    \label{tbl:simulationParameters}
+    
+    \begin{tabularx}{.4\textwidth}{*{5}{X}}
+%
+        \toprule
+        $\delta$   & $\rho$    &  $c$   & $\pi$ & $\theta$ \\
+        \midrule
+        0.27        & 0.81      & 3.11  & -0.2 & 0.53 \\
+        \bottomrule
+%
+    \end{tabularx}
+
+\end{table}
+
+We took the parameters in \cref{tbl:simulationParameters} directly from the estimates in \cref{sec:empirics} with the exception of $\pi$. The parameter estimate ($\approx 0.35$) for $\pi$ is not feasible for all values of $\phi$.
+The value chosen is the closest round number that keeps the various reduced-form parameters finite, for all values of $\phi$.
+
+We consider $\phi \in \lbrace -0.40, -0.10, -0.01 \rbrace$  and $T \in \lbrace 3700, 37000 \rbrace$. To gain an understanding of the DGPs being considered, we report various sample moments for each of the parameterization.
+
+
+
+\begin{table}[htb]
+    
+    \centering
+    \caption{Simulation DGPs' Summary Statistics}
+    \label{tbl:simulationDGPS}
+
+    \sisetup{
+        table-align-text-pre=false,
+        table-align-text-post=false,
+        round-mode=places,
+        round-precision=2,
+        table-space-text-pre=\lbrack,
+        table-space-text-post=\rbrack,
+    }
+    
+    \begin{tabularx}{.5\textwidth}{X | *{4}{S}}
+%
+        \toprule
+        $\phi$ & {$\E[r_t]$} &  {$\Var[r_t]$} & {$\E[\sigma^2_t]$} &  {$\Var[\sigma^2_t]$} \\
+        \midrule
+        -0.40  & 0.853766   & 14.6894   & 4.1947    & 72.3398   \\
+        -0.10  & -0.00579   & 5.0086    & 4.4194    & 72.3398   \\
+        -0.01  & -0.12078   & 4.50616   & 4.41947   & 72.3398   \\
+        \bottomrule
+%
+    \end{tabularx}
+
+\end{table}
+
+Since we are simulating the quantiles of the asymptotic distribution, we need to choose the number of simulations to use. We use \num{250}. The results are similar if we use \num{1000} draws. In addition, we invert a test statistic here. The confidence regions we report in \cref{sec:empirics} solely determined by the outcomes of these tests, and the computing the test statistics is significantly less computationally intensive.
+
+
+
+
+
+\section{Data and Empirical Results}\label{sec:empirics}
 
 \section{Conclusion}
 
