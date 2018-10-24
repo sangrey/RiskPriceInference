@@ -17,8 +17,7 @@ from multiprocessing import Pool
 # We define some functions
 _x, _y, beta, gamma, psi = sym.symbols('_x _y beta gamma psi', real=True, positive=True)
 rho, scale, delta, zeta = sym.symbols('rho scale delta zeta', real=True, positive=True)
-theta, pi, phi, pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols('theta pi phi pi1 pi2 theta1 theta2 phi1 phi2',
-                                                                   real=True)
+theta, pi, phi, pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols('theta pi phi pi1 pi2 theta1 theta2 phi1 phi2')
 
 #  We define the functions that specify the model.
 _psi_sym = (phi / sym.sqrt(scale * (1 + rho))) + (1 - phi**2) / 2 - (1 - phi**2) * theta
@@ -51,8 +50,10 @@ _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / delta) -
                                                      (_pi_from_gamma_in.xreplace({_x: theta - 1}) /
                                                       _pi_from_gamma_in.xreplace({_x: theta})),
                                                      pi).args[0].args[0]))
-compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, zeta), _pi_from_gamma.xreplace(
-    {phi: sym.Min(-sym.sqrt(1 - zeta), 0)}), modules='numpy')
+
+# _pi_from_beta = sym.powsimp(sym.solveset(_beta_sym - vl.beta, vl.pi).args[:2])
+compute_pi = sym.lambdify((delta, gamma, psi, rho, scale, theta, phi), _pi_from_gamma, modules='numpy')
+# compute_pi2 = sym.lambdify((delta, gamma, psi, rho, scale, theta, phi), _pi_from_beta, modules='numpy')
 
 # We create the functions to jointly specify the links.
 _link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym, gamma - _gamma_sym, psi - _psi_sym,
@@ -144,12 +145,12 @@ def compute_constraint_prices(omega, omega_cov, bounds, case):
     phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
     theta_init = compute_theta(psi=omega['psi'], scale=omega['scale'], rho=omega['scale'], zeta=omega['zeta'])
 
-    vals = np.linspace(bounds[1][0], bounds[1][1], 20)
+    vals = -1 * stats.truncexpon.rvs(loc=-bounds[1][1], b=-bounds[1][0], size=50)
     if case != 0 and case != 2:
         arg_list = [(val, _qlr_in([phi_init, val, theta_init], omega, omega_cov, case=case)) for val in vals]
 
         pi_est = compute_pi(delta=omega['delta'], gamma=omega['gamma'], psi=omega['psi'], rho=omega['rho'],
-                            scale=omega['scale'], theta=theta_init, zeta=omega['zeta'])
+                            scale=omega['scale'], theta=theta_init, phi=phi_init)
         if np.isfinite(pi_est):
             arg_list.append((pi_est, _qlr_in([phi_init, pi_est, theta_init], omega, omega_cov, case=case)))
 
