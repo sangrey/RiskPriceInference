@@ -1,4 +1,11 @@
-\usepackage[T1]{fontenc}
+\usepackage{ifxetex}
+\ifxetex
+   \usepackage{fontspec}
+\else
+    \usepackage[utf8]{inputenc}
+    \usepackage[T1]{fontenc}
+\fi
+
 \usepackage{amsmath,amsfonts,amssymb, amsthm} 
 \usepackage{mathtools, thmtools}
 \usepackage[onehalfspacing]{setspace}
