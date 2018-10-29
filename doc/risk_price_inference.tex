@@ -43,11 +43,7 @@ Modern finance is all about the risk return trade offs that investors face and h
 
 This implies that current volatility will affect expected returns in two ways. 1) Through investors' preferences over future market returns. 2) Through investors' preferences over future volatility. As one might expect distinguishing these two effects is quite difficult. The difference between how the two effect risk premia comes through their different nonlinear relationships in the presence of contemporaneous correlation between the volatility and return processes. We adopt the framework of \textcite{han2018leverage}, which is a discrete-time exponentially-affine stochastic volatility model. They mention a potential identification strategy in that paper. We develop this strategy, characterizing how the identification strength of the risk prices varies over the parameter space, and show how to perform uniformly valid inference.
 
-To take a step back and more fully develop empirical structure at hand, we consider how to measure the
-relationship between market volatility and expected returns if we assume that this relationship is constant and
-linear. Even in this simple case, unlike the consensus in the theoretical literature, the empirical literature
-has found pinning down this relationship quite difficult. Not only has its magnitude proven difficult to
-determine, but various estimates even differ in sign, \parencite{lettau2010measuring}.
+To take a step back and more fully develop empirical structure at hand, we consider how to measure the relationship between market volatility and expected returns if we assume that this relationship is constant and linear. Even in this simple case, unlike the consensus in the theoretical literature, the empirical literature has found pinning down this relationship quite difficult. Not only has its magnitude proven difficult to determine, but various estimates even differ in sign, \parencite{lettau2010measuring}.  
 
 The empirical literature, which we examine in more detail in the literature review, has focused on point estimates of this magnitude. However, if individual investors are ambiguity averse as in \textcite{hansen2001robust, jiu2012ambiguity}, they will care not just about how the representative investor prices volatility but also their uncertainty regarding this estimate. Furthermore, when economists calibrate models, they must know how precisely the data determine these parameters. If the need to alter the parameter value slightly in order to make their model perform well, are they bringing in more restrictions or data to more precisely determine the parameter of interest or are they using a value that the data tell us is incorrect?
 
@@ -73,14 +69,7 @@ As far as estimation is concerned, we derive a series of conditional means and v
 
 We estimate the prices of some factors using moment conditions derived from a pricing model. As is standard in that literature, we will do this by specifying the physical and risk-neutral measures and their relationship, i.e.\@ the stochastic discount factor or pricing kernel. This is non-trivial because we only observe equity data and so can only use moments with respect to the physical measure to estimate the parameters. However, as will be seen in detail below the risk prices govern the stochastic discount factor (SDF), not the physical measure directly. Consequently, we need to relate the physical and risk-neutral measures through SDF closely in order to get restrictions on the behavior of the physical measure in terms of the risk prices. 
 
-Let $\F_t$ be the representative investor's information set at time $t$, and $P_t$ be the price on the asset in question, with associated return $r_{t+1}$ and volatility $\sigma^2_{t+1}$. Then standard asset pricing theory says there exists a stochastic discount factor $M_{t,t+1}$ that prices the assets. % The advantage of defining $\QQ$ is that for some function --- $f$ -- of the future excess return --- $r_{t+1}$ -- % and volatility $\sigma^2_{t+1}$ and potentially the current information available -- $\F_t$, we can price this % payoff as its expectation with respect to $\QQ$. % In other words, the price of $f(r_{t+1}, \sigma^2_{t+1}, \F_t)$ satisfies \cref{eqn:risk_neutral_measure_defn} % for all $t$ and for all $f$. % This is useful because we can choose $f$ to make our estimation convenient.
-
-% \begin{equation} %  P_t(f) = \E_{\QQ}\left[ f\left(r_{t+1}, \sigma^2_{t+1}, \F_{t}\right) \mvert \F_{t}\right] %  \label{eqn:risk_neutral_measure_defn} % \end{equation}
-
-% Since $P_t(f), r_{t+1}$ and $\sigma_t^2$ are observable, if we specify a model for $\F_t$ in terms of observable % (to the econometrician) variables, this provides a moment condition that we can use. % However, this condition does not identify everything we wish to estimate, in particular it does not identify the % risk prices because $\QQ$ is not observable from equity data.
-
-% To resolve this we complete the model by defining the stochastic discount factor --- $M_{t, t+1}$ --- as the % Radon-Nikodym derivative between the $\PP$ and $\QQ$ measures. % No arbitrage guarantees that this will exist, \parencite{harrison1978martingales}. % Since risk prices arise from investors' demand for compensation to hold risk, the risk price show up here % in the $\QQ$ measure. % (We collect the parameter of interest into a vector --- $\omega$.)
-
+Let $\F_t$ be the representative investor's information set at time $t$, and $P_t$ be the price on the asset in question, with associated return $r_{t+1}$ and volatility $\sigma^2_{t+1}$. Then standard asset pricing theory says there exists a stochastic discount factor $M_{t,t+1}$ that prices the assets. 
 
 \begin{defn}{Asset Pricing Equation}\label{eqn:asset_pricing_eqn}
  \begin{equation}
@@ -996,8 +985,7 @@ We consider $\phi \in \lbrace -0.40, -0.10, -0.01 \rbrace$ and $T \in \lbrace 37
 Since we are simulating the quantiles of the asymptotic distribution, we need to choose the number of simulations to use. We use \num{250}. The results are similar if we use \num{1000} draws. In addition, we invert a test statistic here. The confidence regions we report in \cref{sec:empirics} solely determined by the outcomes of these tests, and the computing the test statistics is significantly less computationally intensive.
 We report averages over \num{500} simulations.
 
-To show the clear identification and how it varies with $\phi$, we plot the distribution of estimates, $\widehat{\pi}$ as reported by simulation using \num{37000} observations, \num{500} simulations, and the parameters used in \textcite{han2018leverage}. When $\phi$ is far from $0$ and the standard asymptotic experiments approximate the true distribution, they should be close to Gaussian. Conversely, as $\phi$ approaches $0$, the Gaussian limiting distribution does not provide a good approximation. The black lines in the middle of the figures in \cref{fig:sim_parameter_estimates} are the true parameter values.
-
+To show the clear identification and how it varies with $\phi$, we plot the distribution of estimates, $\widehat{\pi}$ as reported by simulation using \num{37000} observations, \num{500} simulations, and the parameters used in \textcite{han2018leverage}. When $\phi$ is far from $0$ and the standard asymptotic experiments approximate the true distribution, they should be close to Gaussian. Conversely, as $\phi$ approaches $0$, the Gaussian limiting distribution does not provide a good approximation. The black lines in the middle of the figures in \cref{fig:sim_parameter_estimates} are the true parameter values.  We truncate the parameter space for $\pi$ at $[-20, 0]$, and so the limiting distribution piles up at the boundaries as is common in these types of simulations.   
 
 \begin{figure}[htb]
     
@@ -1015,6 +1003,7 @@ To show the clear identification and how it varies with $\phi$, we plot the dist
     \end{subfigure}
     \begin{subfigure}[t]{.32\textwidth}
         \caption[phi = -0.01]{$\phi = -0.01$}
+        \includegraphics[width=\textwidth, height=\textwidth]{pi_est_500_-0_point_01.pdf}
     \end{subfigure}
 
 \end{figure}
@@ -1033,7 +1022,7 @@ Because we have four link functions, the AR-statistic is asymptotically $\chi^2(
     round-mode=places,
     round-precision=3,
   }
-  
+ 
   \begin{tabularx}{\textwidth}{X | *{3}{S} | *{3}{S}}
 %
     \toprule
@@ -1067,6 +1056,9 @@ If we look at the upper-right-hand corner of \cref{tbl:test_performance}, we see
 
 \section{Data and Empirical Results}\label{sec:empirics}
 
+
+
+\subsection{Data}
 
 The two series we need to estimate the model are $r_{t+1}$ and $\sigma^2_{t+1}$, and $\sigma^2_{t+1}$ must be the volatility of $r_{t+1}$.  That is, we need the appropriately defined variance of $r_{t+1}$ to equal $\sigma^2_{t+1}$ in expectation as discussed in \cref{sec:deriving_conditional_mean}.  Since this condition is automatically satisfied by the integrated volatility and daily return, we use high-frequency data to estimate $\sigma^2_{t+1}$ and use the associated daily return for $r_{t+1}$.  
 
@@ -1102,8 +1094,7 @@ We preprocess the data using the pre-averaging approach as in \textcites{podolsk
 
 We also plot the joint unconditional distribution to see the static relationship between the two series are related. The volatility has a long-right tail (it has has the typical gamma-type distribution) and the returns have a bell-shaped distribution. They are also slightly negative related as can be seen by the regression line in the joint plot.
 
-We also report a series of summary statistics.
-
+We also report a series of summary statistics.  The volatility and returns are weakly negatively correlated, corroborating the work by \textcites{bandi2012timevarying, aitsahalia2013leverage}.  
 
 \begin{table}[htb]
 
@@ -1137,7 +1128,10 @@ We also report a series of summary statistics.
 
 \end{table}
 
-As we can see in  \cref{tbl:summary_stats}, the volatility and returns are weakly negatively correlated, corroborating the work by \textcites{bandi2012timevarying, aitsahalia2013leverage}.  We now report the reduced-form parameters  estimates and associated confidence intervals.  We only report the reduced-form parameters that true determinant of the model, i.e., they are necessary to simulate the model. The other reduced-form parameters are known function of these parameters and the structural parameters and so have only useful in that the estimation procedure itself.
+
+\subsection{Estimates}
+
+We now report the reduced-form parameters  estimates and associated confidence intervals.  We only report the reduced-form parameters that true determinant of the model, i.e., they are necessary to simulate the model. The other reduced-form parameters are known function of these parameters and the structural parameters and so have only useful in that the estimation procedure itself. The confidence intervals reported here use the Gaussian limiting theory, ($\pm 1.96$ standard errors)  but we truncate at the edge of the parameter space if necessary. Although, these reduced-form parameters can be estimated directly from the data, disentangling $c$ and $\delta$ is difficult and so the estimation procedure responds appropriately by reporting relatively large standard errors.  
 
 
 \begin{table}[htb]
@@ -1192,7 +1186,7 @@ We are interested in not just the reduced-form parameters.  We also want estimat
         \toprule
         & {Point Estimate}  & \multicolumn{2}{c}{Confidence Interval} \\
         \midrule
-        $\phi$      & -0.302417 & -0.20 & 0.30 \\
+        $\phi$      & -0.302417  & 0.30 & -0.20 \\
         \rowcolor{gray!20}
         $\pi$       & -0.115097 & -0.2500 & 0.0 \\
         $\theta$      & 0.516140  & 0.20 & 0.6 \\
@@ -1219,6 +1213,11 @@ The confidence region is approximately rectangular, and so the projection infere
 
 \section{Conclusion}
 
+In structural stochastic volatility models such as the one developed here, changes in the volatility affect returns through two channels. First, the investor's willingness to tolerate high volatility in order to get high expected return as measured by the price of market risk. Standard economic models  imply there is a static trade-off between risk and expected return. Consequently, when the risk changes the expected return must change to restore equilibrium. However, investors may also be directly averse to changes in future volatility, and the empirical evidence shows that they are. \Textcite{han2018leverage} shows that we can disentangle these two channels through their differing relationships to the leverage effect. However, estimating the leverage effect is quite difficult, \parencite{aitsahalia2013leverage}. This poses a subtle identification that invalidates standard inference. When the data's signal-to-noise ratio is small, as it is here, standard tests and confidence intervals provide misleading results. We adopt the discrete-time exponentially-affine  of \textcite{han2018leverage} and adapt weak identification methods  to this framework to ensure that the resulting confidence intervals are robust.
+
+In particular, we develop a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to a series of well-behaved reduced-form parameters which govern the return and volatility's joint distribution. We do this by adapting the conditional quasi-likelihood ratio test (CLR) \textcite{andrews2016conditional} develop in a GMM framework to a minimum distance framework. The resulting CLR test is uniformly valid. We invert this test to derive a robust confidence set. We then apply this methodology to data on the S\&P 500 and show that the market risk price lies in $(0.20, 0.60)$ yearly percentage points, and the volatility risk price lies in $(-0.20, 0.00)$. These estimates are both substantially smaller in magnitude than the values chosen by  \textcite{han2018leverage}.
+
+
 \clearpage
 
 
@@ -1234,30 +1233,22 @@ The confidence region is approximately rectangular, and so the projection infere
 
 \begin{lemma}[Linearity of $\beta$ and $\gamma$]
  \label{lemma:linearity_of_physical_functions}
- Letting $\sigma^2_{t+1}$ be the integrated volatility of a process with return $r_{t+1}$.
- Assume that $\sigma^2_{t+1}$ and $r_{t+1}$ follow a bivariate CAR(1) process parametrized as in
- \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}. 
- Then $\beta''(0)$ and $\gamma''(0)$ both equal zero.
+ Letting $\sigma^2_{t+1}$ be the integrated volatility of a process with return $r_{t+1}$.  Assume that $\sigma^2_{t+1}$ and $r_{t+1}$ follow a bivariate CAR(1) process parametrized as in \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}.  Then $\beta''(0)$ and $\gamma''(0)$ both equal zero.
 \end{lemma}
 
 \begin{proof}
- By the \Ito\ Isometry, and the definition of $r_{t+1}$ as an integrated variance, the following holds for the
- returns' predictable information set $\F^r_{t-}$. 
+ By the \Ito\ Isometry, and the definition of $r_{t+1}$ as an integrated variance, the following holds for the returns' predictable information set $\F^r_{t-}$. 
 
  \begin{equation}
   \Var\left(r_{\tau+1}\mvert \F_{\tau-}\right) \leq \E\left(r^2_{\tau+1} \mvert \F_{\tau-}\right) 
   = \E\left(\sigma^2_{t+1}\mvert \F_{\tau-}\right)
  \end{equation}
 
- The integrated volatlity is predictable, and so $\sigma^2_{t+1}$ is contained in the return's predictable
- $\sigma$-algebra. 
+ The integrated volatility is predictable, and so $\sigma^2_{t+1}$ is contained in the return's predictable $\sigma$-algebra. 
 
- Consequently, $\Var\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) \leq \sigma^2_{t+1}$
- In addition, variance must always be positive, and so $\Var\left(r_{t+1} \mvert \sigma^2_t,
- \sigma^2_{t+1}\right) \geq 0$.
+ Consequently, $\Var\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) \leq \sigma^2_{t+1}$ In addition, variance must always be positive, and so $\Var\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) \geq 0$.
 
- Since the second derivative of the log-cumulant funciton evaluted at zero equals the variance, we have the
- following set of inequalities.
+ Since the second derivative of the log-cumulant function evaluated at zero equals the variance, we have the following set of inequalities.
 
  \begin{gather}
   0 \leq (1 - \phi^2) \sigma^2_{t+1} - \beta''(0) \sigma^2_t - \gamma''(0) \leq
@@ -1271,17 +1262,14 @@ The confidence region is approximately rectangular, and so the projection infere
 %
  \end{gather}
 
- On the outside of the two inequalities we have constants, and the distribution of $\sigma^2_{t+1}$ given
- $\sigma^2_t$ is not bounded away from zero.
- Consequently, the only way for \cref{eqn:second_derivative_inequalities} to hold for all $\sigma^2_{t+1}$ is
- if the term inside the parantheses equals zero.
+ On the outside of the two inequalities we have constants, and the distribution of $\sigma^2_{t+1}$ given $\sigma^2_t$ is not bounded away from zero.  Consequently, the only way for \cref{eqn:second_derivative_inequalities} to hold for all $\sigma^2_{t+1}$ is if the term inside the parentheses equals zero.
 
  \begin{equation}
   0 = \beta''(0) \sigma^2_t + \gamma''(0)
  \end{equation}
 
  However, the only way for this to hold is for both $\gamma''(0)$ and $\beta''(0)$ to equal zero.
- This plus the condtional gaussianity of the returns implied by the paramtric model implies that $\gamma$
+ This plus the conditional Gaussianity of the returns implied by the parametric model implies that $\gamma$
  and $\beta$ are both linear.
 
 \end{proof}
