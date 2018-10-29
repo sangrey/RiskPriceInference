@@ -39,7 +39,7 @@ In structural stochastic volatility asset pricing models, changes in volatility 
 
 \section{Introduction}
 
-The core of modern finance is how investors optimally trade off risk and return.  In particular, the central question of asset pricing is what drives expected returns. Standard economic theory predicts you must compensate investors with higher expected returns when they face more risk. In other words, we would expect a positive relationship between the mean and volatility of returns. In \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected return varies proportionally with the volatility of the market return. However, to price option prices well, we need not only a price of equity risk that loads upon the market variance, but also a price of volatility risk as well \parencite{christoffersen2013capturing}. Investors care not just about how their returns co-move with the market return but also how they co-move with the market volatility.
+The core of modern finance is how investors optimally trade off risk and return.  Standard economic theory predicts you must compensate investors with higher expected returns when they face more risk. In other words, we would expect a positive relationship between the mean and volatility of returns. In \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected return varies proportionally with the volatility of the market return. However, to price option prices well, we need not only a price of equity risk that loads upon the market variance, but also a price of volatility risk as well \parencite{christoffersen2013capturing}. Investors care not just about how their returns co-move with the market return but also how they co-move with the market volatility.
 
 This implies that current volatility will affect expected returns in two ways. 1) Through investors' preferences over future market returns. 2) Through investors' preferences over future volatility. As one might expect distinguishing these two effects is quite difficult. The difference between how the two effect risk premia comes through their different nonlinear relationships in the presence of contemporaneous correlation between the volatility and return processes. We adopt the framework of \textcite{han2018leverage}, which is a discrete-time exponentially-affine stochastic volatility model. They mention a potential identification strategy in that paper. We develop this strategy, characterizing how the identification strength of the risk prices varies over the parameter space, and show how to perform uniformly valid inference.
 
@@ -67,27 +67,26 @@ As far as estimation is concerned, we derive a series of conditional means and v
 
 \addtocounter{subsection}{1}
 
-We estimate the prices of some factors using moment conditions derived from a pricing model. As is standard in that literature, we will do this by specifying the physical and risk-neutral measures and their relationship, i.e.\@ the stochastic discount factor or pricing kernel. This is non-trivial because we only observe equity data and so can only use moments with respect to the physical measure to estimate the parameters. However, as will be seen in detail below the risk prices govern the stochastic discount factor (SDF), not the physical measure directly. Consequently, we need to relate the physical and risk-neutral measures through SDF closely in order to get restrictions on the behavior of the physical measure in terms of the risk prices. 
+We need a model that relates the prices to the dynamics in the data to estimate them.  We specify this model using a  stochastic discount factor (SDF) and the physical measure. Since we do not have options data, the SDF, which is also called a pricing kernel, is unobserved. Hence, our pricing model must allow us to identify the parameters governing the  SDF  if we know the parameters that govern the physical measure. 
 
-Let $\F_t$ be the representative investor's information set at time $t$, and $P_t$ be the price on the asset in question, with associated return $r_{t+1}$ and volatility $\sigma^2_{t+1}$. Then standard asset pricing theory says there exists a stochastic discount factor $M_{t,t+1}$ that prices the assets. 
+Let $\F_t$ be the representative investor's information set at time $t$ and $P_t$ be the price on the asset in question. Denote the associated return $r_{t+1}$ and volatility $\sigma^2_{t+1}$. Then the SDF --- $M_{t,t+1}$ --- prices all of the assets. In other words, \cref{eqn:asset_pricing_eqn}  holds. This definition says that the SDF is the change of measure between the physical and risk-neutral distributions and that prices are expectations with respect to the risk-neutral measure.
 
-\begin{defn}{Asset Pricing Equation}\label{eqn:asset_pricing_eqn}
- \begin{equation}
-  P_t = \E\left[M_{t,t+1} P_{t+1} \mvert \F_t \right] 
- \end{equation}
+\begin{defn}{Asset Pricing Equation}
+    \label{eqn:asset_pricing_eqn}
+    \begin{equation}
+        P_t = \E\left[M_{t,t+1} P_{t+1} \mvert \F_t \right] 
+    \end{equation}
 \end{defn}
 
-The main issue with \cref{eqn:asset_pricing_eqn} is that $M_{t,t+1}$ is not observable, and so we cannot use it to estimate models. However, if we can parameterize $M_{t,t+1}$ as a vector of observables and parameters, then we can. We specify the model by parameterizing the dynamics of the $P_t$ and $M_{t, t+1}(\omega)$ The object of interest here is the risk prices, which are such parameters. Risk prices measure the level of compensation that the representative investor demands in order to face additional risk. Consequently, they determine the amount that the stochastic discount factor (SDF) twists the distribution of $P_t$. 
+Risk prices measure the level of compensation that the representative investor demands to face additional risk. Consequently, they determine the amount that the stochastic discount factor (SDF) twists the distribution of $P_t$.  Our model for $P_t$ that implies $M_{t,t+1}$ is a known function of these risk prices, parameters that govern the price and volatility dynamics, the volatility --- $\sigma^2_{t}, \sigma^2_{t+1}$, and the log excess returns --- $r_{t+1}$.. Having done that, we place this $M_{t,t+1}$ into \cref{eqn:asset_pricing_eqn} and estimate the model by matching the reduced-form and model-implied dynamics of the returns and volatitlies.
 
-In what follows, we write down a model for $P_t$ that implies $M_{t,t+1}$ is a known function of these risk prices, parameters that govern the price and volatility dynamics, the volatility --- $\sigma^2_{t}, \sigma^2_{t+1}$, and the log excess returns --- $r_{t+1}$.. Having done that, we place this $M_{t,t+1}$ into \cref{eqn:asset_pricing_eqn} and estimate the model by matching the reduced-form and model-implied dynamics of the returns and polities.
+Throughout we assume that the two risks that command nonzero prices are the market risk price and the volatility risk price as discussed in the introduction. Consequently, we  only use variation in the first two moments of the data to estimate these parameters. If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional, conrad2012exante, chang2013market}, and we used higher sample moments to determine the price of our risk-factors our resulting estimates would be biased, likely substantially so.  Attempting to match the risk prices of high moments with only the risk prices considered here would misattribute compensation for bearing risk associated with these higher moments to the market and volatility risk prices.  Consequently, our model must be parameterized in terms of the first two moments. We use the conditional autoregressive CAR(1) model here, which we take from \textcite{darolles2006structural,han2018leverage}. 
 
-Throughout we assume that the two risks that are priced in the market are equity risk and volatility risk as we discussed in the introduction. This motivates us to focus on the first two moments of the data. If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional, conrad2012exante, chang2013market}, and we used higher sample moments as well to determine the price of our risk-factors our resulting estimates would be biased, likely substantially so. Essentially, we misattribute compensation for bearing risk driven by the higher moments to risk driven by lower moments. This implies that we want a model that is paramterized in terms of these first two moments. We use the conditional autoregressive CAR(1) model here, which we take from \textcite{darolles2006structural,han2018leverage}
-
-Following \textcite{han2018leverage}, we assume that the $P_t$ and $\sigma^2_t$ are first-order Markov and there is no Granger-causality from return to the volatility and that returns are serially independent given the volatility path. In other words, the volatility drives all of the dynamics of the process. Note, we do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, which they are in the data. We construct the model in terms of a series of Laplace transforms that we parameterize using some functions $A(x), B(x), C(x), D(x)$, and $E(x)$ for all $x$ in its domain. We collect the parameters in a vector $\omega$.
+In particular, we adopt the model that \textcite{han2018leverage} develop. This model assumes that the $P_t$ and $\sigma^2_t$ are first-order Markov and there is no Granger-causality from the return to the volatility and that returns are independent given the volatility. In other words, the volatility drives all of the dynamics of the process. We do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, as they are in the data. We construct the model in terms of a series of Laplace transforms that we parameterize using some functions $A(x), B(x), C(x), D(x)$, and $E(x)$ for all $x$ in its domain. We collect the parameters in a vector $\omega$.
 
 \subsection{The Stochastic Discount Factor}\label{sec:deriving_sdf_functions}
 
-We start by parameterizing the stochastic discount factor. We assume an exponentially-affine structure for the SDF. We let $\pi$ be the price of volatility risk and $\theta$ be the price of equity risk, and use the following parameterization for the SDF.
+We start by parameterizing the stochastic discount factor.  Let $\pi$ be the price of volatility risk and $\theta$ be the price of market risk.
 
 \begin{defn}{The Stochastic Discount Factor}
  \label{defn:SDF}
@@ -97,11 +96,11 @@ We start by parameterizing the stochastic discount factor. We assume an exponent
  \end{equation}
 \end{defn}
 
-Since $M_{t,t+1}$ must integrate to $1$ for all $\sigma^2_t$, we can view $m_{0}(\pi, \theta)$ and $m_1(\pi, \theta)$ as integration constants.
+Since $M_{t,t+1}$ must integrate to $1$ for all $\sigma^2_t$, $m_{0}(\pi, \theta)$ and $m_1(\pi, \theta)$ are integration constants. This will be crucial to our derivation of the relationship between the SDF and physical measure functions below.
 
 \subsection{Parameterizing the Physical Measure Dynamics}
 
-We now introduce the data generating process for the volatility. We use a conditional autoregressive gamma process as in \textcite{gourieroux2006autoregressive, han2018leverage} for the volatility. This implies that we can parameterize the process using the $A$ and $B$ defined as follows.
+We now introduce the data generating process for the volatility. We use a conditional autoregressive gamma process as in \textcite{gourieroux2006autoregressive, han2018leverage} for the volatility. This implies $A$ and $B$ are as follows.
 
 \begin{defn}{Volatility Dynamics Functions}
  \label{defn:physical_vol_dynamics}
@@ -116,8 +115,7 @@ We now introduce the data generating process for the volatility. We use a condit
 
 \end{defn}
 
-In this specification, $\rho$ is a persistence parameter, and $c$ is a scaling parameter.
-We can see this this clearly from the following forms of the moment conditions.
+In this specification, $\rho$ is a persistence parameter, and $c$ is a scaling parameter. To see this, consider the following moment conditions. 
 
 \begin{remark}[Volatilty Moment Conditions] 
  \label{remark:vol_moment_conditions}
@@ -130,11 +128,12 @@ We can see this this clearly from the following forms of the moment conditions.
  \end{align}
 \end{remark}
 
-Since these two moment conditions are sufficient to derive the unconditional moments, all of the parameters are identified as long as they are in the interior of their appropriately specified domains. Intuitively, we are using linear regression to estimate the slope and intercept parameters.
+Since these two moment conditions are sufficient to derive the unconditional moments, all of the parameters are identified as long as they are in the interior of their appropriately specified domains. We are using linear regression to estimate the slope and intercept parameters.
 
 \subsubsection{Return Dynamics}
 
-We then turn to computing the moments of the return distribution. This is more subtle than computing the moments of the volatility dynamics because we have to relate the dynamics of the returns to that of the volatility and to the stochastic discount factor, which is not observed. We use the conditional autoregressive CAR(1) model here, which we take from \textcite{darolles2006structural,han2018leverage} This model specifies the conditional Laplace transform of the return as a function of $r_{t+1}$ given $\sigma^2_{t+1}, \sigma^2_t$. We start by specifying a parametric form for $C(x)$ and $D(x)$, and $E(x)$. We paramterize $C(x)$ using a quadratic form, which, along with our other rescritions, implies that the return is conditionall Gaussian.
+We now compute the return distribution's moments. This computation is more subtle than computing the volatility's moments of the volatility dynamics because we must relate the dynamics of the returns' dynamics to those of the volatility as given by the unobservable SDF.  We use the conditional autoregressive CAR(1) model here, which we take from \textcite{darolles2006structural,han2018leverage}. This model specifies the conditional Laplace transform of the return as a function of $r_{t+1}$ given $\sigma^2_{t+1}, \sigma^2_t$. We start by specifying a parametric form for $C(x)$ and $D(x)$, and $E(x)$. The parametric form we give   $C(x)$ implies that returns'  are conditionally Gaussian.
+
 
 \begin{defn}{Reduced-Form Functions}
  \label{defn:physical_return_dynamics}
@@ -145,11 +144,10 @@ We then turn to computing the moments of the return distribution. This is more s
  \end{align}
 \end{defn}
 
-In addition, as these functions parameterize the Laplace transform, they equal zero at at $x=0$. It might seem as first, that imposing linearity for $D(x)$ and $E(x)$ is a strong restriction. This is not actually the case. Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility and hence greater than $\Var(r_{t+1} \ivert \sigma^2_{t+1}, \sigma^2_{t})$ and variances are positive, the model implies they are linear.\footnote{We show this in \cref{lemma:linearity_of_physical_functions} which is located in \cref{app:model_characterization}.}
+As these functions parameterize the Laplace transform, they equal zero at $x=0$. It might seem as first, that imposing linearity for $D(x)$ and $E(x)$ is a strong restriction. This is not actually the case. Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility and hence greater than $\Var(r_{t+1} \ivert \sigma^2_{t+1}, \sigma^2_{t})$ and variances are positive, the model implies they are linear.\footnote{We show this in \cref{lemma:linearity_of_physical_functions} which is located in \cref{app:model_characterization}.}
 
-
-To give an idea of how the dynamics of $\sigma^2_t$ evolve in this specfication, we compute the first two moments.
-
+To ease understanding of how $r_{t+1}$ and $\sigma^2_t$ are related, consider the first two moments:
+%
 \begin{align}
  \label{eqn:rtn_cond_mean}
  \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \psi \sigma^2_{t+1} + \beta \sigma^2_t +
@@ -157,12 +155,10 @@ To give an idea of how the dynamics of $\sigma^2_t$ evolve in this specfication,
  \label{eqn:rtn_cond_vol}
  \Var\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= (1 - \phi^2) \sigma^2_{t+1} 
 \end{align}
+%
+We use these moments  to identify $\psi$, $\beta$, and $\phi$.  The $\psi$ parameter governs the change in the conditional mean when we condition on the volatility. The $\phi$ parameter governs the reduction of the returns' innovation variance.  If $\phi=0$, the variance does not decrease, and there is no leverage effect.
 
-
-
-\subsection{Relating the Physical Measure Functions and the Risk Prices}
-
-By plugging in the Laplace transforms for $\sigma^2_{t+1}$ and $r_{t+1}$ into \cref{defn:SDF}, we can derive the following.
+We derive the following by plugging in the Laplace transforms for $\sigma^2_{t+1}$ and $r_{t+1}$ into \cref{defn:SDF}.
 
 \begin{restatable}[Characterizing the SDF Integration Constants]{lemma}{sdfConstants}
  \label{lemma:characterizing_sdf_integration_constants}
@@ -181,26 +177,17 @@ By plugging in the Laplace transforms for $\sigma^2_{t+1}$ and $r_{t+1}$ into \c
 \end{restatable}
 
 
-% Since the right-hand side of \cref{eqn:sdf_functions_vs_physical_functions} are entirely in terms of the physical
-% measure functions, which are observable, we can estimate the SDF functions entirely using equity data.
-% In other words, we do not need, at least in principle, option data to estimate the SDF.
-% In particular, we can determine the risk prices from equity prices if the identified parts of the physical measure
-% functions ($\alpha$, $\beta$, etc.) are \textquote{sufficiently} invertible.
-% (I.e.\@ the matrix of their derivatives satisfies the appropriate non-singularity conditions.)
-
 \subsubsection{Deriving the Conditional Mean}\label{sec:deriving_conditional_mean}
 
-The goal moving forward is to solve for $\gamma$, $\beta$, and $\psi$ in terms of $(rho, c, \delta)$ and $(\pi, \theta)$. Once we do this, we can use the difference in expected returns between the distribution given $\sigma^2_t$ and the distribution given $\sigma^2_{t+1}$ and $\sigma^2_t$ to separately identify the two risk prices. In this section, we focus on $\psi$ because it controls this difference in means and hence controls the strength of identification.
 
-Intuitively, the reason they are not identified in general is that if volatility and returns are uncorrelated, we cannot disentangle the shift in the mean because the price of volatility risk from the shift in the mean induced by price of equity risk. They both show up in the same way in $\psi$, which we will show later. However, if we have a leverage effect, when we condition on $\sigma^2_{t+1}$ two different components of the return are moving -- the mean and variance. Since we now have two moments, we can identify both parameters.
+This section starts by solving for $\gamma$, $\beta$, and $\psi$ in terms of $(rho, c, \delta)$ and $(\pi, \theta)$. Once we do this, we can use the difference in expected returns between the distribution given $\sigma^2_t$ and the distribution given $\sigma^2_{t+1}$ and $\sigma^2_t$ to separately identify the two risk prices. In this section, we focus on $\psi$ because it controls this difference in means and hence identifies of the volatility risk price when $\phi \neq 0$.
 
-In general, $\psi$ will have three parts. First, we have the Jensen's inequality term --- the mean will shift by a value proportional to the variance. Second, the reduction in variance will shift the price as consumers are risk averse. Third, since $\sigma^2_{t+1}$ and $r_{t+1}$ are correlated, (the leverage effect) the drift will change directly. 
+% Intuitively, the reason they are not identified in general is that if volatility and returns are uncorrelated, we cannot disentangle the shift in the mean because the price of volatility risk from the shift in the mean induced by price of equity risk. They both show up in the same way in $\psi$, which we will show later. However, if we have a leverage effect, when we condition on $\sigma^2_{t+1}$ two different components of the return are moving -- the mean and variance. Since we now have two moments, we can identify both parameters.
+In general, $\psi$ has three parts. First, it has a  Jensen's inequality term --- the mean will shift by a value proportional to the variance. Second, the reduction in variance shifts the price because investors are risk-averse. Third, since $\sigma^2_{t+1}$ and $r_{t+1}$ are correlated, (the leverage effect) the drift will change directly. The goal is to separate the three components. The way we do this is by constructing a pseudo-return --- $\widetilde{r}_{t+1}$ --- whose mean is not affected by the change in variance resulting from the addition of  $\sigma^2_{t+1}$ to the information set.
 
-The goal is to separate out the three components. The way we do this is by constructing a pseudo-return --- $\widetilde{r}_{t+1}$ --- whose mean is not affected by the change in variance caused by adding $\sigma^2_{t+1}$ to the information set.
+We exploit the fact that $\E\left[M_{t,t+1}(\theta, \pi) \exp(r_{t+1}) \mvert \sigma^2_t \right] = 1$ by relating $\E\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}, \sigma^2_t \right]$ to this expression. Clearly, there are two differences between these expressions. First, we have the SDF in the first expression. Second, the conditioning information differs. We can view these differences as two measure changes. Since prices here are conditionally log-Gaussian, the measure change can be parameterized in terms of the covariance between the log SDF --- $m_{t,t+1} \coloneqq \log M_{t,t+1}$ --- and the return.
 
-We do this by exploiting the fact that $\E\left[M_{t,t+1}(\theta, \pi) \exp(r_{t+1}) \mvert \sigma^2_t \right] = 1$. We want to relate $\E\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}, \sigma^2_t \right]$ to this expression. Clearly, there are two differences between these expressions. First, we have the SDF in the first expression. Second, the conditioning information differs. We can view these differences as two measure changes. Since prices here are conditionally log-Gaussian, the measure change can be paramterized in terms of the covariance between the log SDF --- $m_{t,t+1} \coloneqq \log M_{t,t+1}$ --- and the return.
-
-If we apply the logarithm to \cref{defn:SDF}, we get the following expression for $m_{t,t+1}$:
+Applying the logarithm to \cref{defn:SDF} gives
 %
  \begin{equation}
  \label{eqn:log_sdf}
@@ -218,7 +205,7 @@ Except for $\theta r_{t+1}$, the terms on the right are constant given $\sigma^2
  = -\theta \Var\left(r_{t+1} \mvert \sigma^2_{t+1}\right). 
 \end{equation}
 %
-Plugging in \cref{eqn:rtn_cond_vol}, we obtain:
+Plugging in \cref{eqn:rtn_cond_vol}, gives
 %
 \begin{equation}
  \label{eqn:return_covarinace}
@@ -226,7 +213,7 @@ Plugging in \cref{eqn:rtn_cond_vol}, we obtain:
 %
  = -\theta (1 - \phi^2) \sigma^2_{t+1}.
 \end{equation}
-
+%
 The expression in \cref{eqn:return_covarinace} is the change in the mean driven by investors' risk aversion, and is controlled by their equity risk price. To see this, note it equals zero if $\theta = 0$.
 
 The second term we need is the Jensen's effect term. The mean of a conditionally log-Gaussian price depends on both the mean and variance of the underlying return. It has the standard form: minus one-half the conditional variance $\left(-\frac{1 - \phi^2}{2} \sigma^2_{t+1}\right)$. 
@@ -1412,7 +1399,6 @@ applies to $\widetilde{r}_{t+1}$ but not to $r_{t+1}$.
  This will be important later.
  
 \end{proof}
-
 
 
 \end{appendices}
