@@ -39,7 +39,7 @@ In structural stochastic volatility asset pricing models, changes in volatility 
 
 \section{Introduction}
 
-Modern finance is all about the risk return trade offs that investors face and how to optimally respond to them. In particular, the central question of asset pricing is what drives expected returns. Standard economic theory predicts you must compensate investors with higher expected returns when they face more risk. In other words, we would expect a positive relationship between the mean and volatility of returns. In \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected return varies proportionally with the volatility of the market return. However, to price option prices well, we need not only a price of equity risk that loads upon the market variance, but also a price of volatility risk as well \parencite{christoffersen2013capturing}. Investors care not just about how their returns co-move with the market return but also how they co-move with the market volatility.
+The core of modern finance is how investors optimally trade off risk and return.  In particular, the central question of asset pricing is what drives expected returns. Standard economic theory predicts you must compensate investors with higher expected returns when they face more risk. In other words, we would expect a positive relationship between the mean and volatility of returns. In \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the expected return varies proportionally with the volatility of the market return. However, to price option prices well, we need not only a price of equity risk that loads upon the market variance, but also a price of volatility risk as well \parencite{christoffersen2013capturing}. Investors care not just about how their returns co-move with the market return but also how they co-move with the market volatility.
 
 This implies that current volatility will affect expected returns in two ways. 1) Through investors' preferences over future market returns. 2) Through investors' preferences over future volatility. As one might expect distinguishing these two effects is quite difficult. The difference between how the two effect risk premia comes through their different nonlinear relationships in the presence of contemporaneous correlation between the volatility and return processes. We adopt the framework of \textcite{han2018leverage}, which is a discrete-time exponentially-affine stochastic volatility model. They mention a potential identification strategy in that paper. We develop this strategy, characterizing how the identification strength of the risk prices varies over the parameter space, and show how to perform uniformly valid inference.
 
@@ -933,14 +933,14 @@ identification strengths, we vary both $T$ and $\phi$.
     $\delta$  & $\rho$  & $c$  & $\pi$ & $\theta$ \\
     \midrule
 % %
-    \multicolumn{5}{c}{Parameters Estimated from the Data} \\
-    \midrule
-    0.27    & 0.81   & 3.11 & -0.2 & 0.53 \\
-%
-    \midrule
-    \multicolumn{5}{c}{Parameter Values used by \textcite{han2018leverage}} \\
-    \midrule
-    0.6475    & 0.95   & \num[scientific-notation=true]{.00394128} & -10 & 1.7680 \\
+%     \multicolumn{5}{c}{Parameters Estimated from the Data} \\
+%     \midrule
+%     0.27    & 0.81   & 3.11 & -0.2 & 0.53 \\
+% %
+%     \midrule
+%     \multicolumn{5}{c}{Parameter Values used by \textcite{han2018leverage}} \\
+%     \midrule
+%     0.6475    & 0.95   & \num[scientific-notation=true]{.00394128} & -10 & 1.7680 \\
     \bottomrule
 %
   \end{tabularx}
