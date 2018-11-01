@@ -43,7 +43,7 @@ The core of modern finance studies how investors optimally trade off risk and re
 
 In these structural stochastic volatility models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the market risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. Disentangling these channels is difficult and poses a subtle identification problem that invalidates standard inference. We adopt the discrete-time exponentially affine model of \textcite{han2018leverage}, which links the identification of volatility risk price to the leverage effect. This effect measures the correlation between return and volatility innovations. Although theoretically less than zero, this effect is difficult to quantify empirically, \parencites{bandi2012timevarying, aitsahalia2013leverage}. This low signal-to-noise ratio (weak identification) invalidates standard inference and makes classic asymptotic approximation perform poorly.
 
-We provide identification-robust inference by developing a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to a series of reduced-form parameters that determine the return and volatility's joint distribution. The link functions are almost flat if the leverage effect is close to zero, making estimating the volatility risk price difficult. We adapt the conditional quasi-likelihood ratio test that \textcite{andrews2016conditional} develop in a nonlinear GMM framework to a minimum distance framework. The resulting conditional quasi-likelihood ratio test is uniformly valid. We invert this test to derive robust confidence sets that provide correct coverage for the prices regardless of the leverage effect's magnitude. 
+We provide identification-robust inference by developing a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to a series of reduced-form parameters that determine the return and volatility's joint distribution. The link functions are almost flat if the leverage effect is close to zero, making estimating the volatility risk price difficult. We adapt the conditional quasi-likelihood ratio test that \textcite{andrews2016conditional} develop in a nonlinear general method of moments (GMM) framework to a minimum distance framework. The resulting conditional quasi-likelihood ratio test is uniformly valid. We invert this test to derive robust confidence sets that provide correct coverage for the prices regardless of the leverage effect's magnitude. 
 
 Before we do that, consider measuring the relationship between market volatility and expected returns when this relationship is linear, and so the market risk price is the only risk price. Even here, unlike the consensus in the theoretical literature, the empirical literature has found pinning down this relationship quite difficult. Not only has its magnitude proven difficult to determine, but various estimates even differ in sign, \parencites{brandt2004relationship, lettau2010measuring}. This empirical literature focuses on point estimates for the market risk price. However, if individual investors are ambiguity averse as in \textcite{hansen2001robust, jiu2012ambiguity}, they care not just about how the representative investor prices volatility but also about their uncertainty regarding this estimate. This is the first paper to provide identification-roust inference, and hence valid confidence intervals, for these risk prices. 
 
@@ -345,168 +345,63 @@ We now collect all of the moment conditions.
         \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right] &= 2 c \rho \sigma^2_t + c^2 \delta \\
 %        
         \label{eqn:cond_expected_rtn_moment}
-        \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\pi, \theta) + \beta(\pi, \theta) \sigma^2_t + \psi(\pi, \theta) \sigma^2_{t+1} \\
+        \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\pi, \theta, \phi) + \beta(\pi, \theta, \phi) \sigma^2_t + \psi(\pi, \theta, \phi) \sigma^2_{t+1} \\
 %        
         \label{eqn:cond_rtn_var}
         \Var\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= (1 - \phi^2) \sigma^2_{t+1} 
     \end{align}
 \end{defn}
 
-
-We do need to run a constrained optimization though, because only certain values of the parameters are valid. Having done that we characterize the set where the GMM criterion strongly identifies the parameters.
+Now that we have a series of moment conditions, we can specify when the parameters are identified.
 
 \begin{restatable}[Identified Set]{lemma}{identifiedSet}
 
- Assume that the moment conditions specified in \cref{defn:equilibrium_moment_conditions} have the correct form and that the instruments we are using satisfy the standard exogeneity and relevant conditions. 
- Let the true parameter vector $\omega \coloneqq (\rho, c, \delta, \phi, \theta, \pi) \in [-1+\epsilon_1, 1 - \epsilon_2] \times [M_1, M_2] \times [\epsilon_4, M_4]\times [M_5, M_6]\times \times [-1 + \epsilon_4, 1 - \epsilon_5] \times [M_7, M_8] \times [M_{9}, M_{10}]$, where the $M_{\ast}$ are some large (in magnitude) known constants and the $\epsilon_{\ast}$ are some small positive constants. Let $Q_T(\omega, X)$ be the GMM objective function with moment conditions given in \cref{defn:equilibrium_moment_conditions}.  
+    Assume that the moment conditions specified in \cref{defn:equilibrium_moment_conditions} have the correct form and that the instruments we are using satisfy the standard exogeneity and relevant conditions. Let the true parameter vector $\omega \coloneqq (\rho, c, \delta, \phi, \theta, \pi) \in [-1+\epsilon_1, 1 - \epsilon_2] \times [M_1, M_2] \times [\epsilon_4, M_4]\times [M_5, M_6]\times \times [-1 + \epsilon_4, 1 - \epsilon_5] \times [M_7, M_8] \times [M_{9}, M_{10}]$, where the $M_{\ast}$ are some large (in magnitude) known constants and the $\epsilon_{\ast}$ are some small positive constants. Let $Q_T(\omega, X)$ be the GMM objective function with moment conditions given in \cref{defn:equilibrium_moment_conditions}.  
  
-If there exists a $\epsilon$ such that $\abs{\phi} > \epsilon > 0$, then all of the parameters are identified.  If $\phi = 0$, the objective function is independent of $\pi$.  Hence, $\pi$ is not identified. However, even in that case all of remaining parameters are still identified.
+    If there exists a $\epsilon$ such that $\abs{\phi} > \epsilon > 0$, then all of the parameters are identified.  If $\phi = 0$, the objective function is independent of $\pi$.  Hence, $\pi$ is not identified. However, even in that case all of remaining parameters are still identified.
 
 \end{restatable}
+
+We do need to run a constrained optimization though, because only certain values of the parameters are valid. As noted in the introduction, we develop a minimum distance criterion. Such a criterion has two parts. First, it requires a series of conditions that relate the structural parameters to the reduced-form parameters.  Second, it needs a series of conditions that identifies the reduced-form parameters. Before we specify these criteria, we introduce a reduced-form parameter $\zeta = 1 - \phi^2$, which is the transformation of $\phi$ which we can easily estimate.
+% Why does the derivative of $\phi$ end up in the denominator?
+% We do not estimate $\phi$ directly because if we did we would need to differentiate \cref{eqn:cond_expected_rtn_moment} with respect to $\phi$. However, the derivative of $\psi$ with respect to $\phi$ gcl 
+
+We group the structural parameters we are estimating into a vector $\xi \coloneqq (\phi, \pi, \theta)'$.
+We also group the reduced-form parameters into a vector $\omega \coloneqq (\rho, c, \delta, \psi, \zeta, \beta, \gamma)'$.
+We define the link function as follows, where we suppress the reduced-form parameters in the notation.
+
+
+%
+\begin{defn}{Link Function}
+    \label{defn:link_function}
+    \begin{equation}
+        g(\omega, \xi) \coloneqq
+%
+        \begin{pmatrix}
+            \gamma - \gamma(\pi, \theta, \phi) \\ 
+            \beta - \beta(\pi, \theta, \phi) \\
+            \psi - \psi(\pi, \theta, \phi)  \\
+            \zeta - (1 - \phi^2)  \\
+        \end{pmatrix}
+%
+\end{equation}
+
+\end{defn}
+
 
 
 \section{Estimating the Reduced-Form Parameters}\label{sec:EstimatingReducedForm}
 
-We want to estimate $\omega \coloneqq (\rho, c, \delta, \phi, \pi, \theta)'$ and get its asymptotic distribution.  We also have some auxiliary parameters: $\xi_1 \coloneqq (\beta, \gamma, \psi)'$ and $\xi_2 \coloneqq \phi^2$.  The way we do this by splitting $\omega$ in two parts.  The first $\omega_s$ is the vector of purely structural parameters: $(\phi, \pi, \theta)'$.  The second part $\omega_r$ is composed of parameters that we can estimate directly without model-based cross-equation restrictions, but are of interest.  We collect all of the reduced parameters into a vector: $\xi \coloneqq (\omega_r', \xi_a)'$.  We start by constructing a GMM estimator for $\xi$, we will then show how to convert this into an estimator for $\omega$.  Throughout, I will denote the partial derivative of some function $f$ with respect to some variable $x$ with $f_x$.
-
-
-We view estimating the first stage as a particular form of GMM.
-From standard GMM theory, we know that the following holds, for some asymptotic covariance matrix $\Omega_{\xi}$,
-%
-\begin{equation}
- \sqrt{T} (\hat{\xi} - \xi) \dto N\left(0, \Omega_{\xi}\right)
-\end{equation}
-
-We construct $\Omega_{\xi}$ in three steps.
-First, we will derive the asymptotic covariance matrices for each of $\omega_r, \xi_1, \xi_2$.
-Then we will show how to combine them into one joint covariance matrix.
-
-\subsection{Covariance of the Reduced-Form Parameters}\label{sec:omega_r}
-
-\begin{equation}
- h\left(\sigma^2_{t},\sigma^2_{t+1} \mvert \omega_r\right) \coloneqq 
-\begin{bmatrix}
- \sigma^2_{t+1} - (c \delta + \rho \sigma^2_{t}) \\
-%
- \sigma^2_{t} \left(\sigma^2_{t+1} - (c \delta + \rho \sigma^2_{t})\right)\\
-%
- \sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
- \sigma^2_{t}\right)^{2}\right)\\
-%
- \sigma^2_{t} \left(\sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
- \sigma^2_{t}\right)^{2}\right)\right)\\
-
- \sigma^4_{t} \left(\sigma^4_{t+1} - \left(c^{2} \delta + 2 c \rho \sigma^2_{t} + \left(c \delta + \rho
- \sigma^2_{t}\right)^{2}\right)\right)\\
-\end{bmatrix}
-\end{equation}
-
-By standard GMM theory, the following holds, if the weighting matrix \newline $W_{\omega_r,T} \pto \E[h(\sigma^2_t,
-\sigma^2_{t+1} \ivert \omega_r)' h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)]^{-1}$.
-We have 
-
-\begin{equation}
- \sqrt{T}(\widehat{\omega}_r - \omega_r) \dto N\left(0, \Omega_{\omega_r}\right),
-\end{equation}
-%
-where
-%
-\begin{equation}
- \Omega_{\omega_r} \coloneqq \left(\E\left[h_{\omega_r}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]'
- \E[h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)' h(\sigma^2_t, \sigma^2_{t+1} \ivert \omega_r)]^{-1}
- \E\left[h_{\omega_r}(\sigma^2_{t}, \sigma^2_{t+1}, \xi_{1})\right]\right)^{-1}
-\end{equation}
-%
-We estimate this by replacing the population expectations and covariances by their sample counterparts.
-
-\subsection[Covariance Computation Step 2]{Covariance of $\xi_1$}\label{sec:est_xi2}
-
-We estimate $\xi_1$ by weighted least squares, a special case of GMM: 
-%
-\begin{equation}
- \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] = \gamma + \beta \sigma^2_t + \psi \sigma^2_{t+1}.
-\end{equation}
-
-The only unusual part is we know that $\Var(r_{t+1} \ivert \sigma^2_t, \sigma^2_{t+1}) = (1-\phi^2) \sigma^2_{t+1}$. Consequently, the regression results are more efficient if we adjust for heteroskedasticity. However, we do not know $\phi$, and so this might seem impossible. However, since time-invariant parts of heteroskedasticity adjustments cancel, reweighting by the inverse of $\sigma^2_{t+1}$ achieves is equivalent to the optimal reweighting. Also, since $\sigma^2_{t+1}$ is contained in the conditioning set, the fact that it is viewed as a random variable in other parts of the regression is irrelevant. Let $u_t = \frac{r_{t+1} - (\gamma + \beta \sigma^2_{t} + \psi \sigma^2_{t+1}}{\sigma^2_{t+1}}$.
-
-Since this regression is exactly identified, any positive-definite weight matrix, including the identity is optimal. Consequently, we have the following result, where the WLS covariance matrix has the standard form:
-
-\begin{equation}
- \Omega_{\xi_1} = \E\left[\left(1, \sigma^2_{t}, \sigma^2_{t+1}\right) \left(1, \sigma^2_{t},
- \sigma^2_{t+1}\right)'\right]^{-1} \Var\left(u_t\right).
-\end{equation}
-
-
-\subsection[Covariance Computation Step 3]{Covariance of $\xi_2$}
-
-We know that $\Var(r_{t+1} \vert \sigma^2_{t+1} \sigma^2_t) = (1-\phi^2) \sigma^2_{t+1}$.
-This implies $\Var(\frac{r_{t+1}}{\sigma_{t+1}} \vert \sigma^2_{t+1}, \sigma^2_t) = 1 - \phi^2$.
-Since we consistently estimate the conditional mean of $r_{t+1}$ in \cref{sec:est_xi2}, the residuals ---
-$\widehat{u}_t = \frac{r_{t+1} - \widehat{\gamma} - \widehat{\beta}\sigma^2_t - \widehat{\psi}
-\sigma^2_{t+1}}{\sigma_{t+1}}$ --- satisfy $\frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
-
-Define $\widehat{\xi}_2 \coloneqq 1 - \frac{1}{T} \sum_{t=1}^T \hat{u}_t^2 \pto (1 - \phi^2)$.
-Then $\widehat{\xi}_2 \dto N(0, \Omega_{\xi_2})$ for some covariance matrix $\Omega_{\xi_2}$, since this is a GMM
-estimator.
-What is $\Omega_{\xi_2}$.
-Since we are just identified, standard GMM theory says it is the covariance of the moment condition scaled by the
-appropriate derivative. 
-Since we are estimating a mean shifted by a constant, the derivative equals $1$.
-Consequently, $\Omega_{\xi_2} = \Var(\frac{u^2_t}{\sigma^2_{t+1}})$, which can be estimated by
-$\frac{1}{T} \sum_{t=1}^T (\frac{\widehat{u}_t^2}{\sigma^2_{t+1}} - \frac{1}{T} \sum_{t=1}^T
-\frac{\widehat{u}_t^2}{\sigma^2_{t+1}})^2$, i.e.\@ the sample covariance of the squared residuals. 
-
-\subsection[Combining the Covariance Matrices]{Combining $\Omega_{\omega_r}, \Omega_{\xi_2}$, and $\Omega_{\xi_2}$}
-
-Each of $\Omega_{\xi_i}$ are of the form $(\E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i)]' \Var(h(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i) \ivert \xi_i)^{-1} \E[h_{\xi_{i}}(\sigma^2_{t+1}, \sigma^2_t \ivert \xi_i) \ivert \xi_i])^{-1}$. Consequently, the off-diagonal blocks of the joint covariance matrix $\Omega$ come from two places: the derivatives and the covariance of the moments. Since the moments in the first stage do not depend on the parameters in the second stage, and vice-versa, the derivatives to not cause any co-movement. The other cases are trickier, and so we consider them each in turn. 
-
-Consider the covariance between $h(\sigma^2_{t+1}, \sigma^2_t, \omega_r)$ and $h(\sigma^2_{t+1}, \sigma^2_t, \xi_2)$, which we can rearrange since the moments are mean zero. 
-%
-\begin{equation}
- \Cov\left(h\left(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t \mvert \omega_{r} \right) ,
-  h\left(\sigma^2_{t+1} \sigma^2_t \mvert \xi_2 \right) \right) 
-%
- = \E\left[h(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r) h\left(\sigma^2_{t+1}, \sigma^2_t \mvert
-  \xi_2 \right) \right]
-\end{equation}
-%
-By the law of iterated expectation, that equals 
-%
-\begin{equation}
- \E\left[\E[h\left(r_{t+1}, \sigma^2_{t+1}, \sigma^2_t \mvert \omega_r\right) \mvert \sigma^2_{t+1},
-  \sigma^2_t] \E\left[h\left(\sigma^2_{t+1}, \sigma^2_t \mvert \xi_2 \right) \mvert \sigma^2_{t+1},
-  \sigma^2_t\right] \right].
-\end{equation}
-
-The first term in the expression above equals zero, and, hence, so does the entire expression. In other words, the first two set of moment conditions are independent. By an identical argument, the first and third moments are independent as well.
-
-We now consider how the second and their sets of moments are related. Since the derivatives are with respect to different parameters (and constant) no dependence arises from there. The question is how are the moment conditions in the second and third steps related. The second stage moment condition is a conditional mean and third stage moment is a conditional covariance. Let $u_t$ denote the error term in that regression (as it did above). Then
-%
-\begin{equation}
- \E\left[\E\left[\frac{r_{t+1} - \E\left[r_{t+1}\mvert \sigma^2_{t+1} \sigma^2_t\right]}{\sigma_{t+1}} \right]
- \E\left[\frac{(r_{t+1} - \E\left[r_{t+1} \mvert \sigma^2_{t+1} \sigma^2_t\right])^2}{\sigma^2_{t+1}}\right]
- \right] 
-%
- = \E\left[\E\left[\frac{u_t u_t^2}{\sigma^2_{t+1}}\right] \mvert \sigma^2_t, \sigma^2_{t+1} \right] = 0.
-\end{equation}
-%
-Since $u_t$ is conditionally Gaussian, its conditional third moment equals zero. By the law of iterated expectations, its unconditional moment does as well.
-
-In other words, the second and third set of moments are uncorrelated. Now, the careful reader might be worried about filling in the population expectations instead of their estimators in the regression above. However, since the expectations are linear and consistently estimable, this error vanishes in the limit. Intuitively, OLS mean and variance estimates are asymptotically independent.
-
-In addition, since all three components are asymptotically independent; the inverse of a block-diagonal matrix is block-diagonal, and we using optimal weighting matrices in each part, we are using an optimal weighting matrix for $\xi$, not just its components.
-
-\subsection{Asymptotic Distribution of the Reduced-Form Parameter}
-
-This section gives the asymptotic distribution of the reduced-form parameter. Write $\omega =(\omega_{1},\omega_{2},\omega_{3}),$ where $\omega_{1}=(\rho ,c)$, $\omega_{2} = (\gamma ,\beta ,\psi)$, and $\omega_{3} = \phi ^{2}$. Below we describe the estimator $\widehat{\omega}_{1},\widehat{\omega}_{2},\widehat{\omega}_{3}$ and provide the asymptotic distribution of $\widehat{\omega} = (\widehat{\omega}_{1},\widehat{\omega }_{2},\widehat{\omega}_{3})$. We estimate these parameters separately because $\omega_{1}$ only shows up in the conditional mean and variance of $r_{t+1};$ $\omega_{2}$ only shows up in the conditional mean of $\sigma_{t+1}^{2};$ and $\phi $ only shows up in the conditional variance of $\sigma_{t+1}^{2}.$ 
+This section gives the asymptotic distribution of the reduced-form parameter. Write $\omega =(\omega_{1},\omega_{2},\omega_{3}),$ where $\omega_{1}=(\rho ,c)$, $\omega_{2} = (\gamma, \beta, \psi)$, and $\omega_{3} = \zeta$. Below we describe the estimator $\widehat{\omega} \coloneqq (\widehat{\omega}_{1},\widehat{\omega}_{2},\widehat{\omega}_{3})$ and provide its asymptotic distribution. We estimate these parameters separately because $\omega_{1}$ only shows up in the conditional mean and variance of $r_{t+1}$, $\omega_{2}$ only shows up in the conditional mean of $\sigma_{t+1}^{2}$, and $\phi $ only shows up in the conditional variance of $\sigma_{t+1}^{2}.$ 
 
 We estimate $\omega_{1}$ by GMM based on the moment condition: 
 %
-\begin{eqnarray}
- \mathbb{E}[h_{t}(\omega_{1,0})] & = &0,\text{ where} \nonumber \\
+\begin{align}
+\E[h_{t}(\omega_{1,0})] &= 0, \text{ where} \nonumber \\
 %
- h_{t}(\omega_{1}) & = &\left(
-  \begin{array}{c} 
+ h_{t}(\omega_{1}) &\coloneqq  
+%
+  \begin{pmatrix}
    \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma_{t}^{2}\right) \\ 
 %
    \sigma_{t}^{2}\left( \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) \right) \\ 
@@ -514,64 +409,54 @@ We estimate $\omega_{1}$ by GMM based on the moment condition:
    \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma_{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left(
    c\delta +\rho \sigma_{t}^{2}\right) ^{2}\right) \right) \\ 
 %
-   \sigma_{t}^{2}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta
-   +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) \\ 
+   \sigma_{t}^{2}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) \\ 
 %
-   \sigma_{t}^{4}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta
-   +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) 
-  \end{array}\right).
-\end{eqnarray}
+   \sigma_{t}^{4}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) 
+  \end{pmatrix}.
+\end{align}
 %
 The optimal GMM estimator is
 %
-\begin{eqnarray}
- \widehat{\omega}_{1} & = & \underset{\omega_{1}\in \Lambda_{1}}{\arg\min} 
+\begin{align}
+    \widehat{\omega}_{1} &=  \argmin_{\omega_1 \in \Lambda_{1}}
 %
- \overline{h}_{T}(\omega_{1})^{\prime}W_{T}\overline{h}_{T}(\omega_{1}), \text{ where} \nonumber \\ 
+    \overline{h}_{T}(\omega_{1})^{\prime}W_{T}\overline{h}_{T}(\omega_{1}), \text{ where} \nonumber \\ 
 %
- \overline{h}_{T}(\omega_{1}) & = &T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1}), \nonumber \\
+    \overline{h}_{T}(\omega_{1}) &= T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1}), \nonumber \\
 %
- W_{T} & = &T^{-1}\sum_{t = 1}^{T}h_{t}(\widetilde{\omega}_{1})h_{t}(\widetilde{\omega}_{1})^{\prime
- }-\overline{h}_{T}(\widetilde{\omega}_{1})\overline{h} _{T}(\widetilde{\omega}_{1})^{\prime},
-\end{eqnarray}
+    W_{T} &= T^{-1}\sum_{t=1}^{T} (h_{t}(\widetilde{\omega}_{1})h_{t}(\widetilde{\omega}_{1})^{\prime }-\overline{h}_{T}(\widetilde{\omega}_{1})\overline{h} _{T}(\widetilde{\omega}_{1})^{\prime}),
+\end{align}
 %
-where $\widetilde{\omega}_{1}$ is the preliminary GMM estimator based on the identify covariance matrix.
+and $\widetilde{\omega}_{1}$ is the preliminary GMM estimator based on the identity covariance matrix.
 
-We estimate $\omega_{2}$ by the GLS estimator because $\gamma, \beta, \psi$ are the intercept and linear
-coefficients of the conditional mean function and the conditional variance is proportional to $\sigma_{t+1}^{2}$. 
-Define $x_{t} = \sigma_{t+1}^{-1}(1,\sigma_{t}^{2},\sigma_{t+1}^{2})$ and $y_{t} = \sigma_{t+1}^{-1}r_{t+1}$. 
-The GLS\ estimator of $\omega_{2}$ is
+We estimate $\omega_{2}$ using generalized leas squares (GLS) because $\gamma, \beta, \psi$ are the intercept and linear coefficients of the conditional mean function and the conditional variance is proportional to $\sigma_{t+1}^{2}$.  Define $x_{t} = \sigma_{t+1}^{-1}(1,\sigma_{t}^{2},\sigma_{t+1}^{2})$ and $y_{t} = \sigma_{t+1}^{-1}r_{t+1}$.  The GLS estimator for $\omega_{2}$ is
 %
 \begin{equation}
- \widehat{\omega}_{2} = \left( \sum_{t = 1}^{T}x_{t}x_{t}^{\prime}\right) ^{-1}\sum_{t = 1}^{T}x_{t}y_{t}.
+    \widehat{\omega}_{2} = \left( \sum_{t = 1}^{T}x_{t}x_{t}^{\prime}\right) ^{-1}\sum_{t = 1}^{T}x_{t}y_{t}.
 \end{equation}
 
-We estimate $\omega_{3}$ by the sample variance estimator. 
-Define 
+We estimate $\omega_{3}$ by the sample variance estimator. Define 
 %
 \begin{equation}
- \widehat{y}_{t} = x_{t}\widehat{\omega}_{2} = \sigma_{t+1}^{-1}(\widehat{\gamma}+\widehat{\beta
- }\sigma_{t}^{2}+\widehat{\psi}\sigma_{t+1}^{2}).
+    \widehat{y}_{t} = x_{t}\widehat{\omega}_{2} = \sigma_{t+1}^{-1}(\widehat{\gamma}+\widehat{\beta}\sigma_{t}^{2}+\widehat{\psi}\sigma_{t+1}^{2}).
 \end{equation}
 %
 The estimator of $\omega_{3}$ is 
+%
 \begin{equation}
- \widehat{\omega}_{3} = \max \{1-T^{-1}\sum_{t = 1}^{T}\left( y_{t}-\widehat{y}_{t}\right) ^{2},0\}.
+    \widehat{\omega}_{3} = T^{-1}\sum_{t=1}^{T} \left(y_{t}-\widehat{y}_{t}\right)^{2}.
 \end{equation}%
-[**XC. In practice, do we need to impose the estimator is positive?]
 
 The next lemma provides the asymptotic distribution of the estimator $\widehat{\omega}$. Let $h_{\omega ,t}(\omega_{1})\in \mathbb{R}^{5\times 2}$ denote the derivative of $h_{t}(\omega_{1})$ w.r.t.\@ $\omega_{1}$. Define 
 %
-\begin{eqnarray}
- \Omega_{1} & = &\left \{ \mathbb{E}\left[ h_{\omega ,t}\left( \omega _{1,0}\right) \right]^{\prime}
-  \mathbb{E}[h_{t}(\omega_{1,0})h_{t}(\omega _{1,0})^{\prime}]^{-1}\mathbb{E}\left[
- h_{\omega,t}\left(\omega_{1,0}\right) \right] \right \} ^{-1}, \notag \\ 
+\begin{align}
+    \Sigma_{1} & = \left \{ \E\left[ h_{\omega ,t}\left( \omega _{1,0}\right) \right]^{\prime} \E\left[h_{t}(\omega_{1,0})h_{t}(\omega _{1,0})^{\prime}\right]^{-1} \E\left[ h_{\omega,t}\left(\omega_{1,0}\right)
+    \right] \right \} ^{-1}, \nonumber \\ 
 %
- \Omega_{2} & = &\mathbb{E}\left[ x_{t}x_{t}^{\prime}\right] ^{-1}\mathbb{E[(} y_{t}-x_{t}^{\prime
- }\omega_{2,0})^{2}], \notag \\
+    \Sigma_{2} & = \E\left[ x_{t}x_{t}^{\prime}\right] ^{-1}\mathbb{E[(} y_{t}-x_{t}^{\prime }\omega_{2,0})^{2}], \\
 %
- \Omega_{3} & = &\mathbb{V[}\left( y_{t}-x_{t}^{\prime}\omega_{2,0}\right)^{2}].
-\end{eqnarray}
+    \Sigma_{3} & = \Var\left[\left( y_{t}-x_{t}^{\prime}\omega_{2,0}\right)^{2}\right]. \nonumber 
+\end{align}
 
 \begin{lemma}
 Suppose Assumptions *** hold. Then
@@ -596,9 +481,9 @@ Suppose Assumptions *** hold. Then
  \sim N\left( 0,
 %
  \begin{array}{ccc}
-  \Omega_{1} & 0 & 0 \\ 
-  0 & \Omega_{2} & 0 \\ 
-  0 & 0 & \Omega_{3}%
+  \Sigma_{1} & 0 & 0 \\ 
+  0 & \Sigma_{2} & 0 \\ 
+  0 & 0 & \Sigma_{3}%
  \end{array}\right).
 \end{equation}
 \end{lemma}
@@ -609,115 +494,103 @@ Suppose Assumptions *** hold. Then
 \end{proof}
 
 
+% \subsection{Constructing the Second-Stage Criterion}\label{sec:construct_link_func}
 
-\section{Estimating the Structural Parameters}\label{sec:EstimatingStructural}
+% In this stage, we convert the estimates for $\omega$ into estimates for $\xi$. We do this by specifying a link function. Since $(\rho, c, \delta)'$ shows up in both $\xi$ and $\omega$, the link function for those parameters is the identify function. The third set of parameters $\xi_3 = \phi^2$, and so we use that as a link function. We also use the reduced-form estimates as link functions, as well, i.e.,
+% %
+% \begin{equation}
+%  g(\xi, \omega) = \xi - (\rho, c, \delta, \beta(\rho, c, \phi, \pi, \theta), \gamma(\rho, \delta, c, \phi, \pi,
+%  \theta), \psi(\rho, c, \phi, \theta), \phi^2)'.
+% \end{equation}
 
-\subsection{Constructing the Link Function}\label{sec:construct_link_func}
+% We specify $g(\xi, \omega)$ in this way because it gives us the correct off-diagonal elements. If we estimated $(\rho, c, \delta)$ by themselves and just plugged them in here, we would have to relate the off-diagonal terms in a separate step. In addition, by using the optimal weight matrix for this stage, we estimate all of the parameters as efficiently possible using our moment conditions.
 
-In this stage, we convert the estimates for $\xi$ into estimates for $\omega$. We do this by specifying a link function. Since $(\rho, c, \delta)'$ shows up in both $\xi$ and $\omega$, the link function for those parameters is the identify function. The third set of parameters $\xi_3 = \phi^2$, and so we use that as a link function. We also use the reduced-form estimates as link functions, as well, i.e.,
-%
-\begin{equation}
- g(\xi, \omega) = \xi - (\rho, c, \delta, \beta(\rho, c, \phi, \pi, \theta), \gamma(\rho, \delta, c, \phi, \pi,
- \theta), \psi(\rho, c, \phi, \theta), \phi^2)'.
-\end{equation}
-
-We specify $g(\xi, \omega)$ in this way because it gives us the correct off-diagonal elements. If we estimated $(\rho, c, \delta)$ by themselves and just plugged them in here, we would have to relate the off-diagonal terms in a separate step. In addition, by using the optimal weight matrix for this stage, we estimate all of the parameters as efficiently possible using our moment conditions.
-
-Doing this implies we must be careful and treat the $\rho,c$, and $\delta$ on each sides of the equation as different. The 2nd-stage sample criterion function is 
-%
-\begin{equation}
- Q_T(\omega) \coloneqq \frac{1}{2} g(\widehat{\xi}_T, \omega)' \W_{T} g(\widehat{\xi}_T, \omega),
-\end{equation}
-%
-with second stage weight matrix $\W_T$.
-We need to estimate $\omega$, and so we differentiate and get the first-order condition at $\omega_0$, where $\W
-\coloneqq \lim_{T \to \infty} \E[W_T]$.
-This gives
-%
-\begin{equation}
- \frac{\partial Q_T}{\partial \omega}(\omega_0) = g_{\omega}\left(\xi_0, \omega_0\right) \W g\left(\xi_0,
- \omega_0\right) = 0.
-\end{equation}
-%
-We now expand $\widehat{\xi}_T$ around $\xi_0$, for some $\widetilde{\xi}_T$ between $\xi_0$ and $\widetilde{\xi}_T$, 
-%
-\begin{align}
- \sqrt{T} \frac{\partial Q}{\partial \omega}(\omega_0) 
-%
- &= g_{\omega}\left(\omega_0, \widehat{\xi}_T\right) \W_T \left[\sqrt{T} g\left(\omega_{0},\xi_0\right) +
-  g_{\xi}\left(\omega_{0}, \widetilde{\xi}_T\right)' \sqrt{T} \left(\widetilde{\xi}_T - \xi_0\right)\right]
-%
-%
- \intertext{The first term equals zero by assumption, and the derivative is the identity matrix.}
-%
-%
- &= g_{\omega}\left(\omega, \widehat{\xi}_T\right) \W_T \left[ \sqrt{T} \left(\widetilde{\xi}_T -
-  \xi_0\right)\right]
-\end{align}
-%
-We also need to compute the Hessian and evaluate it at $\widehat{\omega}_T$ a consistent estimator for $\omega$.
-%
-\begin{align}
- \frac{\partial^2 Q}{\partial \omega \partial \omega'}(\widehat{\omega}_T) &=
-%
- g_{\omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \W_T g_{\omega} \left(\widehat{\omega}_T,
- \widehat{\xi}_T\right)+ g_{\omega, \omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right) \W_T
- g\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \\
-%
- &\pto g_{\omega}\left(\omega, \xi_0\right)' \W g_{\omega} \left(\omega, \xi_0\right) + 0. 
-\end{align}
-%
-if we use the optimal weight matrix --- $\W \coloneqq \E[g_{\omega_s}(\theta_0, \xi_0)]$. Standard extremum estimator theory gives
-%
-\begin{equation}
- \sqrt{T} \left(\widehat{\omega}_T - \omega_{0}\right) \dto N\left(0, \left(\E[g_{\omega}(\theta_0, \xi_0)]'
- \Omega_{\xi}^{-1} \E[g_{\omega}(\theta_0, \xi_0)]\right)^{-1}\right).
-\end{equation}
-%
-The covariance in the middle is GMM-covariance of the reduced-form parameters. We estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives. We estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
+% Doing this implies we must be careful and treat the $\rho,c$, and $\delta$ on each sides of the equation as different. The 2nd-stage sample criterion function is 
+% %
+% \begin{equation}
+%  Q_T(\omega) \coloneqq \frac{1}{2} g(\widehat{\xi}_T, \omega)' \W_{T} g(\widehat{\xi}_T, \omega),
+% \end{equation}
+% %
+% with second stage weight matrix $\W_T$.
+% We need to estimate $\omega$, and so we differentiate and get the first-order condition at $\omega_0$, where $\W
+% \coloneqq \lim_{T \to \infty} \E[W_T]$.
+% This gives
+% %
+% \begin{equation}
+%  \frac{\partial Q_T}{\partial \omega}(\omega_0) = g_{\omega}\left(\xi_0, \omega_0\right) \W g\left(\xi_0,
+%  \omega_0\right) = 0.
+% \end{equation}
+% %
+% We now expand $\widehat{\xi}_T$ around $\xi_0$, for some $\widetilde{\xi}_T$ between $\xi_0$ and $\widetilde{\xi}_T$, 
+% %
+% \begin{align}
+%  \sqrt{T} \frac{\partial Q}{\partial \omega}(\omega_0) 
+% %
+%  &= g_{\omega}\left(\omega_0, \widehat{\xi}_T\right) \W_T \left[\sqrt{T} g\left(\omega_{0},\xi_0\right) +
+%   g_{\xi}\left(\omega_{0}, \widetilde{\xi}_T\right)' \sqrt{T} \left(\widetilde{\xi}_T - \xi_0\right)\right]
+% %
+% %
+%  \intertext{The first term equals zero by assumption, and the derivative is the identity matrix.}
+% %
+% %
+%  &= g_{\omega}\left(\omega, \widehat{\xi}_T\right) \W_T \left[ \sqrt{T} \left(\widetilde{\xi}_T -
+%   \xi_0\right)\right]
+% \end{align}
+% %
+% We also need to compute the Hessian and evaluate it at $\widehat{\omega}_T$ a consistent estimator for $\omega$.
+% %
+% \begin{align}
+%  \frac{\partial^2 Q}{\partial \omega \partial \omega'}(\widehat{\omega}_T) &=
+% %
+%  g_{\omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \W_T g_{\omega} \left(\widehat{\omega}_T,
+%  \widehat{\xi}_T\right)+ g_{\omega, \omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right) \W_T
+%  g\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \\
+% %
+%  &\pto g_{\omega}\left(\omega, \xi_0\right)' \W g_{\omega} \left(\omega, \xi_0\right) + 0. 
+% \end{align}
+% %
+% if we use the optimal weight matrix --- $\W \coloneqq \E[g_{\omega_s}(\theta_0, \xi_0)]$. Standard extremum estimator theory gives
+% %
+% \begin{equation}
+%  \sqrt{T} \left(\widehat{\omega}_T - \omega_{0}\right) \dto N\left(0, \left(\E[g_{\omega}(\theta_0, \xi_0)]'
+%  \Sigma_{\xi}^{-1} \E[g_{\omega}(\theta_0, \xi_0)]\right)^{-1}\right).
+% \end{equation}
+% %
+% The covariance in the middle is GMM-covariance of the reduced-form parameters. We estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives. We estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
 
 \subsection{Robust Inference for Risk Price}
 
-The reduced-form parameters are $\omega = (\rho ,c,\gamma ,\beta ,\psi ,\phi ^{2})$. 
-Using the conditional mean and conditional variance derived in the paper, we estimate $\, \omega_{1} = (\rho ,c)$
-by the GMM estimator, estimate $\omega_{2} = (\psi ,\beta ,\gamma )$ by the GLS estimator, and estimate
-$\omega_{3} = \phi^{2}$ by the method of moments estimator for the variance.
+% The reduced-form parameters are $\omega = (\rho ,c,\gamma ,\beta ,\psi ,\phi ^{2})$.  Using the conditional mean and conditional variance derived in the paper, we estimate $\, \omega_{1} = (\rho ,c)$ by the GMM estimator, estimate $\omega_{2} = (\psi ,\beta ,\gamma )$ by the GLS estimator, and estimate $\omega_{3} = \phi^{2}$ by the method of moments estimator for the variance.
 
-We can show that the estimator $\widehat{\omega}$ satisfies
+% We can show that the estimator $\widehat{\omega}$ satisfies
 
-\begin{equation}
- T^{1/2}(\widehat{\omega}-\omega_{0})\rightarrow_{d}\upsilon_{\omega}\sim N(0,V).
-\end{equation}%
+% \begin{equation}
+%  T^{1/2}(\widehat{\omega}-\omega_{0})\rightarrow_{d}\upsilon_{\omega}\sim N(0,V).
+% \end{equation}%
 
-See the next section for details. 
-Note that these estimators do not involve the structural parameters $\theta $ and $\pi$.
-We do not plug in $\beta ,\gamma ,\psi $ as functions of $\theta $ and $\pi .$ Instead, we treat $\beta ,\gamma
-,\psi $ just as linear coefficients and estimate them by GLS.
+% See the next section for details. 
+Our estimate in the previous section does not involve the structural parameters $\theta$, $\pi$, and $\phi$.
+We do not plug in $\beta ,\gamma ,\psi $ as functions of $\theta $ and $\pi .$ Instead, we treat $\beta ,\gamma ,\psi $ just as linear coefficients and estimate them by GLS.
 
-We estimate the structural parameters $\theta $ and $\pi $ using $\widehat{ \omega}$ and the link functions
-specified below. 
+We estimate the structural parameters $\theta $ and $\pi $ using $\widehat{ \omega}$ and the link functions specified below. 
 First, we know that
 %
-\begin{equation}
- \label{psi_fn} 
- \psi_{0}=\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right) \right) ^{-1/2} - \left( 1-\phi_{0}^{2}\right)
- /2-(1-\phi_{0}^{2})\theta_{0}
+\begin{equation} \label{eqn:psi_fn} 
+    \psi_{0}=\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right) \right) ^{-1/2} - \left( 1-\phi_{0}^{2}\right) /2-(1-\phi_{0}^{2})\theta_{0}
 \end{equation}
 %
 when all parameters are evaluated at the true values. 
 This equation strongly identifies $\theta_{0}$ because $\phi_{0}$ is assumed to be negative and bounded away from
-1 in magnitude.. 
-It follows from (\cref{psi_fn}) that
+1 in magnitude.  It follows from (\cref{eqn:psi_fn}) that
 
 \begin{equation}
- \theta_{0} = L(\omega_{0})=-(1-\phi_{0}^{2})^{-1}\left[ \psi_{0}-\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right)
- \right)^{-1/2}-\left( 1-\phi_{0}^{2}\right) /2\right] .
+    \theta_{0} = L(\omega_{0})=-(1-\phi_{0}^{2})^{-1}\left[ \psi_{0}-\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right) \right)^{-1/2}-\left( 1-\phi_{0}^{2}\right) /2\right].
 \end{equation}
 %
 Thus, we estimate $\theta_{0}$ by
 %
 \begin{equation}
- \widehat{\theta}=L(\widehat{\omega}).
+    \widehat{\theta}=L(\widehat{\omega}).
 \end{equation}
 %
 By the delta method, we know that
@@ -825,10 +698,9 @@ Note that the construction of this CI\ does not involve estimation of $\pi$.
 
 \section{Simulations}\label{sec:simulation}
 
-In this section, we verify that the asymptotic approximations we derived work well in practice. 
-Since we have a parametric model, we can simulate from it directly.
-To investigate the robustness of the procedure with respect to various
-identification strengths, we vary both $T$ and $\phi$.
+In this section, we verify that the asymptotic approximations we derived work well in practice.  Since we have a parametric model, we can simulate from it directly.  To investigate the robustness of the procedure with respect to various identification strengths, we vary both $T$ and $\phi$.
+We took the parameters in \cref{tbl:simulationParameters} directly from the estimates in \textcite{han2018leverage}. 
+We consider $\phi \in \lbrace -0.40, -0.10, -0.01 \rbrace$ and $T \in \lbrace 3700, 37000 \rbrace$. 
 
 \begin{table}[htb]
  
@@ -856,45 +728,10 @@ identification strengths, we vary both $T$ and $\phi$.
 
 \end{table}
 
-We took the parameters in \cref{tbl:simulationParameters} directly from the estimates in \cref{sec:empirics} with the exception of $\pi$. The parameter estimate ($\approx 0.35$) for $\pi$ is not feasible for all values of $\phi$.
-The value chosen is the closest round number that keeps the various reduced-form parameters finite, for all values of $\phi$.
 
-We consider $\phi \in \lbrace -0.40, -0.10, -0.01 \rbrace$ and $T \in \lbrace 3700, 37000 \rbrace$. To gain an understanding of the DGPs being considered, we report various sample moments for each of the parameterization.
+Since we are simulating the quantiles of the asymptotic distribution, we need to choose the number of simulations to use. We use \num{250}. The results are qualitatively similar if we use \num{1000} draws. Instead of simulating the confidence intervals, which is computationally intensive, we simulate the test statistic, which is equivalent.   We report averages over \num{500} simulations.
 
-
-% \begin{table}[htb]
- 
-%  \centering
-%  \caption{Simulation DGPs' Summary Statistics}
-%  \label{tbl:simulationDGPS}
-
-%  \sisetup{
-%   table-align-text-pre=false,
-%   table-align-text-post=false,
-%   round-mode=places,
-%   round-precision=2,
-%   table-space-text-pre=\lbrack,
-%   table-space-text-post=\rbrack,
-%  }
- 
-%  \begin{tabularx}{.5\textwidth}{X | *{4}{S}}
-% %
-%   \toprule
-%   $\phi$ & {$\E[r_t]$} & {$\Var[r_t]$} & {$\E[\sigma^2_t]$} & {$\Var[\sigma^2_t]$} \\
-%   \midrule
-%   -0.40 & 0.853766 & 14.6894 & 4.1947 & 72.3398 \\
-%   -0.10 & -0.00579 & 5.0086 & 4.4194 & 72.3398 \\
-%   -0.01 & -0.12078 & 4.50616 & 4.41947 & 72.3398 \\
-%   \bottomrule
-
-%  \end{tabularx}
-
-% \end{table}
-
-Since we are simulating the quantiles of the asymptotic distribution, we need to choose the number of simulations to use. We use \num{250}. The results are similar if we use \num{1000} draws. In addition, we invert a test statistic here. The confidence regions we report in \cref{sec:empirics} solely determined by the outcomes of these tests, and the computing the test statistics is significantly less computationally intensive.
-We report averages over \num{500} simulations.
-
-To show the clear identification and how it varies with $\phi$, we plot the distribution of estimates, $\widehat{\pi}$ as reported by simulation using \num{37000} observations, \num{500} simulations, and the parameters used in \textcite{han2018leverage}. When $\phi$ is far from $0$ and the standard asymptotic experiments approximate the true distribution, they should be close to Gaussian. Conversely, as $\phi$ approaches $0$, the Gaussian limiting distribution does not provide a good approximation. The black lines in the middle of the figures in \cref{fig:sim_parameter_estimates} are the true parameter values. We truncate the parameter space for $\pi$ at $[-20, 0]$, and so the limiting distribution piles up at the boundaries as is common in these types of simulations.  
+To show the identification strength varies with $\phi$, we plot the distribution of estimates, $\widehat{\pi}$ as reported by simulation using \num{37000} observations, \num{500} simulations, and the parameters used in \textcite{han2018leverage}. When $\phi$ is far from $0$ and the standard asymptotic experiments approximate the true distribution, the statistics' distribution should be close to Gaussian. Conversely, as $\phi$ approaches $0$, the Gaussian limiting distribution does not provide a good approximation. The black lines in the middle of the figures in \cref{fig:sim_parameter_estimates} are the true parameter values. We truncate the parameter space for $\pi$ at $[-20, 0]$, and so the limiting distribution piles up at the boundaries as is common in this class of simulations.  
 
 \begin{figure}[htb]
   
@@ -917,8 +754,7 @@ To show the clear identification and how it varies with $\phi$, we plot the dist
 
 \end{figure}
 
-We now report size of the tests in finite-sample using the standard Gaussian Quasi-Likelihood Ratio (QLR) statistic, the Anderson-Rubin (AR) statistic, and the conditional-QLR proposed here.
-Because we have four link functions, the AR-statistic is asymptotically $\chi^2(df=4)$ distributed.
+We now report the size of the tests in finite-sample using the standard Gaussian Quasi-Likelihood Ratio (QLR) statistic, the Anderson-Rubin (AR) statistic, and the conditional-QLR statistic proposed here.  Because we have four link functions, the AR-statistic is asymptotically $\chi^2(df=4)$ distributed.
 %TODO This is right, isn't it?
 
 \begin{table}[htb]
@@ -932,7 +768,7 @@ Because we have four link functions, the AR-statistic is asymptotically $\chi^2(
   round-precision=3,
  }
  
- \begin{tabularx}{\textwidth}{X | *{3}{S} | *{3}{S}}
+ \begin{tabularx}{.65\textwidth}{X | *{3}{S} | *{3}{S}}
 %
   \toprule
   $\phi$ & {QLR} & {AR} & {CLR} & {QLR} & {AR} & {CLR} \\
@@ -959,25 +795,20 @@ Because we have four link functions, the AR-statistic is asymptotically $\chi^2(
 
 \end{table}
 
-If we look at the upper-right-hand corner of \cref{tbl:test_performance}, we see that the $AR$-statistic is robust, but conservative, as we would expect. We also see that the standard $QLR$-statistic appears to be conservative. The $CLR$ test, on the on the other hand, is robust and has the proper size regardless of the value of $\phi$. The other section in \cref{tbl:test_performance} are less encouraging. Neither the $CLR$ nor the $QLR$ statistic performs well when we use the parameters estimated from the data, even when $\phi = -0.40$. This is likely occurs for two reasons. First, the variance of $r_{t+1}$ increases with $\phi$, and so $\phi$ is not purely a measure of the signal-to-noise ratio.\footnote{$\Var(r_{t+1}) = 4.5$ when $\phi = -0.01$, and $\Var(r_{t+1}) = 14.7$ when $\phi = -0.04$.} Consequently, the lower right-hand pane of \cref{tbl:test_performance} is not necessarily a good approximation of what happens in the data. Second, even though, $c$ and $\delta$ do not equal zero, the standard errors are large enough that we must truncate their confidence intervals. This likely introduces some non-Gaussianity into the first-stage distribution when $T = 3700$.\footnote{See the discussion around \cref{tbl:reduced_form_parameters} for further discussion.} This causes both the $QLR$ and $CLR$ tests to have improper size even when $\phi$ is large. This is likely also why the $AR$ statistic does not appear to be conservative. The bias induces by the improper first-stage distribution and the inherent conservativeness of that test appear to approximately cancel out in this simulation. The first-stage distribution in the upper-right-hand, conversely, appears to be well-behaved, and so we do not have similar issues.
-
+Consider the right-hand side of \cref{tbl:test_performance}. The $AR$-statistic is robust, but conservative, as we would expect. The standard $QLR$-statistic appears to be conservative. The $CLR$ test, on the other hand, is robust and has the proper size regardless of the value of $\phi$. This behavior of the CLR test is precisely what the data predicts should happen.
 
 
 \section{Data and Empirical Results}\label{sec:empirics}
-
-
 
 \subsection{Data}
 
 The two series we need to estimate the model are $r_{t+1}$ and $\sigma^2_{t+1}$, and $\sigma^2_{t+1}$ must be the volatility of $r_{t+1}$. That is, we need the appropriately defined variance of $r_{t+1}$ to equal $\sigma^2_{t+1}$ in expectation as discussed in \cref{sec:deriving_conditional_mean}. Since this condition is automatically satisfied by the integrated volatility and daily return, we use high-frequency data to estimate $\sigma^2_{t+1}$ and use the associated daily return for $r_{t+1}$. 
 
-We need a market index so that the risk prices we estimate are not prices of risk investors face in practice. The do not the asset's risk the asset to be diversifiable. We use SPY, (SPDR S\&P 500 ETF Trust), which is an exchange-traded fund that mimics the S\&P 500. 
+We need a market index so that the risk prices we estimate are not prices of risk investors face in practice. We do not want the asset's risk to be easily diversifiable. We use SPY, (SPDR S\&P 500 ETF Trust), which is an exchange-traded fund that mimics the S\&P 500.  We use the procedure \textcite{sangrey2018jumps} develops to estimate the integrated total volatility, which is the instantaneous expectation of the price variance, i.e., the time-derivative of the predictable quadratic variation. This measure reduces to the integrated diffusion volatility if prices have continuous paths. He shows in simulations that his method works well in the presence of market microstructure noise.
 
-We use the procedure \textcite{sangrey2018jumps} develops to estimate the integrated total volatility, which is the instantaneous expectation of the price variance, i.e., the time-derivative of the predictable quadratic variation. This measure reduces to the integrated diffusion volatility if prices have continuous paths. He shows in simulation that his method works well in the presence of market microstructure noise.
+Since this paper only use one asset, and SPY is one of the most liquid assets traded, we can essentially choose the frequency at which we want to observe the underlying price. In order to balance market-microstructure noise, computational cost, and efficiency of the resultant estimators we sample at the \SI{1}{\second} frequency. The data starts in 2003 and ends in September 2017. Since the asset is only traded during business hours, this leads to \num{3713} days of data with an average of $\approx \num{24000}$ observations per day. We compute $r_{t+1}$ as the daily return from the open to close of the market because this is the interval over which we can estimate the volatility. Doing this avoids needing  to specify the relationship between overnight and intra-day returns. 
 
-Since this paper only use one asset, and SPY is one of the most liquid assets traded, we can essentially choose the frequency at which we want to observe the underlying price. In order to balance market-microstructure noise, computational cost, and efficiency of the resultant estimators we sample at the \SI{1}{\second} frequency. The data starts in 2003 and ends in September 2017. Since the asset is only traded during business hours, this leads to \num{3713} days of data with an average of $\approx \num{24000}$ observations per day. We compute $r_{t+1}$ as the daily return from the open to close of the market because this is the interval over which the volatility is calculated; hence, we do not need to specify the relationship between overnight and intra-day returns. 
-
-We preprocess the data using the pre-averaging approach as in \textcites{podolskij2009bipower, aitsahalia2012testing}. This procedure is known not to affect the consistency of the estimation procedure. The basic idea is rather simple. We average the price over a small interval to remove the noise. If we pick the rates at which we shrink the interval to appropriately balance averaging away the noise and estimating the instantaneous variation, the estimators will be consistent even in the presence of noise. 
+We preprocess the data using the pre-averaging approach as in \textcites{podolskij2009bipower, aitsahalia2012testing}. This procedure is known not to affect the consistency of the estimation procedure. The basic idea is rather simple. We average the price over a small interval to remove the noise. If we pick the rates at which we shrink the interval appropriately and thereby balance smoothing away the noise and allowing the volatility to vary intraday, the estimators are consistent.
 
 \begin{figure}[htb]
 
@@ -1001,7 +832,7 @@ We preprocess the data using the pre-averaging approach as in \textcites{podolsk
 \end{figure}
 
 
-We also plot the joint unconditional distribution to see the static relationship between the two series are related. The volatility has a long-right tail (it has has the typical gamma-type distribution) and the returns have a bell-shaped distribution. They are also slightly negative related as can be seen by the regression line in the joint plot.
+To see how the data move over time, we plot their time series in  \cref{fig:spy_dynamics}.  We also plot the joint unconditional distribution in \cref{fig:spy_static} to see the static relationship between the two series are related. The volatility has a long-right tail (it has the typical gamma-type distribution) and the returns have a bell-shaped distribution. They are also slightly negative related as can be seen by the regression line in the joint plot.
 
 We also report a series of summary statistics. The volatility and returns are weakly negatively correlated, corroborating the work by \textcites{bandi2012timevarying, aitsahalia2013leverage}. 
 
@@ -1040,7 +871,7 @@ We also report a series of summary statistics. The volatility and returns are we
 
 \subsection{Estimates}
 
-We now report the reduced-form parameters estimates and associated confidence intervals. We only report the reduced-form parameters that true determinant of the model, i.e., they are necessary to simulate the model. The other reduced-form parameters are known function of these parameters and the structural parameters and so have only useful in that the estimation procedure itself. The confidence intervals reported here use the Gaussian limiting theory, ($\pm 1.96$ standard errors) but we truncate at the edge of the parameter space if necessary. Although, these reduced-form parameters can be estimated directly from the data, disentangling $c$ and $\delta$ is difficult and so the estimation procedure responds appropriately by reporting relatively large standard errors. 
+We now report the reduced-form parameters estimates and associated confidence intervals. We only report the reduced-form parameters that true determinants of the model, i.e., they are necessary to simulate the model. The other reduced-form parameters are known functions of these parameters and the structural parameters. They have no economic meaning and are only useful in the estimation procedure. The confidence intervals reported here use the Gaussian limiting theory, ($\pm 1.96$ standard errors) but we truncate at the edge of the parameter space if necessary. Although, these reduced-form parameters can be estimated directly from the data, disentangling $c$ and $\delta$ is difficult, and so the estimation procedure responds appropriately by reporting relatively large standard errors. 
 
 
 \begin{table}[htb]
@@ -1073,7 +904,7 @@ We now report the reduced-form parameters estimates and associated confidence in
 \end{table}
 
 
-We are interested in not just the reduced-form parameters. We also want estimates for the $\phi$ and the risk prices. Since $\phi < 0$, our estimator is consistent and do the point estimate is a meaningful number. We report the \SI{95}{\percent} confidence intervals by taking computing the joint confidence interval above, and then projecting down to the each of the components.
+We are interested in not just the reduced-form parameters. We also want estimates for the $\phi$ and the risk prices. Since $\phi < 0$, our estimator is consistent and the point estimate is a meaningful number. We report the \SI{95}{\percent} confidence intervals by taking computing the joint confidence interval above, and then projecting down to the each of the components.
 
 
 \begin{table}[htb]
@@ -1103,9 +934,9 @@ We are interested in not just the reduced-form parameters. We also want estimate
   \end{tabularx}
 \end{table}
 
-The parameters in \cref{tbl:structural_param_estimates} have a few notable features. First, we can reject $\phi = 0$ at the \SI{95}{\percent} level. We cannot, however, reject that $\pi = 0$. Interestingly, the values for $\phi, \pi$, and $\theta$ reported by \textcite{han2018leverage} lie outside our confidence regions of each of the parameters. They calibrate $\pi = 10$, and then estimate the remaining parameters. Since their calibration of $\pi$ is badly misspecified, their resulting estimates for $\theta$ is biased in finite sample. To be fair to them, our estimates do not lie outside their confidence intervals. Even though, our estimation procedure for the parameters individually is conservative, as induced by the projection above, our estimates are still more precise in practice. This is likely a result of our estimation procedure more effectively using the information about the various parameters jointly, which their partially calibrated model is incapable of doing.
+The parameters in \cref{tbl:structural_param_estimates} have a few notable features. First, we can reject $\phi = 0$ at the \SI{95}{\percent} level. We cannot, however, reject that $\pi = 0$. Interestingly, the values for $\phi, \pi$, and $\theta$ reported by \textcite{han2018leverage} lie outside our confidence regions for each of the parameters. They calibrate $\pi = -10$ and then estimate the remaining parameters. Since their calibration of $\pi$ is badly misspecified, their resulting estimates for $\theta$ is biased in finite sample. Conversely, our estimates do not lie outside their confidence intervals. Even though our estimation procedure for the parameters individually is conservative, as induced by the projection above, our estimates are still more precise in practice. This difference is likely a result of our estimation procedure more effectively using the information about the various parameters jointly, which their partially calibrated model is incapable of doing.
 
-The one main issue with the estimates in \cref{tbl:structural_param_estimates} is that they are conservative because we go from joint inference to sub-vector inference by using a projection based procedure. Plots of confidence region in three dimensions are not particularly easy to understand, and so we report a joint confidence region for the two prices.
+The main issue with the estimates in \cref{tbl:structural_param_estimates} is that they are conservative because we go from joint inference to sub-vector inference by using an inherently conservative projection based procedure. Plots of confidence region in three dimensions are not particularly easy to understand, and so we report a joint confidence region for the two prices. This is still conservative as we project out $\phi$, but not as conservative as the univariate analysis.
 
 
 \begin{figure}[htb]
@@ -1122,9 +953,9 @@ The confidence region is approximately rectangular, and so the projection infere
 
 \section{Conclusion}
 
-In structural stochastic volatility models such as the one developed here, changes in the volatility affect returns through two channels. First, the investor's willingness to tolerate high volatility in order to get high expected return as measured by the price of market risk. Standard economic models imply there is a static trade-off between risk and expected return. Consequently, when the risk changes the expected return must change to restore equilibrium. However, investors may also be directly averse to changes in future volatility, and the empirical evidence shows that they are. \Textcite{han2018leverage} shows that we can disentangle these two channels through their differing relationships to the leverage effect. However, estimating the leverage effect is quite difficult, \parencite{aitsahalia2013leverage}. This poses a subtle identification that invalidates standard inference. When the data's signal-to-noise ratio is small, as it is here, standard tests and confidence intervals provide misleading results. We adopt the discrete-time exponentially-affine of \textcite{han2018leverage} and adapt weak identification methods to this framework to ensure that the resulting confidence intervals are robust.
+In structural stochastic volatility models such as the one developed here, changes in the volatility affect returns through two channels. First, the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the price of market risk. Standard economic models imply there is a static trade-off between risk and expected return. Consequently, when the risk changes the expected return must change to restore equilibrium. However, investors may also be directly averse to changes in future volatility, and the empirical evidence shows that they are. \Textcite{han2018leverage} shows that we can disentangle these two channels through their differing relationships to the leverage effect. However, estimating the leverage effect is quite tricky, \parencite{aitsahalia2013leverage}. This difficulty poses a subtle identification that invalidates standard inference. When the data's signal-to-noise ratio is small, as it is here, standard tests and confidence intervals provide misleading results. We adopt the discrete-time exponentially-affine of \textcite{han2018leverage} and adapt weak identification methods to this framework to ensure that the resulting confidence intervals are uniformly valid.
 
-In particular, we develop a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to a series of well-behaved reduced-form parameters which govern the return and volatility's joint distribution. We do this by adapting the conditional quasi-likelihood ratio test (CLR) \textcite{andrews2016conditional} develop in a GMM framework to a minimum distance framework. The resulting CLR test is uniformly valid. We invert this test to derive a robust confidence set. We then apply this methodology to data on the S\&P 500 and show that the market risk price lies in $(0.20, 0.60)$ yearly percentage points, and the volatility risk price lies in $(-0.20, 0.00)$. These estimates are both substantially smaller in magnitude than the values chosen by \textcite{han2018leverage}.
+In particular, we develop a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to a series of well-behaved reduced-form parameters which govern the return and volatility's joint distribution. We do this by adapting the conditional quasi-likelihood ratio test (CLR) \textcite{andrews2016conditional} develop in a GMM framework to a minimum distance framework. The resulting CLR test is uniformly valid. We invert this test to derive a robust confidence set. We then apply this methodology to data on the S\&P 500 and show that the market risk price lies in $(0.20, 0.60)$ yearly percentage points, and the volatility risk price lies in $(-0.20, 0.00)$ yearly percentage points. These estimates are both substantially smaller in magnitude than the values chosen by \textcite{han2018leverage}.
 
 
 \clearpage
