@@ -80,7 +80,7 @@ Risk prices measure the level of compensation that the representative investor d
 
 Throughout we assume that the two risks that command nonzero prices are the market risk price and the volatility risk price, as discussed in the introduction. Consequently, we only use variation in the first two moments of the data to estimate these parameters. If higher moments, such as skewness and kurtosis are also priced factors; as in \textcites{harvey2000conditional, conrad2012exante, chang2013market}; and we used higher sample moments to determine the price of our risk-factors our resulting estimates would be biased, likely substantially so. Attempting to match the risk prices of high moments with only the risk prices considered here would misattribute compensation for bearing risk associated with these higher moments to the market and volatility risk prices. Consequently, our model must be parameterized in terms of the first two moments. We use the conditional autoregressive CAR(1) model here, which we take from \textcite{darolles2006structural,han2018leverage}. 
 
-In particular, we adopt the model that \textcite{han2018leverage} develop. This model assumes that the $P_t$ and $\sigma^2_t$ are first-order Markov and there is no Granger-causality from the return to the volatility and that returns are independent given the volatility. In other words, the volatility drives all of the dynamics of the process. We do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, as they are in the data. We construct the model in terms of a series of Laplace transforms that we parameterize using some functions $A(x), B(x), C(x), D(x)$, and $E(x)$. We collect the parameters into a vector $\omega$.
+In particular, we adopt the model that \textcite{han2018leverage} develop. This model assumes that the $P_t$ and $\sigma^2_t$ are first-order Markov and there is no Granger-causality from the return to the volatility and that returns are independent given the volatility. In other words, the volatility drives all of the dynamics of the process. We do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, as they are in the data. This implies that the only relevant information in the information set --- $\F_{t}$ --- for time $t+1$-measurable variables is contained in $\sigma^2_t$. In general, $\sigma^2_t$, $\sigma^2_{t+1}$, and $r_{t+1}$ form a sufficient statistic for $\F_{t+1}$. We construct the model in terms of a series of Laplace transforms that we parameterize using some functions $A(x), B(x), C(x), D(x)$, and $E(x)$. We collect the parameters into a vector $\omega$.
 
 \subsection{The Stochastic Discount Factor}\label{sec:deriving_sdf_functions}
 
@@ -121,6 +121,7 @@ for all $x \in \R$. The $A$ and $B$ are as follows.
 \end{defn}
 
 In this specification, $\rho$ is a persistence parameter, and $c$ is a scaling parameter. To see this, consider the following moment conditions. 
+
 
 \begin{remark}[Volatilty Moment Conditions] 
  \label{remark:vol_moment_conditions}
@@ -281,6 +282,9 @@ Now that we have a formula for $\psi$, we can derive the formulas for $\beta$ an
 \begin{proof}
     This is a straightforward implication of \cref{lemma:separating_leverage_effect} and the derivation in the text.
 \end{proof}
+
+
+
 
 \subsection{Identification of the Risk Prices}
 
@@ -1086,42 +1090,35 @@ functions.
 
 \begin{proof}
 
- We start by considering the expectation of $\widetilde{r}_{t+1}$ and show that it equals zero.
+Before we consider the expectation of $\widetilde{r}_{t+1}$ and show that it equals zero, consider the expectation of $\exp(m_{t,t+1}, r_{t+1})$.
+%
+All of the expectations in the next series of equations are with respect to $\sigma^2_t$, $\sigma^2_{t+1}$, and so we suppress them in our notation.
+Consider the following:
+%
+\begin{align}
+    &0 = \log \E\left[\exp\left(m_{t,t+1} + r_{t+1}\right)\right]  \\
+%
+    \intertext{The $m_{t,t+1}$ and $r_{t+1}$ variables are jointly conditionally Gaussian, and so their sum is as well. Using the formula for a log-Gaussian random variable gives} 
+%
+    \label{eqn:excess_return_decomposition_a}
+    &= \E[m_{t,t+1}] + \E[r_{t+1}] + \frac{1}{2} \Var[m_{t,t+1}] + \frac{1}{2}\Var[r_{t+1}] - \Cov[m_{t,t+1}, r_{t,t+1}] 
+\end{align}
 
- \begin{align}
- \E\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t} \right] &= \E\left[\E\left[r_{t+1} - \frac{1 - \phi^2}{2}
- \sigma^2_{t+1} + (1 - \phi^2) \theta \sigma^2_{t+1}\mvert \sigma^2_{t}, \sigma^2_{t+1} \right] \mvert
- \sigma^2_t\right] \\
+If $r_{t+1}$ was risk-less, then since $r_{t+1}$ is an excess-return, $\E[r_{t+1}] = 0$, and all of the variance terms drop out.
+This gives
 %
- \intertext{By the conditional Gaussianity of $r_{t+1}$, we can absorb the convexity correction into an
- exponential. Normally, it would introduce a $1/2$ variance term, but that cancels. The second term is a
- measurable with respect to the conditioning information and so is not affected.}
+\begin{equation}
+    0 = \E[m_{t,t+1}] + \frac{1}{2} \Var[m_{t,t+1}] 
+\end{equation}
 %
- &= \E\left[\log \E\left[\exp(r_{t+1}) \exp((1 - \phi^2) \theta \sigma^2_{t+1})\mvert \sigma^2_{t},
-  \sigma^2_{t+1} \right] \mvert \sigma^2_t\right] \\
+Substituting that into the  \cref{eqn:excess_return_decomposition_a}, gives
 %
- \intertext{We note that normally, the covariance term would cause the mean to fall, but again that term
- cancels with the second term. We can divide through by $\exp(r_t)$ and $m_{t-1,t}$ because they are
- measurable with respect to $\F_t$, and the remainder of the SDF is also contained within the information
- set, and so we can add it as well (\cref{eqn:log_sdf}).} 
-%
- &\propto \E\left[\log \E\left[\frac{\exp(r_{t+1})}{\exp(r_t)} \frac{M_{t,t+1}}{M_{t-1,t}} \mvert
-  \sigma^2_t, \sigma^2_{t+1} \right] \mvert \sigma^2_t \right]
-%
- \intertext{We can pull the log outside of the outer expectation while adding at most a
- $\sigma^2_t$-measurable term.}
-%
- &\propto \log \E\left[\frac{\exp(r_{t+1})}{\exp(r_t)} \frac{M_{t,t+1}}{M_{t-1,t}} \mvert \sigma^2_t
-  \right]
-%
- \intertext{This is the log expectation of a price change in the price discounted by the change in the
- SDF.}
-%
- &= 0
- \end{align}
+\begin{equation}
+    \E[r_{t+1}] = -\frac{1}{2}\Var[r_{t+1}] + \Cov[m_{t,t+1}, r_{t,t+1}] 
+\end{equation}
 
-Because the mean of $\tilde{r}_{t+1}$ given $\sigma^2_t$ does not change in expectation when we condition on
-$\sigma^2_{t+1}$ we can apply the \Ito\ Isometry.
+Clearly, $\E[\widetilde{r}_{t+1}]= r_{t+1} + \frac{1}{2} \Var[r_{t+1} \sigma^2_{t}, \sigma^2_{t+1}] - \Cov[m_{t,t+1}, \sigma^2_{t+}]$ has mean zero.
+Because the mean of $\tilde{r}_{t+1}$ given $\sigma^2_t$ does not change when we condition on $\sigma^2_{t+1}$ we can apply the \Ito\ Isometry.
 
 \begin{equation}
  \label{eqn:return_var_versus_expected_vol_pp}
