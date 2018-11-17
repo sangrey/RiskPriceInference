@@ -1090,40 +1090,51 @@ functions.
 
 \begin{proof}
 
-Before we consider the expectation of $\widetilde{r}_{t+1}$ and show that it equals zero, consider the expectation of $\exp(m_{t,t+1}, r_{t+1})$.
-%
+Before we show the expectation of $\widetilde{r}_{t+1}$ equals zero, consider the expectation of $\exp(m_{t,t+1} + r_{t+1})$.
 All of the expectations in the next series of equations are with respect to $\sigma^2_t$, $\sigma^2_{t+1}$, and so we suppress them in our notation.
 Consider the following:
 %
-\begin{align}
-    &0 = \log \E\left[\exp\left(m_{t,t+1} + r_{t+1}\right)\right]  \\
+\begin{equation}
+    0 = \log \E\left[\exp\left(m_{t,t+1} + r_{t+1}\right)\right].  
+\end{equation}
 %
-    \intertext{The $m_{t,t+1}$ and $r_{t+1}$ variables are jointly conditionally Gaussian, and so their sum is as well. Using the formula for a log-Gaussian random variable gives} 
+    The $m_{t,t+1}$ and $r_{t+1}$ variables are jointly conditionally Gaussian, and so their sum is as well. Using the formula for a log-Gaussian random variable gives
 %
+\begin{equation}
     \label{eqn:excess_return_decomposition_a}
-    &= \E[m_{t,t+1}] + \E[r_{t+1}] + \frac{1}{2} \Var[m_{t,t+1}] + \frac{1}{2}\Var[r_{t+1}] - \Cov[m_{t,t+1}, r_{t,t+1}] 
-\end{align}
-
-If $r_{t+1}$ was risk-less, then since $r_{t+1}$ is an excess-return, $\E[r_{t+1}] = 0$, and all of the variance terms drop out.
+    0 = \E[m_{t,t+1}] + \E[r_{t+1}] + \frac{1}{2} \Var[m_{t,t+1}] + \frac{1}{2}\Var[r_{t+1}] - \Cov[m_{t,t+1}, r_{t,t+1}]. 
+\end{equation}
+%
+If $r_{t+1}$ was risk-less, $\E[r_{t+1}] = 0$ since $r_{t+1}$ is an excess-return, and all of the variance terms drop out.
 This gives
 %
 \begin{equation}
-    0 = \E[m_{t,t+1}] + \frac{1}{2} \Var[m_{t,t+1}] 
+    0 = \E[m_{t,t+1}] + \frac{1}{2} \Var[m_{t,t+1}]. 
 \end{equation}
 %
 Substituting that into the  \cref{eqn:excess_return_decomposition_a}, gives
 %
 \begin{equation}
-    \E[r_{t+1}] = -\frac{1}{2}\Var[r_{t+1}] + \Cov[m_{t,t+1}, r_{t,t+1}] 
+    \E[r_{t+1}] = -\frac{1}{2}\Var[r_{t+1}] + \Cov[m_{t,t+1}, r_{t,t+1}]. 
 \end{equation}
 
-Clearly, $\E[\widetilde{r}_{t+1}]= r_{t+1} + \frac{1}{2} \Var[r_{t+1} \sigma^2_{t}, \sigma^2_{t+1}] - \Cov[m_{t,t+1}, \sigma^2_{t+}]$ has mean zero.
-Because the mean of $\tilde{r}_{t+1}$ given $\sigma^2_t$ does not change when we condition on $\sigma^2_{t+1}$ we can apply the \Ito\ Isometry.
-
-\begin{equation}
- \label{eqn:return_var_versus_expected_vol_pp}
- \E\left[\Var\left(\tilde{r}_{t+1} \mvert \sigma^2_t\right) \right] = \E[ \sigma^2_{t+1}]
-\end{equation}
+Clearly, $\E[\widetilde{r}_{t+1}]= r_{t+1} + \frac{1}{2} \Var[r_{t+1} \sigma^2_{t}, \sigma^2_{t+1}] - \Cov[m_{t,t+1}, \sigma^2_{t+}]$ has mean zero given $\sigma^2_t, \sigma^2_{t+1}$. By the law of iterated expectations, it also has mean zero given $\sigma^2_t$ only.
+Hence, we can apply the \Ito\ Isometry:
+%
+\begin{align}
+    \label{eqn:return_var_versus_expected_vol_pp}
+    \Var\left[\tilde{r}_{t+1} \mvert \sigma^2_t\right] 
+%
+    &= \E[\tilde{r}^2_{t+1}] = \E\left[\left(\int_t^{t+1} \dif \tilde{p}(s) \right)^2 \mvert \sigma^2_t \right] = 
+    %
+    \E\left[\left(\int_t^{t+1} \tilde{\sigma}^2(s) \dif s \right)^2 \mvert \sigma^2_t \right]
+%
+    \intertext{Since changing drift terms does not affect the volatility.}
+%
+    &= \E\left[\left(\int_t^{t+1} \sigma^2(s) \dif s \right)^2 \mvert \sigma^2_t \right]
+%
+    = \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]
+\end{align}
 
 Intuitively, volatilities are squared returns, and so they are variances.
 The tricky part here is that variances are centered second moments, not the second moments themselves.
