@@ -1,6 +1,8 @@
 \documentclass[11pt, letterpaper, twoside]{article}
 \usepackage{risk_price_inference}
-\addbibresource{risk_price_inference}
+\usepackage[backend=biber, autopunct=true, authordate, hyperref=true, doi=false,
+isbn=false, url=false, eprint=false]{biblatex-chicago} 
+\addbibresource{risk_price_inference.bib}
 
 \author{Xu Cheng\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}} \and Eric Renault\thanks{Brown University, Department of Economics -- Box B, 64 Waterman Street, Providence, RI 02912, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}} \and Paul Sangrey\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
 
@@ -43,24 +45,23 @@ An important question in finance is how investors optimally trade off risk and r
 In models with stochastic volatility, the relationship is often nonlinear \parencites{bansal2014volatility, dewbecker2017price}: %[XC. I deleted option pricing given that we do not consider that here.] 
 The investors care not just about how an asset's returns co-move with the volatility but also care how they co-move with the change in volatility. %[XC. I think we should add why stochastic volatility is important for asset pricing.]
 
-XC. As we discussed, this first paragraph needs rewriting.
+%XC. As we discussed, this first paragraph needs rewriting.
 
-In structural stochastic volatility models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the market risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. We adopt the discrete-time exponentially affine model of \textcite{han2018leverage}, where the market risk price and the volatility risk price are represented by two structural parameters. In this model,  \textcite{han2018leverage} establish the important result that the identification of the volatility risk price depends on a substantial leveage effect, which is the negative correlation between return and change in volatility. 
+In structural stochastic volatility models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the market risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. We adopt the discrete-time exponentially affine model of \textcite{han2018leverage}, where the market risk price and the volatility risk price are represented by two structural parameters. In this model,  \textcite{han2018leverage} establish the important result that the identification of the volatility risk price depends on a substantial leverage effect, which is the negative correlation between return and change in volatility. 
 
-Although the leverage effect is theoretically less than zero, it is difficult to quantify empirically and its estimate usually is small \parencites{aitsahalia2013leverage}. With a mild leverage effect, the data only provide limited amount of information about the volatility risk, compared to the finite-sample noise in the data. This low signal-to-noise ratio,  modelled by weak identification, invalidates standard inference based on the generalized method of moments (GMM) estimator, see Stock and Wright (2000) and \textcite{andrews2012estimation}.
+Although the leverage effect is theoretically less than zero, it is difficult to quantify empirically and its estimate usually is small \parencites{aitsahalia2013leverage}. With a mild leverage effect, the data only provide limited amount of information about the volatility risk, compared to the finite-sample noise in the data. This low signal-to-noise ratio,  modeled by weak identification, invalidates standard inference based on the generalized method of moments (GMM) estimator, see Stock and Wright (2000) and \textcite{andrews2012estimation}.
 
 We provide identification-robust confidence set (CS) for the structural parameters that measure the market risk price, the volatility risk price, and the leverage effect. 
-The robust CS provides correct asymptotic coverage, uniformly over a large set of models that allow for any amount of leverage effect. This uniform validity is crucial for the CS to have good finite-sample coverage (Mikusheva, 2007; Andrews and Guggenberger, 2010). In constrast, standard CS based on the GMM estimator and its asymptotic normality does not have uniform validity in the presence of small leverge effect. This applies to all structural parameters because they are estimated simultaneously.
+The robust CS provides correct asymptotic coverage, uniformly over a large set of models that allow for any amount of leverage effect. This uniform validity is crucial for the CS to have good finite-sample coverage \parencites{mikusheva2007uniform, andrews2010applications}. In contrast, standard confidence sets based on the GMM estimator and its asymptotic normality does not have uniform validity in the presence of small leverage effect. This applies to all structural parameters because they are estimated simultaneously.
 
 
-The robust inference is achieved in two-steps. First, we establish a minimum distance criterion using link functions between the structural parameter and a set of reduced-form parameters that determine the joint distribution of the return and volatility. The structural model implies that the link functions are zero when evaluated at the true values of the structral parameters and the reduced-form paramters. Identification and estimation of these reduced fom parameters are standard and not affected by small leverage effect. However, the link function is almost flat in the structural parameter when the leverage effect is small, resulting in weak identfication. Second, given this minimum distance crtiterion, we invert the conditional quasi-likelihood ratio (QLR) test by Andrews and Mikusheva (2016) to constrcut a robust CS. The key feature of this test is that the flat link function is treated as an infinite dimensional nuisance parameter. The critical value is contructed by conditioning on a sufficient statistic for this nuisance parameter and it is shown to yield a valid test regardless of the nuisance parameter. Andrews and Mikusheva (2016) develop test in a GMM framework and we apply it to the minimum distance context here.
+The robust inference is achieved in two-steps. First, we establish a minimum distance criterion using link functions between the structural parameter and a set of reduced-form parameters that determine the joint distribution of the return and volatility. The structural model implies that the link functions are zero when evaluated at the true values of the structural parameters and the reduced-form parameters. Identification and estimation of these reduced form parameters are standard and not affected by small leverage effect. However, the link function is almost flat in the structural parameter when the leverage effect is small, resulting in weak identification. Second, given this minimum distance criterion, we invert the conditional quasi-likelihood ratio (QLR) test by \textcite{andrews2016conditional} to construct a robust confidence set. The key feature of this test is that the flat link function is treated as an infinite dimensional nuisance parameter. The critical value is constructed by conditioning on a sufficient statistic for this nuisance parameter and it is shown to yield a valid test regardless of the nuisance parameter. \Textcite{andrews2016conditional} develop a test in a GMM framework, and we apply it to the minimum distance context here.
 
 
+Our paper relates to the empirical analysis of the effect of volatility on risk premia. As \textcite{lettau2010measuring} mention,  the evidence here is inconclusive. \textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there, bali2006there, ludvigson2007empirical} find a positive relationship, while \textcites{campbell1987stock, breen1989economic, pagan1991nonparametric, whitelaw1994time, brandt2004relationship} find a negative relationship. In addition, some papers use both a market risk factor and a variance risk factor to explain the risk premia dynamics, including \textcites{christoffersen2013capturing, feunou2014risk, dewbecker2017price}. A substantial positive variance risk premium is documented by \textcites{bollerslev2008risk, drechsler2011whats}. We contribute to this literature by providing a new way to do inference for the market risk price and the volatility risk price. This new confidence set not only allows for both effects but also takes into account the potential identification issue.
 
-Our paper relates to the empirical analysis of the effect of volatility on risk premia. As \textcite{lettau2010measuring} mention,  the evidence here is inconclusive. \textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there, bali2006there, ludvigson2007empirical} find a positive relationship, while \textcites{campbell1987stock, breen1989economic, pagan1991nonparametric, whitelaw1994time, brandt2004relationship} find a negative relationship. In addition, some papers use both a market risk factor and a variance risk factor to explain the risk premia dynamics, including \textcites {christoffersen2013capturing, feunou2014risk, dewbecker2017price}. A substantial positive variance risk premium is documented by \textcites {bollerslev2008risk, drechsler2011whats}. We contribute to this literature by providing a new way to do inference for the market risk price and the volatility risk price. This new confidence set not only allows for both effects but also takes into account the potential identification issue.
 
-
-The weak identification issue studied in this paper is relevant in many economic applications, ranging from linear instrumental variable models (Staiger and Stock, 1997) to nonlinear structural models (Mavroeidis, Plagborg-Møller, Stock, 2014; Andrews and Mikusheva, 2015, QE). This is the first paper to study this issue in asset pricing models with structural volatility. The conditional inference approach is introduced to the linear instrumental variable model by Moreia (2003) and applied to the nonlinear GMM problem by Kleibergen (2005). Andrews and Mikusheva (2016) propose conditional inference for nonlinear GMM problems with infinitely dimensional nuisance parameter. This paper extends the scope of its application to a minimum distance criterion and to a new type of asset pricing model.
+The weak identification issue studied in this paper is relevant in many economic applications, ranging from linear instrumental variable models (Staiger and Stock, 1997) to nonlinear structural models \parencites{mavroeidis2014empirical, andrews2015maximum}  (Stock, 2014). This is the first paper to study this issue in structural asset pricing models with stochastic volatility. The conditional inference approach is introduced to the linear instrumental variable model by \textcite{moreira2003conditional} and applied to the nonlinear GMM problem by \textcite{kleibergen2005testing}. \Textcite{andrews2016conditional} propose conditional inference for nonlinear GMM problems with infinitely dimensional nuisance parameter. This paper extends the scope of its application to a minimum distance criterion and to a new type of asset pricing model.
 
 The rest of the paper is organized as follows. \cref{sec:model} provides the model and its parameterization. Section ** provide model-implied restrictions and use them to derive the link function. Section ** provides the asymptotic distribution of the reduced-form parameter and robust inference for the structural parameter. A detailed algorithm to construct the robust confidence set is given in Section **. Section ** provides simulation results and an empirical application. Section ** concludes. Proofs are given in the appendix.
 
@@ -114,6 +115,7 @@ We adopt the conditional autoregressive gamma process as in \textcite{gourieroux
 %
 \begin{equation}
     \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_{t}\right] = \exp\left(- A(x) \sigma^2_{t} - B(x)\right)
+    \label{eqn:vol_laplace_transform}
 \end{equation}
 %
 for all $x \in \R$. The function $A(x)$ and $B(x)$ are parameterized as follows.
@@ -151,6 +153,7 @@ Since these two moment conditions are sufficient to derive the unconditional mom
 Next, we model the return dynamics. Similar to the volatility dynamcs, the distribution of $r_t$ given $\sigma^2_{t+1}$ and $\sigma^2_{t}$ is specified in terms of the Laplace transform:
 %
 \begin{equation}
+    \label{eqn:return_laplace_transform}
     \E\left[\exp(- x r_{t+1}) \mvert \F_{t}, \sigma^2_{t+1} \right] = \exp\left(- C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x)\right).
 \end{equation}
 %
@@ -185,7 +188,494 @@ Under this specification, we have the following representation of the conditiona
 
 Both the parameter $\psi$ and $\phi$ are linked to the leverage effect as shown below.
 
-********PUT THE SCIENTIFIC WORKPLACE NOTES HERE*************
+\section{Link Functions}
+
+So far, we have introduced the following parameters: $(m_{0},m_{1},\theta
+,\pi )$ in SDF, $(\rho ,c,\delta )$ in the volatility dynamic, and $(\psi
+,\beta ,\gamma ,\phi )$ in the return dynamic. Next, we explore restrictions
+among these parameters that are consistent with this model. In other words,
+not all of these parameters can change freely under the structural model.
+
+We use these restrictions to construct link functions between a set of
+reduced-form parameter and a set of structural parameters. These link
+functions play an important role on separating the regularly behaved
+reduced-form parameters from the structural parameters. They also are used
+to conduct identification robust inference for the structural parameters
+based on a minimum distance criterion.
+
+All of these restrictions are also presented and imposed in the GMM
+estimation in Han et al. (2018). However, they estimate all parameters
+together with all of these restriction imposed, because they assume all
+parameters being estimated are strongly identified.
+
+\subsection{Pricing Equation Restrictions}
+
+We first explore the restriction implied by the pricing equation $\mathbb{E[}%
+M_{t,t+1}\exp (r_{t+1})|\mathcal{F}_{t}]=1.$ We first provide a simple
+result stating that the constants $m_{0}$ and $m_{1}$ are normalization
+constants implied by all the other parameters. Thus, $m_{0}$ and $m_{1}$ are
+not free parameters to be estimated. Instead, they should take the value
+given, once other parameters are specified. These restrictions on $m_{0}$
+and $m_{1}$ are obtained by applying the restriction $\mathbb{E[}%
+M_{t,t+1}\exp (r_{t+1})|\mathcal{F}_{t}]=1$ to the risk free asset. Applying
+the same argument to any other asset, we also obtain another set of two
+restrictions, which can be written in terms of coefficient $\beta $ and $%
+\gamma $ under the linear form of $D(x)$ and $E(x).$
+
+\begin{lemma}
+\label{Lemma m0 and m1}Given the parameterization in the model. The pricing
+equation $\mathbb{E[}M_{t,t+1}\exp (r_{t+1})|\mathcal{F}_{t}]=1$ implies that%
+\begin{eqnarray*}
+m_{0} &=&E(\theta )+B\left( \pi +C\left( \theta \right) \right) , \\
+m_{1} &=&D\left( \theta \right) +A\left( \pi +C\left( \theta \right) \right)
+,
+\end{eqnarray*}%
+and%
+\begin{eqnarray*}
+\gamma  &=&B\left( \pi +C\left( \theta -1\right) \right) -B\left( \pi
++C\left( \theta \right) \right) , \\
+\beta  &=&A\left( \pi +C\left( \theta -1\right) \right) -A\left( \pi
++C\left( \theta \right) \right) .
+\end{eqnarray*}
+\end{lemma}
+
+The two equalities on $\beta $ and $\gamma $ link them to the market risk
+price $\theta $ and volatility risk $\pi $ through the functions $A(\cdot
+),B(\cdot ),C(\cdot ),$ which also involve parameters $(\rho ,c,\delta ,\psi
+,\phi ).$ We treat these two equalities as link functions in the minimum
+distance criterion specified below.
+
+\subsection{Leverage Effect Restrictions}
+
+We first show that both parameter $\psi $ and $\phi $ are linked to the leverage effect. Given the variance of $r_{t+1}$ conditional on $(\sigma _{t+1}^{2},\sigma _{t}^{2}),$ specified in (**), we have
+%
+\begin{equation*}
+    \phi ^{2}=\sigma _{t+1}^{2}-\Var[r_{t+1}|\sigma _{t+1}^{2},\sigma _{t}^{2}].
+\end{equation*}
+%
+This shows that $\phi $ is linked to the leverage effect because it measures the return volatility reduction after conditioning on the volatility path.  On the other hand, given the mean of $r_{t+1}$ conditional on $(\sigma _{t+1}^{2},\sigma _{t}^{2}),$ specified in (**), we have\footnote{To see this result, note that he mean of $r_{t+1}-\psi \sigma _{t+1}^{2}$ given $(\sigma _{t+1}^{2},\sigma _{t}^{2})$ does not depend on $\sigma
+_{t+1}^{2}.$}%
+%
+\begin{equation}
+    \E[r_{t+1}|\sigma _{t+1}^{2},\sigma _{t}^{2}]-E[r_{t+1}|\sigma _{t}^{2}]=\psi \left \{ \sigma _{t+1}^{2}-E[\sigma _{t+1}^{2}|\sigma _{t}^{2}]\right \} .
+\end{equation}%
+The parameter $\psi $ is also linked to the leverage effect because it incorporates the instantaneous relationship between change in the innovation in $\sigma _{t+1}^{2}$ and change in the return forecast. Besides the leverage effect, $\psi $ also include the change in $r_{t+1}$ through two other channels: (i) the market risk price due to the correlation between $M_{t,t+1}$ and $\exp (r_{t+1})$ and (ii) the Jensen's effect term that captures the change in the mean of $\exp (r_{t+1})$ with the volatility of $ r_{t+1}$ (with a 1/2 factor). Following \textcite{han2018leverage}, these two measures of the leverage effect are restricted to 
+%
+\begin{equation}
+    \psi -(1-\phi ^{2})\theta +\frac{1}{2}(1-\phi ^{2})=k\phi 
+    \label{leverage restriction}
+\end{equation}
+%
+for a constant $k,$ where the left hand side is the leverage effect in $\psi$ after the other two effects are removed. \Textcite{han2018leverage} show that an appropriate choice of $k$ is the value under which $corr[r_{t+1},\sigma _{t+1}^{2}|\sigma _{t}^{2}]=\phi $ if this correlation is indeed time invariant. Guided by this condition, they show that $k=1/(2c)^{1/2}$ should be used for the volatility dynamic specified in () and ().
+
+\subsection{Structural and Reduced-Form Parameters}
+
+Because $\phi $ is the leverage effect parameter, we group it together with market risk price $\theta $ and the volatility risk price $\pi $ and call $ \lambda =(\theta ,\pi ,\phi )^{\prime }$ structural parameters. These structural parameters are estimated by restrictions from this structural model. In contrast, the other parameters in the conditional mean and variance of the return and volatility, see ()-() and ()-(), are simply estimated using these moments, without any model restriction. As such, we call them the reduced-form parameter. Because $1-\phi ^{2}$ shows up in the conditional variance of $r_{t+1},$ see (**), we define $\zeta =1-\phi ^{2}$ as a reduced-form parameter and link it to the structural parameter $\phi $ through this relationship. To sum up, the reduced-form parameters are $\omega =(\rho ,c,\delta ,\psi ,\beta ,\gamma ,\zeta )^{\prime }.$
+
+Using $\zeta $ as a reduced-form parameter has the additional benefit that
+the sample variance, denoted by $\widehat{\zeta },$ is a simple consistent
+estimator with normal distribution. Estimation of $\phi $ is more
+complicated because $-1<\phi \leq 0$ by definition and this estimation
+involves boundary constraints that results in a non-standard distribution.
+The inference procedure below does not require estimation of $\phi $ and is
+uniform over $\phi $ even if its true value is on or close to the boundary $%
+0.$
+
+The link functions between the structural parameter $\lambda $ and the
+reduced-form parameter $\omega $ are collected together in%
+\begin{equation}
+   g(\lambda, \omega) = 
+%
+    \begin{pmatrix}
+        B\left( \pi +C\left( \theta -1\right) \right) -B\left( \pi +C\left( \theta \right) \right) -\gamma  \\ 
+        A\left( \pi +C\left( \theta -1\right) \right) -A\left( \pi +C\left( \theta \right) \right) -\beta  \\ 
+        \psi -(1-\phi ^{2})\theta +\frac{1}{2}(1-\phi ^{2})-1/(2c)^{1/2}\phi  \\ \zeta -\left( 1-\phi ^{2}\right) 
+    \end{pmatrix}.
+\end{equation}%
+For the inference problem studied below, we know $g(\lambda _{0},\omega
+_{0})=0$ when evaluated at the true value of $\lambda $ and $\omega .$
+
+\subsection{Identification}
+
+One of the important contributions of Han etal is to establish the
+relationship between the identification of the volatility risk price and the
+leverage effect. In particular, they show that when the leverage effect
+parameter $\phi =0,$ the volatility price $\pi $ is not identified. To see
+this result, note that the only source of identification information on $\pi 
+$ are the first two link functions in $g(\lambda _{0},\omega _{0})=0,$ which
+comes from Lemma \ref{Lemma m0 and m1}. In these two equalities, $\pi $ is
+not identified if $C(\theta )=C(\theta -1).$ Using the definition $C(\theta
+)=\psi \theta +(1-\phi ^{2})\theta ^{2}/2$ and the restriction (\ref%
+{leverage restriction}), we have 
+\begin{equation*}
+C(\theta )-C(\theta -1)=\psi +(1-\phi ^{2})\left( \theta -\frac{1}{2}\right)
+=k\phi .
+\end{equation*}%
+Therefore, a non-zero leverage effect i.e., $\phi \neq 0,$ is required for
+the identification of the volatility risk price $\pi $.
+
+The identification result above is based on the theoretical model only,
+without considering data uncertainty in practical applications. With a
+finite-sample size and different types of noise in the data, such as
+measurement errors and omitted variables, a much more substantial leverage
+effect is required to obtain a standard identification situation where the
+noise in the data is negligible compared to the information to identify $\pi
+.$ However, if only a small leverage effect is documented, e.g., Ait-Sahalia
+et al (2014), or the magnitude of the leverage effect is completely unknown,
+an identification robust procedure is needed to conduct inference in this
+problem. We provide such a procedure now.
+
+\section{Robust Inference for Risk Prices}
+
+\subsection{Asymptotic Distribution of the Reduced-Form Parameter}
+
+Write $\omega :=(\omega _{1},\omega _{2},\omega _{3})^{\prime },$ where $%
+\omega _{1}=(\rho ,c,\delta )\in O_{1},$ $\omega _{2}=(\gamma ,\beta ,\psi
+)\in O_{2},$ and $\omega _{3}=\zeta \in O_{3}.$ The parameter space for $%
+\omega $ is $O=O_{1}\times O_{2}\times O_{3}\subset R^{d_{\omega }}.$ The
+true value of $\omega $ is assumed to be in the interior of the parameter
+space.
+
+Below we describe the estimator $\widehat{\omega }:=(\widehat{\omega }_{1},%
+\widehat{\omega }_{2},\widehat{\omega }_{3})^{\prime }$ and provide its
+asymptotic distribution. We estimate these parameters separately because $%
+\omega _{1}$ only shows up in the conditional mean and variance of $\sigma
+_{t+1}^{2},$ $\omega _{2}$ only shows up in the conditional mean of $%
+r_{t+1}, $ and $\omega _{3}$ only shows up in the conditional variance of $%
+r_{t+1}.$
+
+We first estimate $\omega _{1}=(\rho ,c)$ based on the conditional mean and
+variance of $\sigma _{t+1}^{2}$, which can be equivalently written as 
+\begin{eqnarray}
+E[\sigma _{t+1}^{2}|\sigma _{t}^{2}] &=&A\text{ and }E[\sigma
+_{t+1}^{4}|\sigma _{t}^{2}]=B,\text{ where }  \notag \\
+A &=&\rho \sigma _{t}^{2}+c\delta \text{ and }B=A^{2}+\left( 2c\rho \sigma
+_{t}^{2}+c^{2}\delta \right) .
+\end{eqnarray}%
+Because the conditional mean of $\sigma _{t+1}^{2}$ and $\sigma _{t+1}^{4}$
+are linear and quadratic functions, respectively, of the conditioning
+variable $\sigma _{t}^{2},$ without loss of efficiency, they can be
+transformed to the unconditional moments%
+\begin{equation}
+E[h_{t}(\omega _{10})]=0,\text{ where }h_{t}(\omega _{1})=[(1,\sigma
+_{t}^{2})\otimes (\sigma _{t+1}^{2}-A),(1,\sigma _{t}^{2},\sigma
+_{t}^{4})\otimes (\sigma _{t+1}^{4}-B)]^{\prime },
+\end{equation}%
+where $\omega _{10}$ represents the true value of $\omega _{1}.$ The
+two-step GMM estimator of $\omega _{1}$ is%
+\begin{equation}
+\widehat{\omega }_{1}=\underset{\omega _{1}\in O_{1}}{\arg \min }\left(
+T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})\right) ^{\prime }\widehat{V}%
+_{1}\left( T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})\right) ,
+\label{omega 1 est}
+\end{equation}%
+where $\widehat{V}_{1}$ is a consistent estimator of $V_{1}=\sum_{m=-\infty
+}^{\infty }\mathbb{C}ov[h_{t}(\omega _{10}),h_{t+m}(\omega _{10})].$
+
+We estimate $\omega _{2}$ by the generalized least squares (GLS) estimator
+because the conditional mean of $r_{t+1}$ is a linear function of the
+conditioning variable $\sigma _{t}^{2}$ and $\sigma _{t+1}^{2}$ and the
+conditional variance is proportional to $\sigma _{t+1}^{2}.$ The GLS\
+estimator of $\omega _{2}$ is%
+\begin{eqnarray}
+\widehat{\omega }_{2} &=&\left( \sum_{t=1}^{T}x_{t}x_{t}^{\prime }\right)
+^{-1}\sum_{t=1}^{T}x_{t}y_{t},\text{ where }  \notag \\
+x_{t} &=&\sigma _{t+1}^{-1}(1,\sigma _{t}^{2},\sigma _{t+1}^{2})^{\prime }%
+\text{ and }y_{t}=\sigma _{t+1}^{-1}r_{t+1}.  \label{omega 2 est}
+\end{eqnarray}%
+We estimate $\omega _{3}$ by the sample variance estimator%
+\begin{equation}
+\widehat{\omega }_{3}=T^{-1}\sum_{t=1}^{T}\left( y_{t}-\widehat{y}%
+_{t}\right) ^{2},\text{ where }\widehat{y}_{t}=x_{t}^{\prime }\widehat{%
+\omega }_{2}.  \label{omega 3 est}
+\end{equation}
+
+Let $P$ denote the distribution of the data $\mathcal{W}=\{W_{t}=(r_{t+1},%
+\sigma _{t+1}^{2}):t\geq 1\}$ and $\mathcal{P}$ denote the parameter space
+of $P$. Note that the true values of the structural parameter and the
+reduced-form parameters are all determined by $P.$ We allow $P$ to change
+with $T.$ For notational simplicity, the dependence on $P$ and $T$ is
+suppressed.
+
+Let 
+\begin{equation}
+f_{t}(\omega )=\left( 
+\begin{array}{c}
+h_{t}(\omega _{1}) \\ 
+x_{t}(y_{t}-x_{t}^{\prime }\omega _{2}) \\ 
+(y_{t}-x_{t}^{\prime }\omega _{2})^{2}%
+\end{array}%
+\right) \in R^{d_{f}}\text{ and }V=\sum_{m=-\infty }^{\infty }\mathbb{C}%
+\mathbf{ov}[f_{t}(\omega _{0}),f_{t+m}(\omega _{0})].
+\end{equation}%
+The estimator $\widehat{\omega }$ defined above is based on the first moment
+of $f_{t}(\omega ).$ Thus, the limiting distribution of $\widehat{\omega }$
+relates to the limiting distribution of $T^{-1/2}\sum_{t=1}^{T}f_{t}(\omega
+_{0})-\mathbb{E[}f_{t}(\omega _{0})$ following from the central limit
+theorem. Furthermore, because $\omega _{1}$ is the GMM\ estimator based on
+some nonlinear moment conditions, we need uniform convergence of the the
+sample moments and their derivatives to show the consistency and asymptotic
+normality of $\widehat{\omega }_{1}.$ These uniform convergence follows from
+the uniform law of large numbers. Because $\widehat{\omega }_{2}$ is a
+simple OLS estimator by regressing $y_{t}$ and $x_{t},$ we need
+no-multicollinearity among the regressors. We make all of the these
+assumptions below.. All of them are easily verifiable with weakly dependent
+time series data.
+
+Let $\widehat{V}$ denote a heteroskedasticity and autocorrelation consistent
+(HAC) estimator of $V$. The estimator $\widehat{V}_{1}$ is a submatrix of $%
+\widehat{V}$ associate with $V_{1}.$ Let $H_{t}(\omega _{1})=\partial
+h_{t}(\omega _{1})/\partial \omega _{1}^{\prime }.$
+
+\smallskip
+
+\noindent \textbf{Assumption R}. The following conditions hold uniformly
+over $P\in \mathcal{P}$, for some fixed $0<C<\infty .$
+
+\noindent (i) $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega _{1})-\mathbb{E[}%
+h_{t}(\omega _{1}))\rightarrow _{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega
+_{1})-\mathbb{E[}H_{t}(\omega _{1})\mathbb{])}\rightarrow _{p}0,$ $\mathbb{E[%
+}H_{t}(\omega _{1})\mathbb{]}$ is continuous in $\omega _{1},$ all uniformly
+over the parameter space of $\omega _{1}.$
+
+%\QTP{Body Math}
+
+\noindent (ii) $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime }-\mathbb{E[}%
+x_{t}x_{t}^{\prime }\mathbb{])\rightarrow }_{p}0.$
+
+%\QTP{Body Math}
+\noindent (iii) $V^{-1/2}\{T^{-1/2}(\sum_{t=1}^{T}f_{t}(\omega _{0})-\mathbb{%
+E[}f_{t}(\omega _{0})\mathbb{]\} \rightarrow }_{d}N(0,I)$ and $\widehat{V}%
+-V\rightarrow _{p}0.$
+
+\noindent (iv) $C^{-1}\leq \lambda _{\min }(A)\leq \lambda _{\max }(A)\leq C$
+for $A=V,\mathbb{E[}H_{t}\left( \omega _{1,0}\right) ^{\prime }H_{t}\left(
+\omega _{1,0}\right) ]),\mathbb{E[}x_{t}x_{t}^{\prime }],\mathbb{E[}%
+z_{t}z_{t}^{\prime }],$ where $z_{t}=(1,\sigma _{t}^{2},\sigma
+_{t}^{4})^{\prime }.$
+
+\smallskip
+
+Let $H(\omega _{1})=\mathbb{E[}H_{t}(\omega _{1})]$ and $\overline{H}(\omega
+_{1})=T^{-1}\sum_{t=1}^{T}H_{t}(\omega _{1}).$ Define%
+\begin{eqnarray}
+\mathcal{B} &=&\diag\{[H(\omega _{10})V_{1}^{-1}H(\omega _{10})]^{-1}H(\omega
+_{10})V_{1}^{-1},\mathbb{E[}x_{t}x_{t}^{\prime }]^{-1},1\},  \notag \\
+\widehat{\mathcal{B}} &=&\diag\{[\overline{H}(\widehat{\omega }_{1})^{\prime }%
+\widehat{V}_{1}^{-1}\overline{H}(\widehat{\omega }_{1})]^{-1}\overline{H}(%
+\widehat{\omega }_{1})^{\prime }\widehat{V}_{1}^{-1},[T^{-1}%
+\sum_{t=1}^{T}x_{t}x_{t}^{\prime }]^{-1},1\}.  \label{Fhat}
+\end{eqnarray}%
+The following Lemma provides the asymptotic distribution of the reduced-form
+parameter and a consistent estimator of its asymptotic covariance. Note that
+we put the asymptotic covariance on the left side of the convergence to
+allow the distribution of the data to change with sample size $T.$
+
+\begin{lemma}
+\label{Lemma Reduce}Suppose Assumption R holds. The following results hold
+uniformly over $P\in \mathcal{P}$.
+
+\noindent \emph{(i)} $\xi _{T}:=\Omega ^{-1/2}T^{-1/2}(\widehat{\omega }%
+-\omega _{0})\rightarrow _{d}\xi \sim N(0,I),$ where $\Omega =\mathcal{B}V%
+\mathcal{B}^{\prime }.$
+
+\noindent \emph{(ii)} $\widehat{\Omega }-\Omega \rightarrow _{p}0,$ where $%
+\widehat{\Omega }=\widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}%
+^{\prime }.$
+\end{lemma}
+
+\subsection{Weak Identification}
+
+The true value of the structural parameter $\lambda $ and the reduced-form
+parameter $\omega $ satisfies the link function $g(\lambda _{0},\omega
+_{0})=0.$In a standard problem without any identification issue, we can
+estimate $\lambda _{0}$ by the minimum distance estimator $\widehat{\lambda }%
+=(\widehat{\theta },\widehat{\pi },\widehat{\phi })$ that minimizes $%
+Q_{T}(\lambda )=g(\lambda ,\widehat{\omega })^{\prime }W_{T}g(\lambda ,%
+\widehat{\omega })$ for some weighting matrix $W_{T}$ and construct tests
+and confidence sets for $\lambda _{0}$ based on the asymptotic normal
+distribution of $T^{1/2}(\widehat{\lambda }-\lambda _{0})$. However, this
+standard method does not work in the present problem when $\pi _{0}$ is only
+weak identified. In this case, $g(\lambda ,\widehat{\omega })$ is almost
+flat in $\pi $ and the minimum distance estimator of $\widehat{\pi }$ is not
+even consistent. To make the problem even more complicated, the
+inconsistency of $\widehat{\pi }$ has a spillover effect on $\widehat{\theta 
+}$ and $\widehat{\phi },$ making the distribution of $\widehat{\theta }$ and 
+$\widehat{\phi }$ non-normal even in large sample.
+
+Before presenting the robust test, we first introduce some useful quantities
+and provide some heuristic discussions of the identification problem and its
+consequence. Let $G(\lambda ,\omega )$ denote the partial derivative of $%
+g(\lambda ,\omega )$ wrt $\omega .$ Let $g_{0}(\lambda )=g(\lambda ,\omega
+_{0})$ and $G_{0}(\lambda )=G(\lambda ,\omega _{0})$ be the link function
+and its derivative evaluated at $\omega _{0}$ and $\widehat{g}(\lambda
+)=g(\lambda ,\widehat{\omega })$ and $\widehat{G}(\lambda )=G(\lambda ,%
+\widehat{\omega })$ be the same quantities evaluate at the estimator $%
+\widehat{\omega }.$ The delta method gives 
+\begin{equation}
+\eta _{T}(\lambda ):=T^{1/2}\left[ \widehat{g}(\lambda )-g_{0}(\lambda )%
+\right] =G_{0}(\lambda )\Omega ^{1/2}\cdot \xi _{T}+o_{p}(1),
+\label{emp pro}
+\end{equation}%
+where $\xi _{T}\rightarrow _{d}N(0,I)$ following Lemma \ref{Lemma Reduce}.
+Thus, $\eta _{T}(\cdot )$ weakly converges to a Gaussian process $\eta
+(\cdot )$ with covariance function $\Sigma (\lambda _{1},\lambda
+_{2})=G_{0}(\lambda _{1})\Omega G_{0}(\lambda _{2})^{\prime }.$
+
+Following (\ref{emp pro}), we can write $T^{1/2}\widehat{g}(\lambda )=\eta
+_{T}(\lambda )+T^{1/2}g_{0}(\lambda ),$ where $\eta _{T}(\lambda )$ is the
+noise from the reduced-form parameter estimation and $T^{1/2}g_{0}(\lambda )$
+is the signal from the link function. Under weak identification, $%
+g_{0}(\lambda )$ is almost flat in $\lambda ,$ modelled by the signal $%
+T^{1/2}g_{0}(\lambda )$ being finite even for $\lambda \neq \lambda _{0}$
+and $T\rightarrow \infty .$ Thus, the signal and the noise are of the same
+order of magnitude, yielding an inconsistent minimum distance estimator $%
+\widehat{\lambda }.$ This is in contrast with the strong identification
+scenario, where $T^{1/2}g_{0}(\lambda )\rightarrow \infty $ for $\lambda
+\neq \lambda _{0}$ as $T\rightarrow \infty $ and $g_{0}(\lambda _{0})=0.$ In
+this case, the signal is so strong that the minimum distance estimator is
+consistent.
+
+The identification strength of $\lambda _{0}$ is determined by the function $%
+T^{1/2}g_{0}(\lambda ).$ However, this function is unknown and cannot be
+consistently estimated (due to $T^{1/2}$). Thus, we take the conditional
+inference procedure as in Andrews and Mikusheva (2016)\ and view $%
+T^{1/2}g_{0}(\lambda )$ as an infinite dimensional nuisance parameter for
+the inference for $\lambda _{0}$. The goal is to control robust confidence
+set (CS) for $\lambda _{0}$ that has correct size asymptotically regardless
+of this unknown nuisance parameter.
+
+\subsection{Conditional QLR\ Test}
+
+We construct a confidence set for $\lambda $ by inverting the test $%
+H_{0}:\lambda =\lambda _{0}$ vs $H_{1}:\lambda \neq \lambda _{0}$. The test
+statistic is a QLR\ statistic that takes the form%
+\begin{equation}
+QLR(\lambda _{0})=T\widehat{g}(\lambda _{0})^{\prime }\widehat{\Sigma }%
+(\lambda _{0},\lambda _{0})^{-1}\widehat{g}(\lambda _{0})-\underset{\lambda
+\in \Lambda }{\min }T\widehat{g}(\lambda )^{\prime }\widehat{\Sigma }%
+(\lambda ,\lambda )^{-1}\widehat{g}(\lambda ),  \label{QLR stat}
+\end{equation}%
+where $\widehat{\Sigma }(\lambda _{1},\lambda _{2},)=\widehat{G}(\lambda
+_{1})\widehat{\Omega }\widehat{G}(\lambda _{2})^{\prime }$ and $\widehat{%
+\Omega }$ is the consistent estimator of $\Omega $ defined above$.$
+
+Andrews and Mikusheva (2016) provide the conditional QLR\ test in a
+nonlinear GMM problem, where $\widehat{g}(\lambda )$ is replaced by a sample
+moment. The same method can be applied to the present nonlinear minimum
+distance problem. Following AM, we first project $\widehat{g}(\lambda )$
+onto $\widehat{g}(\lambda _{0})$ and construct a residual process%
+\begin{equation}
+\widehat{r}(\lambda )=\widehat{g}(\lambda )-\widehat{\Sigma }(\lambda
+,\lambda _{0})\widehat{\Sigma }(\lambda _{0},\lambda _{0})^{-1}\widehat{g}%
+(\lambda _{0}).  \label{red process}
+\end{equation}%
+The limiting distribution of $\widehat{r}(\lambda )$ and $\widehat{g}%
+(\lambda _{0})$ are Gaussian and independent. Thus, conditional on $\widehat{%
+r}(\lambda ),$ the asymptotic distribution of $\widehat{g}(\lambda )$ no
+longer depends on the nuisance parameter $T^{1/2}g_{0}(\lambda ),$ making
+the procedure robust to all identification strength.
+
+Specifically, we obtain the $1-\alpha $ conditional quantile of the QLR
+statistic, denoted by $c_{1-\alpha }(r,\lambda _{0}),$ as follows. For $%
+b=1,..,B,$ we take independent draws $\eta _{b}^{\ast }\sim N(0,\widehat{%
+\Sigma }(\lambda _{0},\lambda _{0}))$ and produce a simulated process 
+\begin{equation}
+g_{b}^{\ast }(\lambda )=\widehat{r}(\lambda )+\widehat{\Sigma }(\lambda
+,\lambda _{0})\widehat{\Sigma }(\lambda _{0},\lambda _{0})^{-1}\eta
+_{b}^{\ast }
+\end{equation}%
+and a simulated statistic%
+\begin{equation}
+QLR_{b}^{\ast }(\lambda _{0})=T\widehat{g}(\lambda _{0})^{\prime }\widehat{%
+\Sigma }(\lambda _{0},\lambda _{0})^{-1}\widehat{g}(\lambda _{0})-\underset{%
+\lambda \in \Pi }{\min }Tg_{b}^{\ast }(\lambda )^{\prime }\widehat{\Sigma }%
+(\lambda ,\lambda )^{-1}g_{b}^{\ast }(\lambda ).
+\end{equation}%
+Let $b_{0}=\lceil (1-\alpha )B\rceil ,$ the smallest integer no smaller than 
+$(1-\alpha )B$. Then the critical value $c_{1-\alpha }(r,\lambda _{0})$ is
+the $b_{0}^{th}$ smallest value among $\{QLR_{b}^{\ast },b=1,...,B\}.\Omega $
+
+\smallskip
+
+To sum up, we execute the following steps for a robust CS for $\lambda .$
+
+\noindent (i) Estimate the reduced-form parameter $\widehat{\omega }=(%
+\widehat{\omega }_{1},\widehat{\omega }_{2},\widehat{\omega }_{3})^{\prime }$
+following the estimators defined in (\ref{omega 1 est}) and (\ref{omega 2
+est}). Obtain a consistent estimator of its asymptotic covariance $\widehat{%
+\Omega }=\widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime },$
+where $\widehat{\mathcal{B}}$ is define in (\ref{Fhat}) and $\widehat{V}$ is
+a HAC estimator of $V.$
+
+\noindent For $\lambda _{0}\in \Lambda ,$ execute steps (ii)-(iv) below.
+
+\noindent (ii) Construct the QLR statistic $QLR(\lambda _{0})$ in (\ref{QLR
+stat}) using $g(\lambda ,\omega ),$ $G(\lambda ,\omega ),$ $\widehat{\omega }%
+,$ and $\widehat{\Omega }.$
+
+\noindent (iii) Compute the residual process $\widehat{r}(\lambda )$ in (\ref%
+{red process}).
+
+\noindent (iv) Given $\widehat{r}(\lambda ),$ compute the critical value $%
+c_{1-\alpha }(r,\lambda _{0})$ described above.
+
+\noindent (v) Repeat steps (ii)-(iv) for different values of $\lambda _{0}$.
+Construct a confidence set by collecting the null values that are not
+rejected, i.e., nominal level $1-\alpha $ confidence set for $\lambda _{0}$
+is%
+\begin{equation}
+CS_{T}=\{ \lambda _{0}:QLR_{T}(\lambda _{0})\leq c_{1-\alpha }(r,\lambda
+_{0})\}.
+\end{equation}
+
+\smallskip
+
+To obtain confidence intervals for each element of $\lambda _{0},$ one
+simple solution is to project the confidence set constructed above to each
+axis. The resulting confidence interval also has correct coverage. An
+alternative solution is to first concentrate out the nuisance parameters
+before apply the conditional inference approach above, see Section 5\ of AM.
+However, this concentration approach only works when the nuisance parameter
+is strongly identified. In the present set-up, this approach does not work
+for $\theta $ and $\phi $ because the nuisance parameter $\pi $ is weakly
+identified.
+
+\smallskip
+
+\noindent \textbf{Assumption S}. The following conditions hold over $P\in 
+\mathcal{P},$ for any $\lambda $ in its parameter space, and any $\omega $
+in some fixed neighborhood around its true value, for some fixed $0<C<\infty
+.$
+
+\noindent (i) $g(\lambda ,\omega )$ is partially differentiable in $\omega ,$
+with partial derivative $G(\lambda ,\omega )$ that satisfies $||G(\lambda
+_{1},\omega )-G(\lambda _{2},\omega )||\leq C||\lambda _{1}-\lambda _{2}||$
+and $||G(\lambda ,\omega _{1})-G(\lambda ,\omega _{2})||\leq C||\omega
+_{1}-\omega _{2}||.$
+
+\noindent (ii) $C^{-1}\leq \lambda _{\min }(G(\lambda ,\omega )^{\prime
+}G(\lambda ,\omega ))\leq \lambda _{\max }(G(\lambda ,\omega )^{\prime
+}G(\lambda ,\omega ))\leq C$.
+
+\smallskip
+
+\begin{lemma}
+\label{Lemma CS}Suppose Assumption R and S hold. Then, 
+\begin{equation*}
+\underset{T\rightarrow \infty }{\lim \inf }\underset{P\in \mathcal{P}}{\inf }%
+\Pr \left( \lambda _{0}\in CS_{T}\right) \geq 1-\alpha .
+\end{equation*}
+\end{lemma}
+
+This Lemma states that the confidence set constructed by the conditional
+QLR\ test has correct uniform asymptotic size. Uniformity is important for
+this confidence set to cover the true parameter with a probability close to $%
+1-\alpha $ in finite-sample. Most importantly, this uniform result is
+established over a parameter $\mathcal{P}$ that is large enough to allow the
+weak identification of the structural parameter $\lambda .\qquad QED$
+
+\bigskip
 
 
 \section{Conclusion}
@@ -198,6 +688,227 @@ we have reduce the overlap with the abstract and intro. I will think about it.
 %
 
 \clearpage
+
+\begin{appendices}
+
+\section{Proofs}\label{sec:proofs}
+
+% \subsection{\texorpdfstring{\cref{Lemma Reduce}{Lemma 1}}}
+
+\begin{proof}
+
+    Under the assumption that (i) $ \mathbb{E(}z_{t}z_{t}^{\prime })$ has the smallest eigenvalue bounded away from 0 and (ii) $c>\varepsilon $ and $\delta >\varepsilon $ for some $ \varepsilon >0,$ we not only have $\omega _{10}$ as an uniquely minimizer of $||\mathbb{E}[h_{t}(\omega _{1})]||$ but also have a uniform positive lower bound for $\norm{\E[h_{t}(\omega _{1})]}$ for $\norm{\omega _{1}-\omega _{10}} \geq \varepsilon$. Thus, consistency of $\widehat{\omega }_{1}$ follows from standard arguments for the consistency of a GMM estimator under an uniform convergence of the criterion under Assumption R(i) and R(ii).
+
+Let $\overline{h}(\omega _{1})=T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})$ and $ \overline{H}(\omega )=T^{-1}\sum_{t=1}^{T}H_{t}(\omega _{1}).$ By construction, the estimator satisfies the first order condition
+%
+\begin{align}
+    0 &= 
+    \begin{pmatrix} 
+        \overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V}_{1}^{-1}\overline{h} (\widehat{\omega }_{1}) \\ 
+%
+        T^{-1}\sum_{T=1}^{T}x_{t}(y_{t}-x_{t}^{\prime }\widehat{\omega }_{2}) \\ 
+%
+        \widehat{\omega }_{3}-T^{-1}\sum_{t=1}^{T}\left( y_{t}-\widehat{y} _{t}\right) ^{2} 
+    \end{pmatrix} \nonumber \\ 
+%
+    &= 
+%
+    \begin{pmatrix}
+%
+        \overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V}_{1}^{-1}\overline{h} (\omega _{10})+\overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V} _{1}^{-1}\overline{H}(\widetilde{\omega }_{1})(\widehat{\omega }_{1}-\omega
+_{10}) \\ 
+%
+        T^{-1}\sum_{t=1}^{T}x_{t}(y_{t}-x_{t}^{\prime }\omega _{20})-T^{-1}\sum_{t=1}^{T}x_{t}x_{t}^{\prime }\left( \widehat{\omega } _{2}-\omega _{20}\right) \\ 
+%
+        \left( \widehat{\omega }_{3}-\omega _{3}\right) +\omega _{3}-T^{-1}\sum_{t=1}^{T}\left( y_{t}-x_{t}\widehat{\omega }_{2}\right) ^{2}
+    \end{pmatrix},
+%
+  \label{L-R-1}
+\end{align}
+%
+where the second equality follows from a mean value expansion of $\overline{h }(\widehat{\omega }_{1})$ around $\omega _{10},$ with $\widetilde{\omega } _{1}$ between $\omega _{10}$ and $\widehat{\omega }_{1}$. 
+Let
+%
+\begin{equation}
+%
+    \widetilde{\mathcal{B}} = \diag\left\lbrace[\overline{H}(\widehat{\omega }_{1})^{\prime } \widehat{V}_{1}^{-1}\overline{H}(\widetilde{\omega }_{1})]^{-1}\overline{H}( \widehat{\omega }_{1})^{\prime }\widehat{V}_{1}^{-1},[T^{-1} \sum_{t=1}^{T}x_{t}x_{t}^{\prime }]^{-1},1\right\rbrace.  
+%
+\end{equation}
+%
+Then (\ref{L-R-1}) implies that 
+%
+\begin{align}
+    T^{1/2}\left( \widehat{\omega }-\omega \right) 
+%    
+    &= \widetilde{\mathcal{B}} \cdot T^{-1/2}\sum_{t=1}^{T} 
+%
+    \begin{pmatrix}
+        -h_{t}(\omega _{10}) \\ 
+%
+        x_{t}(y_{t}-x_{t}^{\prime }\omega _{20}) \\ 
+%
+        \left( y_{t}-x_{t}\widehat{\omega }_{2}\right) ^{2}-\omega _{3}%
+    \end{pmatrix}  \nonumber \\
+%
+    &=
+%
+    \widetilde{\mathcal{B}}\cdot T^{-1/2}\sum_{t=1}^{T} 
+%
+    \begin{pmatrix}
+        -h_{t}(\omega _{10}) \\ 
+%
+        x_{t}(y_{t}-x_{t}^{\prime }\omega _{20}) \\ 
+%
+        \left( y_{t}-x_{t}^{\prime }\omega _{20}\right) ^{2}-\E\left[\left( y_{t}-x_{t}^{\prime }\omega _{20}\right)^{2}\right]%
+%
+    \end{pmatrix}%
+%
+    +
+%
+    \begin{pmatrix}
+        0 \\ 
+        0 \\ 
+        \varepsilon_{T}
+    \end{pmatrix},
+%
+    \label{L-R-2}
+%
+\end{align}%
+%
+where the second equality uses $\omega _{3}=\E[\left( y_{t}-x_{t}^{\prime }\omega _{20}\right) ^{2}]$ by definition and 
+%
+\begin{align}
+    \varepsilon _{T} 
+%
+    &= T^{-1/2}\sum_{t=1}^{T}\left[ \left( y_{t}-x_{t}^{\prime } \widehat{\omega }_{2}\right) ^{2}-\left( y_{t}-x_{t}^{\prime }\omega _{20}\right) ^{2}\right]  \nonumber \\
+%
+    &= 2T^{-1}\sum_{t=1}^{T}\left( y_{t}-x_{t}^{\prime }\omega _{20}\right) x_{t}^{\prime }\left[ T^{1/2}\left( \widehat{\omega }_{2}-\omega _{20}\right) \right] +o_{p}(1)  \nonumber \\
+%
+    &= o_{p}(1)  
+%
+    \label{L-R-3}
+\end{align}
+%
+because $T^{-1}\sum_{t=1}^{T}\left( y_{t}-x_{t}^{\prime }\omega _{20}\right) x_{t}^{\prime }\rightarrow _{p}0$ and $T^{1/2}(\widehat{\omega }_{2}-\omega _{20})=O_{p}(1)$ following Assumption R. 
+In addition, 
+%
+\begin{equation}
+    \widetilde{\mathcal{B}}\rightarrow _{p}\mathcal{B}  
+    \label{L-R-4}
+\end{equation}%
+%
+following from the consistency of $\widehat{\omega }_{1}$ and Assumption R.
+Finally, the desirable result follows from (\ref{L-R-2})-(\ref{L-R-4}) and Assumption R. 
+The consistency of $\widehat{\Omega }$ follows from the consistency of $\widehat{\mathcal{B}}$ and $\widehat{V}$. 
+
+\end{proof}
+
+\begin{proof}
+
+\noindent Proof of Lemma \ref{Lemma CS}. 
+We obtain this result by applying \textcite[Theorem 1]{andrews2016conditional}. 
+We now verify Assumptions 1-3 in \textcite{andrews2016conditional}. 
+To show weak convergence $\eta _{T}(\cdot )$ to $\eta (\cdot )$ uniformly over $\mathcal{P}$, note that by a second-order Taylor expansion,
+%
+\begin{align}
+    \eta _{T}(\lambda) 
+%
+    &\coloneqq T^{1/2}\left[ \widehat{g}(\lambda )-g_{0}(\lambda ) \right] = G_{0}(\lambda )\Omega ^{1/2}\xi _{T}+\delta _{T},\text{ where} \nonumber \\
+%
+    \xi _{T} 
+    &= \Omega ^{-1/2}T^{1/2}\left( \widehat{\omega }-\omega _{0}\right), \text{ and } 
+%
+    \delta _{T} =\left( G(\lambda ,  \widetilde{\omega })-G(\lambda, \omega _{0})\right) T^{1/2}(\widehat{\omega }-\omega _{0})
+%
+\end{align}%
+%
+and $\widetilde{\omega }$ is between $\widehat{\omega }$ and $\omega_{0}$.
+%
+Because $\norm{G(\lambda ,\widetilde{\omega })-G(\lambda ,\omega _{0})} \leq C \norm{\widetilde{\omega }-\omega_{0}}$, $\delta _{T}=o_{p}(1)$ uniformly over $ \mathcal{P}$ following Lemma \ref{Lemma Reduce}. 
+To show $G_{0}(\lambda)\Omega ^{1/2}\xi _{T}$ weakly converges to $\eta (\cdot ),$ it is sufficient to show (i) the pointwise convergence%
+%
+\begin{equation}
+% 
+    \begin{pmatrix}
+        G_{0}(\lambda _{1})\Omega ^{1/2}\xi _{T} \\ 
+        G_{0}(\lambda _{2})\Omega ^{1/2}\xi _{T}%
+    \end{pmatrix}%
+%
+    \rightarrow _{d}( 
+%
+    \begin{pmatrix}
+        \eta (\lambda _{1}) \\ 
+        \eta (\lambda _{2})%
+    \end{pmatrix},
+%
+\end{equation}%
+%
+which follows from Lemma \ref{Lemma Reduce}, and (ii) the stochastic equicontinuity condition, i.e., for every $\varepsilon >0$ and $\xi >0,$ there exists a $\delta >0$ such that
+%
+\begin{equation}
+    \underset{T\rightarrow \infty }{\lim\sup }\Pr \left( \underset{P\in \mathcal{P}}{\sup }\underset{\norm{\lambda _{1}-\lambda _{2}}\leq \delta }{\sup }\norm*{G_{0}(\lambda _{1})\Omega ^{1/2}\xi _{T}-G_{0}(\lambda
+    _{2})\Omega ^{1/2}\xi _{T}} >\varepsilon \right) < \xi.
+\end{equation}%
+%
+For some $C < \infty$, we have $\norm{G_{0}(\lambda _{1})-G(\lambda _{2})} \leq C \norm{\lambda _{1}-\lambda _{2}}$ under a uniform bound for the derivative in Assumption S, and we have $||\Omega ^{1/2}||\leq C$ under Assumption R
+because $F$ and $V$ both have bounded largest eigenvalue. 
+Thus,
+%
+\begin{align}
+    &\phantom{=} \underset{T\rightarrow \infty }{\lim \sup }\Pr\left( \underset{P\in \mathcal{P}}{\sup }\underset{\norm{\lambda _{1}-\lambda _{2}}\leq \delta }{\sup }\norm*{ G_{0}(\lambda _{1})\Omega ^{1/2}\xi _{T}-G_{0}(\lambda _{2})\Omega ^{1/2}\xi _{T}} > \varepsilon \right)  \nonumber \\
+%
+    &\leq \underset{T\rightarrow \infty }{\lim \sup }\Pr \left( C^{2}\underset{ P\in \mathcal{P}}{\sup }\left \Vert \xi _{T}\right \Vert >\frac{\varepsilon }{\delta }\right). 
+%
+    \label{EC}
+\end{align}
+%
+Because $\xi _{T}=O_{p}(1)$ uniformly over $P\in \mathcal{P},$ there exists $%
+\delta $ such that $\varepsilon /\delta $ is large enough to make the right
+hand side of the inequality in (\ref{EC}) smaller than $\xi .$
+
+Assumptions 2 and 3 of \textcite[Theorem 1]{andrews2016conditional} follow from Assumption R. 
+\end{proof}
+
+Proof of Lemma \ref{Lemma m0 and m1}. 
+
+\begin{proof}
+For the risk free asset, $ r_{t+1}=0.$ 
+Therefore, we have
+%
+\begin{align*}
+    1 &= E\left[ \exp \left( m_{0}+m_{1}\sigma _{t}^{2}-\pi \sigma _{t+1}^{2}-\theta r_{t+1}\right) \mvert \F_{t}\right]  \\
+%
+    &= \exp (m_{0}+m_{1}\sigma _{t})E\left[ \exp \left( -\pi \sigma _{t+1}^{2}\right) E\left[ \exp \left( -\theta r_{t+1}\right) \mvert \F _{t},\sigma _{t+1}^{2}\right] \mvert \F_{t}\right]  \\
+%
+    &= \exp (m_{0}-E\left( \theta \right) +m_{1}\sigma _{t}-D\left( \theta \right) \sigma _{t}^{2})E\left[ \exp \left( -\pi \sigma _{t+1}^{2}-C\left( \theta \right) \sigma _{t+1}^{2}\right) \mvert \F_{t}\right]  \\
+%
+    &= \exp (m_{0}-E\left( \theta \right) +m_{1}\sigma _{t}-D\left( \theta \right) \sigma _{t}^{2}-A\left( \pi +C\left( \theta \right) \right) \sigma _{t}^{2}-B\left( \pi +C\left( \theta \right) \right) ),
+%
+\end{align*}
+%
+where the first equality follows from the pricing equation, the second equality follows from the law of iterated expectations, the third equation uses the Laplace transform for $r_{t+1}$ in \cref{eqn:return_laplace_transform}, and the last equality follows from the Laplace transform for $\sigma _{t+1}^{2}$ in \cref{eqn:vol_laplace_transform}. 
+% TODO
+We restrict the constant term and the coefficient for $\sigma_{t}^{2}$ to equal 0, which gives the claimed result for $m_{0}$ and $m_{1}.$
+
+We can apply the same argument above to any asset $r_{t+1}$. This gives the same result, except $\theta$ is replaced by $\theta -1$ throughout. 
+This implies that the two equalities for $m_{0}$ and $m_{1}$ also hold with $\theta $ replaced by $\theta -1$. 
+Therefore, 
+%
+\begin{align*}
+    E(\theta -1)+B\left( C\left( \theta -1\right) +\pi \right)  
+%
+    &= E(\theta)+B\left( C\left( \theta \right) +\pi \right) , \\
+%
+    D\left( \theta -1\right) +A\left( C\left( \theta -1\right) +\pi \right) 
+%
+    &= D\left( \theta \right) +A\left( C\left( \theta \right) +\pi \right).
+\end{align*}
+%
+The claimed results for $\gamma $ and $\beta $ follow from $\gamma = \E(\theta)-E(\theta -1)$ and $\beta =D(\theta )-D(\theta -1)$ under the linear specification of $E(x)=\gamma x$ and $D(x)=\beta x$.
+
+\end{proof}
+
+\end{appendices}
 
 \end{document}
 
