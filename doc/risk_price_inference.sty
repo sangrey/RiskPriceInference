@@ -37,13 +37,19 @@
 \setlist[assumplist]{label=(\roman{assumplisti}), ref=\roman{assumplisti},noitemsep}
 
 \declaretheorem[style=definition, name=Assumption, refname={assumption,assumptions},
-    Refname={Assumption,Assumptions}]{assump}
-\Crefname{assump}{Assumption}{Assumptions}
-\Crefname{assumplisti}{Assumption}{Assumptions}
+    Refname={Assumption,Assumptions}]{assumpS}
+\renewcommand*{\theassumpS}{S}
+\declaretheorem[style=definition, name=Assumption, refname={assumption,assumptions},
+    Refname={Assumption,Assumptions}]{assumpR}
+\renewcommand*{\theassumpR}{R}
+\Crefname{assumpR}{Assumption}{Assumptions}
+\Crefname{assumpRlisti}{Assumption}{Assumptions}
+\Crefname{assumpS}{Assumption}{Assumptions}
+\Crefname{assumpSisti}{Assumption}{Assumptions}
 
 \addtotheorempostheadhook[assump]{\crefalias{assumplisti}{assump}}
 \newcommand*{\fullref}[1]{\hyperref[{#1}]{\namecref{#1} \nameref*{#1}(\labelcref{#1})}}
-\newcommand*{\namedref}[1]{\hyperref[{#1}]{\nameref*{#1}(\labelcref{#1})}}
+\newcommand*{\namedref}[1]{\hyperref[{#1}]{\refname{#1} \nameref*{#1}}}
 \newcommand*{\Fullref}[1]{\hyperref[{#1}]{\nameCref{#1} \nameref*{#1}(\labelcref{#1})}}
 \DeclareMathOperator*{\argmin}{argmin}
 
