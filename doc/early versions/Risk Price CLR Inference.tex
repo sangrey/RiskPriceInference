@@ -1,0 +1,510 @@
+%2multibyte Version: 5.50.0.2890 CodePage: 932
+
+\documentclass[11pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage[onehalfspacing]{setspace}
+\usepackage{numinsec}
+\usepackage{harvard}
+\usepackage{hyperref}
+\usepackage{rotating}
+\usepackage[labelsep=none,format=default,labelfont={footnotesize},textfont={footnotesize},font={footnotesize},justification=justified,labelformat=empty]{caption}
+\usepackage{bibmods}
+\usepackage{appendix}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{Codepage=932}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Saturday, July 19, 2008 23:46:52}
+%TCIDATA{LastRevised=Tuesday, November 20, 2018 00:49:35}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{Language=American English}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\setlength{\topmargin}{-0.8in}
+\geometry{top=0.93in}
+\setlength{\textheight}{9in}
+\setlength{\evensidemargin}{0in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\renewcommand{\baselinestretch}{1.4}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newtheorem{assumption}{Assumption}[section]
+\newenvironment{proof}[1][Proof]{\noindent \textbf{#1.} }{\  \rule{0.5em}{0.5em}}
+\input{tcilatex}
+\begin{document}
+
+
+\noindent 
+%TCIMACRO{\TeXButton{Today}{\today}}%
+%BeginExpansion
+\today%
+%EndExpansion
+
+\bigskip
+
+\section{Robust Inference for Risk Prices}
+
+\subsection{Asymptotic Distribution of the Reduced-Form Parameter}
+
+Write $\omega :=(\omega _{1},\omega _{2},\omega _{3})^{\prime },$ where $%
+\omega _{1}=(\rho ,c,\delta )\in O_{1},$ $\omega _{2}=(\gamma ,\beta ,\psi
+)\in O_{2},$ and $\omega _{3}=\zeta \in O_{3}.$ The parameter space for $%
+\omega $ is $O=O_{1}\times O_{2}\times O_{3}\subset R^{d_{\omega }}.$ The
+true value of $\omega $ is assumed to be in the interior of the parameter
+space.
+
+Below we describe the estimator $\widehat{\omega }:=(\widehat{\omega }_{1},%
+\widehat{\omega }_{2},\widehat{\omega }_{3})^{\prime }$ and provide its
+asymptotic distribution. We estimate these parameters separately because $%
+\omega _{1}$ only shows up in the conditional mean and variance of $\sigma
+_{t+1}^{2},$ $\omega _{2}$ only shows up in the conditional mean of $r_{t+1},
+$ and $\omega _{3}$ only shows up in the conditional variance of $r_{t+1}.$
+
+We first estimate $\omega _{1}=(\rho ,c)$ based on the conditional mean and
+variance of $\sigma _{t+1}^{2}$, which can be equivalently written as 
+\begin{eqnarray}
+E[\sigma _{t+1}^{2}|\sigma _{t}^{2}] &=&A\text{ and }E[\sigma
+_{t+1}^{4}|\sigma _{t}^{2}]=B,\text{ where }  \notag \\
+A &=&\rho \sigma _{t}^{2}+c\delta \text{ and }B=A^{2}+\left( 2c\rho \sigma
+_{t}^{2}+c^{2}\delta \right) .
+\end{eqnarray}%
+Because the conditional mean of $\sigma _{t+1}^{2}$ and $\sigma _{t+1}^{4}$
+are linear and quadratic functions, respectively, of the conditioning
+variable $\sigma _{t}^{2},$ without loss of efficiency, they can be
+transformed to the unconditional moments%
+\begin{equation}
+E[h_{t}(\omega _{10})]=0,\text{ where }h_{t}(\omega _{1})=[(1,\sigma
+_{t}^{2})\otimes (\sigma _{t+1}^{2}-A),(1,\sigma _{t}^{2},\sigma
+_{t}^{4})\otimes (\sigma _{t+1}^{4}-B)]^{\prime },
+\end{equation}%
+where $\omega _{10}$ represents the true value of $\omega _{1}.$ The
+two-step GMM estimator of $\omega _{1}$ is%
+\begin{equation}
+\widehat{\omega }_{1}=\underset{\omega _{1}\in O_{1}}{\arg \min }\left(
+T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})\right) ^{\prime }\widehat{V}%
+_{1}\left( T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})\right) ,
+\label{omega 1 est}
+\end{equation}%
+where $\widehat{V}_{1}$ is a consistent estimator of $V_{1}=\sum_{m=-\infty
+}^{\infty }\mathbb{C}ov[h_{t}(\omega _{10}),h_{t+m}(\omega _{10})].$
+
+We estimate $\omega _{2}$ by the generalized least squares (GLS) estimator
+because the conditional mean of $r_{t+1}$ is a linear function of the
+conditioning variable $\sigma _{t}^{2}$ and $\sigma _{t+1}^{2}$ and the
+conditional variance is proportional to $\sigma _{t+1}^{2}.$ The GLS\
+estimator of $\omega _{2}$ is%
+\begin{eqnarray}
+\widehat{\omega }_{2} &=&\left( \sum_{t=1}^{T}x_{t}x_{t}^{\prime }\right)
+^{-1}\sum_{t=1}^{T}x_{t}y_{t},\text{ where }  \notag \\
+x_{t} &=&\sigma _{t+1}^{-1}(1,\sigma _{t}^{2},\sigma _{t+1}^{2})^{\prime }%
+\text{ and }y_{t}=\sigma _{t+1}^{-1}r_{t+1}.  \label{omega 2 est}
+\end{eqnarray}%
+We estimate $\omega _{3}$ by the sample variance estimator%
+\begin{equation}
+\widehat{\omega }_{3}=T^{-1}\sum_{t=1}^{T}\left( y_{t}-\widehat{y}%
+_{t}\right) ^{2},\text{ where }\widehat{y}_{t}=x_{t}^{\prime }\widehat{%
+\omega }_{2}.  \label{omega 3 est}
+\end{equation}
+
+Let 
+\begin{equation}
+f_{t}(\omega )=\left( 
+\begin{array}{c}
+h_{t}(\omega _{1}) \\ 
+x_{t}(y_{t}-x_{t}^{\prime }\omega _{2}) \\ 
+(y_{t}-x_{t}^{\prime }\omega _{2})^{2}%
+\end{array}%
+\right) \in R^{d_{f}}\text{ and }V=\sum_{m=-\infty }^{\infty }\mathbb{C}%
+\mathbf{ov}[f_{t}(\omega _{0}),f_{t+m}(\omega _{0})].
+\end{equation}%
+The estimator $\widehat{\omega }$ defined above is based on the first moment
+of $f_{t}(\omega ).$ Let $\widehat{V}$ denote a heteroskeasticity and
+autocorrelation consistent (HAC) estimator of $V$. The estimator $\widehat{V}%
+_{1}$ is a submatrix of $\widehat{V}$ associate with $V_{1}.$
+
+Let $P$ denote the distribution of the data $\mathcal{W}=\{W_{t}=(r_{t+1},%
+\sigma _{t+1}^{2}):t\geq 1\}$ and $\mathcal{P}$ denote the parameter space
+of $P$. Note that the true values of the structural parameter and the
+reduced-form parameters are all determined by $P.$ We allow $P$ to change
+with $T.$ For notational simplicity, the dependence on $P$ and $T$ is
+suppressed. Let $H_{t}(\omega _{1})=\partial h_{t}(\omega _{1})/\partial
+\omega _{1}^{\prime }.$ 
+
+\smallskip 
+
+\noindent \textbf{Assumption R}. The following conditions hold uniformly
+over $P\in \mathcal{P}$.
+
+\noindent (i) $V^{-1/2}\{T^{-1/2}(\sum_{t=1}^{T}f_{t}(\omega _{0})-\mathbb{E[%
+}f_{t}(\omega _{0})\mathbb{]\} \rightarrow }_{d}N(0,I)$ and $\widehat{V}%
+-V\rightarrow _{p}0.$
+
+\noindent (ii) $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega _{1})-\mathbb{E[}%
+h_{t}(\omega _{1}))\rightarrow _{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega
+_{1})-\mathbb{E[}H_{t}(\omega _{1})\mathbb{])}\rightarrow _{p}0,$ $\mathbb{E[%
+}H_{t}(\omega _{1})\mathbb{]}$ is continuous in $\omega _{1},$ all uniformly
+over the parameter space of $\omega _{1}.$
+
+\QTP{Body Math}
+\noindent (iii) $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime }-\mathbb{E[}%
+x_{t}x_{t}^{\prime }\mathbb{])\rightarrow }_{p}0.$
+
+\noindent (iv) $C^{-1}\leq \lambda _{\min }(A)\leq \lambda _{\max }(A)\leq C$
+for $A=V,\mathbb{E[}H_{t}\left( \omega _{1,0}\right) ^{\prime }H_{t}\left(
+\omega _{1,0}\right) ]),\mathbb{E[}x_{t}x_{t}^{\prime }],\mathbb{E[}%
+z_{t}z_{t}^{\prime }],$ where $z_{t}=(1,\sigma _{t}^{2},\sigma
+_{t}^{4})^{\prime }.$
+
+\smallskip 
+
+Assumptions R(i)-(iii) are the central limit theorem and the uniform law of
+large numbers applied to weakly dependent time series data. Assumption
+R(iv)-R(v) are typical regularity conditions for the identification and $%
+T^{1/2}$ normality of the reduced-form parameter estimator.
+
+Let $H(\omega _{1})=\mathbb{E[}H_{t}(\omega _{1})]$ and $\overline{H}(\omega
+_{1})=T^{-1}\sum_{t=1}^{T}H_{t}(\omega _{1}).$ Define%
+\begin{eqnarray}
+F &=&diag\{[H(\omega _{10})V_{1}^{-1}H(\omega _{10})]^{-1}H(\omega
+_{10})V_{1}^{-1},\mathbb{E[}x_{t}x_{t}^{\prime }]^{-1},1\},  \notag \\
+\widehat{F} &=&diag\{[\overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V%
+}_{1}^{-1}\overline{H}(\widehat{\omega }_{1})]^{-1}\overline{H}(\widehat{%
+\omega }_{1})^{\prime }\widehat{V}_{1}^{-1},[T^{-1}%
+\sum_{t=1}^{T}x_{t}x_{t}^{\prime }]^{-1},1\}.  \label{Fhat}
+\end{eqnarray}%
+The following Lemma provides the asymptotic distribution of the reduced-form
+parameter and a consistent estimator of its asymptotic covariance. Note that
+we put the asymptotic covariance on the left side of the convergence to
+allow the distribution of the data to change with sample size $T.$ 
+
+\begin{lemma}
+\label{Lemma Reduce}Suppose Assumption R holds. The following results hold
+uniformly over $P\in \mathcal{P}$.
+
+\noindent \emph{(i)} $\xi _{T}:=\Omega ^{-1/2}T^{-1/2}(\widehat{\omega }%
+-\omega _{0})\rightarrow _{d}\xi \sim N(0,I),$ where $\Omega =FVF^{\prime }.$
+
+\noindent \emph{(ii)} $\widehat{\Omega }-\Omega \rightarrow _{p}0,$ where $%
+\widehat{\Omega }=\widehat{F}\widehat{V}\widehat{F}^{\prime }.$
+\end{lemma}
+
+\subsection{Weak Identification}
+
+The true value of the structural parameter $\lambda $ and the reduced-form
+parameter $\omega $ satisfies the link function $g(\lambda _{0},\omega
+_{0})=0.$In a standard problem without any identification issue, we can
+estimate $\lambda _{0}$ by the minimum distance estimator $\widehat{\lambda }%
+=(\widehat{\theta },\widehat{\pi },\widehat{\phi })$ that minimizes $%
+Q_{T}(\lambda )=g(\lambda ,\widehat{\omega })^{\prime }W_{T}g(\lambda ,%
+\widehat{\omega })$ for some weighting matrix $W_{T}$ and construct tests
+and confidence sets for $\lambda _{0}$ based on the asymptotic normal
+distribution of $T^{1/2}(\widehat{\lambda }-\lambda _{0})$. However, this
+standard method does not work in the present problem when $\pi _{0}$ is only
+weak identified. In this case, $g(\lambda ,\widehat{\omega })$ is almost
+flat in $\pi $ and the minimum distance estimator of $\widehat{\pi }$ is not
+even consistent. To make the problem even more complicated, the
+inconsistency of $\widehat{\pi }$ has a spillover effect on $\widehat{\theta 
+}$ and $\widehat{\phi },$ making the distribution of $\widehat{\theta }$ and 
+$\widehat{\phi }$ non-normal even in large sample.
+
+Before presenting the robust test, we first introduce some useful quantities
+and provide some heuristic discussions of the identification problem and its
+consequence. Let $G(\lambda ,\omega )$ denote the partial derivative of $%
+g(\lambda ,\omega )$ wrt $\omega .$ Let $g_{0}(\lambda )=g(\lambda ,\omega
+_{0})$ and $G_{0}(\lambda )=G(\lambda ,\omega _{0})$ be the link function
+and its derivative evaluated at $\omega _{0}$ and $\widehat{g}(\lambda
+)=g(\lambda ,\widehat{\omega })$ and $\widehat{G}(\lambda )=G(\lambda ,%
+\widehat{\omega })$ be the same quantities evaluate at the estimator $%
+\widehat{\omega }.$ The delta method gives 
+\begin{equation}
+\eta _{n}(\lambda ):=T^{1/2}\left[ \widehat{g}(\lambda )-g_{0}(\lambda )%
+\right] =G_{0}(\lambda )\Omega ^{1/2}\cdot \xi _{T}+o_{p}(1),
+\label{emp pro}
+\end{equation}%
+where $\xi _{T}\rightarrow _{d}N(0,I)$ following Lemma \ref{Lemma Reduce}.
+Thus, $\eta _{n}(\cdot )$ weakly converges to a Gaussian process $\eta
+(\cdot )$ with covariance function $\Sigma (\lambda _{1},\lambda
+_{2})=G_{0}(\lambda _{1})\Omega G_{0}(\lambda _{2})^{\prime }.$
+
+Following (\ref{emp pro}), we can write $T^{1/2}\widehat{g}(\lambda )=\eta
+_{n}(\lambda )+T^{1/2}g_{0}(\lambda ),$ where $\eta _{n}(\lambda )$ is the
+noise from the reduced-form parameter estimation and $T^{1/2}g_{0}(\lambda )$
+is the signal from the link function. Under weak identification, $%
+g_{0}(\lambda )$ is almost flat in $\lambda ,$ modelled by the signal $%
+T^{1/2}g_{0}(\lambda )$ being finite even for $\lambda \neq \lambda _{0}$
+and $T\rightarrow \infty .$ Thus, the signal and the noise are of the same
+order of magnitude, yielding an inconsistent minimum distance estimator $%
+\widehat{\lambda }.$ This is in contrast with the strong identification
+scenario, where $T^{1/2}g_{0}(\lambda )\rightarrow \infty $ for $\lambda
+\neq \lambda _{0}$ as $T\rightarrow \infty $ and $g_{0}(\lambda _{0})=0.$ In
+this case, the signal is so strong that the minimum distance estimator is
+consistent.
+
+The identification strength of $\lambda _{0}$ is determined by the function $%
+T^{1/2}g_{0}(\lambda ).$ However, this function is unknown and cannot be
+consistently estimated (due to $T^{1/2}$). Thus, we take the conditional
+inference procedure as in Andrews and Mikusheva (2016)\ and view $%
+T^{1/2}g_{0}(\lambda )$ as an infinite dimensionalnuisance parameter for the
+inference for $\lambda _{0}$. The goal is to control robust confidence set
+(CS) for $\lambda _{0}$ that has correct size asymptotically regardless of
+this unknown nuisance parameter.
+
+\subsection{Conditional QLR\ Test}
+
+We construct a confidence set for $\lambda $ by inverting the test $%
+H_{0}:\lambda =\lambda _{0}$ vs $H_{1}:\lambda \neq \lambda _{0}$. The test
+statistic is a QLR\ statistic that takes the form%
+\begin{equation}
+QLR(\lambda _{0})=T\widehat{g}(\lambda _{0})^{\prime }\widehat{\Sigma }%
+(\lambda _{0},\lambda _{0})^{-1}\widehat{g}(\lambda _{0})-\underset{\lambda
+\in \Lambda }{\min }T\widehat{g}(\lambda )^{\prime }\widehat{\Sigma }%
+(\lambda ,\lambda )^{-1}\widehat{g}(\lambda ),  \label{QLR stat}
+\end{equation}%
+where $\widehat{\Sigma }(\lambda _{1},\lambda _{2},)=\widehat{G}(\lambda
+_{1})\widehat{\Omega }\widehat{G}(\lambda _{2})^{\prime }$ and $\widehat{%
+\Omega }$ is the consistent estimator of $\Omega $ defined above$.$
+
+Andrews and Mikusheva (2016) provide the conditional QLR\ test in a
+nonlinear GMM problem, where $\widehat{g}(\lambda )$ is replaced by a sample
+moment. The same method can be applied to the present nonlinear minimum
+distance problem. Following AM, we first project $\widehat{g}(\lambda )$
+onto $\widehat{g}(\lambda _{0})$ and construct a residual process%
+\begin{equation}
+\widehat{r}(\lambda )=\widehat{g}(\lambda )-\widehat{\Sigma }(\lambda
+,\lambda _{0})\widehat{\Sigma }(\lambda _{0},\lambda _{0})^{-1}\widehat{g}%
+(\lambda _{0}).  \label{red process}
+\end{equation}%
+The limiting distribution of $\widehat{r}(\lambda )$ and $\widehat{g}%
+(\lambda _{0})$ are Gaussian and independent. Thus, conditional on $\widehat{%
+r}(\lambda ),$ the asymptotic distribution of $\widehat{g}(\lambda )$ no
+longer depends on the nuisance parameter $T^{1/2}g_{0}(\lambda ),$ making
+the procedure robust to all identification strength.
+
+Specifically, we obtain the $1-\alpha $ conditional quantile of the QLR
+statistic, denoted by $c_{1-\alpha }(r,\lambda _{0}),$ as follows. For $%
+b=1,..,B,$ we take independent draws $\eta _{b}^{\ast }\sim N(0,\widehat{%
+\Sigma }(\lambda _{0},\lambda _{0}))$ and produce a simulated process 
+\begin{equation}
+g_{b}^{\ast }(\lambda )=\widehat{r}(\lambda )+\widehat{\Sigma }(\lambda
+,\lambda _{0})\widehat{\Sigma }(\lambda _{0},\lambda _{0})^{-1}\eta
+_{b}^{\ast }
+\end{equation}%
+and a simulated statistic%
+\begin{equation}
+QLR_{b}^{\ast }(\lambda _{0})=T\widehat{g}(\lambda _{0})^{\prime }\widehat{%
+\Sigma }(\lambda _{0},\lambda _{0})^{-1}\widehat{g}(\lambda _{0})-\underset{%
+\lambda \in \Pi }{\min }Tg_{b}^{\ast }(\lambda )^{\prime }\widehat{\Sigma }%
+(\lambda ,\lambda )^{-1}g_{b}^{\ast }(\lambda ).
+\end{equation}%
+Let $b_{0}=\lceil (1-\alpha )B\rceil ,$ the smallest integer no smaller than 
+$(1-\alpha )B$. Then the critical value $c_{1-\alpha }(r,\lambda _{0})$ is
+the $b_{0}^{th}$ smallest value among $\{QLR_{b}^{\ast },b=1,...,B\}.\Omega $
+
+\smallskip 
+
+To sum up, we execute the following steps for a robust CS for $\lambda .$
+
+\noindent (i) Estimate the reduced-form parameter $\widehat{\omega }=(%
+\widehat{\omega }_{1},\widehat{\omega }_{2},\widehat{\omega }_{3})^{\prime }$
+following the estimators defined in (\ref{omega 1 est}) and (\ref{omega 2
+est}). Obtain a consistent estimator of its asymptotic covariance $\widehat{%
+\Omega }=\widehat{F}\widehat{V}\widehat{F}^{\prime },$ where $\widehat{F}$
+is define in (\ref{Fhat}) and $\widehat{V}$ is a heteroskedastic and
+autocorrelation consistent (HAC) estimator of $V.$
+
+\noindent For $\lambda _{0}\in \Lambda ,$ execute steps (ii)-(iv) below.
+
+\noindent (ii) Construct the QLR statistic $QLR(\lambda _{0})$ in (\ref{QLR
+stat}) using $g(\lambda ,\omega ),$ $G(\lambda ,\omega ),$ $\widehat{\omega }%
+,$ and $\widehat{\Omega }.$
+
+\noindent (iii) Compute the residual process $\widehat{r}(\lambda )$ in (\ref%
+{red process}).
+
+\noindent (iv) Given $\widehat{r}(\lambda ),$ compute the critical value $%
+c_{1-\alpha }(r,\lambda _{0})$ described above.
+
+\noindent (v) Repeat steps (ii)-(iv) for different values of $\lambda _{0}$.
+Construct a confidence set by collecting the null values that are not
+rejected, i.e., nominal level $1-\alpha $ confidence set for $\lambda _{0}$
+is%
+\begin{equation}
+CS_{T}=\{ \lambda _{0}:QLR_{T}(\lambda _{0})\leq c_{1-\alpha }(r,\lambda
+_{0})\}.
+\end{equation}
+
+\smallskip 
+
+To obtain confidence intervals for each element of $\lambda _{0},$ one
+simple solution is to project the confidence set constructed above to each
+axis. The resulting confidence interval also has correct coverage. An
+alternative solution is to first concentrate out the nuisance parameters
+before apply the conditional inference approach above, see Section 5\ of AM.
+However, this concentration approach only works when the nuisance parameter
+is strongly identified. In the present set-up, this approach does not work
+for $\theta $ and $\phi $ because the nuisance parameter $\pi $ is weakly
+identified.
+
+\smallskip 
+
+\noindent \textbf{Assumption S}. The following conditions hold over $P\in 
+\mathcal{P},$ for any $\lambda $ in its parameter space, and any $\omega $
+in some fixed neighborhood around its true value. 
+
+\noindent (i) $g(\lambda ,\omega )$ is twice continuously differentiable in $%
+\omega $ and the second order derivative $G_{\omega }(\lambda ,\omega )$
+satisfies $||G_{\omega }(\lambda ,\omega )||\leq C.$
+
+\noindent (ii) $C^{-1}\leq \lambda _{\min }(G(\lambda ,\omega )^{\prime
+}G(\lambda ,\omega ))\leq \lambda _{\max }(G(\lambda ,\omega )^{\prime
+}G(\lambda ,\omega ))\leq C$.
+
+\smallskip 
+
+\begin{lemma}
+\label{Lemma CS}Suppose Assumption R and S hold. Then, 
+\begin{equation*}
+\underset{T\rightarrow \infty }{\lim \inf }\underset{P\in \mathcal{P}}{\inf }%
+\Pr \left( \lambda _{0}\in CS_{T}\right) \geq 1-\alpha .
+\end{equation*}
+\end{lemma}
+
+This Lemma states that the confidence set constructed by the conditional
+QLR\ test has correct uniform asymptotic size. Uniformity is important for
+this confidence set to cover the true parameter with a probability close to $%
+1-\alpha $ in finite-sample. Most importantly, this uniform result is
+established over a parameter $\mathcal{P}$ that is large enough to allow the
+weak identification of the structural parameter $\lambda .$
+
+\bigskip 
+
+\bigskip 
+
+\noindent Proof of Lemma \ref{Lemma Reduce}. Under the assumption that (i) $%
+\mathbb{E(}z_{t}z_{t}^{\prime })$ has the smallest eigenvalue bounded away
+from 0 and (ii) $c>\varepsilon $ and $\delta >\varepsilon $ for some $%
+\varepsilon >0,$ we not only have $\omega _{10}$ as an uniquely minimizer of 
+$||\mathbb{E}[h_{t}(\omega _{1})]||$ but also have a uniform positive lower
+bound for $||E[h_{t}(\omega _{1})]||$ for $||\omega _{1}-\omega _{10}||\geq
+\varepsilon .$ Thus, consistency of $\widehat{\omega }_{1}$ follows from
+standard arguments for the consistency of a GMM estimator under an uniform
+convergence of the criterion under Assumption R(ii). 
+
+Let $\overline{h}(\omega _{1})=T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})$ and $%
+\overline{H}(\omega )=T^{-1}\sum_{t=1}^{T}H_{t}(\omega _{1}).$ By
+construction, the estimator satisfies the first order condition%
+\begin{eqnarray}
+0 &=&\left( 
+\begin{array}{c}
+\overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V}_{1}^{-1}\overline{h}%
+(\widehat{\omega }_{1}) \\ 
+T^{-1}\sum_{T=1}^{T}x_{t}(y_{t}-x_{t}^{\prime }\widehat{\omega }_{2}) \\ 
+\widehat{\omega }_{3}-T^{-1}\sum_{t=1}^{T}\left( y_{t}-\widehat{y}%
+_{t}\right) ^{2}%
+\end{array}%
+\right)   \notag \\
+&=&\left( 
+\begin{array}{c}
+\overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V}_{1}^{-1}\overline{h}%
+(\omega _{10})+\overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V}%
+_{1}^{-1}\overline{H}(\widetilde{\omega }_{1})(\widehat{\omega }_{1}-\omega
+_{10}) \\ 
+T^{-1}\sum_{t=1}^{T}x_{t}(y_{t}-x_{t}^{\prime }\omega
+_{20})-T^{-1}\sum_{t=1}^{T}x_{t}x_{t}^{\prime }\left( \widehat{\omega }%
+_{2}-\omega _{20}\right)  \\ 
+\left( \widehat{\omega }_{3}-\omega _{3}\right) +\omega
+_{3}-T^{-1}\sum_{t=1}^{T}\left( y_{t}-x_{t}\widehat{\omega }_{2}\right) ^{2}%
+\end{array}%
+\right) ,  \label{L-R-1}
+\end{eqnarray}%
+where the second equality follows from a mean value expansion of $\overline{h%
+}(\widehat{\omega }_{1})$ around $\omega _{10},$ with $\widetilde{\omega }%
+_{1}$ between $\omega _{10}$ and $\widehat{\omega }_{1}$. Let%
+\begin{equation}
+\widetilde{F}=diag\{[\overline{H}(\widehat{\omega }_{1})^{\prime }\widehat{V}%
+_{1}^{-1}\overline{H}(\widetilde{\omega }_{1})]^{-1}\overline{H}(\widehat{%
+\omega }_{1})^{\prime }\widehat{V}_{1}^{-1},[T^{-1}%
+\sum_{t=1}^{T}x_{t}x_{t}^{\prime }]^{-1},1\}.
+\end{equation}%
+Then (\ref{L-R-1}) implies that 
+\begin{eqnarray}
+T^{1/2}\left( \widehat{\omega }-\omega \right)  &=&\widetilde{F}\cdot
+T^{-1/2}\sum_{t=1}^{T}\left( 
+\begin{array}{c}
+-h_{t}(\omega _{10}) \\ 
+x_{t}(y_{t}-x_{t}^{\prime }\omega _{20}) \\ 
+\left( y_{t}-x_{t}\widehat{\omega }_{2}\right) ^{2}-\omega _{3}%
+\end{array}%
+\right)   \notag \\
+&=&\widetilde{F}\cdot T^{-1/2}\sum_{t=1}^{T}\left( 
+\begin{array}{c}
+-h_{t}(\omega _{10}) \\ 
+x_{t}(y_{t}-x_{t}^{\prime }\omega _{20}) \\ 
+\left( y_{t}-x_{t}^{\prime }\omega _{20}\right) ^{2}-\mathbb{E}[\left(
+y_{t}-x_{t}^{\prime }\omega _{20}\right) ^{2}]%
+\end{array}%
+\right) +\left( 
+\begin{array}{c}
+0 \\ 
+0 \\ 
+\varepsilon _{T}%
+\end{array}%
+\right) ,  \label{L-R-2}
+\end{eqnarray}%
+where the second equality uses $\omega _{3}=\mathbb{E}[\left(
+y_{t}-x_{t}^{\prime }\omega _{20}\right) ^{2}]$ by definition and 
+\begin{eqnarray}
+\varepsilon _{T} &=&T^{-1/2}\sum_{t=1}^{T}\left[ \left( y_{t}-x_{t}^{\prime }%
+\widehat{\omega }_{2}\right) ^{2}-\left( y_{t}-x_{t}^{\prime }\omega
+_{20}\right) ^{2}\right]   \notag \\
+&=&2T^{-1}\sum_{t=1}^{T}\left( y_{t}-x_{t}^{\prime }\omega _{20}\right)
+x_{t}^{\prime }\left[ T^{1/2}\left( \widehat{\omega }_{2}-\omega
+_{20}\right) \right] +o_{p}(1)  \notag \\
+&=&o_{p}(1)  \label{L-R-3}
+\end{eqnarray}%
+because $T^{-1}\sum_{t=1}^{T}\left( y_{t}-x_{t}^{\prime }\omega _{20}\right)
+x_{t}^{\prime }\rightarrow _{p}0$ and $T^{1/2}(\widehat{\omega }_{2}-\omega
+_{20})=O_{p}(1)$ following Assumption R. In addition, 
+\begin{equation}
+\widetilde{F}\rightarrow _{p}F  \label{L-R-4}
+\end{equation}%
+following from the consistency of $\widehat{\omega }_{1}$ and Assumption R.
+Finally, the desirable result follows from (\ref{L-R-2})-(\ref{L-R-4}) and
+Assumption R. The consistency of $\widehat{\Omega }$ follows from the
+consistency of $\widehat{F}$ and $\widehat{V}.$ $_{\square }$
+
+\bigskip 
+
+\noindent Proof of Lemma \ref{Lemma CS}. Assumptions 1-3 of AM holds under
+Assumption R, S, and Lemma \ref{Lemma Reduce}. This Lemma then follows from
+Theorem 1 of AM. $_{\square }$
+
+\end{document}

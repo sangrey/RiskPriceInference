@@ -1,0 +1,1195 @@
+\documentclass[11pt, letterpaper, twoside]{article}
+\usepackage{risk_price_inference}
+\addbibresource{risk_price_inference}
+
+\author{Xu Cheng\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:xucheng@upenn.edu}{xucheng@upenn.edu}} \and Eric Renault\thanks{Brown University, Department of Economics -- Box B, 64 Waterman Street, Providence, RI 02912, \href{mailto:eric_renault@brown.edu}{eric\_renault@brown.edu}} \and Paul Sangrey\thanks{University of Pennsylvania, The Perelman Center for Political Science and Economics, 133 South 36th Street, Philadelphia, PA 19104, \href{mailto:paul@sangrey.io}{paul@sangrey.io}}}
+
+\title{Identification Robust Inference for Risk Prices in Structural Stochastic Volatility Models}
+
+\date{\today}
+
+\begin{document}
+
+\begin{titlepage}
+
+
+\maketitle
+\thispagestyle{empty}
+\addtocounter{page}{-1}
+
+\begin{abstract} 
+
+\singlespacing \noindent 
+In structural stochastic volatility asset pricing models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to bear high volatility in order to get high expected returns as measured by the market risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. Disentangling these channels is difficult and poses a subtle identification problem that invalidates standard inference. We adopt the discrete-time exponentially affine model of \textcite{han2018leverage}, which links the identification of volatility risk price to the leverage effect. In particular, we develop a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to the well-behaved reduced-form parameters governing the return and volatility's joint distribution. The link functions are almost flat if the leverage effect is close to zero, making estimating the volatility risk price difficult. We adapt the conditional quasi-likelihood ratio test \textcite{andrews2016conditional} develop in a nonlinear GMM framework to a minimum distance framework. The resulting conditional quasi-likelihood ratio test is uniformly valid. We invert this test to derive robust confidence sets that provide correct coverage for the prices regardless of the leverage effect's magnitude. 
+
+\end{abstract} 
+
+\vspace{\baselineskip}
+
+\jelcodes{C12, C14, C38, C58, G12}
+
+\vspace{\baselineskip}
+
+\keywords{weak identification, robust inference, stochastic volatility, leverage, market risk premium, volatility risk premium, risk price, confidence set, asymptotic size}
+
+\end{titlepage}
+
+% \tableofcontents
+\clearpage
+
+\section{Introduction}
+
+The core of modern finance studies how investors optimally trade off risk and return. Standard economic theory predicts investors demand a higher return as compensation for bearing more risk. Hence, we should expect a positive relationship between the mean and volatility of returns. In \gentextcites{sharpe1964capital,lintner1965security} capital asset pricing model (CAPM) the market return's risk premia is proportional to its variance. However, both empirically and in models with stochastic volatility, the relationship is often nonlinear, \parencites{bansal2014volatility, dewbecker2017price}. This nonlinearity is particularly obvious in option pricing models, such as \textcites{bates2008market, christoffersen2013capturing}, where investors care not just about how an asset's returns co-move with the market's return but also care how they co-move with the market's volatility.
+
+In these structural stochastic volatility models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the market risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. Disentangling these channels is difficult and poses a subtle identification problem that invalidates standard inference. We adopt the discrete-time exponentially affine model of \textcite{han2018leverage}, which links the identification of volatility risk price to the leverage effect. This effect measures the correlation between return and volatility innovations. Although theoretically less than zero, this effect is difficult to quantify empirically, \parencites{bandi2012timevarying, aitsahalia2013leverage}. This low signal-to-noise ratio (weak identification) invalidates standard inference and makes classic asymptotic approximation perform poorly.
+
+We provide identification-robust inference by developing a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to a series of reduced-form parameters that determine the return and volatility's joint distribution. The link functions are almost flat if the leverage effect is close to zero, making estimating the volatility risk price difficult. We adapt the conditional quasi-likelihood ratio test that \textcite{andrews2016conditional} develop in a nonlinear general method of moments (GMM) framework to a minimum distance framework. The resulting conditional quasi-likelihood ratio test is uniformly valid. We invert this test to derive robust confidence sets that provide correct coverage for the prices regardless of the leverage effect's magnitude. 
+
+Before we do that, consider measuring the relationship between market volatility and expected returns when this relationship is linear, and so the market risk price is the only risk price. Even here, unlike the consensus in the theoretical literature, the empirical literature has found pinning down this relationship quite difficult. Not only has its magnitude proven difficult to determine, but various estimates even differ in sign, \parencites{brandt2004relationship, lettau2010measuring}. This empirical literature focuses on point estimates for the market risk price. However, if individual investors are ambiguity averse as in \textcite{hansen2001robust, jiu2012ambiguity}, they care not just about how the representative investor prices volatility but also about their uncertainty regarding this estimate. This is the first paper to provide identification-robust inference, and hence valid confidence intervals, for these risk prices. 
+
+To further understand the inherent complexity that afflicts this estimation procedure, note that innovations to the volatility process affect the return in three ways, which we must disentangle. First, we must disentangle the volatility feedback effect or leverage --- the contemporaneous correlation between the volatility and return innovations --- from the risk premium --- the relationship between volatility and expected returns. This second relationship is predictable, not contemporaneous. Second, and just as important, we must separate the market risk price and the volatility risk price. In general, and we show this below, the market risk price is strongly identified even in the presence of the volatility risk price. Because the market risk price measures a static tradeoff, there is a simple linear relationship that we can use between the market risk price and the expected return. However, volatility risk introduces nonlinear nuisance terms into this regression. They do not matter asymptotically, but they do in finite samples.
+
+Since this paper's contributions are in econometric methodology and empirical results, we take a model from the literature that has the various components, instead of developing our own. In particular, we take the model from \textcite{han2018leverage} and use it to estimate the relevant parameters. This model has a few nice features. First, it has both market and volatility prices and a leverage effect. As such, it is the natural discrete-time analog of the \textcite{heston1993closedform} option pricing model. It has an exponentially affine stochastic discount factor and shares with \textcite{heston1993closedform} the advantage of having a structure-preserving change of measure between the physical and risk-neutral models. Doing our analysis in discrete-time has two benefits. First, we can more directly compare our results to risk-premia estimates outside of the option pricing literature. Second, the high-frequency jumps should not dramatically affect our results. If we were to use a diffusion process in continuous time, we would severely counterfactually constrain the price's higher-order moments and likely bias our inference. 
+
+As far as estimation is concerned, we derive a series of conditional means and variances. We then take these means and variances and plug them into a minimum-distance  criterion. The data we use are $\lbrace r_{t+1}, \sigma^2_{t+1} \rbrace$, where $r_{t+1}$ denotes the daily excess market return on the market and $\sigma^2_{t+1}$ denotes the associated realized volatility 
+
+\section{Literature Review}\label{sec:lit_review}
+
+Our paper lies at the intersection of three strands of the literature. The first is the empirical analysis of the effect of volatility on risk premia. As \textcite[620]{lettau2010measuring} mention,  the evidence here is inconclusive. Papers such as \textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there, bali2006there, ludvigson2007empirical} find a positive relationship, while \textcites{campbell1987stock, breen1989economic, pagan1991nonparametric, whitelaw1994time, brandt2004relationship} find a negative relationship. We contribute this literature by providing valid confidence intervals for the price of market risk, and explicitly accounting for the price of volatility risk. The previous specifications did not account for this, and so although their estimates were consistent, they suffered from a finite-sample bias. 
+
+The second literature argues that we need two factors to explain risk premia dynamics: a market risk factor and a variance risk factor. Most of this literature has been in the options-pricing literature, \parencites{christoffersen2013capturing, feunou2014risk, dewbecker2017price}. There also is a sizable strand of the literature documenting that the difference between the VIX and realized volatility, i.e., the variance risk premium, commands a substantial positive premium, \parencites{bollerslev2008risk, drechsler2011whats}. Our paper contributes to this literature by being the first to provide valid confidence sets for both prices of both market and volatility risk.
+
+The third literature is the weak identification literature, such as \textcites{andrews2016conditional, andrews2012estimation}. We contribute to this literature by adapting the conditional quasi-likelihood test that \textcite{andrews2016conditional} develop in a generalized method of moments (GMM) framework to a minimum distance one. We also show how to conduct valid inference when the parameter that controls the strength of identification lies on the boundary.
+
+\section{The Model}\label{sec:model}
+
+\addtocounter{subsection}{1}
+
+We need a model that relates the prices to the dynamics in the data to estimate the prices. We specify this model using a stochastic discount factor (SDF) and the physical measure. Since we do not have options data, the SDF, which is also called a pricing kernel, is unobserved. Hence, our pricing model must identify the parameters governing the SDF in terms of the parameters that govern the physical measure. 
+
+Let $\F_t$ be the representative investor's information set at time $t$ and $P_t$ be the price on the asset in question discounted by the risk-free rate. Denote the associated excess return $r_{t+1}$ and volatility $\sigma^2_{t+1}$. Then the SDF --- $M_{t,t+1}$ --- prices all of the assets. In other words, \cref{eqn:asset_pricing_eqn} holds. This definition says that the SDF is the change of measure between the physical and risk-neutral distributions and that prices are expectations with respect to the risk-neutral measure.
+
+\begin{defn}{Asset Pricing Equation}
+  \label{eqn:asset_pricing_eqn}
+  \begin{equation}
+    P_t = \E\left[M_{t,t+1} P_{t+1} \mvert \F_t \right] 
+  \end{equation}
+\end{defn}
+
+Risk prices measure the level of compensation that the representative investor demands to face additional risk. Consequently, they determine the amount that the stochastic discount factor (SDF) twists the distribution of $P_t$. Our model for $P_t$ implies $M_{t,t+1}$ is a known function of these risk prices, parameters that govern the price and volatility dynamics, the volatility --- $\sigma^2_{t}, \sigma^2_{t+1}$, and the log excess returns --- $r_{t+1}$. Having done that, we place this $M_{t,t+1}$ into \cref{eqn:asset_pricing_eqn} and estimate the model by matching the reduced-form and model-implied dynamics of the returns and volatilities.
+
+Throughout we assume that the two risks that command nonzero prices are the market risk price and the volatility risk price, as discussed in the introduction. Consequently, we only use variation in the first two moments of the data to estimate these parameters. If higher moments, such as skewness and kurtosis are also priced factors; as in \textcites{harvey2000conditional, conrad2012exante, chang2013market}; and we used higher sample moments to determine the price of our risk-factors our resulting estimates would be biased, likely substantially so. Attempting to match the risk prices of high moments with only the risk prices considered here would misattribute compensation for bearing risk associated with these higher moments to the market and volatility risk prices. Consequently, our model must be parameterized in terms of the first two moments. We use the conditional autoregressive CAR(1) model here, which we take from \textcite{darolles2006structural,han2018leverage}. 
+
+In particular, we adopt the model that \textcite{han2018leverage} develop. This model assumes that the $P_t$ and $\sigma^2_t$ are first-order Markov and there is no Granger-causality from the return to the volatility and that returns are independent given the volatility. In other words, the volatility drives all of the dynamics of the process. We do allow $\sigma^2_{t+1}$ and $r_{t+1}$ to be contemporaneously correlated, as they are in the data. This implies that the only relevant information in the information set --- $\F_{t}$ --- for time $t+1$-measurable variables is contained in $\sigma^2_t$. In general, $\sigma^2_t$, $\sigma^2_{t+1}$, and $r_{t+1}$ form a sufficient statistic for $\F_{t+1}$. We construct the model in terms of a series of Laplace transforms that we parameterize using some functions $A(x), B(x), C(x), D(x)$, and $E(x)$. We collect the parameters into a vector $\omega$.
+
+\subsection{The Stochastic Discount Factor}\label{sec:deriving_sdf_functions}
+
+We start by parameterizing the stochastic discount factor. Let $\pi$ be the price of volatility risk and $\theta$ be the price of market risk.
+
+\begin{defn}{The Stochastic Discount Factor}
+ \label{defn:SDF}
+ \begin{equation}
+ M_{t,t+1}(\pi, \theta) = \exp\left(m_{0}(\pi, \theta) + m_1(\pi, \theta) \sigma_t^2 - \pi \sigma^2_{t+1} -
+ \theta r_{t+1}\right) 
+ \end{equation}
+\end{defn}
+
+Since $M_{t,t+1}$ must integrate to $1$ for all $\sigma^2_t$, $m_{0}(\pi, \theta)$ and $m_1(\pi, \theta)$ are integration constants. This will be crucial to our derivation of the relationship between the SDF and physical measure functions below.
+
+\subsection{Parameterizing the Physical Measure Dynamics}
+
+We now introduce the data generating process for the volatility. We use a conditional autoregressive gamma process as in \textcite{gourieroux2006autoregressive, han2018leverage} for the volatility. 
+They parameterize their model in terms of the Laplace transform: 
+%
+\begin{equation}
+    \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_{t}\right] = \exp\left(- A(x) \sigma^2_{t} - B(x)\right). 
+\end{equation}
+%
+for all $x \in \R$. The $A$ and $B$ are as follows.
+
+\begin{defn}{Volatility Dynamics Functions}
+     \label{defn:physical_vol_dynamics}
+     \begin{align}
+        \label{defn:a_PP}
+        A(x) &= \frac{\rho x}{1 + c x}, \\
+        \label{defn:b_PP}
+        B(x) &= \delta \log(1 + c x), \\
+    %    
+        \text{with}&\ \rho \in [0,1), \quad c > 0, \quad \delta > 0. \nonumber
+     \end{align}
+
+\end{defn}
+
+In this specification, $\rho$ is a persistence parameter, and $c$ is a scaling parameter. To see this, consider the following moment conditions. 
+
+
+\begin{remark}[Volatilty Moment Conditions] 
+ \label{remark:vol_moment_conditions}
+    \begin{align}
+        \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right] &= \rho \sigma^2_t + c \delta\\
+%   
+        \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right] &= 2 c \rho \sigma^2_t + c^2 \delta 
+%   
+    \end{align}
+\end{remark}
+
+Since these two moment conditions are sufficient to derive the unconditional moments, all of the parameters are identified as long as they are in the interior of their appropriately specified domains. Intuitively, We are using linear regression to estimate the slope and intercept parameters.
+
+\subsubsection{Return Dynamics}
+
+We now compute the return distribution's moments. This computation is more subtle than computing the moments of the volatility dynamics because we must relate the dynamics of the returns' dynamics to those of the volatility as given by the unobservable SDF. We use the conditional autoregressive CAR(1) model here, which we take from \textcite{darolles2006structural,han2018leverage}. This model specifies the conditional Laplace transform of the return as a function of $r_{t+1}$ given $\sigma^2_{t+1}, \sigma^2_t$: 
+%
+\begin{equation}
+    \E\left[\exp(- x r_{t+1}) \mvert \F_{t}, \sigma^2_{t+1} \right] = \exp\left(- C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x)\right).
+\end{equation}
+%
+We start by specifying a parametric form for $C(x)$, $D(x)$, and $E(x)$. The parametric form we give  $C(x)$ implies that returns are conditionally Gaussian.
+
+\begin{defn}{Reduced-Form Functions}
+    \label{defn:physical_return_dynamics}
+    \begin{align}
+        C(x) &\coloneqq \psi x + \frac{1 - \phi^2}{2} x^2, \\
+        D(x) &\coloneqq \beta x, \\
+        E(x) &\coloneqq \gamma x. 
+    \end{align}
+\end{defn}
+
+% As these functions parameterize the Laplace transform, they equal zero when $x=0$. 
+
+% It might seem as first that imposing linearity for $D(x)$ and $E(x)$ is a strong restriction. This is not actually the case. Since we assumed that $\sigma^2_{t+1}$ is an integrated volatility and hence greater than $\Var(r_{t+1} \ivert \sigma^2_{t+1}, \sigma^2_{t})$ and variances are positive, the model implies they are linear.\footnote{We show this in \cref{lemma:linearity_of_physical_functions} which is located in \cref{app:model_characterization}.}
+
+To ease understanding of how $r_{t+1}$ and $\sigma^2_t$ are related, consider the first two moments:
+%
+\begin{equation}
+    \label{eqn:rtn_cond_mean}
+    \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] = \psi \sigma^2_{t+1} + \beta \sigma^2_t + \gamma \\
+\end{equation}
+%
+and
+%
+\begin{equation}
+    \label{eqn:rtn_cond_vol}
+    \Var\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] = (1 - \phi^2) \sigma^2_{t+1}.
+\end{equation}
+%
+These moments identify $\psi$, $\beta$, and $\phi$. The $\psi$ parameter governs the change in the conditional mean when we condition on the volatility. The $\phi$ parameter governs the reduction of the returns' innovation variance in that case. If $\phi=0$, the variance does not decrease and there is no leverage effect.  
+
+We derive the following by plugging in the Laplace transforms for $\sigma^2_{t+1}$ and $r_{t+1}$ into \cref{defn:SDF}.
+
+\begin{restatable}[Characterizing the SDF Integration Constants]{lemma}{sdfConstants}
+    \label{lemma:characterizing_sdf_integration_constants}
+    Let the SDF be given as in \cref{defn:SDF}, and the model be parameterized as in \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}.  Then the SDF constants follow the following equations.\footnote{This is mentioned on \textcite[14]{han2018leverage}.}
+    
+    \begin{align}
+        \label{eqn:sdf_functions_vs_physical_functions}
+        m_0(\theta, \pi) &= E(\theta) + B(C(\theta) + \pi) \\
+        m_1(\theta, \pi) &= D(\theta) + A(C(\theta) + \pi) \nonumber
+    \end{align}
+    
+\end{restatable}
+
+
+\subsubsection{Deriving the Conditional Mean}\label{sec:deriving_conditional_mean}
+
+
+This section solves for $\gamma$, $\beta$, and $\psi$ in terms of $\lbrace \rho, c, \delta \rbrace$ and $\lbrace \pi, \theta \rbrace$. We then use the difference in expected returns between the distribution given both $\sigma^2_t$ and the distribution given $\sigma^2_{t+1}$ and $\sigma^2_t$ to separately identify the two risk prices. We focus on $\psi$ because it controls this difference in means and hence identifies of the volatility risk price when $\phi \neq 0$.
+
+As alluded to in the introduction, $\psi$ combines three different effects. First, it has a Jensen's inequality term --- the mean will shift by a value proportional to the variance. Second, the reduction in variance shifts the price because investors are risk-averse. Third, since $\sigma^2_{t+1}$ and $r_{t+1}$ are correlated, the drift will change directly ---  the leverage effect. The goal is to separate the three components. The way we do this is by constructing a pseudo-return --- $\widetilde{r}_{t+1}$ --- whose mean is not affected by the change in variance resulting from the addition of $\sigma^2_{t+1}$ to the information set.
+
+We exploit the fact that $\E\left[M_{t,t+1}(\theta, \pi) \exp(r_{t+1}) \mvert \sigma^2_t \right] = 1$ by relating $\E\left[\exp(r_{t+1}) \mvert \sigma^2_{t+1}, \sigma^2_t \right]$ to this expression. Clearly, there are two differences between these expressions. First, the first expression contains the SDF. Second, the conditioning information differs between them. These differences are two measure changes. Since prices here are conditionally log-Gaussian, the measure change can be parameterized in terms of the covariance between the log SDF --- $m_{t,t+1} \coloneqq \log M_{t,t+1}$ --- and the return.
+
+Applying the logarithm to \cref{defn:SDF} gives
+%
+\begin{equation}
+    \label{eqn:log_sdf}
+    m_{t,t+1}(\pi, \theta) = m_{0}(\pi, \theta) + m_1(\pi, \theta) \sigma_t^2 - \pi \sigma^2_{t+1} - \theta r_{t+1}.
+\end{equation}
+%
+Except for $\theta r_{t+1}$, the terms on the right are constant given $\sigma^2_t, \sigma^2_{t+1}$, and so they do not affect the conditional covariance between $m_{t,t+1}$ and $r_{t+1}$. Hence,
+%
+\begin{equation}
+ \Cov\left(m_{t,t+1}, r_{t+1} \mvert \sigma^2_{t+1}, \sigma^2_t \right) 
+%
+ = \Cov\left(-\theta r_{t+1}, r_{t+1} \mvert \sigma^2_{t+1}, \sigma^2_t \right) 
+%
+ = -\theta \Var\left(r_{t+1} \mvert \sigma^2_{t+1}\right). 
+\end{equation}
+%
+Plugging in \cref{eqn:rtn_cond_vol} gives
+%
+\begin{equation}
+    \label{eqn:return_covarinace}
+    \Cov\left(m_{t,t+1}, r_{t+1} \mvert \sigma^2_{t+1}, \sigma^2_t \right) = -\theta (1 - \phi^2) \sigma^2_{t+1}.
+\end{equation}
+%
+This expression is the change in the mean driven by investors' risk aversion, and is controlled by their market risk price. To see this, note it equals zero if $\theta = 0$.
+
+The second term we need is the Jensen's effect term. The mean of a conditionally log-Gaussian price depends on both the mean and variance of the underlying return. It has the standard form: minus one-half the conditional variance $\left(-\frac{1 - \phi^2}{2} \sigma^2_{t+1}\right)$. 
+
+We now define a pseudo-return that only changes by an amount proportional to the leverage effect and is not affected by the changes in the return arising from the reduction in risk. From \cref{eqn:rtn_cond_mean}, we know that $\E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1} \right] = \psi \sigma^2_{t+1}$ plus some function of $\sigma^2_t$. However, this $\psi$ contains all three effects. We want a pseudo-return $\widetilde{r}_{t+1}$ where $\E\left[\widetilde{r}_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1} \right] = \widetilde{\psi} \sigma^2_{t+1}$ for some $\widetilde{\psi}$ that only contains the direct effect, not the Jensen or any risk-compensation. We can then solve for $\widetilde{\psi}$ in terms of the parameters governing the dynamics of $r_{t+1}$.
+
+\begin{restatable}[Separating the Leverage Effect from the Measure Changes]{lemma}{leverageVersusMeasureChange}
+    \label{lemma:separating_leverage_effect}
+%    
+    Let $\tilde{r}_{t+1} \coloneqq r_{t+1} - \frac{1 - \phi^2}{2} \sigma^2_{t+1} + (1 - \phi^2) \theta \sigma^2_{t+1}$, and let the $m_{t+1}$ have the form given by \cref{eqn:log_sdf}. Further assume that $\sigma^2_{t+1}$ is the integrated volatility associated with $r_{t+1}$.\footnote{This is the price and volatility are both appropriately discretized functionals of the same underlying semimartingale price process.} Then 
+    
+    \begin{equation}
+        \Var\left[\tilde{r}_{t+1} \mvert \sigma^2_t \right] = \E\left[\sigma^2_{t+1} \mvert \sigma^2_t\right].\footnote{This lemma has the same conclusion as \textcite[Eqn. 3.9]{han2018leverage}. As noted there, their conclusion is \textquote{reminiscent of continuous time stochastic volatility models...However, it must be adjusted in case of a risk premium...that makes the drift random.}  This lemma makes that adjustement. This allows us to derive it without making any additional assumptions on the nature of the leverage effect.}
+    \end{equation}
+\end{restatable}
+%
+\Cref{lemma:separating_leverage_effect} is not the only way we can compute $\Var\left[\tilde{r}_{t+1} \mvert \sigma^2_t \right]$.  We can also use the law of total variance:
+%
+\begin{equation}
+    \Var\left[\widetilde{r}_{t+1} \mvert \sigma^2_t\right] = \E\left[\Var\left[\widetilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] \mvert \sigma_t^2 \right] + \Var\left[\E\left[\widetilde{r}_{t+1}\mvert \sigma_{t+1}^2\right] \mvert \sigma^2_t\right].
+\end{equation}
+%
+Since $\sigma^2_{t+1}$ is constant given $\sigma^2_{t+1}, \sigma^2_t$, the conditional variance of $\widetilde{r}_{t+1}$ is the same as $r_{t+1}$. In addition, $\E\left[\tilde{r}_{t+1} \mvert \sigma^2_{t+1}\right] = \psi \sigma^2_{t+1} - \frac{1-\phi^2}{2} \sigma^2_{t+1} + (1- \phi^2) \theta \sigma^2_{t+1}$ plus $\sigma^2_t$-measurable terms. We now fill in the values for both of the inside variables on the right-hand side using the formulas for $r_{t+1}$, and we use \cref{lemma:separating_leverage_effect} on the left-hand side. We then take unconditional expectations of both sides, giving us
+%
+\begin{equation}
+    \E\left[\sigma^2_{t+1} \right] = \E[ \E\left[(1 - \phi^2) \sigma^2_{t+1} \right]] + \E\left[\Var\left[\left(\psi - \frac{1-\phi^2}{2} + (1-\phi^2)\theta\right) \sigma^2_{t+1} \mvert \sigma^2_t\right]\right].
+\end{equation}
+%
+Rearranging terms implies 
+%
+\begin{equation}
+    \label{eqn:psi_tilde_eqn}
+    \left(\psi - \frac{1-\phi^2}{2} + (1-\phi^2)\theta\right) = \phi \sqrt{\frac{\E\left[\sigma^2_{t+1} \right]}{\E \left[\Var\left(\sigma^2_{t+1} \mvert \sigma^2_t\right)\right]}}.
+\end{equation}
+%
+We can now solve for $\psi$ and replace the moments on the right hand side by substituting in the expectations from \cref{remark:vol_moment_conditions} and some elementary calculations, which gives 
+%
+\begin{equation}
+    \label{eqn:psi_pp_as_func_of_params}
+    \psi = \frac{\phi}{\sqrt{c (1 + \rho)}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta.
+\end{equation}
+
+Now that we have a formula for $\psi$, we can derive the formulas for $\beta$ and $\gamma$ in terms of the other reduced-form parameters and the risk prices. 
+
+\begin{restatable}[Reparameterizing the Physical Distribution]{lemma}{physicalMeasureFunctions}
+
+    \label{lemma:psi_function}
+    
+    Let the SDF be given as in \cref{defn:SDF}, and the model be parameterized as in
+    \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}. 
+    Then the following holds
+    
+    \begin{equation}
+        \psi(\pi, \theta) = \frac{\phi}{\sqrt{c (1 + \rho)}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta.  
+    \end{equation}
+\end{restatable}
+
+\begin{proof}
+    This is a straightforward implication of \cref{lemma:separating_leverage_effect} and the derivation in the text.
+\end{proof}
+
+
+
+
+\subsection{Identification of the Risk Prices}
+
+The goal is to identify the risk-prices $\theta$ and $\pi$. In the previous sections, we derived a series of moment conditions in terms of the parameters. We now need to analyze when these moment conditions identify the risk prices. The asset pricing equation entirely encapsulates the information that return data contain about pricing.  The definition of $M_{t,t+1}$ as a change of measure means that the following holds:
+%
+\begin{equation}
+    \E\left[ M_{t,t+1}(\theta, \pi) \exp(r_{t+1}) \mvert \F_{t} \right] = 1.
+\end{equation}
+
+We now characterize, the information in this set of moment conditions regarding the risk prices. The difficult part is identifying the volatility risk price --- $\pi$, which is the primary object of interest. Substituting in the SDF formula from above and replacing all of the dependence on $\F_t$ with $\sigma^2_t$, yields
+%
+\begin{equation}
+    \E \left[ \exps*{ - \pi \sigma^2_{t+1} - (\theta - 1) rx_{t+1} } \mvert \sigma^2_t \right] = \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi) \sigma^2_t}.
+\end{equation}
+%
+Similar to above, we use the law of iterated expectations to substitute in the conditional Laplace transforms of $r_{t+1}$ and $\sigma^2_{t+1}$, obtaining
+%
+\begin{equation}
+    \E\left[\exps*{- A\left(\pi + C(\theta -1)\right) \sigma^2_t - B(\pi) - D(\theta-1) \sigma^2_t - E(\theta-1)} \mvert \sigma^2_t \right] = \exps*{- m_0(\theta, \pi) - m_1(\theta, \pi) \sigma^2_t}. 
+\end{equation}
+
+\begin{lemma}[Reparameterizing $\beta$ and $\gamma$]
+    \label{lemma:reparameterizing_beta_and_gamma}
+    Let the SDF be given as in \cref{defn:SDF}, and the model be parameterized as in \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics} and assume that the risk-neutral measures have distributions with the same parametric forms. 
+    
+    
+    \begin{align}
+        \label{eqn:beta_function}
+        \gamma &= B(\pi + C(\theta - 1) - B(\pi + C(\theta)) \\
+        %
+        \label{eqn:gamma_function}
+        \beta &= A(\pi + C(\theta -1)) - A(\pi + C(\theta)) 
+    \end{align}
+    
+\end{lemma}
+
+\begin{proof}
+    This comes from matching the coefficients of the $\F_t$-measurable variables and using the linearity of $D(x)$ and $C(x)$.  We substitute in the formulas for $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ that we derived in \cref{lemma:characterizing_sdf_integration_constants} which gives us to equations that we solve for $\gamma$ and $\beta$.
+\end{proof}
+ 
+We can characterize the identification restrictions in \cref{lemma:reparameterizing_beta_and_gamma} in two different cases.\footnote{These conditions are discussed in  \textcite[19]{han2018leverage} under slightly different assumptions.}
+
+\begin{enumerate}
+    \item[Case 1:] The price of market risk $\theta$ satisfies the following equations. 
+        \begin{equation}
+            \label{eqn:lack_of_id_condition}
+            C(\theta - 1) = C(\theta) 
+        \end{equation}
+    
+        If \cref{eqn:lack_of_id_condition} holds, then some simple algebra shows that $E(\theta) = E(\theta-1)$ and $D(\theta) = D(\theta-1)$.  In this situation, any value of $\pi$ satisfies \cref{lemma:reparameterizing_beta_and_gamma}.  Since these are the only places $\pi$ appears in the model, $\pi$ is not identified from equity data alone.  As noted by \textcite{han2018leverage}, this is in line with the common belief that the econometrician needs options data to be able to identify the price of volatility risk. 
+    
+    \item[Case 2:] 
+        In general, there is no reason to expect the \cref{eqn:lack_of_id_condition} to hold.  If it does not, it may be possible to identify both $\theta$ and $\pi$.  In this case, $\pi$ does affect the affect risk premia in the equity data. Hence, we can, in principle, identify $\pi$ from the difference between the functions in the previous case when evaluated at $\theta-1$ and $\theta$.  
+\end{enumerate}
+
+We now show that if $\phi = 0$, then \cref{eqn:lack_of_id_condition} holds, but it does not hold if $\phi \neq 0$. In other words, as mentioned in \textcite[13]{han2018leverage}, a leverage effect will allow us to separately identify $\theta$ and $\pi$. To see this, we apply the definition of $C(x)$ from \cref{defn:physical_return_dynamics} and the formula for $\psi(\pi, \theta)$ from \cref{lemma:psi_function}. Some simple algebra gives 
+%
+\begin{align}
+    C(\theta) - C(\theta - 1) &= C'(0) + C''(0) \left(\theta - \frac{1}{2}\right) = \psi + (1 - \phi^2) \left(\theta - \frac{1}{2}\right), \\
+%
+    &= \frac{\phi}{\sqrt{c (1 + \rho )}} + \frac{1 - \phi^2}{2} - (1 - \phi^2) \theta + (1 - \phi^2) \left(\theta - \frac{1}{2}\right) 
+%
+    \label{eqn:alpha_difference} 
+    = \frac{\phi}{\sqrt{c (1 + \rho )}}. 
+\end{align}
+%
+This shows the leverage effect creates a wedge between $C(\theta)$ and $C(\theta-1)$ that is proportional to $\frac{\phi}{\sqrt{c (1 + \rho )}}$. Clearly, this wedge equals zero if and only if $\phi = 0$. Consequently, if $\phi \neq 0$, we can separately identify $\pi$ and $\theta$.
+
+\section{The Estimation Criterion in Population}\label{sec:EstimationCriterion}
+
+We use the moment conditions derive above to estimate the model. To complete the model, we derive moments that identify $\phi$ and $\psi$.  They are straightforward implications of the discrete-time moment conditions governing the volatility and return dynamics. 
+
+\subsection{Identified Set}\label{sec:identified_set}
+
+In the previous sections, we have eliminated $\psi$, $\beta$, and $\gamma$ from the model by solving for them in terms of the other parameters.
+We now collect all of the moment conditions.
+
+\begin{defn}{Equilibrium Moment Conditions}
+    \label{defn:equilibrium_moment_conditions}
+    \begin{align}
+        \label{eqn:cond_vol_mean}
+        \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right] &= \rho \sigma^2_t + c \delta\\
+%    
+        \label{eqn:cond_vol_var}
+        \Var\left[\sigma^2_{t+1} \mvert \sigma^2_t \right] &= 2 c \rho \sigma^2_t + c^2 \delta \\
+%        
+        \label{eqn:cond_expected_rtn_moment}
+        \E\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= \gamma(\pi, \theta, \phi) + \beta(\pi, \theta, \phi) \sigma^2_t + \psi(\pi, \theta, \phi) \sigma^2_{t+1} \\
+%        
+        \label{eqn:cond_rtn_var}
+        \Var\left[r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right] &= (1 - \phi^2) \sigma^2_{t+1} 
+    \end{align}
+\end{defn}
+
+Now that we have a series of moment conditions, we can specify when the parameters are identified.
+
+\begin{restatable}[Identified Set]{lemma}{identifiedSet}
+
+    Assume that the moment conditions specified in \cref{defn:equilibrium_moment_conditions} have the correct form and that the instruments we are using satisfy the standard exogeneity and relevant conditions. Let the true parameter vector $\omega \coloneqq (\rho, c, \delta, \phi, \theta, \pi) \in [-1+\epsilon_1, 1 - \epsilon_2] \times [M_1, M_2] \times [\epsilon_4, M_4]\times [M_5, M_6]\times \times [-1 + \epsilon_4, 1 - \epsilon_5] \times [M_7, M_8] \times [M_{9}, M_{10}]$, where the $M_{\ast}$ are some large (in magnitude) known constants and the $\epsilon_{\ast}$ are some small positive constants. Let $Q_T(\omega, X)$ be the GMM objective function with moment conditions given in \cref{defn:equilibrium_moment_conditions}.  
+ 
+    If there exists a $\epsilon$ such that $\abs{\phi} > \epsilon > 0$, then all of the parameters are identified.  If $\phi = 0$, the objective function is independent of $\pi$.  Hence, $\pi$ is not identified. However, even in that case all of remaining parameters are still identified.
+
+\end{restatable}
+
+We need to run a constrained optimization though, because only certain values of the parameters are valid. As noted in the introduction, we develop a minimum distance criterion. Such a criterion has two parts. First, it requires a series of conditions that relate the structural parameters to the reduced-form parameters.  Second, it needs a series of conditions that identifies the reduced-form parameters. Before we specify these criteria, we introduce a reduced-form parameter $\zeta = 1 - \phi^2$, which is the transformation of $\phi$ which we can easily estimate.
+% Why does the derivative of $\phi$ end up in the denominator?
+% We do not estimate $\phi$ directly because if we did we would need to differentiate \cref{eqn:cond_expected_rtn_moment} with respect to $\phi$. However, the derivative of $\psi$ with respect to $\phi$ gcl 
+
+We group the structural parameters we are estimating into a vector $\xi \coloneqq (\phi, \pi, \theta)'$.
+We also group the reduced-form parameters into a vector $\omega \coloneqq (\rho, c, \delta, \psi, \zeta, \beta, \gamma)'$.
+We define the link function as follows, where we suppress the reduced-form parameters in the notation.
+
+
+%
+\begin{defn}{Link Function}
+    \label{defn:link_function}
+    \begin{equation}
+        g(\omega, \xi) \coloneqq
+%
+        \begin{pmatrix}
+            \gamma - \gamma(\pi, \theta, \phi) \\ 
+            \beta - \beta(\pi, \theta, \phi) \\
+            \psi - \psi(\pi, \theta, \phi)  \\
+            \zeta - (1 - \phi^2)  \\
+        \end{pmatrix}
+%
+\end{equation}
+
+\end{defn}
+
+
+
+\section{Estimating the Reduced-Form Parameters}\label{sec:EstimatingReducedForm}
+
+This section gives the asymptotic distribution of the reduced-form parameter. Write $\omega =(\omega_{1},\omega_{2},\omega_{3}),$ where $\omega_{1}=(\rho ,c)$, $\omega_{2} = (\gamma, \beta, \psi)$, and $\omega_{3} = \zeta$. Below we describe the estimator $\widehat{\omega} \coloneqq (\widehat{\omega}_{1},\widehat{\omega}_{2},\widehat{\omega}_{3})$ and provide its asymptotic distribution. We estimate these parameters separately because $\omega_{1}$ only shows up in the conditional mean and variance of $r_{t+1}$, $\omega_{2}$ only shows up in the conditional mean of $\sigma_{t+1}^{2}$, and $\phi $ only shows up in the conditional variance of $\sigma_{t+1}^{2}.$ 
+
+We estimate $\omega_{1}$ by GMM based on the moment condition: 
+%
+\begin{align}
+\E[h_{t}(\omega_{1,0})] &= 0, \text{ where} \nonumber \\
+%
+ h_{t}(\omega_{1}) &\coloneqq  
+%
+  \begin{pmatrix}
+   \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma_{t}^{2}\right) \\ 
+%
+   \sigma_{t}^{2}\left( \sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) \right) \\ 
+%
+   \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma_{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left(
+   c\delta +\rho \sigma_{t}^{2}\right) ^{2}\right) \right) \\ 
+%
+   \sigma_{t}^{2}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) \\ 
+%
+   \sigma_{t}^{4}\left( \sigma_{t+1}^{4}-\left( c^{2}\delta +2c\rho \sigma _{t}^{2}+\left( c\delta +\sigma_{t+1}^{2}-\left( c\delta +\rho \sigma _{t}^{2}\right) ^{2}\right) \right) \right) 
+  \end{pmatrix}.
+\end{align}
+%
+The optimal GMM estimator is
+%
+\begin{align}
+    \widehat{\omega}_{1} &=  \argmin_{\omega_1 \in \Lambda_{1}}
+%
+    \overline{h}_{T}(\omega_{1})^{\prime}W_{T}\overline{h}_{T}(\omega_{1}), \text{ where} \nonumber \\ 
+%
+    \overline{h}_{T}(\omega_{1}) &= T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1}), \nonumber \\
+%
+    \intertext{and}
+%
+    W_{T} &= T^{-1}\sum_{t=1}^{T} (h_{t}(\widetilde{\omega}_{1})h_{t}(\widetilde{\omega}_{1})^{\prime }-\overline{h}_{T}(\widetilde{\omega}_{1})\overline{h} _{T}(\widetilde{\omega}_{1})^{\prime}),
+\end{align}
+%
+and $\widetilde{\omega}_{1}$ is the preliminary GMM estimator based on the identity covariance matrix.
+
+We estimate $\omega_{2}$ using generalized leas squares (GLS) because $\gamma, \beta, \psi$ are the intercept and linear coefficients of the conditional mean function and the conditional variance is proportional to $\sigma_{t+1}^{2}$.  Define $x_{t} = \sigma_{t+1}^{-1}(1,\sigma_{t}^{2},\sigma_{t+1}^{2})$ and $y_{t} = \sigma_{t+1}^{-1}r_{t+1}$.  The GLS estimator for $\omega_{2}$ is
+%
+\begin{equation}
+    \widehat{\omega}_{2} = \left( \sum_{t = 1}^{T}x_{t}x_{t}^{\prime}\right) ^{-1}\sum_{t = 1}^{T}x_{t}y_{t}.
+\end{equation}
+
+We estimate $\omega_{3}$ by the sample variance estimator. Define 
+%
+\begin{equation}
+    \widehat{y}_{t} = x_{t}\widehat{\omega}_{2} = \sigma_{t+1}^{-1}(\widehat{\gamma}+\widehat{\beta}\sigma_{t}^{2}+\widehat{\psi}\sigma_{t+1}^{2}).
+\end{equation}
+%
+The estimator of $\omega_{3}$ is 
+%
+\begin{equation}
+    \widehat{\omega}_{3} = T^{-1}\sum_{t=1}^{T} \left(y_{t}-\widehat{y}_{t}\right)^{2}.
+\end{equation}%
+
+The next lemma provides the asymptotic distribution of the estimator $\widehat{\omega}$. Let $h_{\omega ,t}(\omega_{1})\in \mathbb{R}^{5\times 2}$ denote the derivative of $h_{t}(\omega_{1})$ w.r.t.\@ $\omega_{1}$. Define 
+%
+\begin{align}
+    \Sigma_{1} & = \left \{ \E\left[ h_{\omega ,t}\left( \omega _{1,0}\right) \right]^{\prime} \E\left[h_{t}(\omega_{1,0})h_{t}(\omega _{1,0})^{\prime}\right]^{-1} \E\left[ h_{\omega,t}\left(\omega_{1,0}\right)
+    \right] \right \} ^{-1}, \nonumber \\ 
+%
+    \Sigma_{2} & = \E\left[ x_{t}x_{t}^{\prime}\right] ^{-1}\mathbb{E[(} y_{t}-x_{t}^{\prime }\omega_{2,0})^{2}], \\
+%
+    \Sigma_{3} & = \Var\left[\left( y_{t}-x_{t}^{\prime}\omega_{2,0}\right)^{2}\right]. \nonumber 
+\end{align}
+
+\begin{lemma}
+Suppose Assumptions *** hold. Then
+
+\begin{equation}
+ T^{1/2}\left( 
+%
+ \begin{array}{c}
+  \widehat{\omega}_{1}-\omega_{1,0} \\ 
+  \widehat{\omega}_{2}-\omega_{2,0} \\ 
+  \widehat{\omega}_{3}-\omega_{3,0}%
+ \end{array}\right) 
+%
+ \rightarrow_{d}\xi_{\omega} = 
+%
+ \left(\begin{array}{c}
+   \xi_{\omega 1} \\ 
+   \xi_{\omega 2} \\ 
+   \xi_{\omega 3}%
+ \end{array}\right) 
+%
+ \sim N\left( 0,
+%
+ \begin{array}{ccc}
+  \Sigma_{1} & 0 & 0 \\ 
+  0 & \Sigma_{2} & 0 \\ 
+  0 & 0 & \Sigma_{3}%
+ \end{array}\right).
+\end{equation}
+\end{lemma}
+
+
+\begin{proof}
+ Will be added later.
+\end{proof}
+
+
+% \subsection{Constructing the Second-Stage Criterion}\label{sec:construct_link_func}
+
+% In this stage, we convert the estimates for $\omega$ into estimates for $\xi$. We do this by specifying a link function. Since $(\rho, c, \delta)'$ shows up in both $\xi$ and $\omega$, the link function for those parameters is the identify function. The third set of parameters $\xi_3 = \phi^2$, and so we use that as a link function. We also use the reduced-form estimates as link functions, as well, i.e.,
+% %
+% \begin{equation}
+%  g(\xi, \omega) = \xi - (\rho, c, \delta, \beta(\rho, c, \phi, \pi, \theta), \gamma(\rho, \delta, c, \phi, \pi,
+%  \theta), \psi(\rho, c, \phi, \theta), \phi^2)'.
+% \end{equation}
+
+% We specify $g(\xi, \omega)$ in this way because it gives us the correct off-diagonal elements. If we estimated $(\rho, c, \delta)$ by themselves and just plugged them in here, we would have to relate the off-diagonal terms in a separate step. In addition, by using the optimal weight matrix for this stage, we estimate all of the parameters as efficiently possible using our moment conditions.
+
+% Doing this implies we must be careful and treat the $\rho,c$, and $\delta$ on each sides of the equation as different. The 2nd-stage sample criterion function is 
+% %
+% \begin{equation}
+%  Q_T(\omega) \coloneqq \frac{1}{2} g(\widehat{\xi}_T, \omega)' \W_{T} g(\widehat{\xi}_T, \omega),
+% \end{equation}
+% %
+% with second stage weight matrix $\W_T$.
+% We need to estimate $\omega$, and so we differentiate and get the first-order condition at $\omega_0$, where $\W
+% \coloneqq \lim_{T \to \infty} \E[W_T]$.
+% This gives
+% %
+% \begin{equation}
+%  \frac{\partial Q_T}{\partial \omega}(\omega_0) = g_{\omega}\left(\xi_0, \omega_0\right) \W g\left(\xi_0,
+%  \omega_0\right) = 0.
+% \end{equation}
+% %
+% We now expand $\widehat{\xi}_T$ around $\xi_0$, for some $\widetilde{\xi}_T$ between $\xi_0$ and $\widetilde{\xi}_T$, 
+% %
+% \begin{align}
+%  \sqrt{T} \frac{\partial Q}{\partial \omega}(\omega_0) 
+% %
+%  &= g_{\omega}\left(\omega_0, \widehat{\xi}_T\right) \W_T \left[\sqrt{T} g\left(\omega_{0},\xi_0\right) +
+%   g_{\xi}\left(\omega_{0}, \widetilde{\xi}_T\right)' \sqrt{T} \left(\widetilde{\xi}_T - \xi_0\right)\right]
+% %
+% %
+%  \intertext{The first term equals zero by assumption, and the derivative is the identity matrix.}
+% %
+% %
+%  &= g_{\omega}\left(\omega, \widehat{\xi}_T\right) \W_T \left[ \sqrt{T} \left(\widetilde{\xi}_T -
+%   \xi_0\right)\right]
+% \end{align}
+% %
+% We also need to compute the Hessian and evaluate it at $\widehat{\omega}_T$ a consistent estimator for $\omega$.
+% %
+% \begin{align}
+%  \frac{\partial^2 Q}{\partial \omega \partial \omega'}(\widehat{\omega}_T) &=
+% %
+%  g_{\omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \W_T g_{\omega} \left(\widehat{\omega}_T,
+%  \widehat{\xi}_T\right)+ g_{\omega, \omega}\left(\widehat{\omega}_T, \widehat{\xi}_T\right) \W_T
+%  g\left(\widehat{\omega}_T, \widehat{\xi}_T\right)' \\
+% %
+%  &\pto g_{\omega}\left(\omega, \xi_0\right)' \W g_{\omega} \left(\omega, \xi_0\right) + 0. 
+% \end{align}
+% %
+% if we use the optimal weight matrix --- $\W \coloneqq \E[g_{\omega_s}(\theta_0, \xi_0)]$. Standard extremum estimator theory gives
+% %
+% \begin{equation}
+%  \sqrt{T} \left(\widehat{\omega}_T - \omega_{0}\right) \dto N\left(0, \left(\E[g_{\omega}(\theta_0, \xi_0)]'
+%  \Sigma_{\xi}^{-1} \E[g_{\omega}(\theta_0, \xi_0)]\right)^{-1}\right).
+% \end{equation}
+% %
+% The covariance in the middle is GMM-covariance of the reduced-form parameters. We estimate it by plugging $\widehat{\xi}$ into to the formulas above and their derivatives. We estimate the asymptotic covariance matrix by replacing its components with their sample counterparts.
+
+\subsection{Robust Inference for Risk Price}
+
+% The reduced-form parameters are $\omega = (\rho ,c,\gamma ,\beta ,\psi ,\phi ^{2})$.  Using the conditional mean and conditional variance derived in the paper, we estimate $\, \omega_{1} = (\rho ,c)$ by the GMM estimator, estimate $\omega_{2} = (\psi ,\beta ,\gamma )$ by the GLS estimator, and estimate $\omega_{3} = \phi^{2}$ by the method of moments estimator for the variance.
+
+% We can show that the estimator $\widehat{\omega}$ satisfies
+
+% \begin{equation}
+%  T^{1/2}(\widehat{\omega}-\omega_{0})\rightarrow_{d}\upsilon_{\omega}\sim N(0,V).
+% \end{equation}%
+
+% See the next section for details. 
+Our estimate in the previous section does not involve the structural parameters $\theta$, $\pi$, and $\phi$.
+We do not plug in $\beta ,\gamma ,\psi $ as functions of $\theta $ and $\pi .$ Instead, we treat $\beta ,\gamma ,\psi $ just as linear coefficients and estimate them by generalized least squares (GLS).
+
+We estimate the structural parameters $\theta $ and $\pi $ using $\widehat{ \omega}$ and the link functions specified below. 
+First, we know that
+%
+\begin{equation} \label{eqn:psi_fn} 
+    \psi_{0}=\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right) \right) ^{-1/2} - \left( 1-\phi_{0}^{2}\right) /2-(1-\phi_{0}^{2})\theta_{0}
+\end{equation}
+%
+when all parameters are evaluated at the true values. 
+This equation strongly identifies $\theta_{0}$ because $\phi_{0}$ is assumed to be negative and bounded away from
+1 in magnitude.  It follows from (\cref{eqn:psi_fn}) that
+
+\begin{equation}
+    \theta_{0} = L(\omega_{0})=-(1-\phi_{0}^{2})^{-1}\left[ \psi_{0}-\phi_{0}\left( c_{0}\left( 1+\rho_{0}\right) \right)^{-1/2}-\left( 1-\phi_{0}^{2}\right) /2\right].
+\end{equation}
+%
+Thus, we estimate $\theta_{0}$ by
+%
+\begin{equation}
+    \widehat{\theta}=L(\widehat{\omega}).
+\end{equation}
+%
+By the delta method, we know that
+%
+\begin{equation}
+ T^{1/2}(\widehat{\theta}-\theta_{0})\rightarrow_{d}L_{\omega}(\omega_{0})^{\prime}\upsilon_{\omega},
+\end{equation}
+%
+where $L_{\omega}(\omega )\in R^{d_{\omega}}$ denote the derivative of $L(\omega )$ w.r.t.\@ $\omega$. 
+The inference for $\theta $ is standard. 
+A confidence interval for $\theta $ can be obtained by inverting the $t$-statistic with a critical value obtained
+from the standard normal distribution.
+
+Next, we consider inference for the structural parameter $\pi$. 
+This is a non-standard problem because $\pi $ is potentially weakly identified. 
+Define
+%
+\begin{equation}
+ g(\pi ,\omega )=\left( 
+%
+ \begin{array}{c}
+  \gamma -\left[ B\left( \pi +C\left( \theta_{L}-1\right) \right) -B\left( \pi +C\left( \theta_{L}\right)
+  \right) \right] \\ 
+%
+  \beta -\left[ A\left( \pi +C\left( \theta_{L}-1\right) \right) -A\left( \pi +C\left( \theta_{L}\right)
+  \right) \right] 
+ \end{array}\right),
+%
+ \text{ where}\ \theta_{L} = L(\omega).
+\end{equation}
+%
+We know 
+%
+\begin{equation}
+ g(\pi_{0}, \omega_{0})=0 \in \mathbb{R}^{2}.
+\end{equation}
+%
+Inference on $\pi $ is based on the function $g(\pi ,\widehat{\omega})$ because $\widehat{\omega}$ is a
+consistent estimator of $\omega_{0}$.
+By the consistency of $\widehat{\omega}$,
+%
+\begin{equation}
+ T^{1/2}\left[ g(\pi, \widehat{\omega}) - g(\pi,\omega_{0})\right] \Rightarrow \upsilon(\pi) = G(\pi,
+ \omega_{0})^{\prime}\upsilon_{\omega},
+\end{equation}%
+
+\noindent where $G(\pi ,\omega )$ denote the derivative of $g(\pi ,\omega )$ w.r.t.\@ to $\omega$. 
+The Gaussian process $\upsilon(\pi)$ has covariance kernel 
+%
+\begin{equation}
+ \Sigma (\pi_{1},\pi_{2})=G(\pi_{1},\omega_{0})^{\prime}VG(\pi_{2},\omega_{0}).
+\end{equation}
+%
+We can estimate $\Sigma (\pi_{1},\pi_{2})$ by 
+%
+\begin{equation}
+ \widehat{\Sigma}(\pi_{1},\pi_{2})=G(\pi_{1},\widehat{\omega})^{\prime}
+ \widehat{V}G(\pi_{2},\widehat{\omega}),
+\end{equation}
+
+\noindent where $\widehat{V}$ is a consistent estimator of $V.$
+
+We construct a confidence interval for $\pi $ by inverting tests $H_{0}:\pi =\pi_{0}$ vs $H_{0}:\pi \neq \pi_{0}$. 
+The test statistic is the QLR statistic:
+%
+\begin{equation}
+ QLR=Tg(\pi_{0},\widehat{\omega})^{\prime}\widehat{\Sigma}(\pi_{0},\pi _{0})^{-1}g(\pi_{0},\widehat{\omega})
+ - \underset{\pi \in \Pi}{\min}Tg(\pi ,\widehat{\omega})^{\prime}\widehat{\Sigma}(\pi,\pi)^{-1}
+ g(\pi,\widehat{\omega}). 
+\end{equation} 
+
+To obtain the critical value, we follow the conditional inference approach in \textcite{andrews2016conditional}. To
+this end, first construct a projection residual process:
+%
+\begin{equation}
+ h(\pi ,\widehat{\omega})=g(\pi ,\widehat{\omega})-\widehat{\Sigma}(\pi ,\pi_{0})\widehat{\Sigma
+ }(\pi_{0},\pi_{0})^{-1}g(\pi_{0},\widehat{\omega}).
+\end{equation}
+%
+By construction, $h(\pi ,\widehat{\omega})$ and $g(\pi_{0},\widehat{\omega})$ are independent asymptotically. 
+Conditional on $h(\pi ,\widehat{\omega})$, we obtain the $1-\alpha $ quantile of the QLR statistic, denoted
+$c_{\alpha}(h)$, by sampling from the asymptotic distributions of $g(\pi_{0},\widehat{\omega})$ under the null.
+Specifically, we take independent draws $\upsilon^{\ast}\sim N(0,\Sigma (\pi_{0},\pi_{0}))$ and produce simulated
+process:
+%
+\begin{equation}
+ g^{\ast}(\pi ,\widehat{\omega}) = h\left(\pi ,\widehat{\omega}\right) + \widehat{\Sigma} (\pi
+ ,\pi_{0})\widehat{\Sigma}(\pi_{0},\pi_{0})^{-1}\upsilon^{\ast}.
+\end{equation}%
+%
+We then calculate
+\begin{equation}
+ QLR^{\ast}=Tg^{\ast}(\pi_{0},\widehat{\omega})^{\prime}\widehat{\Sigma} (\pi_{0},\pi_{0})^{-1}g^{\ast
+ }(\pi_{0},\widehat{\omega})-\underset{\pi \in \Pi}{\min}Tg^{\ast}(\pi ,\widehat{\omega})^{\prime
+ }\widehat{\Sigma} (\pi ,\pi )^{-1}g^{\ast}(\pi ,\widehat{\omega}), 
+\end{equation}
+%
+which is a random draw from the conditional distribution of the $QLR$ statistic given $h_{T}(\pi ,\widehat{\omega
+})$, when $g(\pi_{0},\widehat{ \omega})$ is drawn from its asymptotic distribution. 
+In practice, we repeat this process for a large number of times and obtain $c_{\alpha}(h)$ by simulation.
+
+We reject the null $H_{0}:\pi =\pi_{0}$ if $QLR\geq c_{\alpha}(h)$. 
+The confidence interval for $\pi $ is the collection of null values that are not rejected as the null value. 
+Note that the construction of this CI\ does not involve estimation of $\pi$.
+
+\section{Simulations}\label{sec:simulation}
+
+In this section, we verify that the asymptotic approximations we derived work well in practice.  Since we have a parametric model, we can simulate from it directly.  To investigate the robustness of the procedure with respect to various identification strengths, we vary both $T$ and $\phi$.
+We took the parameters in \cref{tbl:simulationParameters} directly from the estimates in \textcite{han2018leverage}. 
+We consider $\phi \in \lbrace -0.40, -0.10, -0.01 \rbrace$ and $T \in \lbrace 3700, 37000 \rbrace$. 
+
+\begin{table}[htb]
+ 
+ \centering
+ \caption{Simulation Parameters}
+ \label{tbl:simulationParameters}
+ 
+ \begin{tabularx}{.65\textwidth}{X X c X X}
+
+  \toprule
+  $\delta$ & $\rho$ & $c$ & $\pi$ & $\theta$ \\
+  \midrule
+% %
+%   \multicolumn{5}{c}{Parameters Estimated from the Data} \\
+%   \midrule
+%   0.27  & 0.81  & 3.11 & -0.2 & 0.53 \\
+% %
+%   \midrule
+  \multicolumn{5}{c}{Parameter Values used by \textcite{han2018leverage}} \\
+  \midrule
+  0.6475  & 0.95  & \num[scientific-notation=true]{.00394128} & -10 & 1.7680 \\
+  \bottomrule
+%
+ \end{tabularx}
+
+\end{table}
+
+
+Since we are simulating the quantiles of the asymptotic distribution, we need to choose the number of simulations to use. We use \num{250}. The results are qualitatively similar if we use \num{1000} draws. Instead of simulating the confidence intervals, which is computationally intensive, we simulate the test statistic, which is equivalent.   We report averages over \num{500} simulations.
+
+To show the identification strength varies with $\phi$, we plot the distribution of estimates, $\widehat{\pi}$ as reported by simulation using \num{37000} observations, \num{500} simulations, and the parameters used in \textcite{han2018leverage}. When $\phi$ is far from $0$ and the standard asymptotic experiments approximate the true distribution, the statistics' distribution should be close to Gaussian. Conversely, as $\phi$ approaches $0$, the Gaussian limiting distribution does not provide a good approximation. The black lines in the middle of the figures in \cref{fig:sim_parameter_estimates} are the true parameter values. We truncate the parameter space for $\pi$ at $[-20, 0]$, and so the limiting distribution piles up at the boundaries as is common in this class of simulations.  
+
+\begin{figure}[htb]
+  
+  \caption[t-statistics]{Parameter Estimates}
+  \label{fig:sim_parameter_estimates}
+
+
+  \begin{subfigure}[t]{.32\textwidth}
+    \caption[phi = -0.40]{$\phi = -0.40$}
+    \includegraphics[width=\textwidth, height=\textwidth]{pi_est_500_-0_point_4.pdf}
+  \end{subfigure}
+  \begin{subfigure}[t]{.32\textwidth}
+    \caption[phi = -0.10]{$\phi = -0.10$}
+    \includegraphics[width=\textwidth, height=\textwidth]{pi_est_500_-0_point_1.pdf}
+  \end{subfigure}
+  \begin{subfigure}[t]{.32\textwidth}
+    \caption[phi = -0.01]{$\phi = -0.01$}
+    \includegraphics[width=\textwidth, height=\textwidth]{pi_est_500_-0_point_01.pdf}
+  \end{subfigure}
+
+\end{figure}
+
+We now report the size of the \SI{5}{\percent} tests in finite-sample using the standard Gaussian Quasi-Likelihood Ratio (QLR) statistic, the Anderson-Rubin (AR) statistic, and the conditional-QLR statistic proposed here.  Because we have four link functions, the AR-statistic is asymptotically $\chi^2(df=4)$ distributed.
+%TODO This is right, isn't it?
+
+\begin{table}[htb]
+ 
+  \centering
+  \caption{Size in Finite Samples}
+  \label{tbl:test_performance}
+
+ \sisetup{
+  round-mode=places,
+  round-precision=3,
+ }
+ 
+ \begin{tabularx}{.75\textwidth}{X | *{3}{S} | *{3}{S}}
+%
+  \toprule
+  $\phi$ & {QLR} & {AR} & {CLR} & {QLR} & {AR} & {CLR} \\
+  \midrule
+   \multicolumn{7}{c}{Parameter Values used by \textcite{han2018leverage}} \\
+  \midrule
+  & \multicolumn{3}{c}{$T$ = 37000} & \multicolumn{3}{c}{$T$ = 3700} \\
+  \midrule
+  -0.01  & 0.01600  & 0.0100    & 0.04400   & 0.01400   & 0.00800   & 0.0580   \\
+  -0.10  & 0.03200  & 0.0100    & 0.05400   & 0.0200    & 0.01000   & 0.0600    \\
+  -0.40  & 0.0480   & 0.0200    & 0.05000   & 0.06200   & 0.01600   & 0.0760   \\
+%
+  % \midrule
+  %      \multicolumn{7}{c}{Parameters Estimated from the Data} \\
+  % \midrule
+  %     & \multicolumn{3}{c}{$T$ = 37000} & \multicolumn{3}{c}{$T$ = 3700} \\
+  % \midrule
+  % -0.01  & 0.0600  & 0.0300  & 0.06600                  \\ 
+  % -0.10  &      &      &    & 0.084000  & 0.03600 & 0.09000 \\ 
+  % -0.40  &      &      &    & 0.09200   & 0.06400 & 0.10400 \\
+  \bottomrule
+
+ \end{tabularx}
+
+\end{table}
+
+Consider the right-hand side of \cref{tbl:test_performance}. The $AR$-statistic is robust, but conservative, as we would expect. The standard $QLR$-statistic appears to be conservative. The $CLR$ test, on the other hand, is robust and has the proper size regardless of the value of $\phi$. This behavior of the CLR test is precisely what the data predicts should happen. In the left-hand side of the table, the sample size is smaller. Again, the AR test is quite conservative. Neither the CLR nor the QLR tests seems to have converged yet when $\phi = -0.40$.  This is likely because the variance of $r_{t+1}$ increases as $\phi$ increases in magnitude. With the other parameters set as they are in \textcite{han2018leverage}, we need large samples to deal with the heteroskedasticity, and non-Gaussianity in the data when $\phi$ is large in magnitude.
+
+
+\section{Data and Empirical Results}\label{sec:empirics}
+
+\subsection{Data}
+
+The two series we need to estimate the model are $r_{t+1}$ and $\sigma^2_{t+1}$, and $\sigma^2_{t+1}$ must be the volatility of $r_{t+1}$. That is, we need the appropriately defined variance of $r_{t+1}$ to equal $\sigma^2_{t+1}$ in expectation as discussed in \cref{sec:deriving_conditional_mean}. Since this condition is automatically satisfied by the integrated volatility and daily return, we use high-frequency data to estimate $\sigma^2_{t+1}$ and use the associated daily return for $r_{t+1}$. 
+
+We need a market index so that the risk prices we estimate are not prices of risk investors face in practice. We do not want the asset's risk to be easily diversifiable. We use SPY (SPDR S\&P 500 ETF Trust) which is an exchange-traded fund that mimics the S\&P 500.  We use the procedure \textcite{sangrey2018jumps} develops to estimate the integrated total volatility, which is the instantaneous expectation of the price variance, i.e., the time-derivative of the predictable quadratic variation. This measure reduces to the integrated diffusion volatility if prices have continuous paths. He shows in simulations that his method works well in the presence of market microstructure noise.
+
+Since this paper only use one asset, and SPY is one of the most liquid assets traded, we can essentially choose the frequency at which we want to observe the underlying price. In order to balance market-microstructure noise, computational cost, and efficiency of the resultant estimators we sample at the \num{1} second frequency. The data starts in 2003 and ends in September 2017. Since the asset is only traded during business hours, this leads to \num{3713} days of data with an average of $\approx \num{24000}$ observations per day. We compute $r_{t+1}$ as the daily return from the open to close of the market because this is the interval over which we can estimate the volatility. Doing this avoids needing  to specify the relationship between overnight and intra-day returns. 
+
+We preprocess the data using the pre-averaging approach as in \textcites{podolskij2009bipower, aitsahalia2012testing}. This procedure is known not to affect the consistency of the estimation procedure. The basic idea is rather simple. We average the price over a small interval to remove the noise. If we pick the rates at which we shrink the interval appropriately and thereby balance smoothing away the noise and allowing the volatility to vary intraday, the estimators are consistent.
+
+\begin{figure}[htb]
+
+  \centering
+  \caption{S\&P 500 Volatility and Log-Return}
+
+
+  \begin{subfigure}[t]{.54\textwidth}
+    \label{fig:spy_dynamics}
+    \caption{Time Series}
+    \includegraphics[width=\textwidth, height=.81\textwidth]{time_series.pdf}
+  \end{subfigure}%
+%
+  \hfill
+%
+  \begin{subfigure}[t]{.44\textwidth}
+    \label{fig:spy_static}
+    \caption{Joint Distribution}
+    \includegraphics[width=\textwidth, height=\textwidth]{joint_dist.pdf}
+  \end{subfigure}
+\end{figure}
+
+
+To see how the data move over time, we plot their time series in  \cref{fig:spy_dynamics}.  We also plot the joint unconditional distribution in \cref{fig:spy_static} to see the static relationship between the two series are related. The volatility has a long-right tail (it has the typical gamma-type distribution) and the returns have a bell-shaped distribution. They are also slightly negative related as can be seen by the regression line in the joint plot.
+
+We also report a series of summary statistics. The volatility and returns are weakly negatively correlated, corroborating the work by \textcites{bandi2012timevarying, aitsahalia2013leverage}. 
+
+\begin{table}[htb]
+
+  \centering
+  \caption{Summary Statistics}
+  \label{tbl:summary_stats}
+
+
+  \sisetup{
+   table-align-text-pre=false,
+   table-align-text-post=false,
+   round-mode=places,
+   round-precision=2,
+   table-space-text-pre=\lbrack,
+   table-space-text-post=\rbrack,
+  }
+
+  \begin{tabularx}{.5\textwidth}{X | S S}
+    \toprule
+    & {$r_{t+1}$} & {$\sigma^2_{t+1}$} \\
+    \midrule
+      Mean & 0.023421 & 5.621287 \\
+      \rowcolor{gray!20}
+      Standard Deviation & 2.350165 & 14.458446\\
+      Skewness & -0.312 & 12.209 \\
+      \rowcolor{gray!20}
+      Kurtosis & 10.055 & 240.401 \\
+      Correlation & \multicolumn{2}{c}{\num{-0.024379}} \\
+    \bottomrule
+  \end{tabularx}
+
+\end{table}
+
+
+\subsection{Estimates}
+
+We now report the reduced-form parameters estimates and associated confidence intervals. We only report the reduced-form parameters that are true determinants of the model, i.e., they are necessary to simulate the model. The other reduced-form parameters are known functions of these parameters and the structural parameters. These parameters have no economic meaning and are only useful in the estimation procedure. The confidence intervals reported here use the Gaussian limiting theory, ($\pm 1.96$ standard errors) but we truncate at the edge of the parameter space if necessary. Although, these reduced-form parameters can be estimated directly from the data, disentangling $c$ and $\delta$ is difficult, and so the estimation procedure responds appropriately by reporting relatively large standard errors. 
+
+
+\begin{table}[htb]
+  \caption{Reduced-Form Parameter Estimates} 
+  \label{tbl:reduced_form_parameters}
+
+  \centering
+  \sisetup{
+    table-align-text-pre=false,
+    table-align-text-post=false,
+    round-mode=places,
+    table-alignment=center,
+  }
+
+  \begin{tabularx}{.5\textwidth}{X | S >{{(}} S[table-space-text-pre={(}] <{{,\,}}
+    S[table-space-text-pre={\hspace{-1cm}}] <{{)}}}
+%
+    \toprule
+    & {Point Estimate} & \multicolumn{2}{c}{Confidence Interval} \\
+    \midrule
+    $c$     & 3.112013 & 0.00 & 7.379227 \\
+    % $c$     & 3.112013 & -1.155201 & 7.379227 \\
+    \rowcolor{gray!20}
+    $\delta$  & 0.2678579 & 0.00 & 3.007632 \\
+    % $\delta$  & 0.2678579 & -2.471916 & 3.007632 \\
+    $\rho$   & 0.807506 & 0.402264 & 1.00 \\
+    % $\rho$   & 0.807506 & 0.402264 & 1.212748 \\
+    \bottomrule 
+  \end{tabularx}
+\end{table}
+
+
+We are interested in not just the reduced-form parameters. We also want estimates for $\phi$ and the risk prices. Since $\phi < 0$, our estimator is consistent and the point estimate is a meaningful number. We report the \SI{95}{\percent} confidence intervals by computing the joint confidence interval above, and then projecting down to the each of the components.
+
+
+\begin{table}[htb]
+  \caption{Structural Parameter Estimates} 
+  \label{tbl:structural_param_estimates}
+
+  \centering
+  \sisetup{
+    table-align-text-pre=false,
+    table-align-text-post=false,
+    round-mode=places,
+    round-precision=2,
+    table-alignment=center,
+  }
+
+  \begin{tabularx}{.5\textwidth}{X | S >{{(}} S[table-space-text-pre={(}] <{{,\,}}
+    S[table-space-text-pre={\hspace{-1cm}}] <{{)}}}
+%
+    \toprule
+    & {Point Estimate} & \multicolumn{2}{c}{Confidence Interval} \\
+    \midrule
+    $\phi$   & -0.302417 & 0.30 & -0.20 \\
+    \rowcolor{gray!20}
+    $\pi$    & -0.115097 & -0.2500 & 0.0 \\
+    $\theta$   & 0.516140 & 0.20 & 0.6 \\
+    \bottomrule 
+  \end{tabularx}
+\end{table}
+
+The parameters in \cref{tbl:structural_param_estimates} have a few notable features. First, we can reject $\phi = 0$ at the \SI{95}{\percent} level. We cannot, however, reject that $\pi = 0$. Interestingly, the values for $\phi, \pi$, and $\theta$ reported by \textcite{han2018leverage} lie outside our confidence regions for each of the parameters. They calibrate $\pi = -10$ and then estimate the remaining parameters. Since their calibration of $\pi$ is badly misspecified, their resulting estimates for $\theta$ is biased in finite sample. Conversely, our estimates do not lie outside their confidence intervals. Even though our estimation procedure for the parameters individually is conservative, as induced by the projection above, our estimates are still more precise in practice. This difference is likely a result of our estimation procedure more effectively using the information about the various parameters jointly, which their partially calibrated model is incapable of doing.
+
+The main issue with the estimates in \cref{tbl:structural_param_estimates} is that they are conservative because we go from joint inference to sub-vector inference by using an inherently conservative projection-based procedure. Plots of confidence region in three dimensions are not particularly easy to understand, and so we report a joint confidence region for the two prices. This analysis is still conservative as we project out $\phi$, but not as conservative as the univariate analysis.
+
+
+\begin{figure}[htb]
+
+  \centering
+  \caption{Confidence Set for Risk Prices}
+  \label{fig:confidence_region}
+
+  \includegraphics[width=.5\textwidth]{confidence_region.pdf}
+\end{figure}
+
+The confidence region is approximately rectangular, and so the projection inference we reported in \cref{tbl:structural_param_estimates} is likely not particular conservative. Furthermore, since we plotted the constraint on the potential value of the parameters, we can see that except for $\pi < 0$, the other constraints do not bind in practice. It is worth noting that there no reason to assume that confidence region has to be connected. The joint likelihood appears to be multi-modal but since the asymptotic distribution is not Gaussian, this not surprising.
+
+
+\section{Conclusion}
+
+In structural stochastic volatility models such as the one developed here, changes in the volatility affect returns through two channels. First, the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the price of market risk. Standard economic models imply there is a static trade-off between risk and expected return. Consequently, when the risk changes the expected return must change to restore equilibrium. However, investors may also be directly averse to changes in future volatility, and the empirical evidence shows that they are. \Textcite{han2018leverage} shows that we can disentangle these two channels through their differing relationships to the leverage effect. However, estimating the leverage effect is quite tricky, \parencite{aitsahalia2013leverage}. This difficulty poses a subtle identification problem that invalidates standard inference. When the data's signal-to-noise ratio is small, as it is here, standard tests and confidence intervals provide misleading results. We adopt the discrete-time exponentially-affine of \textcite{han2018leverage} and adapt weak identification methods to this framework to ensure that the resulting confidence intervals are uniformly valid.
+
+In particular, we develop a minimum distance criterion that links the market risk price, the volatility risk price, and the leverage effect to some well-behaved reduced-form parameters that govern the return and volatility's joint distribution. We do this by adapting the conditional quasi-likelihood ratio test (CLR) \textcite{andrews2016conditional} develop in a GMM framework to a minimum distance framework. The resulting CLR test is uniformly valid. We invert this test to derive a robust confidence set. We then apply this methodology to data on the S\&P 500 and show that the market risk price lies between \num{0.20} and \num{0.60} yearly percentage points, and the volatility risk price lies between \num{-0.20} and \num{0.00} yearly percentage points. These estimates are both substantially smaller in magnitude than the values chosen by \textcite{han2018leverage}.
+
+
+\clearpage
+
+
+\phantomsection
+\addcontentsline{toc}{section}{References}
+\printbibliography
+\clearpage
+
+\begin{appendices}
+
+
+\section{Model Characterization}\label{app:model_characterization}
+
+% \begin{lemma}[Linearity of $\beta$ and $\gamma$]
+%  \label{lemma:linearity_of_physical_functions}
+%  Letting $\sigma^2_{t+1}$ be the integrated volatility of a process with return $r_{t+1}$. Assume that $\sigma^2_{t+1}$ and $r_{t+1}$ follow a bivariate CAR(1) process parametrized as in \cref{defn:physical_vol_dynamics} and \cref{defn:physical_return_dynamics}. Then $\beta''(0)$ and $\gamma''(0)$ both equal zero.
+% \end{lemma}
+
+% \begin{proof}
+%  By the \Ito\ Isometry, and the definition of $r_{t+1}$ as an integrated variance, the following holds for the returns' predictable information set $\F^r_{t-}$. 
+
+%  \begin{equation}
+%  \Var\left(r_{\tau+1}\mvert \F_{\tau-}\right) \leq \E\left(r^2_{\tau+1} \mvert \F_{\tau-}\right) 
+%  = \E\left(\sigma^2_{t+1}\mvert \F_{\tau-}\right)
+%  \end{equation}
+
+%  The integrated volatility is predictable, and so $\sigma^2_{t+1}$ is contained in the return's predictable $\sigma$-algebra. 
+
+%  Consequently, $\Var\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) \leq \sigma^2_{t+1}$ In addition, variance must always be positive, and so $\Var\left(r_{t+1} \mvert \sigma^2_t, \sigma^2_{t+1}\right) \geq 0$.
+
+%  Since the second derivative of the log-cumulant function evaluated at zero equals the variance, we have the following set of inequalities.
+
+%  \begin{gather}
+%  0 \leq (1 - \phi^2) \sigma^2_{t+1} - \beta''(0) \sigma^2_t - \gamma''(0) \leq
+%  \sigma^2_{t+1} 
+% %
+%  \intertext{Dividing through by $\sigma^2_{t+1}$ and pulling the first term outside}
+% %
+%  \label{eqn:second_derivative_inequalities}
+%  \implies \phi^2 - 1 \leq -\frac{1}{\sigma^2_{t+1}} \left(\beta''(0) \sigma^2_t +
+%  \gamma''(0)\right) \leq \phi^2 
+% %
+%  \end{gather}
+
+%  On the outside of the two inequalities we have constants, and the distribution of $\sigma^2_{t+1}$ given $\sigma^2_t$ is not bounded away from zero. Consequently, the only way for \cref{eqn:second_derivative_inequalities} to hold for all $\sigma^2_{t+1}$ is if the term inside the parentheses equals zero.
+
+%  \begin{equation}
+%  0 = \beta''(0) \sigma^2_t + \gamma''(0)
+%  \end{equation}
+
+%  However, the only way for this to hold is for both $\gamma''(0)$ and $\beta''(0)$ to equal zero.
+%  This plus the conditional Gaussianity of the returns implied by the parametric model implies that $\gamma$
+%  and $\beta$ are both linear.
+
+% \end{proof}
+
+
+\sdfConstants*
+
+\begin{proof}
+
+\begin{equation}
+ \label{eqn:reweigted_sdf}
+ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
+ \right) \mvert \F_t \right] = 1 
+\end{equation}
+
+We can use \cref{eqn:reweigted_sdf} to relate $m_0(\theta, \pi)$ and $m_1(\theta, \pi)$ to the physical measure
+functions. 
+
+\begin{gather}
+ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} - \theta r_{t+1}
+ \right) \mvert \F_t \right] = 1 \\
+%
+ \intertext{By the law of iterated expectations.}
+%
+ \E\left[ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1}\right)
+ \exp\left( - \theta r_{t+1}\right) \mvert \F_t, \sigma^2_{t+1} \right]\right] = 1 \\
+%
+ \intertext{The second term is the Laplace transform of $r_{t+1}$.}
+%
+ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - \pi \sigma^2_{t+1} \right)
+ \exp(-C(\theta) \sigma^2_{t+1} - D(\theta) \sigma^2_{t} - E(\theta_2) \mvert \F_t \right] = 1 \\
+%
+ \intertext{Reorganizing terms.}
+%
+ \E\left[\exp\left(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - D(\theta) \sigma^2_{t} - E(\theta_2)
+ \right) \exp(-\left(\pi + C(\theta)\right) \sigma^2_{t+1}) \mvert \F_t \right] = 1 \\ 
+%
+ \intertext{Substituting in the Laplace transform for $\sigma^2_{t+1}$.} 
+%
+ \label{eqn:expected_sdf_wrt_PP}
+ \E\left[\exp(m_0(\theta, \pi) + m_1(\theta, \pi) \sigma^2_t - D(\theta) \sigma^2_{t} - E(\theta_2) - A(\pi +
+ C(\theta)) - B(\pi + C(\theta)) \mvert \F_t \right] = 1 
+\end{gather}
+
+\end{proof}
+
+\leverageVersusMeasureChange*
+
+
+\begin{proof}
+
+Before we show the expectation of $\widetilde{r}_{t+1}$ equals zero, consider the expectation of $\exp(m_{t,t+1} + r_{t+1})$.
+All of the expectations in the next series of equations are with respect to $\sigma^2_t$, $\sigma^2_{t+1}$, and so we suppress them in our notation.
+Consider the following:
+%
+\begin{equation}
+    0 = \log \E\left[\exp\left(m_{t,t+1} + r_{t+1}\right)\right].  
+\end{equation}
+%
+    The $m_{t,t+1}$ and $r_{t+1}$ variables are jointly conditionally Gaussian, and so their sum is as well. Using the formula for a log-Gaussian random variable gives
+%
+\begin{equation}
+    \label{eqn:excess_return_decomposition_a}
+    0 = \E[m_{t,t+1}] + \E[r_{t+1}] + \frac{1}{2} \Var[m_{t,t+1}] + \frac{1}{2}\Var[r_{t+1}] - \Cov[m_{t,t+1}, r_{t,t+1}]. 
+\end{equation}
+%
+If $r_{t+1}$ was risk-less, $\E[r_{t+1}] = 0$ since $r_{t+1}$ is an excess-return, and all of the variance terms drop out.
+This gives
+%
+\begin{equation}
+    0 = \E[m_{t,t+1}] + \frac{1}{2} \Var[m_{t,t+1}]. 
+\end{equation}
+%
+Substituting that into the  \cref{eqn:excess_return_decomposition_a}, gives
+%
+\begin{equation}
+    \E[r_{t+1}] = -\frac{1}{2}\Var[r_{t+1}] + \Cov[m_{t,t+1}, r_{t,t+1}]. 
+\end{equation}
+
+Clearly, $\E[\widetilde{r}_{t+1}]= r_{t+1} + \frac{1}{2} \Var[r_{t+1} \sigma^2_{t}, \sigma^2_{t+1}] - \Cov[m_{t,t+1}, \sigma^2_{t+}]$ has mean zero given $\sigma^2_t, \sigma^2_{t+1}$. By the law of iterated expectations, it also has mean zero given $\sigma^2_t$ only.
+Hence, we can apply the \Ito\ Isometry:
+%
+\begin{align}
+    \label{eqn:return_var_versus_expected_vol_pp}
+    \Var\left[\tilde{r}_{t+1} \mvert \sigma^2_t\right] 
+%
+    &= \E[\tilde{r}^2_{t+1}] = \E\left[\left(\int_t^{t+1} \dif \tilde{p}(s) \right)^2 \mvert \sigma^2_t \right] = 
+    %
+    \E\left[\left(\int_t^{t+1} \tilde{\sigma}^2(s) \dif s \right)^2 \mvert \sigma^2_t \right]
+%
+    \intertext{Since changing drift terms does not affect the volatility.}
+%
+    &= \E\left[\left(\int_t^{t+1} \sigma^2(s) \dif s \right)^2 \mvert \sigma^2_t \right]
+%
+    = \E\left[\sigma^2_{t+1} \mvert \sigma^2_t \right]
+\end{align}
+
+Intuitively, volatilities are squared returns, and so they are variances.
+The tricky part here is that variances are centered second moments, not the second moments themselves.
+The volatilities are also centered second moments, but the centering is not the same in general.
+In continuous time, they would only differ by a drift term, which can be ignored, which is why the Ito\ Isometry
+usually is used in that context.
+Using discrete-time return, as we do here, we first have to appropriately recenter the variables, which is why it
+applies to $\widetilde{r}_{t+1}$ but not to $r_{t+1}$.
+
+\end{proof}
+
+
+\section{Identification Proofs}
+
+
+\identifiedSet*
+
+\begin{proof}
+ Since $Q_{T}$ is a quadratic in terms of deviations between sample and population moment conditions as long as
+ the population moment can be inverted to solve for the parameters, the $Q_T$ process identifies them as well. 
+ In addition, since we have a sufficient number of exogenous valid instruments the conditioning implied by
+ projecting on the instruments does not affect the arguments above. 
+
+ Identifying the four parameters that govern the volatility dynamics is not particularly complicated. 
+ We have four parameters and four non-redundant moment conditions.
+ The first two equations in \cref{defn:equilibrium_moment_conditions} identify $\rho$ and $c \delta$.
+ \cref{eqn:cond_vol_var} identifies $\rho c$ and $c^2 \delta$. 
+ This allows us to separately identify $c$ and $\delta$.
+ 
+ Identifying $\phi$ is also relatively straightforward. Since $r_{t+1}$ and $\sigma^2_{t+1}$ are known, as long
+ as we know the conditional mean of $r_{t+1}$, then identifying $\phi$ is identified by \cref{eqn:cond_rtn_var}.
+ Identifying the conditional mean of $r_{t+1}$ is straightforward because we observe volatility and the
+ conditional mean is a linear equation in these variables. 
+ 
+
+ Identifying the risk prices $\pi$ and $\theta$ is more complicated.
+ We have to identify both parameters off of \cref{eqn:cond_expected_rtn_moment}. 
+ This is in principle possible because we now have two non-redundant sources of variation in the data ---
+ $\sigma^2_t$ and $\sigma^2_{t+1}$.
+
+ The only place that \cref{defn:equilibrium_moment_conditions} that the risk-prices occurs in
+ \cref{eqn:cond_expected_rtn_moment}. 
+ We showed that $\gamma, \beta$ and $\psi$ functions are independent of $\pi$ if $\phi = 0$ in the discussion
+ leading up \cref{eqn:alpha_difference}.
+ We further showed that they are not independent if $\phi \neq 0$.
+ In addition the dependence of the identification in terms of the non-singularity of the derivatives
+ equilibrium conditions in terms of $\pi$ and $\theta$ depends smoothly on $\phi$. 
+ This will be important later.
+ 
+\end{proof}
+
+
+\end{appendices}
+
+
+\end{document}
+
+
