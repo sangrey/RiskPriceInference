@@ -15,6 +15,7 @@
 \usepackage{caption, subcaption}
 \usepackage[pdfencoding=auto, naturalnames, psdextra, colorlinks, citecolor=cyan]{hyperref}
 \usepackage[noabbrev, capitalise, nameinlink]{cleveref}
+\crefname{equation}{}{}
 \usepackage{csquotes}
 \usepackage{siunitx}
 \usepackage[title,titletoc,toc]{appendix}
@@ -36,11 +37,9 @@
 \newlist{assumplist}{enumerate}{1}
 \setlist[assumplist]{label=(\roman{assumplisti}), ref=\roman{assumplisti},noitemsep}
 
-\declaretheorem[style=definition, name=Assumption, refname={assumption,assumptions},
-    Refname={Assumption,Assumptions}]{assumpS}
+\declaretheorem[style=definition, name=Assumption, refname={Assumption,Assumptions}, ]{assumpS}
 \renewcommand*{\theassumpS}{S}
-\declaretheorem[style=definition, name=Assumption, refname={assumption,assumptions},
-    Refname={Assumption,Assumptions}]{assumpR}
+\declaretheorem[style=definition, name=Assumption, refname={Assumption,Assumptions}, ]{assumpR}
 \renewcommand*{\theassumpR}{R}
 \Crefname{assumpR}{Assumption}{Assumptions}
 \Crefname{assumpRlisti}{Assumption}{Assumptions}
