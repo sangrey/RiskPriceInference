@@ -519,7 +519,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     """
     if bounds is None:
-        bounds = [(None, None), (None, None), (None, None)]
+        bounds = [(None, None), (None, None), (0, 1)]
 
     if options is None:
         options = {'maxiter': 200}
