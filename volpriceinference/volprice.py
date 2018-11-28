@@ -70,14 +70,11 @@ _link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_delta, log_scale, psi
 
 
 # We define the moments used to estimate the volatility paramters.
-_mean = (rho * _x + sym.exp(log_scale +  log_delta))
+_mean = rho * _x + sym.exp(log_scale +  log_delta)
 _var = 2 * sym.exp(log_scale) * rho * _x + sym.exp(2 * log_scale + log_delta)
 _row1 = _y - _mean
 _row3 = _y**2 - (_mean**2 + _var)
-#TODO
 _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
-# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row1 * _x**2, _row3, _row3 * _x, _row3 * _x**2])
-# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x])
 
 compute_vol_moments = sym.lambdify([_x, _y, log_delta, log_scale, rho], _vol_moments, modules='numpy')
 compute_vol_moments_grad = sym.lambdify([_x, _y, log_delta, log_scale, rho],
@@ -201,11 +198,16 @@ def compute_hac_num_lags(data, kernel="parzen"):
 
     """
     data = pd.DataFrame(data)
+    data.columns = np.arange(data.shape[1])
     # This is Andrews (1991) Eq. 6.4.
     slopes_and_vars = []
     for _, col in data.items():
-        slope = stats.linregress(col.values[:-1], col.values[1:])[0]
-        innov_var = np.mean((col.values[1:] - slope * col.values[:-1])**2)
+    
+        data_in = col.to_frame()
+        data_in.columns = ['name']
+        model = tsa.AR(data_in).fit(maxlag=1)
+        intercept, slope = model.params
+        innov_var = model.sigma2
         slopes_and_vars.append([slope, innov_var])
 
     slope_and_var_df = pd.DataFrame(slopes_and_vars, columns=['slope', 'var'])
@@ -228,7 +230,7 @@ def compute_hac_num_lags(data, kernel="parzen"):
 
     # We do not want to average over subsequences that are more than the square-root of the sample size.
     # This is essentially changing the constant because it is creating a maximum value for alpha_2)
-    return np.int(max(bandwidth, time_dim**.5))
+    return np.int(max(bandwidth, time_dim**.25))
 
 
 def compute_names(case):
