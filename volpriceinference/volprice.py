@@ -73,12 +73,12 @@ _link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_delta, log_scale, psi
 _mean = rho * _x + sym.exp(log_scale +  log_delta)
 _var = 2 * sym.exp(log_scale) * rho * _x + sym.exp(2 * log_scale + log_delta)
 _row1 = _y - _mean
-_row3 = _y**2 - (_mean**2 + _var)
+_row3 = (_y - _mean)**2 - _var
 _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
 
 compute_vol_moments = sym.lambdify([_x, _y, log_delta, log_scale, rho], _vol_moments, modules='numpy')
 compute_vol_moments_grad = sym.lambdify([_x, _y, log_delta, log_scale, rho],
-                                        _vol_moments.jacobian([log_delta, log_scale, rho])[:], modules='numpy')
+                                        _vol_moments.jacobian([log_delta, log_scale, rho]), modules='numpy')
 
 
 # Define the gradient of the link function with respect to the reduced form paramters.
@@ -439,14 +439,11 @@ def vol_moments(vol_data, log_delta, log_scale, rho):
 
 def vol_moments_grad(vol_data, log_delta, log_scale, rho):
     """Compute the jacobian of the volatility moments."""
-    x = vol_data.values[:-1]
-    y = vol_data.values[1:]
 
-    delta_mom = [np.mean(val) for val in compute_vol_moments_grad(x, y, log_delta=log_delta, log_scale=log_scale, 
-                                                                  rho=rho)]
+    grad = np.mean([compute_vol_moments_grad(x, y, log_delta=log_delta, log_scale=log_scale, rho=rho)
+                    for x, y in zip(vol_data.values[:-1],vol_data.values[1:])], axis=0)
 
-    return pd.DataFrame(np.reshape(delta_mom, (len(delta_mom) // 3, 3)),
-                        columns=['log_delta', 'log_scale', 'rho'])
+    return pd.DataFrame(grad, columns=['log_delta', 'log_scale', 'rho'])
 
 
 def compute_init_constants(vol_data):
@@ -521,7 +518,7 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
 
     """
     if bounds is None:
-        bounds = [(None, None), (None, None), (0, 1)]
+        bounds = [(-3, 2), (None, None), (0, 1)]
 
     if options is None:
         options = {'maxiter': 200}
