@@ -546,7 +546,9 @@ To show the identification strength varies with $\phi$, we plot the distribution
 
 \end{figure}
 
-We now report the size of the \SI{5}{\percent} tests in finite-sample using the standard Gaussian Quasi-Likelihood Ratio (QLR) statistic, the Anderson-Rubin (AR) statistic, and the conditional-QLR statistic proposed here.  Because we have four link functions, the AR-statistic  --- $T\widehat{g}(\lambda _{0})^{\prime }\widehat{\Sigma }(\lambda _{0},\lambda _{0})^{ -1}\widehat{g}(\lambda _{0})$ --- is asymptotically $\chi^2(df=4)$ distributed, \parencite{stock2000GMM}. It should be valid in this context, but it is known to be very conservative in many applications. 
+We now report the size of the \SI{5}{\percent} tests in finite-sample using the standard Gaussian Quasi-Likelihood Ratio (QLR) statistic and the conditional-QLR statistic proposed here.  
+
+% Because we have four link functions, the AR-statistic  --- $T\widehat{g}(\lambda _{0})^{\prime }\widehat{\Sigma }(\lambda _{0},\lambda _{0})^{ -1}\widehat{g}(\lambda _{0})$ --- is asymptotically $\chi^2(df=4)$ distributed, \parencite{stock2000GMM}. It should be valid in this context, but it is known to be very conservative in many applications. 
 
 \begin{table}[htb]
  
@@ -559,25 +561,25 @@ We now report the size of the \SI{5}{\percent} tests in finite-sample using the 
   round-precision=2,
  }
  
- \begin{tabularx}{.8\textwidth}{X | *{3}{S} | *{3}{S }}
+ \begin{tabularx}{.7\textwidth}{X | S S | S S}
 %
   \toprule
-  & {AR} & {Traditional} & {Proposed} & {AR} & {Traditional} & {Proposed} \\
+  & {Traditional} & {Proposed} & {Traditional} & {Proposed} \\
   \midrule
-   \multicolumn{7}{c}{Parameter Values used by \textcite{han2018leverage}} \\
+   \multicolumn{5}{c}{Parameter Values used by \textcite{han2018leverage}} \\
   \midrule
-  $\phi$ & \multicolumn{3}{c}{$T$ = 2,000} & \multicolumn{3}{c}{$T$ = 10,000} \\
+  $\phi$ & \multicolumn{2}{c}{$T$ = 2,000} & \multicolumn{2}{c}{$T$ = 10,000} \\
   \midrule
-  -0.01  & 5.0  & 2.4   & 5.2   & 4.6 & 1.7 & 5.6   \\
-  -0.10  & 5.3  & 3.3   & 6.7   & 4.4 & 2.6 & 6.2   \\
-  -0.40  & 6.3  & 3.3   & 5.3   & 4.9 &     &       \\
+  -0.01  & 2.4   & 5.2  & 1.7 & 5.6   \\
+  -0.10  & 3.3   & 6.7  & 2.6 & 6.2   \\
+  -0.40  & 3.3   & 5.3  & 3.4 & 4.9   \\
   \bottomrule
 
  \end{tabularx}
 
 \end{table}
 
-Consider the results reported in  \cref{tbl:test_performance}. The $AR$-statistic is robust, as we expect. The standard $QLR$-statistic appears to be conservative. The proposed test, on the other hand, is robust and has the proper size regardless of the value of $\phi$. This behavior of the proposed test is exactly what the theory predicts should happen. We see similar performance with $T = 10,000$. 
+The standard $QLR$-statistic appears conservative in \cref{tbl:test_performance}. The proposed test, on the other hand, is robust and has the proper size regardless of the value of $\phi$. This behavior of the proposed test is exactly what the theory predicts should happen. This performance holds with $T$ equal to both $2,000$ and $10,000$. 
 
 \section{Data and Empirical Results}\label{sec:empirical}
 
