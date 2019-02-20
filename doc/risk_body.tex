@@ -19,7 +19,7 @@ Our paper relates to the empirical analysis of the effect of volatility on risk 
 The weak identification issue studied in this paper is relevant in many economic applications, ranging from linear instrumental variable models \parencite{staiger1997instrumental} to nonlinear structural models \parencites{mavroeidis2014empirical, andrews2015maximum}. This paper is the first one to study this issue in structural asset pricing models with stochastic volatility. \Textcite{moreira2003conditional} introduces the conditional inference approach to the linear instrumental variable model, and \textcite{kleibergen2005testing} applies it to the nonlinear GMM problem. \Textcite{andrews2016conditional} propose conditional inference for nonlinear GMM problems with an infinite-dimensional nuisance parameter. This paper applies it to a minimum distance criterion and extends the scope of its application to a new type of asset pricing model.
 
 The rest of the paper is organized as follows. \Cref{sec:model} provides the model and its parameterization. \Cref{sec:ilnk functions} provides model-implied restrictions and use them to derive the link function. \Cref{sec:robust inference} provides the asymptotic distribution of the reduced-form parameter and robust inference for the structural parameter. A detailed algorithm to construct the robust confidence set is given in \cref{sec:conditional QLR}. 
-\Cref{sec:simulation} show that the method works well in simulation, and \Cref{sec:empirical} applies the methods to data on the S\&P 500 providing estimates of the risk prices. \Cref{sec:conclusion} concludes. 
+\Cref{sec:simulation} show that the method works well in simulation, and \Cref{sec:empirical} applies the methods to data on the S\&P 500 providing estimates of the risk prices. \Cref{sec:risk_conclusion} concludes. 
 Proofs are given in the appendix.
 
 \section{The Model}\label{sec:model}
@@ -33,9 +33,9 @@ Let $\F_t$ be the representative investor's information set at time $t$ .
 
 The prices of all assets satisfy the following asset pricing equation in terms of the SDF:
 %
-  \begin{equation}
-    P_t = \E\left[M_{t,t+1} \exp\left(-r_f\right) P_{t+1} \mvert \F_t \right]. 
-  \end{equation}
+\begin{equation}
+  P_t = \E\left[M_{t,t+1} \exp\left(-r_f\right) P_{t+1} \mvert \F_t \right]. 
+\end{equation}
 %
   Following the definition of $r_{t+1}$, the pricing equation implies that for all assets
 %
@@ -45,13 +45,13 @@ The prices of all assets satisfy the following asset pricing equation in terms o
 
 We start by parameterizing the SDF by the exponential affine model. Let $\pi$ be the price of volatility risk and $\kappa$ be the market return risk price. They are both considered as structural parameters.
 
-\begin{defn}{Parameterize the Stochastic Discount Factor}
+\begin{definition}{Parameterize the Stochastic Discount Factor}
  \label{defn:SDF}
 %
  \begin{equation}
     M_{t,t+1}(\pi, \kappa) = \exp\left(m_{0} + m_1 \sigma_t^2 - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right). 
  \end{equation}
-\end{defn}
+\end{definition}
 
 Throughout we assume that the two risks that command nonzero prices are the market return risk price and the volatility risk price. Consequently, we only use variation in the first two moments of the data to estimate these parameters. 
 
@@ -73,7 +73,7 @@ We adopt the conditional autoregressive gamma process as in \textcite{gourieroux
 %
 for all $x \in \R$. The function $A(x)$ and $B(x)$ are parameterized as follows.
 
-\begin{defn}{Parameterize the Volatility Dynamics}
+\begin{definition}{Parameterize the Volatility Dynamics}
      \label{defn:physical_vol_dynamics}
      \begin{align}
         \label{defn:a_PP}
@@ -82,7 +82,7 @@ for all $x \in \R$. The function $A(x)$ and $B(x)$ are parameterized as follows.
         B(x) &\coloneqq \delta \log(1 + c x),
      \end{align}
 with $\rho \in [0,1-\epsilon],$ $c > \epsilon$, $\delta > \epsilon$ for some $\epsilon > 0$.
-\end{defn}
+\end{definition}
 
 In this specification, $\rho$ is a persistence parameter, $c$ is a scale parameter, and $\delta$ is a level parameter. We can see this clearly in the following conditional mean and variance formulas for $\sigma^2_{t+1}$.
 
@@ -105,7 +105,7 @@ Next, we model the return dynamics. Similar to the volatility dynamics, the dist
 %
 for all $x \in \R$. The function $C(x)$, $D(x)$, and $E(x)$ are parameterized as follows such that the return has a conditional Gaussian distribution.
 
-\begin{defn}{Parameterize the Return Dynamics}
+\begin{definition}{Parameterize the Return Dynamics}
     \label{defn:physical_return_dynamics}
     \begin{align}
         C(x) &\coloneqq \psi x - \frac{1 - \phi^2}{2} x^2,\\
@@ -113,7 +113,7 @@ for all $x \in \R$. The function $C(x)$, $D(x)$, and $E(x)$ are parameterized as
         E(x) &\coloneqq \gamma x,
     \end{align}
 with $\phi \in [-1+\epsilon, 0]$ for some $\epsilon>0$.
-\end{defn}
+\end{definition}
 
 Under this specification, we have the following representation of the conditional mean and variance for $r_{t+1}$.
 
@@ -218,8 +218,7 @@ For the inference problem studied below, we know $g(\theta _{0},\omega_{0})=0$ w
 
 \subsection{Identification}
 
-One of the important contributions of \textcite{han2018leverage} is to establish the relationship between the identification of the volatility risk price and the leverage effect. In particular, they show that when the leverage effect parameter $\phi =0,$ the volatility risk price $\pi $ is not identified. To see this result, note that the only source of identification information on $\pi $ are the first two link functions in $g(\theta _{0},\omega _{0})=0$, 
-which come from \cref{Lemma m0 and m1}. Clearly, these two equations are independent of $\pi$ if $C(\kappa )=C(\kappa -1)$. Using the definition of $C(\cdot)$ and \cref{eqn:leverage restriction}, we have 
+One of the important contributions of \textcite{han2018leverage} is to establish the relationship between the identification of the volatility risk price and the leverage effect. In particular, they show that when the leverage effect parameter $\phi =0,$ the volatility risk price $\pi $ is not identified. To see this result, note that the only source of identification information on $\pi $ are the first two link functions in $g(\theta _{0},\omega _{0})=0$, which come from \cref{Lemma m0 and m1}. Clearly, these two equations are independent of $\pi$ if $C(\kappa )=C(\kappa -1)$. Using the definition of $C(\cdot)$ and \cref{eqn:leverage restriction}, we have 
 %
 \begin{equation}
     C(\kappa )-C(\kappa -1)=\psi -(1-\phi ^{2})\left( \kappa -\frac{1}{2}\right) = \frac{\phi}{\sqrt{2 c}}.
@@ -556,7 +555,7 @@ Since SPY is one of the most liquid assets traded, we can choose the frequency a
 
 
   \begin{subfigure}[t]{.54\textwidth}
-    \label{fig:spy_dynamics}
+    \label{risk_fig:spy_dynamics}
     \caption{Time Series}
     \includegraphics[width=\textwidth, height=.81\textwidth]{time_series.pdf}
   \end{subfigure}%
@@ -564,14 +563,14 @@ Since SPY is one of the most liquid assets traded, we can choose the frequency a
   \hfill
 %
   \begin{subfigure}[t]{.44\textwidth}
-    \label{fig:spy_static}
+    \label{risk_fig:spy_static}
     \caption{Joint Distribution}
     \includegraphics[width=\textwidth, height=\textwidth]{joint_dist.pdf}
   \end{subfigure}
 \end{figure}
 
 
-To see how the data move over time, we plot their time series in  \cref{fig:spy_dynamics}.  We also plot the joint unconditional distribution in \cref{fig:spy_static} to see the static relationship between the two series. The volatility has a long-right tail, a typical gamma-type distribution. The returns has a bell-shaped distribution. They are slightly negatively correlated, as shown by the regression line in the joint plot. This corroborates the work by \textcites{bandi2012timevarying, aitsahalia2013leverage}. We also report a series of summary statistics.
+To see how the data move over time, we plot their time series in  \cref{risk_fig:spy_dynamics}.  We also plot the joint unconditional distribution in \cref{risk_fig:spy_static} to see the static relationship between the two series. The volatility has a long-right tail, a typical gamma-type distribution. The returns has a bell-shaped distribution. They are slightly negatively correlated, as shown by the regression line in the joint plot. This corroborates the work by \textcites{bandi2012timevarying, aitsahalia2013leverage}. We also report a series of summary statistics.
 
 \begin{table}[htb]
 
@@ -692,7 +691,7 @@ The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_re
 
 
 
-\section{Conclusion}\label{sec:conclusion}
+\section{Conclusion}\label{sec:risk_conclusion}
 
 
 In structural stochastic volatility models as the one developed here, changes in the volatility affect returns through two channels. On the one hand, investors are willing to tolerate high volatility to get high expected returns as measured by the price of market return risk. On the other hand, investors are directly averse to changes in future volatility, as measured by the price of volatility risk. \Textcite{han2018leverage} shows how to disentangle these two channels by exploiting information arising from the leverage effect in an exponentially-affine pricing model. However, standard inference for this structural model is invalid because the volatility risk price is only weakly identified when the leverage effect is mild. This paper propose an identification robust inference procedure that provides reliable confidence sets for the risk prices regardless of the magnitude of the leverage effect. We take this procedure to the data on the S\&P 500. The robust inference procedure provides reliable yet informative confidence intervals for the risk prices associated with the market return and the volatility. 
