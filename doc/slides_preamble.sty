@@ -1,0 +1,172 @@
+%%%%%%%%%%%%%%%%% Packages %%%%%%%%%%%%%%
+
+%Setup the packages to use UTF-8
+\usepackage{fontspec}
+
+%Use AMS packages 
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathrsfs, mathtools}
+\usepackage{thmtools, thm-restate}
+
+%Use standard orientation of the code. 
+\usepackage{polyglossia}
+\setdefaultlanguage{english}
+
+%Enforce good coding practices. 
+\usepackage[orthodox]{nag}
+\usepackage[all, warning]{onlyamsmath}
+
+\usepackage{graphicx}
+\usepackage{tikz, pgf}
+\usetikzlibrary{fit, shapes.geometric}
+\usetikzlibrary{calc, babel}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{positioning}
+
+\tikzset{>=latex}
+
+%Use sensible defaults for floats, tables, lists, etc. 
+\usepackage{placeins}
+\usepackage{array, tabularx, booktabs}
+\usepackage{multirow}
+\usepackage{colortbl}
+
+\renewcommand{\arraystretch}{1.1} 
+\renewcommand{\tabularxcolumn }[1]{>{\centering \arraybackslash }m {#1}}
+
+%Use sensible styling of fonts
+\usepackage{textcomp} 
+\usepackage[round-mode=places, round-precision=2, scientific-notation=true]{siunitx}
+\usepackage{microtype}
+
+%Captions and References 
+\usepackage{caption, subcaption}
+\usepackage{csquotes}
+\usepackage{pifont}
+
+%Backup Sloes
+\usepackage{appendixnumberbeamer}
+
+%Packages that adjust the box. 
+\usepackage{adjustbox}                                                                                             
+\usepackage{lscape}                                                                                                
+\usepackage{changepage}                                                                                            
+\usepackage[makeroom]{cancel}
+\usepackage[overlay, absolute]{textpos}
+
+%%%%%%%%%%%% Citations %%%%%%%%%%%%%%%%
+\usepackage[backend=biber, autopunct=true, authordate,maxcitenames=4]{biblatex-chicago} 
+
+
+\usetheme{Boadilla}
+\setbeamercolor{frametitle}{fg=black, bg=DarkGreen!20}
+\setbeamercolor{section in head}{fg=DarkGreen, bg=DarkGreen!20}
+\setbeamercolor{title}{fg=black, bg=DarkGreen!20}
+\setbeamercolor{structure}{bg=DarkGreen!20, fg=DarkGreen}
+\setbeamercolor{block body}{bg=DarkGreen!20}
+\setbeamercolor{block title}{fg=black, bg=DarkGreen!35}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{title page}[default][colsep=-4bp,rounded=true]
+\setbeamerfont{title in head/foot}{series=\bfseries}
+\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamerfont{title}{series=\bfseries}
+\setbeamercolor{button}{fg=black}
+
+
+%%%%%%%%%%%% Use Default Items %%%%%%%%%%%%%%%%
+\setbeamertemplate{itemize items}{--}
+\setbeamertemplate{enumerate items}[default]
+
+\newcommand*{\button}[2]{
+    \begin{textblock*}{\textwidth}(.5\textwidth + 20pt, \textheight + 6pt)
+        \hyperlink{#1}{\beamerbutton{#2}}
+    \end{textblock*}
+}
+
+
+%%%%%%%%%%%%%%%%%%% Commands %%%%%%%%%%%%%%%%%%% 
+\newcommand*{\Cov}{\mathbb{C}\mathrm{ov}}
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\F}{\mathcal{F}}
+\newcommand*{\I}{\mathbb{I}}
+\newcommand*{\Lap}{L}  
+\newcommand*{\N}{N}
+\newcommand*{\R}{\mathbb{R}}
+\newcommand*{\Var}{\mathbb{V}\mathrm{ar}}
+\newcommand*{\aequals}{\overset{a.s.}{=}}
+\newcommand*{\lequals}{\overset{\mathcal{L}}{=}}
+\newcommand*{\eps}{\mathcal{\epsilon}}                                                                             
+\DeclareMathOperator{\pto}{\overset{\mathbb{P}}{\rightarrow}}
+\DeclareMathOperator{\slto}{\overset{\mathcal{L}-s}{\longrightarrow}}
+\DeclareMathOperator{\erf}{erf}                                                                                    
+\DeclareMathOperator{\erfc}{erfc}                                                                                  
+\DeclareMathOperator{\erfcx}{erfcx}                                                                                
+\DeclareMathOperator{\sgn}{sign}                                                                                   
+\DeclareMathOperator{\median}{median}                                                                              
+\DeclareMathOperator*{\argmin}{argmin}                                                                             
+
+\newcommand*{\dif}{\mathop{}\!d}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+
+\newcommand*{\Ito}{It\^{o}}
+\newcommand*{\Frechet}{Fr\'{e}chet}
+\newcommand{\mvert}[1][\middle]{\ensuremath{\,#1\vert\,}}
+
+
+%%%%%%%%%%%%%%%%% Theorem Environments %%%%%%%%%%%%
+\declaretheoremstyle[notefont=\bfseries, headformat={\NAME \NOTE}, notebraces={}{}]{assumptionstyle}
+    
+%%%%%%%%%%%%% Add  Figure Folder %%%%%%%%%%
+\graphicspath{{figures/}}
+
+
+%%%%%%%%%%% Define Some Colors %%%%%%%%%%%%%%%%%%%%%%%%5
+
+\definecolor{DisplayPurple}{HTML}{7A00E6} 
+\definecolor{DisplayRed}{HTML}{850100} 
+\definecolor{DisplayBlue}{HTML}{003864} 
+\definecolor{DarkOrange}{HTML}{FF5900}
+\definecolor{DarkGreen}{HTML}{014A19}
+\colorlet{row_background}{DarkGreen!20} 
+\newcommand{\Ccancel}[2][black]{\renewcommand\CancelColor{\color{#1}}\cancelto{#2}}                                  
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\orange}[1]{\textcolor{DarkOrange}{#1}}
+\newcommand{\purple}[1]{\textcolor{DisplayPurple}{#1}}
+\newcommand{\green}[1]{\textcolor{DarkGreen}{#1}}
+                               
+
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{headline}{}    
+\captionsetup{labelformat=empty}                                      
+
+\setbeamertemplate{footline}{%
+    \begin{beamercolorbox}[wd=\paperwidth, sep=2pt]{footline}%
+        \includegraphics[height=7pt]{shield-simple-small.png}%
+        \hfill%
+        \usebeamerfont{title in head/foot}%
+        \scriptsize \insertframenumber\,/\,\inserttotalframenumber
+    \end{beamercolorbox}%
+}
+
+
+\newcommand{\cmark}{\ding{51}}
+\newcolumntype{Y}{>{\usebeamercolor[fg]{frametitle} \arraybackslash} c}
+\newcolumntype{Z}{>{\raggedright \arraybackslash} X}
+
+\newcommand*{\jumppropt}{\ensuremath{\frac{\red{\gamma_t^2}}{\blue{\sigma^2_t} + \red{\gamma^2_t}}}}
+\newcommand*{\jumpprop}[1]{\ensuremath{\frac{\red{\gamma_{#1}^2}}{\blue{\sigma^2_{#1}} + \red{\gamma^2_{#1}}}}}
+\newcommand*{\totalvolt}{\ensuremath{\blue{\sigma^2_t} + \red{\gamma^2_t}}}
+\newcommand*{\totalvol}[1]{\ensuremath{\blue{\sigma^2_{#1}} + \red{\gamma^2_{#1}}}}
+\newcommand*{\jumpvolt}{\red{\ensuremath{\gamma_t^2}}}
+\newcommand*{\diffvolt}{\blue{\ensuremath{\sigma_t^2}}}
+\newcommand*{\FOMC}{\boldsymbol{1}\lbrace FOMC \rbrace}
+\newcommand*{\rtnt}{\ensuremath{\purple{r_t}}}
+\newcommand*{\rxt}{\ensuremath{\purple{rx_t}}}
+\DeclareMathOperator{\logit}{logit}
+
+%Define some commands for this project.
+
+\addbibresource{density_estimation.bib}
+
