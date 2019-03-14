@@ -16,23 +16,10 @@
 \usepackage[orthodox]{nag}
 \usepackage[all, warning]{onlyamsmath}
 
-\usepackage{graphicx}
-\usepackage{tikz, pgf}
-\usetikzlibrary{fit, shapes.geometric}
-\usetikzlibrary{calc, babel}
-\usetikzlibrary{decorations.pathreplacing}
-\usetikzlibrary{positioning}
-
-\tikzset{>=latex}
-
 %Use sensible defaults for floats, tables, lists, etc. 
 \usepackage{placeins}
 \usepackage{array, tabularx, booktabs}
 \usepackage{multirow}
-\usepackage{colortbl}
-
-\renewcommand{\arraystretch}{1.1} 
-\renewcommand{\tabularxcolumn }[1]{>{\centering \arraybackslash }m {#1}}
 
 %Use sensible styling of fonts
 \usepackage{textcomp} 
@@ -54,11 +41,6 @@
 \usepackage[makeroom]{cancel}
 \usepackage[overlay, absolute]{textpos}
 
-%%%%%%%%%%%% Citations %%%%%%%%%%%%%%%%
-\usepackage[backend=biber, autopunct=true, authordate,maxcitenames=4]{biblatex-chicago} 
-
-
-\usetheme{Boadilla}
 \setbeamercolor{frametitle}{fg=black, bg=DarkGreen!20}
 \setbeamercolor{section in head}{fg=DarkGreen, bg=DarkGreen!20}
 \setbeamercolor{title}{fg=black, bg=DarkGreen!20}
@@ -89,34 +71,16 @@
 \newcommand*{\E}{\mathbb{E}}
 \newcommand*{\F}{\mathcal{F}}
 \newcommand*{\I}{\mathbb{I}}
-\newcommand*{\Lap}{L}  
 \newcommand*{\N}{N}
 \newcommand*{\R}{\mathbb{R}}
 \newcommand*{\Var}{\mathbb{V}\mathrm{ar}}
 \newcommand*{\aequals}{\overset{a.s.}{=}}
 \newcommand*{\lequals}{\overset{\mathcal{L}}{=}}
-\newcommand*{\eps}{\mathcal{\epsilon}}                                                                             
-\DeclareMathOperator{\pto}{\overset{\mathbb{P}}{\rightarrow}}
-\DeclareMathOperator{\slto}{\overset{\mathcal{L}-s}{\longrightarrow}}
-\DeclareMathOperator{\erf}{erf}                                                                                    
-\DeclareMathOperator{\erfc}{erfc}                                                                                  
-\DeclareMathOperator{\erfcx}{erfcx}                                                                                
-\DeclareMathOperator{\sgn}{sign}                                                                                   
-\DeclareMathOperator{\median}{median}                                                                              
-\DeclareMathOperator*{\argmin}{argmin}                                                                             
-
-\newcommand*{\dif}{\mathop{}\!d}
-\DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \DeclarePairedDelimiter\norm{\lVert}{\rVert}
 
-\newcommand*{\Ito}{It\^{o}}
-\newcommand*{\Frechet}{Fr\'{e}chet}
 \newcommand{\mvert}[1][\middle]{\ensuremath{\,#1\vert\,}}
 
 
-%%%%%%%%%%%%%%%%% Theorem Environments %%%%%%%%%%%%
-\declaretheoremstyle[notefont=\bfseries, headformat={\NAME \NOTE}, notebraces={}{}]{assumptionstyle}
-    
 %%%%%%%%%%%%% Add  Figure Folder %%%%%%%%%%
 \graphicspath{{figures/}}
 
@@ -129,7 +93,7 @@
 \definecolor{DarkOrange}{HTML}{FF5900}
 \definecolor{DarkGreen}{HTML}{014A19}
 \colorlet{row_background}{DarkGreen!20} 
-\newcommand{\Ccancel}[2][black]{\renewcommand\CancelColor{\color{#1}}\cancelto{#2}}                                  
+
 \newcommand{\blue}[1]{\textcolor{blue}{#1}}
 \newcommand{\red}[1]{\textcolor{red}{#1}}
 \newcommand{\orange}[1]{\textcolor{DarkOrange}{#1}}
@@ -149,24 +113,4 @@
         \scriptsize \insertframenumber\,/\,\inserttotalframenumber
     \end{beamercolorbox}%
 }
-
-
-\newcommand{\cmark}{\ding{51}}
-\newcolumntype{Y}{>{\usebeamercolor[fg]{frametitle} \arraybackslash} c}
-\newcolumntype{Z}{>{\raggedright \arraybackslash} X}
-
-\newcommand*{\jumppropt}{\ensuremath{\frac{\red{\gamma_t^2}}{\blue{\sigma^2_t} + \red{\gamma^2_t}}}}
-\newcommand*{\jumpprop}[1]{\ensuremath{\frac{\red{\gamma_{#1}^2}}{\blue{\sigma^2_{#1}} + \red{\gamma^2_{#1}}}}}
-\newcommand*{\totalvolt}{\ensuremath{\blue{\sigma^2_t} + \red{\gamma^2_t}}}
-\newcommand*{\totalvol}[1]{\ensuremath{\blue{\sigma^2_{#1}} + \red{\gamma^2_{#1}}}}
-\newcommand*{\jumpvolt}{\red{\ensuremath{\gamma_t^2}}}
-\newcommand*{\diffvolt}{\blue{\ensuremath{\sigma_t^2}}}
-\newcommand*{\FOMC}{\boldsymbol{1}\lbrace FOMC \rbrace}
-\newcommand*{\rtnt}{\ensuremath{\purple{r_t}}}
-\newcommand*{\rxt}{\ensuremath{\purple{rx_t}}}
-\DeclareMathOperator{\logit}{logit}
-
-%Define some commands for this project.
-
-\addbibresource{density_estimation.bib}
 

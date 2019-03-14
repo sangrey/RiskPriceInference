@@ -2,6 +2,10 @@
 \usetheme{Boadilla}
 \usecolortheme{rose}
 \usepackage{slides_preamble}
+\usepackage[autopunct=true, hyperref=true, doi=false, isbn=false, natbib=true,
+url=false, eprint=false, style=chicago-authordate]{biblatex} 
+\addbibresource{risk_bibliography.bib}
+
 \title{Identification Robust Inference for Risk Prices in Structural Stochastic Volatility Models} 
 \author{Xu Cheng \inst{1} \and Eric Renault \inst{2} \and Paul Sangrey \inst{1}}
 \institute{\inst{1} University of Pennsylvania \and \inst{2} University of Warwick}
@@ -17,7 +21,20 @@
 \section{Introduction}
 
 \begin{frame}[c]{Introduction}
-    \centering
+
+    \begin{itemize}
+    \item How do investors trade off risk and return?  \textcites{sharpe1964capital, aitsahalia2012testing}.
+%
+        \item The capital asst pricing model (CAPM) gives a static trade-off.
+%
+        \item In practice, volatility varies over time.
+%
+        \item Modern asset pricing models often have an additional channel.
+%
+        \begin{itemize}
+            \item Investors care directly about changes in volatility.
+        \end{itemize}
+    \end{itemize}
 \end{frame}
 
 \end{document}
