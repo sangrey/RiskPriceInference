@@ -8,7 +8,7 @@ set(CMAKE_BUILD_SCRIPTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/info")
 set(PKG_NAME $ENV{PKG_NAME})
 set(CMAKE_PREFIX_PATH $ENV{PREFIX})
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/info)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 string(REPLACE "." "" FORMATTED_PY_VER "$ENV{PY_VER}") 
@@ -39,10 +39,14 @@ file(GENERATE  OUTPUT "$<TARGET_FILE_DIR:${PROJECT_NAME}>/${MY_VERSION_FILENAME}
 add_custom_target(VERSION_FILE ALL DEPENDS "${MY_VERSION_FILANEM}"
     COMMENT "I am writing the version ${MY_VERSION_STRING} to the version file ${MY_VERSION_FILENAME}.")
 
+target_compile_features(${PROJECT_NAME}  PRIVATE cxx_std_17)
 target_compile_options(${PROJECT_NAME} PUBLIC -fdiagnostics-color=always)
 
 message(STATUS "The build type is ${CMAKE_BUILD_TYPE}")                                                        
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")                                                                      
     set(MY_RELEASE_COMPILE_OPTIONS -mtune=native -mfpmath=sse -funroll-loops)
     target_compile_options(${PROJECT_NAME} PUBLIC ${MY_RELEASE_COMPILE_OPTIONS})                                      
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")                                                                         
+    set(MY_DEBUG_COMPILE_OPTIONS -Wpedantic -Werror -Wall -Wextra)
+    target_compile_options(${PROJECT_NAME} PRIVATE ${MY_DEBUG_COMPILE_OPTIONS})                                      
 endif()      
