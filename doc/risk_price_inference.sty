@@ -1,4 +1,7 @@
 \usepackage{ifxetex}
+\usepackage{silence}
+\WarningFilter{remreset}{The remreset package is obsolete}
+
 \ifxetex
    \usepackage{fontspec}
 \else
@@ -21,8 +24,8 @@
 \usepackage{siunitx}
 \usepackage[title,titletoc,toc]{appendix}
 \usepackage{tabularx}
-\usepackage{siunitx}
 \usepackage{booktabs}
+\usepackage{algorithm} 
 
 \declaretheorem[name=Theorem, style=plain]{theorem}
 \declaretheoremstyle[headfont=\normalfont\itshape, bodyfont=\normalfont]{partsytle} 

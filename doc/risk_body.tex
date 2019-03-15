@@ -614,16 +614,23 @@ We now report the estimates and confidence intervals for the reduced-form parame
   \caption{Reduced-Form Parameters Necessary to Fully Specify the Model} 
   \label{tbl:reduced_form_parameters}
 
-  \centering
-  \sisetup{
-    table-align-text-pre=false,
-    table-align-text-post=false,
-    round-mode=places,
-    table-alignment=center,
-  }
+    \centering
+    \sisetup{
+        detect-mode,
+        tight-spacing           = true,
+        group-digits            = false,
+        input-symbols           = {(}{)},
+        input-open-uncertainty  = ,
+        input-close-uncertainty = ,
+        round-mode              = places,
+        round-precision         = 2,
+        table-align-text-pre    = false,
+        table-align-text-post   = false,
+        table-alignment         = center,
+    }
 
-  \begin{tabularx}{.7\textwidth}{X | S >{{(}} S[table-space-text-pre={(}] <{{,\,}}
-    S[table-space-text-pre={\hspace{-1cm}}] <{{)}}}
+    \begin{tabularx}{.7\textwidth}{X | S >{{(}} S[table-space-text-pre={(}] <{{,\,}}
+      S[table-space-text-pre={\hspace{-1.5cm}}] <{{)}}}
 %
     \toprule
     & {Point Estimate} & \multicolumn{2}{c}{\SI{95}{\percent} Confidence Interval} \\
@@ -644,16 +651,22 @@ For confidence intervals of the three structural parameters, we first compute th
   \label{tbl:structural_param_estimates}
 
   \centering
-  \sisetup{
-    table-align-text-pre=false,
-    table-align-text-post=false,
-    round-mode=places,
-    round-precision=2,
-    table-alignment=center,
-  }
+    \sisetup{
+        detect-mode,
+        tight-spacing           = true,
+        group-digits            = false,
+        input-symbols           = {(}{)},
+        input-open-uncertainty  = ,
+        input-close-uncertainty = ,
+        round-mode              = places,
+        round-precision         = 2,
+        table-align-text-pre    = false,
+        table-align-text-post   = false,
+        table-alignment         = center,
+    }
 
-  \begin{tabularx}{.4\textwidth}{X | >{{(}} S[table-space-text-pre={(}] <{{,\,}}
-    S[table-space-text-pre={\hspace{-1cm}}] <{{)}}}
+    \begin{tabularx}{.4\textwidth}{X | S >{{(}} S[table-space-text-pre={(}] <{{,\,}}
+      S[table-space-text-pre={\hspace{-1.5cm}}] <{{)}}}
 %
     \toprule
     & \multicolumn{2}{c}{\SI{95}{\percent} Confidence Interval} \\
