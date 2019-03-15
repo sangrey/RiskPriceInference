@@ -111,5 +111,111 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \end{itemize}
 
 \end{frame}
+
+
+\begin{frame}[c]{Reduced-Form Model}
+
+    The volatility follows a conditional autoregressive gamma process.
+%
+    \medskip
+    \begin{itemize}
+        \item $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $.
+        \medskip
+%
+        \item $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$.
+        \medskip
+%
+        \item $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$.
+    \end{itemize}
+ 
+    \bigskip
+    The return is conditionally Gaussian.
+    \medskip
+
+    \begin{itemize}
+        \item $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right] = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$.
+        \medskip
+%
+        \item $\displaystyle  C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $.
+        \medskip
+%
+        \item $\displaystyle D(x) \coloneqq \beta x$.
+        \medskip
+%
+        \item $\displaystyle E(x) \coloneqq \gamma x$.  
+%
+    \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[c]{Identification}
+
+    \begin{minipage}{.49\textwidth}
+        \centering
+        \emph{The Link Functions}
+%
+        \begin{enumerate}
+            \item $\displaystyle \gamma = B(\pi + C(\kappa -1)) - B(\pi + C(\kappa))$. 
+%
+            \item $\displaystyle \beta = A(\pi + C(\kappa -1)) - A(\pi + C(\kappa))$. 
+%
+            \item $\displaystyle \psi = \frac{\phi}{\sqrt{2 c}} - \frac{1-\phi^2}{2} + (1 -\phi^2) \kappa$.
+        \end{enumerate}
+    \end{minipage}%
+%
+    \hfill
+%
+    \begin{minipage}{.49\textwidth}
+        \centering
+        \emph{Identification Problem}
+    \end{minipage}
+
+\end{frame}
+
+\begin{frame}[c]{Assumption R}
+    \label{assump:R}
+    The following conditions hold uniformly over $P\in \mathcal{P}$, for some fixed $0 < C < \infty$.
+    
+    \begin{enumerate}
+        \item $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega _{1}))\rightarrow _{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega _{1})-\E[H_{t}(\omega _{1})])\rightarrow _{p}0,$ $\E[H_{t}(\omega _{1})]$ is continuous in $\omega _{1},$ all uniformly over the parameter space of $\omega _{1}$.
+    %
+        \item $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime }-\E[ x_{t}x_{t}^{\prime }{])\rightarrow }_{p}0.$
+    %
+        \item $V^{-1/2}\{T^{-1/2}(\sum_{t=1}^{T}f_{t}(\omega _{0})-\E[f_{t}(\omega _{0}){]\} \rightarrow }_{d}N(0,I)$ and $\widehat{V} -V\rightarrow _{p}0.$
+    %
+        \item $C^{-1}\leq \lambda_{\min }(A)\leq \lambda_{\max }(A)\leq C$ for $A=V,\E[H_{t}\left( \omega _{1,0}\right) ^{\prime }H_{t}\left( \omega _{1,0}\right) ]),\E[x_{t}x_{t}^{\prime }],\E[ z_{t}z_{t}^{\prime }],$ where $z_{t}=(1,\sigma _{t}^{2},\sigma _{t}^{4})^{\prime }.$
+    %
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[c]{The Algorithm for Constructing the Confidence Set}
+    \begin{enumerate}
+        \item Estimate the reduced-form parameter $\widehat{\omega }=( \widehat{\omega }_{1},\widehat{\omega }_{2},\widehat{\omega }_{3})^{\prime }$ following the estimators defined in \ref{omega 1 est}, \ref{omega 2 est}, and  \ref{omega 3 est}.
+            \midskip
+%
+        \item Obtain a consistent estimator of $\widehat{\omega}$'s asymptotic covariance $\widehat{ \Omega }=\widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime },$ where $\widehat{\mathcal{B}}$ is defined in \ref{Fhat} and $\widehat{V}$ is a HAC estimator of $V.$
+            \midskip
+    
+        \item For $\theta _{0}\in \Theta$,
+%
+        \begin{enumerate}
+            \item Construct the QLR statistic $QLR(\theta _{0})$ in \ref{QLR stat} using $g(\theta ,\omega ),$ $G(\theta ,\omega ),$ $\widehat{\omega },$ and $\widehat{\Omega }.$
+%
+            \item Compute the residual process $\widehat{r}(\theta )$ in \ref{red process}.
+    
+           \item Given $\widehat{r}(\theta ),$ compute the critical value $c_{1-\alpha }(r,\theta _{0})$ described above.
+%
+        \end{enumerate}
+            \midskip
+%
+        \item Repeat these steps for different values of $\theta _{0}$.  Construct a confidence set by collecting the null values that are not rejected, i.e., the nominal level $1-\alpha $ confidence set for $\theta _{0}$ is
+%
+        \begin{equation}
+            CS_{T}=\{ \theta _{0}:QLR_{T}(\theta _{0})\leq c_{1-\alpha }(r,\theta_{0})\}.
+        \end{equation}
+    \end{enumerate}
+\end{frame}
+
 \end{document}
 
