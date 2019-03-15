@@ -1,4 +1,7 @@
 \documentclass[smaller, aspectratio=169]{beamer}
+
+\usepackage{silence}
+\WarningFilter{remreset}{The remreset package is obsolete}
 \usetheme{Boadilla}
 \usecolortheme{rose}
 \usepackage{slides_preamble}
@@ -6,10 +9,13 @@
 url=false, eprint=false, style=chicago-authordate]{biblatex} 
 \addbibresource{risk_bibliography.bib}
 
-\title{Identification Robust Inference for Risk Prices in Structural Stochastic Volatility Models} 
-\author{Xu Cheng \inst{1} \and Eric Renault \inst{2} \and Paul Sangrey \inst{1}}
-\institute{\inst{1} University of Pennsylvania \and \inst{2} University of Warwick}
-\date{March 25, 2019}
+\let\emph\relax 
+\DeclareTextFontCommand{\emph}{\color{DarkGreen} \bfseries }
+
+\title[]{Identification Robust Inference for Risk Prices in Structural Stochastic Volatility Models} 
+\author[Cheng, Renault, and Sangrey]{Xu Cheng \inst{1} \and Eric Renault \inst{2} \and Paul Sangrey \inst{1}}
+\institute[]{\inst{1} University of Pennsylvania \and \inst{2} University of Warwick}
+\date[]{March 25, 2019}
 
 \begin{document}
 
@@ -23,13 +29,17 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 \begin{frame}[c]{Introduction}
 
     \begin{itemize}
-    \item How do investors trade off risk and return?  \textcites{sharpe1964capital, aitsahalia2012testing}.
+        \item How do investors trade off risk and return?  \textcites{sharpe1964capital}.
+            \medskip
 %
         \item The capital asst pricing model (CAPM) gives a static trade-off.
+            \medskip
 %
         \item In practice, volatility varies over time.
+            \medskip
 %
-        \item Modern asset pricing models often have an additional channel.
+        \item Modern asset pricing models often have an additional channel, \parencites{chang2013market, dewbecker2017price}.
+            \smallskip
 %
         \begin{itemize}
             \item Investors care directly about changes in volatility.
@@ -37,5 +47,69 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \end{itemize}
 \end{frame}
 
+
+\begin{frame}[c]{Volatility Affects Expected Returns Through Two Channels}
+
+    \begin{enumerate}
+        \item Investors' willingness to tolerate high-volatility to get high expected returns.
+            \begin{itemize}
+                \item This measured by the market return risk price.
+            \end{itemize}
+%
+                \item Investors' direct aversion to changes in future volatility.
+            \begin{itemize}
+                \item This is measured by the volatility risk price.
+            \end{itemize}
+    \end{enumerate}
+            \pause
+
+%
+    \begin{itemize}
+        \item \Textcite{han2018leverage} disentangle the two channels when the leverage effect is \emph{large}. 
+            \pause
+        \item However, the leverage effect is \emph{small} and hard to estimate, \parencites{aitsahalia2013leverage, bandi2012timevarying}.
+    \end{itemize}
+
+    \pause
+    \bigskip
+
+    \begin{block}{}
+        The volatility risk price is weakly identified. We develop robust methods that create uniformly valid confidence sets in the presence of any identification strength.
+    \end{block}
+    
+\end{frame}
+
+
+\begin{frame}[c]{Plan for the Talk}
+    \begin{enumerate}
+%
+        \item The model.
+            \bigskip
+%
+        \item Asymptotic results for the reduced-form and structural parameters.
+            \bigskip
+%
+        \item Algorithm to construct the confidence set.
+            \bigskip
+%
+        \item Simulation results.  
+            \bigskip
+%
+        \item Empirical results using data on the S\&P 500.
+%
+    \end{enumerate}
+\end{frame}
+
+
+\begin{frame}[c]{Asset Pricing Equation}
+
+    \begin{itemize}
+        \item $\displaystyle P_t = \E\left[M_{t,t+1} \exp(-r_f) P_{t+1} \mvert \F_{t} \right]$.
+            \bigskip
+%
+        \item $\displaystyle M_{t,t+1}(\pi, \kappa) = \exp\left(m_0 + m_1 \sigma^2_t - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right)$.
+    \end{itemize}
+
+\end{frame}
 \end{document}
 
