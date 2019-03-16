@@ -217,7 +217,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \label{assump:R}
 %    
     \begin{enumerate}
-      \item Where $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega_{1}))\rightarrow_{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega_{1})-\E[H_{t}(\omega_{1})])\rightarrow_{p}0$, and $\E[H_{t}(\omega_{1})]$ is continuous in $\omega_{1}$; all holding uniformly.
+      \item Let $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega_{1}))\rightarrow_{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega_{1})-\E[H_{t}(\omega_{1})])\rightarrow_{p}0$, and $\E[H_{t}(\omega_{1})]$ is continuous in $\omega_{1}$; all holding uniformly.
 %
       \item $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime}-\E[ x_{t}x_{t}^{\prime}{])\rightarrow}_{p}0.$
 %
@@ -243,58 +243,61 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[c]{Some Definitions}
 
-    Let $H(\omega_{1}) \coloneqq \E[H_{t}(\omega_{1})]$ and $\overline{H}(\omega_{1}) \coloneqq T^{-1}\sum_{t = 1}^{T}H_{t}(\omega_{1})$. Define 
+    Define the parameters:
+    \medskip
 %
-    \begin{equation}
-        \mathcal{B} \coloneqq \diag\lbrace[H(\omega_{10})V_{1}^{-1}H(\omega_{10})]^{-1}H(\omega_{10})V_{1}^{-1}, \E[x_{t}x_{t}^{\prime}]^{-1}, 1 \rbrace, \text{ with sample analog } \widehat{\mathcal{B}}.
-        \label{Fhat}
-    \end{equation}
+    \begin{enumerate}
+        \item $\displaystyle H(\omega_{1}) \coloneqq \E[H_{t}(\omega_{1})]$ 
+%
+        \item $\displaystyle \overline{H}(\omega_{1}) \coloneqq T^{-1}\sum_{t=1}^{T} H_{t}(\omega_{1})$
+            %
+        \item $\displaystyle \mathcal{B} \coloneqq \diag\lbrace[H(\omega_{10})V_{1}^{-1}H(\omega_{10})]^{-1}H(\omega_{10})V_{1}^{-1}$, $\displaystyle \E[x_{t}x_{t}^{\prime}]^{-1}, 1 \rbrace$,  with sample analog  $\displaystyle \widehat{\mathcal{B}}$.
+%
+    \end{enumerate}
 %
     \bigskip
 %
     Define the criterion:
 %
-    \begin{equation}
+    \begin{equation*}
       QLR(\theta_{0}) \coloneqq T \widehat{g} (\theta_{0})^{\prime}\widehat{\Sigma} (\theta_{0}, \theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \Theta}{\min}T\widehat{g}(\theta)^{\prime}\widehat{\Sigma} (\theta, \theta)^{-1}\widehat{g}(\theta),  
-      \label{QLR stat}
-    \end{equation}
+    \end{equation*}
     %
-    where $\widehat{\Sigma}\left(\theta_{1}, \theta_{2}\right) = \widehat{G}(\theta_{1})\widehat{\Omega}\widehat{G}(\theta_{2})^{\prime}$ and $\widehat{\Omega}$ is a consistent estimator.
+    \quad where $\widehat{\Sigma}\left(\theta_{1}, \theta_{2}\right) = \widehat{G}(\theta_{1})\widehat{\Omega}\widehat{G}(\theta_{2})^{\prime}$ and $\widehat{\Omega}$ is a consistent estimator.
  
     \bigskip
 %    
     Define the residual process:
     %
-    \begin{equation}
+    \begin{equation*}
       \widehat{r}(\theta) \coloneqq \widehat{g}(\theta)-\widehat{\Sigma}(\theta, \theta_{0})\widehat{\Sigma}(\theta_{0}, \theta_{0})^{-1}\widehat{g} (\theta_{0}). 
-      \label{red process}
-    \end{equation}
+    \end{equation*}
 
 \end{frame}
 
 \begin{frame}[c]{The Algorithm for Constructing the Confidence Set}
   \begin{enumerate}
-    \item Estimate the reduced-form parameter $\widehat{\omega} = \left(\widehat{\omega}_{1}, \widehat{\omega}_{2}, \widehat{\omega}_{3}\right)'$ following the estimators defined in \eqref{omega 1 est}, \eqref{omega 2 est}, and \eqref{omega 3 est}.
+    \item Estimate the reduced-form parameter $\widehat{\omega} \coloneqq \left(\widehat{\omega}_{1}, \widehat{\omega}_{2}, \widehat{\omega}_{3}\right)'$ following the estimators defined above.
       \medskip
 %
-    \item Obtain a consistent estimator of $\widehat{\omega}$'s asymptotic covariance $\widehat{\Omega} = \widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime}, $ where $\widehat{\mathcal{B}}$ is defined in \eqref{Fhat} and $\widehat{V}$ is a HAC estimator of $V.$
+    \item Estimate $\widehat{\omega}$'s asymptotic covariance using $\widehat{\Omega} = \widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime}, $ where $\widehat{V}$ is a HAC estimator of $V$.
       \medskip
   
     \item For $\theta_{0}\in \Theta$, 
 %
     \begin{enumerate}
-      \item Construct the QLR statistic $QLR(\theta_{0})$ in \eqref{QLR stat} using $g(\theta, \omega), $ $G(\theta, \omega), $ $\widehat{\omega}, $ and $\widehat{\Omega}.$
+      \item Construct the QLR statistic $QLR(\theta_{0})$ using $g(\theta, \omega), $ $G(\theta, \omega), $ $\widehat{\omega}, $ and $\widehat{\Omega}.$
 %
-      \item Compute the residual process $\widehat{r}(\theta)$ in \eqref{red process}.
+      \item Compute the residual process $\widehat{r}(\theta)$.
   
-      \item Given $\widehat{r}(\theta), $ compute the critical value $c_{1-\alpha}(r, \theta_{0})$ described above.
+      \item Given $\widehat{r}(\theta), $ compute its critical value $c_{1-\alpha}(r, \theta_{0})$.
 %
     \end{enumerate}
       \medskip
 %
-    \item Repeat these steps for different values of $\theta_{0}$. Construct a confidence set by collecting the null values that are not rejected, i.e., the nominal level $1-\alpha $ confidence set for $\theta_{0}$ is
+  \item Repeat these steps for different $\theta_{0}$. Collect the not rejected $\theta_{0}$ to form a nominal level $1-\alpha $ confidence set: 
 %
     \begin{equation}
       CS_{T} = \left\lbrace \theta_{0} \mvert QLR_{T}(\theta_{0})\leq c_{1-\alpha}(r, \theta_{0}. \right\rbrace
@@ -303,21 +306,11 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 \end{frame}
 
 
-\begin{frame}
-% \begin{assumpS}
-  % \label{assump:S}
-The following conditions hold over $P\in \mathcal{P}, $ for any $\theta $ in its parameter space, and any $\omega $ in some fixed neighborhood around its true value, for some fixed $0<C<\infty$.
-%
-\begin{enumerate}
-  \item $g(\theta, \omega )$ is partially differentiable in $\omega, $ with partial derivative $G(\theta, \omega )$ that satisfies $||G(\theta _{1}, \omega )-G(\theta _{2}, \omega )||\leq C||\theta _{1}-\theta _{2}||$ and $||G(\theta, \omega _{1})-G(\theta, \omega _{2})||\leq C||\omega _{1}-\omega _{2}||.$
-%
-  \item $C^{-1}\leq \lambda_{\min}(G(\theta, \omega )^{\prime}G(\theta, \omega ))\leq \lambda_{\max}(G(\theta, \omega )^{\prime}G(\theta, \omega ))\leq C$.
-\end{enumerate}
-% \end{assumpS}
+\begin{frame}[c]{The algorithm above constructs a valid confidence set}
 
 \begin{theorem}
   \label{Lemma CS}
-  Suppose Assumptions R and S hold. Then, 
+  Suppose Assumptions R and S hold. Then 
 %
   \begin{equation*} 
     \underset{T\rightarrow \infty}{\lim \inf}\underset{P\in \mathcal{P}}{\inf}\Pr \left( \theta _{0}\in CS_{T}\right) \geq 1-\alpha .
