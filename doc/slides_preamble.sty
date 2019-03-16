@@ -20,11 +20,13 @@
 %Use sensible defaults for floats, tables, lists, etc. 
 \usepackage{array, tabularx, booktabs}
 \usepackage{multirow}
+\usepackage{colortbl}
 
 %Use sensible styling of fonts
 \usepackage{textcomp} 
 \usepackage[round-mode=places, round-precision=2, scientific-notation=true]{siunitx}
 \usepackage{microtype}
+\usepackage{pifont}
 
 %Captions and References 
 \usepackage{caption, subcaption}
@@ -49,7 +51,7 @@
 \setbeamertemplate{itemize items}{--}
 \setbeamertemplate{enumerate items}[default]
 
-
+\newcommand{\cmark}{\ding{51}}
 \newcommand*{\button}[2]{
     \begin{textblock*}{\textwidth}(.5\textwidth + 20pt, \textheight + 6pt)
         \hyperlink{#1}{\beamerbutton{#2}}

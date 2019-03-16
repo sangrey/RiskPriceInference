@@ -79,6 +79,32 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
   
 \end{frame}
 
+\begin{frame}[c]{Literature Review}
+
+    \emph{Analysis between Risk and Return:} 
+
+    \begin{itemize}
+        \item  The empirical evidence on the market return risk price is inconclusive, \parencite{lettau2010measuring}. 
+%
+        \item \Textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there} find a positive estimate.
+% 
+        \item \Textcites{campbell1987stock, breen1989economic, brandt2004relationship} find a negative one.
+%
+        \item \Textcites{christoffersen2013capturing, feunou2014risk, dewbecker2017price} focus on the theory and contain both risk factors.
+    \end{itemize}
+    
+    \pause
+
+    \emph{Weak Identification Literature:}
+
+    \begin{itemize}
+        \item \Textcites{staiger1997instrumental, mavroeidis2014empirical, andrews2015maximum} examine various empirical applications in linear IV and nonlinear structural models.
+%
+        \item \Textcite{moreira2003conditional} introduces the conditional inference approach we use, \textcite{kleibergen2005testing} extends it to nonlinear GMM, and \textcite{andrews2016conditional} cover infinite-dimensional nuisance parameters.
+\end{itemize}
+
+\end{frame}
+
 
 \begin{frame}[c]{Plan for the Talk}
   \begin{enumerate}
@@ -100,6 +126,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
   \end{enumerate}
 \end{frame}
 
+\section{Theory}
 
 \begin{frame}[c]{Asset Pricing Equation}
 
@@ -277,25 +304,58 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 
 \end{frame}
 
+\begin{frame}[c]{Construct the Critical Value through Projection}
+
+Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-\alpha }(r,\theta _{0})$: 
+\bigskip
+
+\begin{enumerate}
+    \item Take $B$ draws $\eta_{b}^{\ast} \overset{i.i.d.}{\sim} \N(0,\widehat{\Sigma}(\theta_{0},\theta_{0}))$. 
+%
+        \medskip
+%
+    \item Produce a simulated process, 
+%
+        \begin{equation*}
+            g_{b}^{\ast}(\theta) \coloneqq \widehat{r}(\theta) + \widehat{\Sigma}(\theta, \theta_{0}) \widehat{\Sigma}(\theta_{0},\theta_{0})^{-1}\eta_{b}^{\ast},
+        \end{equation*}
+%
+        and simulated statistic,
+%
+        \begin{equation*}
+            QLR_{b}^{\ast}(\theta_{0}) \coloneqq T\widehat{g}(\theta_{0})^{\prime}\widehat{\Sigma}(\theta_{0},\theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \Pi}{\min}Tg_{b}^{\ast}(\theta)^{\prime}\widehat{\Sigma} (\theta ,\theta)^{-1}g_{b}^{\ast}(\theta).
+        \end{equation*}
+%
+        \item  Let $b_{0}=\lceil (1-\alpha) B \rceil$. 
+        \medskip
+%
+        \item Then $c_{1 - \alpha}(r, \theta_{0})$ is the $b_{0}^{th}$-smallest element in $\lbrace QLR_{b}^{\ast} \rbrace$.
+    \end{enumerate}
+
+\end{frame}
+
 \begin{frame}[c]{The Algorithm for Constructing the Confidence Set}
   \begin{enumerate}
     \item Estimate the reduced-form parameter $\widehat{\omega} \coloneqq \left(\widehat{\omega}_{1}, \widehat{\omega}_{2}, \widehat{\omega}_{3}\right)'$ following the estimators defined above.
-      \medskip
+      \bigskip
 %
     \item Estimate $\widehat{\omega}$'s asymptotic covariance using $\widehat{\Omega} = \widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime}, $ where $\widehat{V}$ is a HAC estimator of $V$.
-      \medskip
+      \bigskip
   
     \item For $\theta_{0}\in \Theta$, 
+          \medskip
 %
     \begin{enumerate}
       \item Construct the QLR statistic $QLR(\theta_{0})$ using $g(\theta, \omega), $ $G(\theta, \omega), $ $\widehat{\omega}, $ and $\widehat{\Omega}.$
+          \medskip
 %
       \item Compute the residual process $\widehat{r}(\theta)$.
+          \medskip
   
       \item Given $\widehat{r}(\theta), $ compute its critical value $c_{1-\alpha}(r, \theta_{0})$.
 %
     \end{enumerate}
-      \medskip
+      \bigskip
 %
   \item Repeat these steps for different $\theta_{0}$. Collect the not rejected $\theta_{0}$ to form a nominal level $1-\alpha $ confidence set: 
 %
@@ -316,6 +376,256 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \underset{T\rightarrow \infty}{\lim \inf}\underset{P\in \mathcal{P}}{\inf}\Pr \left( \theta _{0}\in CS_{T}\right) \geq 1-\alpha .
   \end{equation*}
 \end{theorem}
+
+\end{frame}
+
+\section{Simulations}
+
+
+\begin{frame}[c]{Simualtion}
+    \begin{table}[htb]
+     
+     \centering
+     \caption{Simulation Set-up}
+     \label{tbl:simulationParameters}
+     
+     \begin{tabularx}{.6\textwidth}{X X c X X}
+    
+      \toprule
+      $\delta$ & $\rho$ & $c$ & $\pi$ & $\kappa$ \\
+      \midrule
+      \multicolumn{5}{c}{Parameter Values used by \textcite{han2018leverage}} \\
+      \midrule
+      0.6475  & 0.50  & \num[scientific-notation=true]{.00394128} & -10 & 1.7680 \\
+      \bottomrule
+    %
+     \end{tabularx}
+    
+    \end{table}
+
+
+
+    \begin{table}[htb]
+     
+      \centering
+      \caption{Finite-Sample Size of the Standard and Proposed Tests}
+      \label{tbl:test_performance}
+    
+     \sisetup{
+      round-mode=places,
+      round-precision=2,
+     }
+     
+     \begin{tabularx}{.6\textwidth}{X | S >{{\cellcolor{DarkGreen!20}}} S | S >{{\cellcolor{DarkGreen!20}}} S}
+    %
+      \toprule
+      & {Standard} & {\emph{Proposed}} & {Standard} & {\emph{Proposed}} \\
+      
+      \midrule
+      $\phi$ & \multicolumn{2}{c}{$T$ = 2,000} & \multicolumn{2}{c}{$T$ = 10,000} \\
+      \midrule
+      -0.01  & 2.4   & 5.2  & 1.7 & 5.6   \\
+      -0.10  & 3.3   & 6.7  & 2.6 & 6.2   \\
+      -0.40  & 3.3   & 5.3  & 3.4 & 4.9   \\
+      \bottomrule
+    
+     \end{tabularx}
+    
+    \end{table}
+
+\end{frame}
+
+
+\section{Data and Empirical Results}
+
+
+\begin{frame}[c]{Data}
+    \begin{itemize}
+        \item Use data from January 2003 -- September 2017  from on SPY, which is an ETF tracking the S\&P 500.
+            \bigskip
+%
+        \item Use the daily return as $r_{t+1}$.
+            \bigskip
+%
+        \item Use \textcite{sangrey2018jumps} to compute the total volatility, and use that as $\sigma^2_{t+1}$
+            \bigskip
+%
+        \item We use the S\&P 500 because we want a proxy for the market. We do not want the risk to be diversifiable.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[c]{S\&P 500 Volatility and Log-Return}
+
+    \begin{figure}[htb]
+    
+        \begin{subfigure}[t]{.54\textwidth}
+            \centering
+            Time Series
+
+            \includegraphics[width=\textwidth, height=.6\textwidth]{time_series.pdf}
+        \end{subfigure}%
+    %
+        \hfill
+    %
+        \begin{subfigure}[t]{.44\textwidth}
+            \centering
+            Joint Distribution
+
+            \includegraphics[width=\textwidth, height=.73\textwidth]{joint_dist.pdf}
+        \end{subfigure}
+    \end{figure}
+
+\end{frame}
+
+\begin{frame}[c]{Summary Statistics}
+    \begin{table}[htb]
+    
+      \centering
+      \label{tbl:summary_stats}
+    
+    
+      \sisetup{
+       table-align-text-pre     =   false,
+       table-align-text-post    =   false,
+       round-mode=places, 
+       round-precision          =   2,
+       scientific-notation      =   false,
+       table-space-text-pre     =   \lbrack,
+       table-space-text-post    =   \rbrack,
+      }
+    
+        \begin{tabularx}{.5\textwidth}{X | S S}
+            \toprule
+            & {$r_{t+1}$} & {$\sigma^2_{t+1}$} \\
+            \midrule
+            Mean & 0.023421 & 5.621287 \\
+            \rowcolor{gray!30}
+            Standard Deviation & 2.350165 & 14.458446\\
+            Skewness & -0.312 & 12.209 \\
+            \rowcolor{gray!30}
+            Kurtosis & 10.055 & 240.401 \\
+            Correlation & \multicolumn{2}{c}{\num{-0.024379}} \\
+            \bottomrule
+        \end{tabularx}
+    
+    \end{table}
+
+\end{frame}
+
+\begin{frame}[c]{Parameter Estimates}
+
+    \begin{minipage}{.49\textwidth}
+        \begin{table}[htb]
+            \centering
+            Selected Reduced-Form Parameters
+        
+            \bigskip
+            \sisetup{
+                detect-mode,
+                tight-spacing           = true,
+                group-digits            = false,
+                input-symbols           = {(}{)},
+                input-open-uncertainty  = ,
+                input-close-uncertainty = ,
+                round-mode              = places,
+                scientific-notation = false,
+                round-precision         = 2,
+                table-align-text-pre    = false,
+                table-align-text-post   = false,
+                table-alignment         = center,
+            }
+        
+            \begin{tabularx}{\textwidth}{X | S >{{(}} S[table-space-text-pre={(}] <{{,\,}}
+              S[table-space-text-pre={\hspace{-1.5cm}}] <{{)}}}
+        %
+            \toprule
+            & {Point Estimate} & \multicolumn{2}{c}{ 95 \% Confidence Interval} \\
+            \midrule
+            $c$     & 6.0678 & 3.47006  & 10.6103 \\
+            \rowcolor{gray!30}
+            $\delta$  & 0.40814 & 0.2663 & 0.408137969 \\
+            $\rho$   & 0.517097 & 0.29481863 & 0.739181 \\
+            \bottomrule 
+          \end{tabularx}
+        \end{table}
+    \end{minipage}%
+%
+    \hfill
+%
+    \begin{minipage}{.49\textwidth}
+
+        \begin{table}[htb]
+            \centering
+            Structural 
+            \bigskip
+        
+            \sisetup{
+                detect-mode,
+                tight-spacing           = true,
+                group-digits            = false,
+                input-symbols           = {(}{)},
+                input-open-uncertainty  = ,
+                input-close-uncertainty = ,
+                round-mode              = places,
+                scientific-notation = false,
+                round-precision         = 2,
+                table-align-text-pre    = false,
+                table-align-text-post   = false,
+                table-alignment         = center,
+            }
+        
+            \begin{tabularx}{.75\textwidth}{X | >{{(}} S[table-space-text-pre={(}] <{{,\,}}
+              S[table-space-text-pre={\hspace{-1.5cm}}] <{{)}}}
+%
+            \toprule
+            & \multicolumn{2}{c}{95 \% Confidence Interval} \\
+            \midrule
+            $\phi$   & -0.20 & -0.10    \\
+            \rowcolor{gray!30}
+            $\pi$    & -0.02778 & 0.00   \\
+            $\kappa$   & 0.333 & 0.3778  \\
+            \bottomrule 
+          \end{tabularx}
+        \end{table}
+   \end{minipage}
+
+
+\end{frame}
+
+
+
+\begin{frame}[c]{Joint Confidence Set}
+    \begin{figure}[htb]
+    	
+    	\centering
+    	\label{fig:confidence_region}
+    	
+    	\includegraphics[width=.5\textwidth]{confidence_region_2.pdf}
+    \end{figure}
+
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}[c]{Conclusion}
+
+  \begin{enumerate}
+%
+      \item[\cmark] The model.
+      \bigskip
+%
+  \item[\cmark] Asymptotic results for the reduced-form and structural parameters.
+      \bigskip
+%
+  \item[\cmark] Algorithm to construct the confidence set.
+      \bigskip
+%
+    \item[\cmark] Simulation results. 
+      \bigskip
+%
+    \item[\cmark] Empirical results using data on the S\&P 500.
+%
+  \end{enumerate}
 
 \end{frame}
 
