@@ -5,12 +5,12 @@
 \usetheme{Boadilla}
 \usecolortheme{rose}
 \usepackage{slides_preamble}
-\usepackage[autopunct=true, hyperref=true, doi=false, isbn=false, natbib=true,
+\usepackage[autopunct=true, hyperref=true, doi=false, isbn=false, natbib=true, 
 url=false, eprint=false, style=chicago-authordate]{biblatex} 
 \addbibresource{risk_bibliography.bib}
 
 \let\emph\relax 
-\DeclareTextFontCommand{\emph}{\color{DarkGreen} \bfseries }
+\DeclareTextFontCommand{\emph}{\color{DarkGreen} \bfseries}
 
 \title[]{Identification Robust Inference for Risk Prices in Structural Stochastic Volatility Models} 
 \author[Cheng, Renault, and Sangrey]{Xu Cheng \inst{1} \and Eric Renault \inst{2} \and Paul Sangrey \inst{1}}
@@ -28,193 +28,302 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 
 \begin{frame}[c]{Introduction}
 
+  \begin{itemize}
+    \item How do investors trade off risk and return? \textcites{sharpe1964capital}.
+      \medskip
+%
+    \item The capital asst pricing model (CAPM) gives a static trade-off.
+      \medskip
+%
+    \item In practice, volatility varies over time.
+      \medskip
+%
+    \item Modern asset pricing models often have an additional channel, \parencites{chang2013market, dewbecker2017price}.
+      \smallskip
+%
     \begin{itemize}
-        \item How do investors trade off risk and return?  \textcites{sharpe1964capital}.
-            \medskip
-%
-        \item The capital asst pricing model (CAPM) gives a static trade-off.
-            \medskip
-%
-        \item In practice, volatility varies over time.
-            \medskip
-%
-        \item Modern asset pricing models often have an additional channel, \parencites{chang2013market, dewbecker2017price}.
-            \smallskip
-%
-        \begin{itemize}
-            \item Investors care directly about changes in volatility.
-        \end{itemize}
+      \item Investors care directly about changes in volatility.
     \end{itemize}
+  \end{itemize}
 \end{frame}
 
 
 \begin{frame}[c]{Volatility Affects Expected Returns Through Two Channels}
 
-    \begin{enumerate}
-        \item Investors' willingness to tolerate high-volatility to get high expected returns.
-            \begin{itemize}
-                \item This measured by the market return risk price.
-            \end{itemize}
+  \begin{enumerate}
+    \item Investors' willingness to tolerate high-volatility to get high expected returns.
+      \begin{itemize}
+        \item This measured by the market return risk price.
+      \end{itemize}
 %
-                \item Investors' direct aversion to changes in future volatility.
-            \begin{itemize}
-                \item This is measured by the volatility risk price.
-            \end{itemize}
-    \end{enumerate}
-            \pause
+        \item Investors' direct aversion to changes in future volatility.
+      \begin{itemize}
+        \item This is measured by the volatility risk price.
+      \end{itemize}
+  \end{enumerate}
+      \pause
 
 %
-    \begin{itemize}
-        \item \Textcite{han2018leverage} disentangle the two channels when the leverage effect is \emph{large}. 
-            \pause
-        \item However, the leverage effect is \emph{small} and hard to estimate, \parencites{aitsahalia2013leverage, bandi2012timevarying}.
-    \end{itemize}
+  \begin{itemize}
+    \item \Textcite{han2018leverage} disentangle the two channels when the leverage effect is \emph{large}. 
+      \pause
+    \item However, the leverage effect is \emph{small} and hard to estimate, \parencites{aitsahalia2013leverage, bandi2012timevarying}.
+  \end{itemize}
 
-    \pause
-    \bigskip
+  \pause
+  \bigskip
 
-    \begin{block}{}
-        The volatility risk price is weakly identified. We develop robust methods that create uniformly valid confidence sets in the presence of any identification strength.
-    \end{block}
-    
+  \begin{block}{}
+    The volatility risk price is weakly identified. We develop robust methods that create uniformly valid confidence sets in the presence of any identification strength.
+  \end{block}
+  
 \end{frame}
 
 
 \begin{frame}[c]{Plan for the Talk}
-    \begin{enumerate}
+  \begin{enumerate}
 %
-        \item The model.
-            \bigskip
+    \item The model.
+      \bigskip
 %
-        \item Asymptotic results for the reduced-form and structural parameters.
-            \bigskip
+    \item Asymptotic results for the reduced-form and structural parameters.
+      \bigskip
 %
-        \item Algorithm to construct the confidence set.
-            \bigskip
+    \item Algorithm to construct the confidence set.
+      \bigskip
 %
-        \item Simulation results.  
-            \bigskip
+    \item Simulation results. 
+      \bigskip
 %
-        \item Empirical results using data on the S\&P 500.
+    \item Empirical results using data on the S\&P 500.
 %
-    \end{enumerate}
+  \end{enumerate}
 \end{frame}
 
 
 \begin{frame}[c]{Asset Pricing Equation}
 
-    \begin{itemize}
-        \item $\displaystyle P_t = \E\left[M_{t,t+1} \exp(-r_f) P_{t+1} \mvert \F_{t} \right]$.
-            \bigskip
+  \begin{itemize}
+    \item $\displaystyle P_t = \E\left[M_{t, t+1} \exp(-r_f) P_{t+1} \mvert \F_{t} \right]$.
+      \bigskip
 %
-        \item $\displaystyle M_{t,t+1}(\pi, \kappa) = \exp\left(m_0 + m_1 \sigma^2_t - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right)$.
-    \end{itemize}
+    \item $\displaystyle M_{t, t+1}(\pi, \kappa) = \exp\left(m_0 + m_1 \sigma^2_t - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right)$.
+  \end{itemize}
 
 \end{frame}
 
 
 \begin{frame}[c]{Reduced-Form Model}
 
-    The volatility follows a conditional autoregressive gamma process.
+  The volatility follows a conditional autoregressive gamma process.
 %
+  \medskip
+  \begin{itemize}
+    \item $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $.
     \medskip
-    \begin{itemize}
-        \item $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $.
-        \medskip
 %
-        \item $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$.
-        \medskip
+    \item $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$.
+    \medskip
 %
-        \item $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$.
-    \end{itemize}
+    \item $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$.
+  \end{itemize}
  
-    \bigskip
-    The return is conditionally Gaussian.
-    \medskip
+  \bigskip
+  The return is conditionally Gaussian.
+  \medskip
 
-    \begin{itemize}
-        \item $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right] = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$.
-        \medskip
+  \begin{itemize}
+    \item $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right] = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$.
+    \medskip
 %
-        \item $\displaystyle  C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $.
-        \medskip
+    \item $\displaystyle C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $.
+    \medskip
 %
-        \item $\displaystyle D(x) \coloneqq \beta x$.
-        \medskip
+    \item $\displaystyle D(x) \coloneqq \beta x$.
+    \medskip
 %
-        \item $\displaystyle E(x) \coloneqq \gamma x$.  
+    \item $\displaystyle E(x) \coloneqq \gamma x$. 
 %
-    \end{itemize}
+  \end{itemize}
 \end{frame}
 
 
 
 \begin{frame}[c]{Identification}
 
-    \begin{minipage}{.49\textwidth}
-        \centering
-        \emph{The Link Functions}
+  \begin{minipage}{.49\textwidth}
+    \centering
+    \emph{The Link Functions}
 %
-        \begin{enumerate}
-            \item $\displaystyle \gamma = B(\pi + C(\kappa -1)) - B(\pi + C(\kappa))$. 
+    \begin{enumerate}
+      \item $\displaystyle \gamma = B(\pi + C(\kappa -1)) - B(\pi + C(\kappa))$. 
 %
-            \item $\displaystyle \beta = A(\pi + C(\kappa -1)) - A(\pi + C(\kappa))$. 
+      \item $\displaystyle \beta = A(\pi + C(\kappa -1)) - A(\pi + C(\kappa))$. 
 %
-            \item $\displaystyle \psi = \frac{\phi}{\sqrt{2 c}} - \frac{1-\phi^2}{2} + (1 -\phi^2) \kappa$.
-        \end{enumerate}
-    \end{minipage}%
+      \item $\displaystyle \psi = \frac{\phi}{\sqrt{2 c}} - \frac{1-\phi^2}{2} + (1 -\phi^2) \kappa$.
+    \end{enumerate}
+  \end{minipage}%
 %
-    \hfill
+  \hfill
 %
-    \begin{minipage}{.49\textwidth}
-        \centering
-        \emph{Identification Problem}
-    \end{minipage}
+  \begin{minipage}{.49\textwidth}
+    \centering
+    \emph{Identification Problem}
+  \end{minipage}
 
 \end{frame}
 
-\begin{frame}[c]{Assumption R}
+
+\begin{frame}[c]{Estimating the Reduced-Form Parameters}
+
+
+  \begin{enumerate}
+    \item We estimate $\omega_1$ using two-step GMM
+%
+      \begin{equation}
+        \label{omega 1 est}
+        \widehat{\omega}_{1} \coloneqq \underset{\omega_{1}\in O_{1}}{\arg \min}\left(T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1})\right)^{\prime}\widehat{V}_{1}\left(T^{-1}\sum_{t=1}^{T}h_{t}(\omega_{1})\right), 
+      \end{equation}%
+      %
+      where $\widehat{V}_{1}$ is a consistent estimator of $V_{1} \coloneqq \sum_{m=-\infty}^{\infty}\Cov[h_{t}(\omega_{10}), h_{t+m}(\omega_{10})].$
+%
+      \bigskip
+%
+    \item We estimate $\omega_{2}$ using generalized least squares: 
+%
+      \begin{equation}
+        \widehat{\omega}_{2} \coloneqq \left( \sum_{t=1}^{T}x_{t}x_{t}^{\prime}\right)^{-1}\sum_{t=1}^{T}x_{t}y_{t}, \text{ where} 
+      %
+        x_{t} \coloneqq \sigma _{t+1}^{-1}(1, \sigma _{t}^{2}, \sigma _{t+1}^{2})^{\prime} \text{ and}y_{t}=\sigma _{t+1}^{-1}r_{t+1}. \label{omega 2 est}
+      \end{equation}
+%
+      \bigskip
+%
+    \item We estimate $\omega_{3}$ by the sample variance estimator
+%
+      \begin{equation}
+        \label{omega 3 est}
+        \widehat{\omega}_{3} \coloneqq T^{-1}\sum_{t=1}^{T}\left(y_{t}-\widehat{y}_{t}\right)^{2}, \text{ where} \widehat{y}_{t} = x_{t}^{\prime}\widehat{\omega}_{2}. 
+      \end{equation}
+      
+  \end{enumerate}
+      
+
+\end{frame}
+
+\begin{frame}[c]{Assumptions for any $\theta$, $\omega$ close to its true value, and $ 0 < C < \infty$.}
+
+  \begin{block}{Assumption R}
     \label{assump:R}
-    The following conditions hold uniformly over $P\in \mathcal{P}$, for some fixed $0 < C < \infty$.
-    
+%    
     \begin{enumerate}
-        \item $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega _{1}))\rightarrow _{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega _{1})-\E[H_{t}(\omega _{1})])\rightarrow _{p}0,$ $\E[H_{t}(\omega _{1})]$ is continuous in $\omega _{1},$ all uniformly over the parameter space of $\omega _{1}$.
-    %
-        \item $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime }-\E[ x_{t}x_{t}^{\prime }{])\rightarrow }_{p}0.$
-    %
-        \item $V^{-1/2}\{T^{-1/2}(\sum_{t=1}^{T}f_{t}(\omega _{0})-\E[f_{t}(\omega _{0}){]\} \rightarrow }_{d}N(0,I)$ and $\widehat{V} -V\rightarrow _{p}0.$
-    %
-        \item $C^{-1}\leq \lambda_{\min }(A)\leq \lambda_{\max }(A)\leq C$ for $A=V,\E[H_{t}\left( \omega _{1,0}\right) ^{\prime }H_{t}\left( \omega _{1,0}\right) ]),\E[x_{t}x_{t}^{\prime }],\E[ z_{t}z_{t}^{\prime }],$ where $z_{t}=(1,\sigma _{t}^{2},\sigma _{t}^{4})^{\prime }.$
-    %
+      \item Where $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega_{1}))\rightarrow_{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega_{1})-\E[H_{t}(\omega_{1})])\rightarrow_{p}0$, and $\E[H_{t}(\omega_{1})]$ is continuous in $\omega_{1}$; all holding uniformly.
+%
+      \item $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime}-\E[ x_{t}x_{t}^{\prime}{])\rightarrow}_{p}0.$
+%
+      \item $V^{-1/2} (T^{-1/2}\left(\sum_{t=1}^{T}f_{t}(\omega_{0})-\E[f_{t}(\omega_{0})]\right) \rightarrow_{d} \N(0, \I)$ and $\widehat{V} -V\rightarrow_{p}0.$
+%
+      \item $C^{-1}\leq \lambda_{\min}(A)\leq \lambda_{\max}(A)\leq C$ for $A = V$, $\E[H_{t}\left(\omega_{1, 0}\right)^{\prime}H_{t}\left(\omega_{1, 0}\right) ]), \E[x_{t}x_{t}^{\prime}], \E[ z_{t}z_{t}^{\prime}]$, where $z_{t} = (1, \sigma_{t}^{2}, \sigma_{t}^{4})^{\prime}.$
+%
     \end{enumerate}
+  \end{block}
+  
+  \vfill
+
+  \begin{block}{Assumption S}
+%
+    \begin{enumerate}
+      \item $g(\theta, \omega)$ is partially differentiable in $\omega$, with derivative --- $G(\theta, \omega)$ --- that is Lipschitz in both arguments. 
+    %
+      \item $C^{-1} \leq \lambda_{\min}(G(\theta, \omega)^{\prime}G(\theta, \omega)) \leq \lambda_{\max}(G(\theta, \omega)^{\prime}G(\theta, \omega)) \leq C$.
+    \end{enumerate}
+
+  \end{block}
+
+\end{frame}
+
+
+\begin{frame}
+
+    Let $H(\omega_{1}) \coloneqq \E[H_{t}(\omega_{1})]$ and $\overline{H}(\omega_{1}) \coloneqq T^{-1}\sum_{t = 1}^{T}H_{t}(\omega_{1})$. Define 
+%
+    \begin{equation}
+        \mathcal{B} \coloneqq \diag\lbrace[H(\omega_{10})V_{1}^{-1}H(\omega_{10})]^{-1}H(\omega_{10})V_{1}^{-1}, \E[x_{t}x_{t}^{\prime}]^{-1}, 1 \rbrace, \text{ with sample analog } \widehat{\mathcal{B}}.
+        \label{Fhat}
+    \end{equation}
+%
+    \bigskip
+%
+    Define the criterion:
+%
+    \begin{equation}
+      QLR(\theta_{0}) \coloneqq T \widehat{g} (\theta_{0})^{\prime}\widehat{\Sigma} (\theta_{0}, \theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \Theta}{\min}T\widehat{g}(\theta)^{\prime}\widehat{\Sigma} (\theta, \theta)^{-1}\widehat{g}(\theta),  
+      \label{QLR stat}
+    \end{equation}
+    %
+    where $\widehat{\Sigma}\left(\theta_{1}, \theta_{2}\right) = \widehat{G}(\theta_{1})\widehat{\Omega}\widehat{G}(\theta_{2})^{\prime}$ and $\widehat{\Omega}$ is a consistent estimator.
+ 
+    \bigskip
+%    
+    Define the residual process:
+    %
+    \begin{equation}
+      \widehat{r}(\theta) \coloneqq \widehat{g}(\theta)-\widehat{\Sigma}(\theta, \theta_{0})\widehat{\Sigma}(\theta_{0}, \theta_{0})^{-1}\widehat{g} (\theta_{0}). 
+      \label{red process}
+    \end{equation}
+
 \end{frame}
 
 \begin{frame}[c]{The Algorithm for Constructing the Confidence Set}
+  \begin{enumerate}
+    \item Estimate the reduced-form parameter $\widehat{\omega} = \left(\widehat{\omega}_{1}, \widehat{\omega}_{2}, \widehat{\omega}_{3}\right)'$ following the estimators defined in \eqref{omega 1 est}, \eqref{omega 2 est}, and \eqref{omega 3 est}.
+      \medskip
+%
+    \item Obtain a consistent estimator of $\widehat{\omega}$'s asymptotic covariance $\widehat{\Omega} = \widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime}, $ where $\widehat{\mathcal{B}}$ is defined in \eqref{Fhat} and $\widehat{V}$ is a HAC estimator of $V.$
+      \medskip
+  
+    \item For $\theta_{0}\in \Theta$, 
+%
     \begin{enumerate}
-        \item Estimate the reduced-form parameter $\widehat{\omega }=( \widehat{\omega }_{1},\widehat{\omega }_{2},\widehat{\omega }_{3})^{\prime }$ following the estimators defined in \ref{omega 1 est}, \ref{omega 2 est}, and  \ref{omega 3 est}.
-            \midskip
+      \item Construct the QLR statistic $QLR(\theta_{0})$ in \eqref{QLR stat} using $g(\theta, \omega), $ $G(\theta, \omega), $ $\widehat{\omega}, $ and $\widehat{\Omega}.$
 %
-        \item Obtain a consistent estimator of $\widehat{\omega}$'s asymptotic covariance $\widehat{ \Omega }=\widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime },$ where $\widehat{\mathcal{B}}$ is defined in \ref{Fhat} and $\widehat{V}$ is a HAC estimator of $V.$
-            \midskip
-    
-        \item For $\theta _{0}\in \Theta$,
+      \item Compute the residual process $\widehat{r}(\theta)$ in \eqref{red process}.
+  
+      \item Given $\widehat{r}(\theta), $ compute the critical value $c_{1-\alpha}(r, \theta_{0})$ described above.
 %
-        \begin{enumerate}
-            \item Construct the QLR statistic $QLR(\theta _{0})$ in \ref{QLR stat} using $g(\theta ,\omega ),$ $G(\theta ,\omega ),$ $\widehat{\omega },$ and $\widehat{\Omega }.$
-%
-            \item Compute the residual process $\widehat{r}(\theta )$ in \ref{red process}.
-    
-           \item Given $\widehat{r}(\theta ),$ compute the critical value $c_{1-\alpha }(r,\theta _{0})$ described above.
-%
-        \end{enumerate}
-            \midskip
-%
-        \item Repeat these steps for different values of $\theta _{0}$.  Construct a confidence set by collecting the null values that are not rejected, i.e., the nominal level $1-\alpha $ confidence set for $\theta _{0}$ is
-%
-        \begin{equation}
-            CS_{T}=\{ \theta _{0}:QLR_{T}(\theta _{0})\leq c_{1-\alpha }(r,\theta_{0})\}.
-        \end{equation}
     \end{enumerate}
+      \medskip
+%
+    \item Repeat these steps for different values of $\theta_{0}$. Construct a confidence set by collecting the null values that are not rejected, i.e., the nominal level $1-\alpha $ confidence set for $\theta_{0}$ is
+%
+    \begin{equation}
+      CS_{T} = \left\lbrace \theta_{0} \mvert QLR_{T}(\theta_{0})\leq c_{1-\alpha}(r, \theta_{0}. \right\rbrace
+    \end{equation}
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}
+% \begin{assumpS}
+  % \label{assump:S}
+The following conditions hold over $P\in \mathcal{P}, $ for any $\theta $ in its parameter space, and any $\omega $ in some fixed neighborhood around its true value, for some fixed $0<C<\infty$.
+%
+\begin{enumerate}
+  \item $g(\theta, \omega )$ is partially differentiable in $\omega, $ with partial derivative $G(\theta, \omega )$ that satisfies $||G(\theta _{1}, \omega )-G(\theta _{2}, \omega )||\leq C||\theta _{1}-\theta _{2}||$ and $||G(\theta, \omega _{1})-G(\theta, \omega _{2})||\leq C||\omega _{1}-\omega _{2}||.$
+%
+  \item $C^{-1}\leq \lambda_{\min}(G(\theta, \omega )^{\prime}G(\theta, \omega ))\leq \lambda_{\max}(G(\theta, \omega )^{\prime}G(\theta, \omega ))\leq C$.
+\end{enumerate}
+% \end{assumpS}
+
+\begin{theorem}
+  \label{Lemma CS}
+  Suppose Assumptions R and S hold. Then, 
+%
+  \begin{equation*} 
+    \underset{T\rightarrow \infty}{\lim \inf}\underset{P\in \mathcal{P}}{\inf}\Pr \left( \theta _{0}\in CS_{T}\right) \geq 1-\alpha .
+  \end{equation*}
+\end{theorem}
+
 \end{frame}
 
 \end{document}
