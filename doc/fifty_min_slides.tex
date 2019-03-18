@@ -38,7 +38,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \item In practice, volatility varies over time.
       \medskip
 %
-    \item Modern asset pricing models often have an additional channel, \parencites{chang2013market, dewbecker2017price}.
+    \item Modern asset pricing models often include an additional channel, e.g., \textcites{chang2013market, dewbecker2017price}.
       \smallskip
 %
     \begin{itemize}
@@ -52,21 +52,27 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 
   \begin{enumerate}
     \item Investors' willingness to tolerate high-volatility to get high expected returns.
+        \medskip
       \begin{itemize}
-        \item This measured by the market return risk price.
+          \item This measured by the \emph{market return risk price} --- $\kappa$.
       \end{itemize}
 %
+      \bigskip
+%
         \item Investors' direct aversion to changes in future volatility.
+        \medskip
       \begin{itemize}
-        \item This is measured by the volatility risk price.
+          \item This is measured by the \emph{volatility risk price} --- $\pi$.
       \end{itemize}
   \end{enumerate}
-      \pause
-
+%
+      \bigskip \pause
 %
   \begin{itemize}
     \item \Textcite{han2018leverage} disentangle the two channels when the leverage effect is \emph{large}. 
-      \pause
+%
+        \medskip \pause
+%
     \item However, the leverage effect is \emph{small} and hard to estimate, \parencites{aitsahalia2013leverage, bandi2012timevarying}.
   \end{itemize}
 
@@ -74,7 +80,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
   \bigskip
 
   \begin{block}{}
-    The volatility risk price is weakly identified. We develop robust methods that create uniformly valid confidence sets in the presence of any identification strength.
+      $\pi$ is \emph{weakly-identified}. We develop robust methods to create \emph{uniformly-valid confidence sets} regardless of the identification strength.
   \end{block}
   
 \end{frame}
@@ -84,7 +90,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \emph{Analysis between Risk and Return:} 
 
     \begin{itemize}
-        \item  The empirical evidence on the market return risk price is inconclusive, \parencite{lettau2010measuring}. 
+        \item  The empirical literature estimating  $\kappa$ is inconclusive, \parencite{lettau2010measuring}. 
 %
         \item \Textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there} find a positive estimate.
 % 
@@ -128,50 +134,51 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 
 \section{Theory}
 
-\begin{frame}[c]{Asset Pricing Equation}
+\begin{frame}[c]{The Model}
 
-  \begin{itemize}
-    \item $\displaystyle P_t = \E\left[M_{t, t+1} \exp(-r_f) P_{t+1} \mvert \F_{t} \right]$.
-      \bigskip
+    \begin{tabularx}{\textwidth}{X | X}
+        \multicolumn{2}{l}{Asset Pricing Equation:} \\
 %
-    \item $\displaystyle M_{t, t+1}(\pi, \kappa) = \exp\left(m_0 + m_1 \sigma^2_t - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right)$.
-  \end{itemize}
+        \multicolumn{2}{l}{\emph{--} $\displaystyle P_t = \E\left[M_{t, t+1} \exp(-r_f) P_{t+1} \mvert \F_{t} \right]$.} \\
+%
+        \multicolumn{2}{l}{\emph{--} $\displaystyle M_{t, t+1}(\pi, \kappa) = \exp\left(m_0 + m_1 \sigma^2_t - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right)$.} \\ 
+%
+        \midrule \\
+%
+    $\sigma^2_{t+1}$ follows a conditional autoregressive gamma process: & $r_{t+1}$ follows a conditionally Gaussian process: \\
+% %
+    %     \medskip
+    %     \begin{itemize}
+    %       \item $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $.
+    %       \medskip
+% %
+    %       \item $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$.
+    %       \medskip
+% %
+    %       \item $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$.
+    %     \end{itemize}
+    % \end{minipage}%
+% % 
+  % \hfill
+% %
+    % \begin{minipage}{.45\textwidth}
+    %     \medskip
 
-\end{frame}
-
-
-\begin{frame}[c]{Reduced-Form Model}
-
-  The volatility follows a conditional autoregressive gamma process.
-%
-  \medskip
-  \begin{itemize}
-    \item $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $.
-    \medskip
-%
-    \item $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$.
-    \medskip
-%
-    \item $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$.
-  \end{itemize}
- 
-  \bigskip
-  The return is conditionally Gaussian.
-  \medskip
-
-  \begin{itemize}
-    \item $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right] = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$.
-    \medskip
-%
-    \item $\displaystyle C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $.
-    \medskip
-%
-    \item $\displaystyle D(x) \coloneqq \beta x$.
-    \medskip
-%
-    \item $\displaystyle E(x) \coloneqq \gamma x$. 
-%
-  \end{itemize}
+    %     \begin{itemize}
+    %         \item $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right] = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$.
+    %         \medskip
+% %
+    %         \item $\displaystyle C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $.
+    %         \medskip
+% %
+    %         \item $\displaystyle D(x) \coloneqq \beta x$.
+    %         \medskip
+% %
+    %         \item $\displaystyle E(x) \coloneqq \gamma x$. 
+% %
+    %     \end{itemize}
+    % \end{minipage}
+    \end{tabularx}
 \end{frame}
 
 
@@ -193,9 +200,17 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 %
   \hfill
 %
+  \pause
+%
   \begin{minipage}{.49\textwidth}
     \centering
     \emph{Identification Problem}
+    \begin{enumerate}
+        \item $\pi$ is not identified if $C(\kappa - 1) = C(\kappa)$.
+        \item $C(\kappa - 1) - C(\kappa) $
+        \item[=] $\psi - \frac{1 - \phi^2}{2} (2 \kappa -1 )$
+        \item[=] $\frac{\phi}{\sqrt{2 c}}$.
+    \end{enumerate}
   \end{minipage}
 
 \end{frame}
@@ -207,31 +222,29 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
   \begin{enumerate}
     \item We estimate $\omega_1$ using two-step GMM
 %
-      \begin{equation}
-        \label{omega 1 est}
+      \begin{equation*}
         \widehat{\omega}_{1} \coloneqq \underset{\omega_{1}\in O_{1}}{\arg \min}\left(T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1})\right)^{\prime}\widehat{V}_{1}\left(T^{-1}\sum_{t=1}^{T}h_{t}(\omega_{1})\right), 
-      \end{equation}%
+      \end{equation*}
       %
-      where $\widehat{V}_{1}$ is a consistent estimator of $V_{1} \coloneqq \sum_{m=-\infty}^{\infty}\Cov[h_{t}(\omega_{10}), h_{t+m}(\omega_{10})].$
+      where $\widehat{V}_{1}$ consistently estimator $V_{1} \coloneqq \sum_{m=-\infty}^{\infty}\Cov[h_{t}(\omega_{10}), h_{t+m}(\omega_{10})].$
 %
       \bigskip
 %
     \item We estimate $\omega_{2}$ using generalized least squares: 
 %
-      \begin{equation}
-        \widehat{\omega}_{2} \coloneqq \left( \sum_{t=1}^{T}x_{t}x_{t}^{\prime}\right)^{-1}\sum_{t=1}^{T}x_{t}y_{t}, \text{ where} 
+      \begin{equation*}
+        \widehat{\omega}_{2} \coloneqq \left( \sum_{t=1}^{T}x_{t}x_{t}^{\prime}\right)^{-1}\sum_{t=1}^{T}x_{t}y_{t}, \text{ where } 
       %
-        x_{t} \coloneqq \sigma _{t+1}^{-1}(1, \sigma _{t}^{2}, \sigma _{t+1}^{2})^{\prime} \text{ and}y_{t}=\sigma _{t+1}^{-1}r_{t+1}. \label{omega 2 est}
-      \end{equation}
+x_{t} \coloneqq \frac{1}{\sigma_{t+1}} \begin{pmatrix} 1 & \sigma_{t}^{2} & \sigma_{t+1}^{2} \end{pmatrix}'  \text{ and } y_{t} \coloneqq \frac{r_{t+1}}{\sigma_{t+1}}. 
+      \end{equation*}
 %
       \bigskip
 %
     \item We estimate $\omega_{3}$ by the sample variance estimator
 %
-      \begin{equation}
-        \label{omega 3 est}
-        \widehat{\omega}_{3} \coloneqq T^{-1}\sum_{t=1}^{T}\left(y_{t}-\widehat{y}_{t}\right)^{2}, \text{ where} \widehat{y}_{t} = x_{t}^{\prime}\widehat{\omega}_{2}. 
-      \end{equation}
+      \begin{equation*}
+        \widehat{\omega}_{3} \coloneqq T^{-1}\sum_{t=1}^{T}\left(y_{t}-\widehat{y}_{t}\right)^{2}, \text{ where } \widehat{y}_{t} = x_{t}^{\prime}\widehat{\omega}_{2}. 
+      \end{equation*}
       
   \end{enumerate}
       
@@ -248,9 +261,10 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 %
       \item $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime}-\E[ x_{t}x_{t}^{\prime}{])\rightarrow}_{p}0.$
 %
-      \item $V^{-1/2} (T^{-1/2}\left(\sum_{t=1}^{T}f_{t}(\omega_{0})-\E[f_{t}(\omega_{0})]\right) \rightarrow_{d} \N(0, \I)$ and $\widehat{V} -V\rightarrow_{p}0.$
+      % \item $V^{-1/2} (T^{-1/2}\left(\sum_{t=1}^{T}f_{t}(\omega_{0})-\E[f_{t}(\omega_{0})]\right) \rightarrow_{d} \N(0, \I)$ and $\widehat{V} -V\rightarrow_{p}0.$
+      \item The appropriately standardized moment conditions converge to $\N(0, \I)$.
 %
-      \item $C^{-1}\leq \lambda_{\min}(A)\leq \lambda_{\max}(A)\leq C$ for $A = V$, $\E[H_{t}\left(\omega_{1, 0}\right)^{\prime}H_{t}\left(\omega_{1, 0}\right) ]), \E[x_{t}x_{t}^{\prime}], \E[ z_{t}z_{t}^{\prime}]$, where $z_{t} = (1, \sigma_{t}^{2}, \sigma_{t}^{4})^{\prime}.$
+  \item $V$, $\E[H_{t}\left(\omega_{1, 0}\right)^{\prime}H_{t}\left(\omega_{1, 0}\right) ])$, and $\E[x_{t}x_{t}^{\prime}], \E[ z_{t}z_{t}^{\prime}]$,  have uniformly-bounded eigenvalues where $z_{t} \coloneqq \begin{pmatrix} 1 & \sigma_{t}^{2} & \sigma_{t}^{4} \end{pmatrix}'$.
 %
     \end{enumerate}
   \end{block}
@@ -260,9 +274,9 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
   \begin{block}{Assumption S}
 %
     \begin{enumerate}
-      \item $g(\theta, \omega)$ is partially differentiable in $\omega$, with derivative --- $G(\theta, \omega)$ --- that is Lipschitz in both arguments. 
+      \item The link function --- $g(\theta, \omega)$ --- is partially differentiable in $\omega$, with derivative --- $G(\theta, \omega)$ --- that is Lipschitz in both arguments. 
     %
-      \item $C^{-1} \leq \lambda_{\min}(G(\theta, \omega)^{\prime}G(\theta, \omega)) \leq \lambda_{\max}(G(\theta, \omega)^{\prime}G(\theta, \omega)) \leq C$.
+      \item $(G(\theta, \omega)^{\prime}G(\theta, \omega))$ has uniformly-bounded eigenvalues.
     \end{enumerate}
 
   \end{block}
@@ -270,43 +284,31 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 \end{frame}
 
 
-\begin{frame}[c]{Some Definitions}
+\begin{frame}[c]{Definitions}
 
-    Define the parameters:
-    \medskip
-%
-    \begin{enumerate}
-        \item $\displaystyle H(\omega_{1}) \coloneqq \E[H_{t}(\omega_{1})]$ 
-%
-        \item $\displaystyle \overline{H}(\omega_{1}) \coloneqq T^{-1}\sum_{t=1}^{T} H_{t}(\omega_{1})$
-            %
-        \item $\displaystyle \mathcal{B} \coloneqq \diag\lbrace[H(\omega_{10})V_{1}^{-1}H(\omega_{10})]^{-1}H(\omega_{10})V_{1}^{-1}$, $\displaystyle \E[x_{t}x_{t}^{\prime}]^{-1}, 1 \rbrace$,  with sample analog  $\displaystyle \widehat{\mathcal{B}}$.
-%
-    \end{enumerate}
-%
-    \bigskip
-%
-    Define the criterion:
-%
-    \begin{equation*}
-      QLR(\theta_{0}) \coloneqq T \widehat{g} (\theta_{0})^{\prime}\widehat{\Sigma} (\theta_{0}, \theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \Theta}{\min}T\widehat{g}(\theta)^{\prime}\widehat{\Sigma} (\theta, \theta)^{-1}\widehat{g}(\theta),  
-    \end{equation*}
-    %
-    \quad where $\widehat{\Sigma}\left(\theta_{1}, \theta_{2}\right) = \widehat{G}(\theta_{1})\widehat{\Omega}\widehat{G}(\theta_{2})^{\prime}$ and $\widehat{\Omega}$ is a consistent estimator.
+    \begin{block}{Criterion}
+        \begin{equation*}
+          QLR(\theta_{0}) \coloneqq T \widehat{g} (\theta_{0})^{\prime}\widehat{\Sigma} (\theta_{0}, \theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \Theta}{\min}T\widehat{g}(\theta)^{\prime}\widehat{\Sigma} (\theta, \theta)^{-1}\widehat{g}(\theta),  
+        \end{equation*}
+        %
+        \quad where $\widehat{\Sigma}\left(\theta_{1}, \theta_{2}\right) = \widehat{G}(\theta_{1})\widehat{\Omega}\widehat{G}(\theta_{2})^{\prime}$ and $\widehat{\Omega}$ is a consistent estimator.
+    \end{block}
  
-    \bigskip
+    \vfill
 %    
-    Define the residual process:
+    \begin{block}{Residual Process}
     %
-    \begin{equation*}
-      \widehat{r}(\theta) \coloneqq \widehat{g}(\theta)-\widehat{\Sigma}(\theta, \theta_{0})\widehat{\Sigma}(\theta_{0}, \theta_{0})^{-1}\widehat{g} (\theta_{0}). 
-    \end{equation*}
+        \begin{equation*}
+          \widehat{r}(\theta) \coloneqq \widehat{g}(\theta)-\widehat{\Sigma}(\theta, \theta_{0})\widehat{\Sigma}(\theta_{0}, \theta_{0})^{-1}\widehat{g} (\theta_{0}). 
+        \end{equation*}
+    %
+    \end{block}
 
 \end{frame}
 
 \begin{frame}[c]{Construct the Critical Value through Projection}
 
-Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-\alpha }(r,\theta _{0})$: 
+Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-\alpha }(r,\theta_{0})$: 
 \bigskip
 
 \begin{enumerate}
@@ -334,12 +336,13 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
 
 \end{frame}
 
-\begin{frame}[c]{The Algorithm for Constructing the Confidence Set}
+\begin{frame}[c]{The Algorithm}
+    \bigskip
   \begin{enumerate}
     \item Estimate the reduced-form parameter $\widehat{\omega} \coloneqq \left(\widehat{\omega}_{1}, \widehat{\omega}_{2}, \widehat{\omega}_{3}\right)'$ following the estimators defined above.
       \bigskip
 %
-    \item Estimate $\widehat{\omega}$'s asymptotic covariance using $\widehat{\Omega} = \widehat{\mathcal{B}}\widehat{V}\widehat{\mathcal{B}}^{\prime}, $ where $\widehat{V}$ is a HAC estimator of $V$.
+    \item Estimate $\widehat{\omega}$'s asymptotic covariance, $\widehat{\Omega}$, using a sandwich-form estimator.
       \bigskip
   
     \item For $\theta_{0}\in \Theta$, 
@@ -352,28 +355,24 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
       \item Compute the residual process $\widehat{r}(\theta)$.
           \medskip
   
-      \item Given $\widehat{r}(\theta), $ compute its critical value $c_{1-\alpha}(r, \theta_{0})$.
+      \item Given $\widehat{r}(\theta), $ compute its critical value $c_{1-\alpha}(r, \theta_{0})$ as done on the previous slide.
 %
     \end{enumerate}
       \bigskip
 %
   \item Repeat these steps for different $\theta_{0}$. Collect the not rejected $\theta_{0}$ to form a nominal level $1-\alpha $ confidence set: 
 %
-    \begin{equation}
+    \begin{equation*}
       CS_{T} = \left\lbrace \theta_{0} \mvert QLR_{T}(\theta_{0})\leq c_{1-\alpha}(r, \theta_{0}. \right\rbrace
-    \end{equation}
+    \end{equation*}
   \end{enumerate}
-\end{frame}
-
-
-\begin{frame}[c]{The algorithm above constructs a valid confidence set}
 
 \begin{theorem}
   \label{Lemma CS}
   Suppose Assumptions R and S hold. Then 
 %
   \begin{equation*} 
-    \underset{T\rightarrow \infty}{\lim \inf}\underset{P\in \mathcal{P}}{\inf}\Pr \left( \theta _{0}\in CS_{T}\right) \geq 1-\alpha .
+    \underset{T\rightarrow \infty}{\lim \inf}\underset{P\in \mathcal{P}}{\inf}\Pr \left( \theta_{0}\in CS_{T}\right) \geq 1-\alpha .
   \end{equation*}
 \end{theorem}
 
