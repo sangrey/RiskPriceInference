@@ -79,7 +79,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
   \pause
   \bigskip
 
-  \begin{block}{}
+  \begin{block}{Problem}
       $\pi$ is \emph{weakly-identified}. We develop robust methods to create \emph{uniformly-valid confidence sets} regardless of the identification strength.
   \end{block}
   
@@ -87,7 +87,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 
 \begin{frame}[c]{Literature Review}
 
-    \emph{Analysis between Risk and Return:} 
+    \emph{Analyzing the Relationship between Risk and Return:} 
 
     \begin{itemize}
         \item  The empirical literature estimating  $\kappa$ is inconclusive, \parencite{lettau2010measuring}. 
@@ -101,7 +101,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     
     \pause
 
-    \emph{Weak Identification Literature:}
+    \emph{Analyzing Weak Identification:}
 
     \begin{itemize}
         \item \Textcites{staiger1997instrumental, mavroeidis2014empirical, andrews2015maximum} examine various empirical applications in linear IV and nonlinear structural models.
@@ -121,7 +121,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \item Asymptotic results for the reduced-form and structural parameters.
       \bigskip
 %
-    \item Algorithm to construct the confidence set.
+    \item Confidential inference algorithm for minimum distance estimation and accompanying theory. 
       \bigskip
 %
     \item Simulation results. 
@@ -137,47 +137,33 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 \begin{frame}[c]{The Model}
 
     \begin{tabularx}{\textwidth}{X | X}
-        \multicolumn{2}{l}{Asset Pricing Equation:} \\
+        \multicolumn{2}{c}{Asset Pricing Equation:} \\
+        \toprule 
+        \multicolumn{2}{l}{} \\
 %
         \multicolumn{2}{l}{\emph{--} $\displaystyle P_t = \E\left[M_{t, t+1} \exp(-r_f) P_{t+1} \mvert \F_{t} \right]$.} \\
 %
         \multicolumn{2}{l}{\emph{--} $\displaystyle M_{t, t+1}(\pi, \kappa) = \exp\left(m_0 + m_1 \sigma^2_t - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right)$.} \\ 
+        \multicolumn{2}{l}{} \\
+%
+        \toprule 
+        \multicolumn{2}{c}{Reduced-Form Model} \\
+        \toprule \\
+%
+        $\sigma^2_{t+1}$ follows a conditional autoregressive gamma process: & $r_{t+1}$ follows a conditionally Gaussian process: \\
 %
         \midrule \\
 %
-    $\sigma^2_{t+1}$ follows a conditional autoregressive gamma process: & $r_{t+1}$ follows a conditionally Gaussian process: \\
-% %
-    %     \medskip
-    %     \begin{itemize}
-    %       \item $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $.
-    %       \medskip
-% %
-    %       \item $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$.
-    %       \medskip
-% %
-    %       \item $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$.
-    %     \end{itemize}
-    % \end{minipage}%
-% % 
-  % \hfill
-% %
-    % \begin{minipage}{.45\textwidth}
-    %     \medskip
-
-    %     \begin{itemize}
-    %         \item $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right] = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$.
-    %         \medskip
-% %
-    %         \item $\displaystyle C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $.
-    %         \medskip
-% %
-    %         \item $\displaystyle D(x) \coloneqq \beta x$.
-    %         \medskip
-% %
-    %         \item $\displaystyle E(x) \coloneqq \gamma x$. 
-% %
-    %     \end{itemize}
-    % \end{minipage}
+        $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $. & 
+        $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right]$  \\ 
+        &\qquad $ \displaystyle = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$. \\ 
+%
+        $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$. & $\displaystyle C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $. \\
+%
+        $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$. & $\displaystyle D(x) \coloneqq \beta x$. \\
+%
+        &  $\displaystyle E(x) \coloneqq \gamma x$.  \\
+%
     \end{tabularx}
 \end{frame}
 
@@ -220,17 +206,17 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 
 
   \begin{enumerate}
-    \item We estimate $\omega_1$ using two-step GMM
+  \item We estimate $\omega_1 \coloneqq \begin{pmatrix} \rho & c & \delta \end{pmatrix}'$ using two-step GMM
 %
       \begin{equation*}
         \widehat{\omega}_{1} \coloneqq \underset{\omega_{1}\in O_{1}}{\arg \min}\left(T^{-1}\sum_{t = 1}^{T}h_{t}(\omega_{1})\right)^{\prime}\widehat{V}_{1}\left(T^{-1}\sum_{t=1}^{T}h_{t}(\omega_{1})\right), 
       \end{equation*}
       %
-      where $\widehat{V}_{1}$ consistently estimator $V_{1} \coloneqq \sum_{m=-\infty}^{\infty}\Cov[h_{t}(\omega_{10}), h_{t+m}(\omega_{10})].$
+      where $\widehat{V}_{1}$ consistently estimates $V_{1} \coloneqq \sum_{m=-\infty}^{\infty}\Cov[h_{t}(\omega_{10}), h_{t+m}(\omega_{10})].$
 %
       \bigskip
 %
-    \item We estimate $\omega_{2}$ using generalized least squares: 
+  \item We estimate $\omega_{2} = \begin{pmatrix} \gamma & \beta & \psi \end{pmatrix}'$ using generalized least squares: 
 %
       \begin{equation*}
         \widehat{\omega}_{2} \coloneqq \left( \sum_{t=1}^{T}x_{t}x_{t}^{\prime}\right)^{-1}\sum_{t=1}^{T}x_{t}y_{t}, \text{ where } 
@@ -240,7 +226,7 @@ x_{t} \coloneqq \frac{1}{\sigma_{t+1}} \begin{pmatrix} 1 & \sigma_{t}^{2} & \sig
 %
       \bigskip
 %
-    \item We estimate $\omega_{3}$ by the sample variance estimator
+    \item We estimate $\omega_{3} \coloneqq 1 - \phi^2$ by the sample variance estimator:
 %
       \begin{equation*}
         \widehat{\omega}_{3} \coloneqq T^{-1}\sum_{t=1}^{T}\left(y_{t}-\widehat{y}_{t}\right)^{2}, \text{ where } \widehat{y}_{t} = x_{t}^{\prime}\widehat{\omega}_{2}. 
@@ -259,12 +245,12 @@ x_{t} \coloneqq \frac{1}{\sigma_{t+1}} \begin{pmatrix} 1 & \sigma_{t}^{2} & \sig
     \begin{enumerate}
       \item Let $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega_{1}))\rightarrow_{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega_{1})-\E[H_{t}(\omega_{1})])\rightarrow_{p}0$, and $\E[H_{t}(\omega_{1})]$ is continuous in $\omega_{1}$; all holding uniformly.
 %
-      \item $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime}-\E[ x_{t}x_{t}^{\prime}{])\rightarrow}_{p}0.$
+      \item Let $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime}-\E[ x_{t}x_{t}^{\prime}{])\rightarrow}_{p}0.$
 %
       % \item $V^{-1/2} (T^{-1/2}\left(\sum_{t=1}^{T}f_{t}(\omega_{0})-\E[f_{t}(\omega_{0})]\right) \rightarrow_{d} \N(0, \I)$ and $\widehat{V} -V\rightarrow_{p}0.$
-      \item The appropriately standardized moment conditions converge to $\N(0, \I)$.
+      \item Assume the appropriately standardized moment conditions converge to $\N(0, \I)$.
 %
-  \item $V$, $\E[H_{t}\left(\omega_{1, 0}\right)^{\prime}H_{t}\left(\omega_{1, 0}\right) ])$, and $\E[x_{t}x_{t}^{\prime}], \E[ z_{t}z_{t}^{\prime}]$,  have uniformly-bounded eigenvalues where $z_{t} \coloneqq \begin{pmatrix} 1 & \sigma_{t}^{2} & \sigma_{t}^{4} \end{pmatrix}'$.
+  \item Let $V$, $\E[H_{t}\left(\omega_{1, 0}\right)^{\prime}H_{t}\left(\omega_{1, 0}\right) ])$, and $\E[x_{t}x_{t}^{\prime}], \E[ z_{t}z_{t}^{\prime}]$,  have uniformly-bounded eigenvalues where $z_{t} \coloneqq \begin{pmatrix} 1 & \sigma_{t}^{2} & \sigma_{t}^{4} \end{pmatrix}'$.
 %
     \end{enumerate}
   \end{block}
@@ -274,9 +260,9 @@ x_{t} \coloneqq \frac{1}{\sigma_{t+1}} \begin{pmatrix} 1 & \sigma_{t}^{2} & \sig
   \begin{block}{Assumption S}
 %
     \begin{enumerate}
-      \item The link function --- $g(\theta, \omega)$ --- is partially differentiable in $\omega$, with derivative --- $G(\theta, \omega)$ --- that is Lipschitz in both arguments. 
+      \item Assume the link function --- $g(\theta, \omega)$ --- is partially differentiable in $\omega$, with derivative --- $G(\theta, \omega)$ --- that is Lipschitz in both arguments. 
     %
-      \item $(G(\theta, \omega)^{\prime}G(\theta, \omega))$ has uniformly-bounded eigenvalues.
+      \item Assume $(G(\theta, \omega)^{\prime}G(\theta, \omega))$ has uniformly-bounded eigenvalues.
     \end{enumerate}
 
   \end{block}
@@ -291,7 +277,7 @@ x_{t} \coloneqq \frac{1}{\sigma_{t+1}} \begin{pmatrix} 1 & \sigma_{t}^{2} & \sig
           QLR(\theta_{0}) \coloneqq T \widehat{g} (\theta_{0})^{\prime}\widehat{\Sigma} (\theta_{0}, \theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \Theta}{\min}T\widehat{g}(\theta)^{\prime}\widehat{\Sigma} (\theta, \theta)^{-1}\widehat{g}(\theta),  
         \end{equation*}
         %
-        \quad where $\widehat{\Sigma}\left(\theta_{1}, \theta_{2}\right) = \widehat{G}(\theta_{1})\widehat{\Omega}\widehat{G}(\theta_{2})^{\prime}$ and $\widehat{\Omega}$ is a consistent estimator.
+        \quad where $\widehat{\Sigma}\left(\theta_{1}, \theta_{2}\right) = \widehat{G}(\theta_{1})\widehat{\Omega}\widehat{G}(\theta_{2})^{\prime}$ and $\widehat{\Omega}$ consistently estimates the first-stage covariance.
     \end{block}
  
     \vfill
@@ -616,7 +602,7 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
   \item[\cmark] Asymptotic results for the reduced-form and structural parameters.
       \bigskip
 %
-  \item[\cmark] Algorithm to construct the confidence set.
+  \item[\cmark] Confidential inference algorithm for minimum distance estimation and accompanying theory. 
       \bigskip
 %
     \item[\cmark] Simulation results. 
