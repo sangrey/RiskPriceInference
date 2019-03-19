@@ -17,6 +17,9 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 \institute[]{\inst{1} University of Pennsylvania \and \inst{2} University of Warwick}
 \date[]{March 25, 2019}
 
+\newcommand*{\rkappa}{\textcolor{red}{\kappa}}
+\newcommand*{\rpi}{\textcolor{red}{\pi}}
+
 \begin{document}
 
 \begin{frame}[plain, noframenumbering]
@@ -54,7 +57,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \item Investors' willingness to tolerate high-volatility to get high expected returns.
         \medskip
       \begin{itemize}
-          \item This measured by the \emph{market return risk price} --- $\kappa$.
+          \item This measured by the \emph{market return risk price} --- $\rkappa$.
       \end{itemize}
 %
       \bigskip
@@ -62,7 +65,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
         \item Investors' direct aversion to changes in future volatility.
         \medskip
       \begin{itemize}
-          \item This is measured by the \emph{volatility risk price} --- $\pi$.
+          \item This is measured by the \emph{volatility risk price} --- $\rpi$.
       \end{itemize}
   \end{enumerate}
 %
@@ -80,7 +83,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
   \bigskip
 
   \begin{block}{Problem}
-      $\pi$ is \emph{weakly-identified}. We develop robust methods to create \emph{uniformly-valid confidence sets} regardless of the identification strength.
+      $\rpi$ is \emph{weakly-identified}. We develop robust methods to create \emph{uniformly-valid confidence sets} regardless of the identification strength.
   \end{block}
   
 \end{frame}
@@ -90,7 +93,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \emph{Analyzing the Relationship between Risk and Return:} 
 
     \begin{itemize}
-        \item  The empirical literature estimating  $\kappa$ is inconclusive, \parencite{lettau2010measuring}. 
+        \item  The empirical literature estimating  $\rkappa$ is inconclusive, \parencite{lettau2010measuring}. 
 %
         \item \Textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there} find a positive estimate.
 % 
@@ -143,7 +146,7 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
 %
         \multicolumn{2}{l}{\emph{--} $\displaystyle P_t = \E\left[M_{t, t+1} \exp(-r_f) P_{t+1} \mvert \F_{t} \right]$.} \\
 %
-        \multicolumn{2}{l}{\emph{--} $\displaystyle M_{t, t+1}(\pi, \kappa) = \exp\left(m_0 + m_1 \sigma^2_t - \pi \sigma^2_{t+1} - \kappa r_{t+1}\right)$.} \\ 
+        \multicolumn{2}{l}{\emph{--} $\displaystyle M_{t, t+1}(\rpi, \rkappa) = \exp\left(m_0 + m_1 \sigma^2_t - \rpi \sigma^2_{t+1} - \rkappa r_{t+1}\right)$.} \\ 
         \multicolumn{2}{l}{} \\
 %
         \toprule 
@@ -176,11 +179,11 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \emph{The Link Functions}
 %
     \begin{enumerate}
-      \item $\displaystyle \gamma = B(\pi + C(\kappa -1)) - B(\pi + C(\kappa))$. 
+      \item $\displaystyle \gamma = B(\rpi + C(\rkappa -1)) - B(\rpi + C(\rkappa))$. 
 %
-      \item $\displaystyle \beta = A(\pi + C(\kappa -1)) - A(\pi + C(\kappa))$. 
+      \item $\displaystyle \beta = A(\rpi + C(\rkappa -1)) - A(\rpi + C(\rkappa))$. 
 %
-      \item $\displaystyle \psi = \frac{\phi}{\sqrt{2 c}} - \frac{1-\phi^2}{2} + (1 -\phi^2) \kappa$.
+      \item $\displaystyle \psi = \frac{\phi}{\sqrt{2 c}} - \frac{1-\phi^2}{2} + (1 -\phi^2) \rkappa$.
     \end{enumerate}
   \end{minipage}%
 %
@@ -192,9 +195,9 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
     \centering
     \emph{Identification Problem}
     \begin{enumerate}
-        \item $\pi$ is not identified if $C(\kappa - 1) = C(\kappa)$.
-        \item $C(\kappa - 1) - C(\kappa) $
-        \item[=] $\psi - \frac{1 - \phi^2}{2} (2 \kappa -1 )$
+        \item $\rpi$ is not identified if $C(\rkappa - 1) = C(\rkappa)$.
+        \item $C(\rkappa - 1) - C(\rkappa) $
+        \item[=] $\psi - \frac{1 - \phi^2}{2} (2 \rkappa -1 )$
         \item[=] $\frac{\phi}{\sqrt{2 c}}$.
     \end{enumerate}
   \end{minipage}
@@ -243,7 +246,7 @@ x_{t} \coloneqq \frac{1}{\sigma_{t+1}} \begin{pmatrix} 1 & \sigma_{t}^{2} & \sig
     \label{assump:R}
 %    
     \begin{enumerate}
-      \item Let $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega_{1}))\rightarrow_{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega_{1})-\E[H_{t}(\omega_{1})])\rightarrow_{p}0$, and $\E[H_{t}(\omega_{1})]$ is continuous in $\omega_{1}$; all holding uniformly.
+      \item Let $T^{-1}\sum_{t=1}^{T}(h_{t}(\omega_{1})-\E[ h_{t}(\omega_{1}))\rightarrow_{p}0$ and $T^{-1}\sum_{t=1}^{T}(H_{t}(\omega_{1})-\E[H_{t}(\omega_{1})])\rightarrow_{p}0$, and $\E[H_{t}(\omega_{1})]$ be continuous in $\omega_{1}$; all holding uniformly.
 %
       \item Let $T^{-1}\sum_{t=1}^{T}(x_{t}x_{t}^{\prime}-\E[ x_{t}x_{t}^{\prime}{])\rightarrow}_{p}0.$
 %
@@ -311,7 +314,7 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
         and simulated statistic,
 %
         \begin{equation*}
-            QLR_{b}^{\ast}(\theta_{0}) \coloneqq T\widehat{g}(\theta_{0})^{\prime}\widehat{\Sigma}(\theta_{0},\theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \Pi}{\min}Tg_{b}^{\ast}(\theta)^{\prime}\widehat{\Sigma} (\theta ,\theta)^{-1}g_{b}^{\ast}(\theta).
+            QLR_{b}^{\ast}(\theta_{0}) \coloneqq T\widehat{g}(\theta_{0})^{\prime}\widehat{\Sigma}(\theta_{0},\theta_{0})^{-1}\widehat{g}(\theta_{0})-\underset{\theta \in \rpi}{\min}Tg_{b}^{\ast}(\theta)^{\prime}\widehat{\Sigma} (\theta ,\theta)^{-1}g_{b}^{\ast}(\theta).
         \end{equation*}
 %
         \item  Let $b_{0}=\lceil (1-\alpha) B \rceil$. 
@@ -325,7 +328,7 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
 \begin{frame}[c]{The Algorithm}
     \bigskip
   \begin{enumerate}
-    \item Estimate the reduced-form parameter $\widehat{\omega} \coloneqq \left(\widehat{\omega}_{1}, \widehat{\omega}_{2}, \widehat{\omega}_{3}\right)'$ following the estimators defined above.
+    \item Estimate the reduced-form parameter $\widehat{\omega} \coloneqq \left(\widehat{\omega}_{1}, \widehat{\omega}_{2}, \widehat{\omega}_{3}\right)'$, following the estimators defined above.
       \bigskip
 %
     \item Estimate $\widehat{\omega}$'s asymptotic covariance, $\widehat{\Omega}$, using a sandwich-form estimator.
@@ -355,11 +358,9 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
 
 \begin{theorem}
   \label{Lemma CS}
-  Suppose Assumptions R and S hold. Then 
+  Let Assumptions R and S hold. Then 
 %
-  \begin{equation*} 
-    \underset{T\rightarrow \infty}{\lim \inf}\underset{P\in \mathcal{P}}{\inf}\Pr \left( \theta_{0}\in CS_{T}\right) \geq 1-\alpha .
-  \end{equation*}
+    $\displaystyle \underset{T\rightarrow \infty}{\lim \inf}\underset{P\in \mathcal{P}}{\inf}\Pr \left( \theta_{0}\in CS_{T}\right) \geq 1-\alpha$ .
 \end{theorem}
 
 \end{frame}
@@ -377,9 +378,9 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
      \begin{tabularx}{.6\textwidth}{X X c X X}
     
       \toprule
-      $\delta$ & $\rho$ & $c$ & $\pi$ & $\kappa$ \\
       \midrule
       \multicolumn{5}{c}{Parameter Values used by \textcite{han2018leverage}} \\
+      $\delta$ & $\rho$ & $c$ & $\rpi$ & $\rkappa$ \\
       \midrule
       0.6475  & 0.50  & \num[scientific-notation=true]{.00394128} & -10 & 1.7680 \\
       \bottomrule
@@ -567,8 +568,8 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
             \midrule
             $\phi$   & -0.20 & -0.10    \\
             \rowcolor{gray!30}
-            $\pi$    & -0.02778 & 0.00   \\
-            $\kappa$   & 0.333 & 0.3778  \\
+            $\rpi$    & -0.02778 & 0.00   \\
+            $\rkappa$   & 0.333 & 0.3778  \\
             \bottomrule 
           \end{tabularx}
         \end{table}
