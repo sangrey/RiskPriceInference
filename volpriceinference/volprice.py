@@ -72,9 +72,21 @@ _link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi,
 # We define the moments used to estimate the volatility paramters.
 _mean = rho * _x + sym.exp(log_both)
 _var = 2 * sym.exp(log_scale) * rho * _x + sym.exp(log_scale + log_both)
-_row1 = _y - _mean
-_row3 = (_y - _mean)**2 - _var
+
+# These are from the derivation of sigma_4_variance notebook.
+_fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * rho * _x)
+_second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * rho * _x)
+_fourth_power_variance = sym.factor(_fourth_moment - _second_moment**2) 
+
+# I now compute the heteroskedasticity-adjusted moments.
+#TODO I am not adjusting for the pre-multipying part.... It cancels... 
+_row1 = (_y - _mean) / sym.sqrt(_var)
+# The variance of the 2nd moment is the same as the variance of the variance.
+_row3 = ((_y - _mean)**2 - _var) / sym.sqrt(_fourth_power_variance)
+
+
 _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
+
 
 compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, rho], _vol_moments, modules='numpy')
 compute_vol_moments_grad = sym.lambdify([_x, _y, log_both, log_scale, rho],
