@@ -85,8 +85,8 @@ _var = 2 * sym.exp(log_scale) * _logistic.xreplace({_x:logit_rho}) * _x + sym.ex
 _row1 = (_y - _mean)  # * _var**(-.5) 
 _row3 = ((_y - _mean)**2 - _var) # * (_fourth_power_variance**2)**(-1/4)
 
-_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
-# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
+# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
+_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
 
 
 compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, logit_rho], _vol_moments, modules='numpy')
