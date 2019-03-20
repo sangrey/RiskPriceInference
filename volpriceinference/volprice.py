@@ -77,16 +77,17 @@ _mean = _logistic.xreplace({_x: logit_rho}) * _x + sym.exp(log_both)
 _var = 2 * sym.exp(log_scale) * _logistic.xreplace({_x:logit_rho}) * _x + sym.exp(log_scale + log_both)
 
 # # These are from the derivation of sigma_4_variance notebook.
-# _fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * logit_rho * _x)
-# _second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * logit_rho * _x)
+# I think there's a decen chance they're wrong.
+# _fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * _logistic.xreplace({_x:logit_rho}) * _x)
+# _second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * _logistic.xreplace({_x:logit_rho}) * _x)
 # _fourth_power_variance = sym.factor(_fourth_moment - _second_moment**2) 
 
 # I now compute the heteroskedasticity-adjusted moments.
 _row1 = (_y - _mean)  # * _var**(-.5) 
-_row3 = ((_y - _mean)**2 - _var) # * (_fourth_power_variance**2)**(-1/4)
+_row3 = ((_y - _mean)**2 - _var) #* (_fourth_power_variance**2)**(-1/4)
 
-# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
-_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
+# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row1 * _x**2])
+_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x])
 
 
 compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, logit_rho], _vol_moments, modules='numpy')
