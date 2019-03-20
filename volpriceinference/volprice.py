@@ -23,9 +23,9 @@ theta, pi, phi, pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols('theta pi phi
 #  We define the functions that specify the model.
 _psi_sym = (phi / sym.sqrt(2 * sym.exp(log_scale))) - (1 - phi**2) / 2 + (1 - phi**2) * theta
 _theta_sym = sym.solveset(psi - _psi_sym, theta).args[0]
-_A_func = rho * _x / (1 + sym.exp(log_scale) * _x)
-_C_func = psi * _x - ((1 - phi**2) / 2) * _x**2
 _B_func_in = 1 + sym.exp(log_scale) * _x
+_A_func = rho * _x / _B_func_in
+_C_func = psi * _x - ((1 - phi**2) / 2) * _x**2
 _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
              _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})).xreplace({psi: _psi_sym})
 
@@ -73,19 +73,17 @@ _link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi,
 _mean = rho * _x + sym.exp(log_both)
 _var = 2 * sym.exp(log_scale) * rho * _x + sym.exp(log_scale + log_both)
 
-# These are from the derivation of sigma_4_variance notebook.
-_fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * rho * _x)
-_second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * rho * _x)
-_fourth_power_variance = sym.factor(_fourth_moment - _second_moment**2) 
+# # These are from the derivation of sigma_4_variance notebook.
+# _fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * rho * _x)
+# _second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * rho * _x)
+# _fourth_power_variance = sym.factor(_fourth_moment - _second_moment**2) 
 
 # I now compute the heteroskedasticity-adjusted moments.
-#TODO I am not adjusting for the pre-multipying part.... It cancels... 
-_row1 = (_y - _mean) / sym.sqrt(_var)
-# The variance of the 2nd moment is the same as the variance of the variance.
-_row3 = ((_y - _mean)**2 - _var) / sym.sqrt(_fourth_power_variance)
+_row1 = (_y - _mean)  # * _var**(-.5) 
+_row3 = ((_y - _mean)**2 - _var) # * (_fourth_power_variance**2)**(-1/4)
 
-
-_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
+# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row3 * _x**2])
+_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
 
 
 compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, rho], _vol_moments, modules='numpy')
