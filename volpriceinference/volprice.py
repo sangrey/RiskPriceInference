@@ -1,7 +1,7 @@
 """This module contains the functions that are used to simulate and estimate the model and perform inference."""
 import numpy as np
 import pandas as pd
-from scipy import stats
+from scipy import stats, special
 from scipy.optimize import minimize
 from scipy.signal import windows
 import statsmodels.api as sm
@@ -17,14 +17,17 @@ from multiprocessing import Pool
 
 # We define some functions
 _x, _y, beta, gamma, psi = sym.symbols('_x _y beta gamma psi', real=True, positive=True)
-rho, log_scale, log_both, zeta = sym.symbols('rho log_scale log_both zeta', real=True, positive=True)
+logit_rho, log_scale, log_both, zeta = sym.symbols('logit_rho log_scale log_both zeta', real=True, positive=True)
 theta, pi, phi, pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols('theta pi phi pi1 pi2 theta1 theta2 phi1 phi2')
+
+_logit = sym.log(_x) - sym.log(1 - _x)
+_logistic = 1 / (1 + sym.exp(-1 * _x)) 
 
 #  We define the functions that specify the model.
 _psi_sym = (phi / sym.sqrt(2 * sym.exp(log_scale))) - (1 - phi**2) / 2 + (1 - phi**2) * theta
 _theta_sym = sym.solveset(psi - _psi_sym, theta).args[0]
 _B_func_in = 1 + sym.exp(log_scale) * _x
-_A_func = rho * _x / _B_func_in
+_A_func = _logistic.xreplace({_x:logit_rho}) * _x / _B_func_in
 _C_func = psi * _x - ((1 - phi**2) / 2) * _x**2
 _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
              _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})).xreplace({psi: _psi_sym})
@@ -34,18 +37,18 @@ _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
 _constraint_sym = _B_func_in.xreplace({_x: pi + _C_func}).xreplace({psi: _psi_sym})
 _gamma_sym = sym.exp(log_both - log_scale) * (sym.log(_constraint_sym.xreplace({_x: theta-1})) -
                                    sym.log(_constraint_sym.xreplace({_x: theta})))
-_constraint1 = sym.lambdify((phi, pi, theta, log_scale, rho), _constraint_sym.xreplace({_x: theta-1}),
+_constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta-1}),
                             modules='numpy')
-_constraint2 = sym.lambdify((phi, pi, theta, log_scale, rho), _constraint_sym.xreplace({_x: theta}),
+_constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta}),
                             modules='numpy')
 
 # We create the link functions.
-compute_gamma = sym.lambdify((log_both, log_scale, phi, pi, rho, theta), _gamma_sym, modules='numpy')
-compute_beta = sym.lambdify((log_scale, phi, pi, rho, theta), _beta_sym, modules='numpy')
-compute_psi = sym.lambdify((log_scale, phi, rho, theta), _psi_sym, modules='numpy')
+compute_gamma = sym.lambdify((log_both, log_scale, phi, pi, logit_rho, theta), _gamma_sym, modules='numpy')
+compute_beta = sym.lambdify((log_scale, phi, pi, logit_rho, theta), _beta_sym, modules='numpy')
+compute_psi = sym.lambdify((log_scale, phi, logit_rho, theta), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
-compute_theta = sym.lambdify((psi, rho, log_scale, zeta), _theta_sym.xreplace({phi: sym.Min(0, -sym.sqrt(1 - zeta))}),
+compute_theta = sym.lambdify((psi, logit_rho, log_scale, zeta), _theta_sym.xreplace({phi: sym.Min(0, -sym.sqrt(1 - zeta))}),
                              modules='numpy')
 _pi_from_gamma_in = _B_func_in.xreplace({_x: pi + _C_func})
 _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / sym.exp(log_both - log_scale)) -
@@ -53,29 +56,29 @@ _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / sym.exp(log
                                                       _pi_from_gamma_in.xreplace({_x: theta})),
                                                      pi).args[0].args[0]))
 
-compute_pi = sym.lambdify((gamma, log_both, log_scale, phi, psi, rho, theta), _pi_from_gamma, modules='numpy')
+compute_pi = sym.lambdify((gamma, log_both, log_scale, phi, psi, logit_rho, theta), _pi_from_gamma, modules='numpy')
 
 # We create the functions to jointly specify the links.
 _link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym, gamma - _gamma_sym, psi - _psi_sym,
                                                1 - (zeta + phi**2)])))
 
-_link_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, rho, zeta), _link_sym[-1],
+_link_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym[-1],
                          modules='numpy')
-_link_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta), _link_sym,
+_link_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym,
                          modules='numpy')
-_link_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta), _link_sym[-2:],
+_link_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym[-2:],
                          modules='numpy')
-_link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta), _link_sym[1:],
+_link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym[1:],
                          modules='numpy')
 
 
 # We define the moments used to estimate the volatility paramters.
-_mean = rho * _x + sym.exp(log_both)
-_var = 2 * sym.exp(log_scale) * rho * _x + sym.exp(log_scale + log_both)
+_mean = _logistic.xreplace({_x: logit_rho}) * _x + sym.exp(log_both)
+_var = 2 * sym.exp(log_scale) * _logistic.xreplace({_x:logit_rho}) * _x + sym.exp(log_scale + log_both)
 
 # # These are from the derivation of sigma_4_variance notebook.
-# _fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * rho * _x)
-# _second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * rho * _x)
+# _fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * logit_rho * _x)
+# _second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * logit_rho * _x)
 # _fourth_power_variance = sym.factor(_fourth_moment - _second_moment**2) 
 
 # I now compute the heteroskedasticity-adjusted moments.
@@ -86,22 +89,22 @@ _row3 = ((_y - _mean)**2 - _var) # * (_fourth_power_variance**2)**(-1/4)
 _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3])
 
 
-compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, rho], _vol_moments, modules='numpy')
-compute_vol_moments_grad = sym.lambdify([_x, _y, log_both, log_scale, rho],
-                                        _vol_moments.jacobian([log_both, log_scale, rho]), modules='numpy')
+compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, logit_rho], _vol_moments, modules='numpy')
+compute_vol_moments_grad = sym.lambdify([_x, _y, log_both, log_scale, logit_rho],
+                                        _vol_moments.jacobian([log_both, log_scale, logit_rho]), modules='numpy')
 
 
 # Define the gradient of the link function with respect to the reduced form paramters.
 _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale,
-                                                                        psi, rho, zeta])])))
+                                                                        psi, logit_rho, zeta])])))
 
-_link_grad_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, rho, zeta), _link_grad_sym[-1, :],
+_link_grad_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_grad_sym[-1, :],
                               modules='numpy')
-_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta), _link_grad_sym,
+_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_grad_sym,
                               modules='numpy')
-_link_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta), _link_grad_sym[-2:, :],
+_link_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_grad_sym[-2:, :],
                               modules='numpy')
-_link_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta),
+_link_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                               _link_grad_sym[1:, :], modules='numpy')
 
 omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
@@ -109,33 +112,33 @@ omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sy
 # Define the gradient of the link function with respect to the structural paramters.
 _link_price_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([phi, pi, theta])])))
 
-_link_price_grad_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, rho, zeta),
+_link_price_grad_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                                     _link_price_grad_sym[-1, 0], modules='numpy')
-_link_price_grad_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta),
+_link_price_grad_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                                     _link_price_grad_sym, modules='numpy')
-_link_price_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta),
+_link_price_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                                     _link_price_grad_sym[-2:, [0, 2]], modules='numpy')
-_link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, rho, zeta),
+_link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                                     _link_price_grad_sym[1:, :], modules='numpy')
 
 # I now define the covariance kernel.
 _link_grad_left = _link_grad_sym.xreplace({pi: pi1, theta: theta1, phi: phi1})
 _link_grad_right = _link_grad_sym.xreplace({pi: pi2, theta: theta2, phi: phi2})
 
-_cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, gamma, log_both, log_scale, rho, zeta, omega_cov),
+_cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, gamma, log_both, log_scale, logit_rho, zeta, omega_cov),
                                _link_grad_left[-1, :] * omega_cov * _link_grad_right[-1, :].T, modules='numpy')
 
 _cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1,  phi2, pi2, theta2, psi, beta, gamma,
-                                log_both, log_scale, rho, zeta, omega_cov),
+                                log_both, log_scale, logit_rho, zeta, omega_cov),
                                _link_grad_left * omega_cov * _link_grad_right.T, modules='numpy')
 
 _cov_kernel_in2 = sym.lambdify((phi1, theta1,  phi2, theta2, psi, beta, gamma,
-                                log_both, log_scale, rho, zeta, omega_cov),
+                                log_both, log_scale, logit_rho, zeta, omega_cov),
                                _link_grad_left[-2:, :] * omega_cov *
                                _link_grad_right[-2:, :].T, modules='numpy')
 
 _cov_kernel_in3 = sym.lambdify((phi1, pi1, theta1,  phi2, pi2, theta2, psi,
-                                beta, gamma, log_both, log_scale, rho, zeta,
+                                beta, gamma, log_both, log_scale, logit_rho, zeta,
                                 omega_cov), _link_grad_left[1:, :] * omega_cov
                                * _link_grad_right[1:, :].T, modules='numpy')
 
@@ -147,8 +150,8 @@ def constraint(prices, omega, case=1):
 
     # This needs to be fixed.
 
-    constraint1 = _constraint1(*prices, rho=omega['rho'], log_scale=omega['log_scale'])
-    constraint2 = _constraint2(*prices, rho=omega['rho'], log_scale=omega['log_scale'])
+    constraint1 = _constraint1(*prices, logit_rho=omega['logit_rho'], log_scale=omega['log_scale'])
+    constraint2 = _constraint2(*prices, logit_rho=omega['logit_rho'], log_scale=omega['log_scale'])
 
     return np.minimum(constraint1, constraint2)
 
@@ -156,13 +159,13 @@ def constraint(prices, omega, case=1):
 def compute_constraint_prices(omega, omega_cov, bounds, case):
     """Compute the slackness in the nonlinear constraint."""
     phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
-    theta_init = compute_theta(psi=omega['psi'], log_scale=omega['log_scale'], rho=omega['rho'], zeta=omega['zeta'])
+    theta_init = compute_theta(psi=omega['psi'], log_scale=omega['log_scale'], logit_rho=omega['logit_rho'], zeta=omega['zeta'])
 
     vals = -1 * stats.truncexpon.rvs(loc=-bounds[1][1], b=-bounds[1][0], size=50)
     if case != 0 and case != 2:
         arg_list = [(val, _qlr_in([phi_init, val, theta_init], omega, omega_cov, case=case)) for val in vals]
 
-        pi_est = compute_pi(log_both=omega['log_both'], gamma=omega['gamma'], psi=omega['psi'], rho=omega['rho'],
+        pi_est = compute_pi(log_both=omega['log_both'], gamma=omega['gamma'], psi=omega['psi'], logit_rho=omega['logit_rho'],
                             log_scale=omega['log_scale'], theta=theta_init, phi=phi_init)
         if np.isfinite(pi_est):
             arg_list.append((pi_est, _qlr_in([phi_init, pi_est, theta_init], omega, omega_cov, case=case)))
@@ -358,14 +361,14 @@ def covariance_kernel(prices1, prices2, omega, omega_cov, case):
     return covariance_kernel_in(*prices1, *prices2, omega_cov=omega_cov, **omega)
 
 
-def simulate_autoregressive_gamma(log_both=0, rho=0, log_scale=0, initial_point=None, time_dim=100,
+def simulate_autoregressive_gamma(log_both=0, logit_rho=0, log_scale=0, initial_point=None, time_dim=100,
                                   start_date='2000-01-01'):
     """
     Provide draws from the ARG(1) process of Gourieroux & Jaisak.
 
     Parameters
     --------
-    rho : scalar
+    logit_rho : scalar
         AR(1) coefficient
     log_both : scalar
         intercept
@@ -378,18 +381,18 @@ def simulate_autoregressive_gamma(log_both=0, rho=0, log_scale=0, initial_point=
     """
     # If initial_point is not specified, we start at the unconditional mean.
 
-    initial_point = ((sym.exp(log_both)) / (1 - rho) if initial_point is None
+    initial_point = ((sym.exp(log_both)) / (1 - logit_rho) if initial_point is None
                      else initial_point)
 
-    draws = _simulate_autoregressive_gamma(delta=np.exp(log_both - log_scale), rho=rho, scale=np.exp(log_scale),
-                                           initial_point=initial_point, time_dim=time_dim)
+    draws = _simulate_autoregressive_gamma(delta=np.exp(log_both - log_scale), rho=special.expit(logit_rho),
+                                           scale=np.exp(log_scale), initial_point=initial_point, time_dim=time_dim)
 
     draws_df = pd.Series(draws, pd.date_range(start=start_date, freq='D', periods=len(draws))).to_frame()
 
     return draws_df
 
 
-def simulate_data(theta=1, pi=0, rho=0, log_scale=0, log_both=0, phi=0, initial_point=None, time_dim=100,
+def simulate_data(theta=1, pi=0, logit_rho=0, log_scale=0, log_both=0, phi=0, initial_point=None, time_dim=100,
                   start_date='2000-01-01', case=1):
     """
     Take the reduced-form paramters and risk prices and returns the data.
@@ -398,7 +401,7 @@ def simulate_data(theta=1, pi=0, rho=0, log_scale=0, log_both=0, phi=0, initial_
     --------
     theta: scalar
     pi : scalar
-    rho : scalar
+    logit_rho : scalar
         persistence
     log_scale : positive scalar
     initial_point: scalar, optional
@@ -415,17 +418,17 @@ def simulate_data(theta=1, pi=0, rho=0, log_scale=0, log_both=0, phi=0, initial_
     draws : dataframe
 
     """
-    vol_data = simulate_autoregressive_gamma(rho=rho, log_scale=log_scale, log_both=log_both,
+    vol_data = simulate_autoregressive_gamma(logit_rho=logit_rho, log_scale=log_scale, log_both=log_both,
                                              initial_point=initial_point, time_dim=time_dim+1,
                                              start_date=pd.to_datetime(start_date) - pd.Timedelta('1 day'))
 
-    gamma_val = compute_gamma(rho=rho, log_scale=log_scale, log_both=log_both, pi=pi, theta=theta, phi=phi)
-    beta_val = compute_beta(rho=rho, log_scale=log_scale, pi=pi, theta=theta, phi=phi)
-    psi_val = compute_psi(rho=rho, log_scale=log_scale, theta=theta, phi=phi)
+    gamma_val = compute_gamma(logit_rho=logit_rho, log_scale=log_scale, log_both=log_both, pi=pi, theta=theta, phi=phi)
+    beta_val = compute_beta(logit_rho=logit_rho, log_scale=log_scale, pi=pi, theta=theta, phi=phi)
+    psi_val = compute_psi(logit_rho=logit_rho, log_scale=log_scale, theta=theta, phi=phi)
 
     if case == 1:
         price_in = (phi, pi, theta)
-        if constraint(prices=price_in, omega={'psi': psi_val, 'rho': rho, 'log_scale': log_scale}, case=case) < 0:
+        if constraint(prices=price_in, omega={'psi': psi_val, 'logit_rho': logit_rho, 'log_scale': log_scale}, case=case) < 0:
             raise ValueError(f"""The set of paramters given conflict with each other. No process exists with those
                              paramters. You might want to make the volatility price smaller in magnitude.""")
 
@@ -439,21 +442,21 @@ def simulate_data(theta=1, pi=0, rho=0, log_scale=0, log_both=0, phi=0, initial_
     return data
 
 
-def vol_moments(vol_data, log_both, log_scale, rho):
+def vol_moments(vol_data, log_both, log_scale, logit_rho):
     """Compute the moments of the volatility process."""
     x = vol_data.values[:-1]
     y = vol_data.values[1:]
 
-    return pd.DataFrame(np.squeeze(compute_vol_moments(x, y, log_both=log_both, log_scale=log_scale, rho=rho)).T)
+    return pd.DataFrame(np.squeeze(compute_vol_moments(x, y, log_both=log_both, log_scale=log_scale, logit_rho=logit_rho)).T)
 
 
-def vol_moments_grad(vol_data, log_both, log_scale, rho):
+def vol_moments_grad(vol_data, log_both, log_scale, logit_rho):
     """Compute the jacobian of the volatility moments."""
 
-    grad = np.mean([compute_vol_moments_grad(x, y, log_both=log_both, log_scale=log_scale, rho=rho)
+    grad = np.mean([compute_vol_moments_grad(x, y, log_both=log_both, log_scale=log_scale, logit_rho=logit_rho)
                     for x, y in zip(vol_data.values[:-1],vol_data.values[1:])], axis=0)
 
-    return pd.DataFrame(grad, columns=['log_both', 'log_scale', 'rho'])
+    return pd.DataFrame(grad, columns=['log_both', 'log_scale', 'logit_rho'])
 
 
 def compute_init_constants(vol_data):
@@ -475,7 +478,7 @@ def compute_init_constants(vol_data):
 
     init_constants = {'log_both': np.log(intercept)}
     init_constants['log_scale'] = np.log(error_var / (intercept + (2 * persistence * np.mean(vol_data))))
-    init_constants['rho'] = persistence
+    init_constants['logit_rho'] = persistence
 
     return init_constants
 
@@ -691,7 +694,7 @@ def compute_omega(data, vol_estimates=None, vol_cov=None):
     reduced_form_cov = vol_cov.merge(cov_1st_stage2, left_index=True, right_index=True,
                                      how='outer').fillna(0).sort_index(axis=1).sort_index(axis=0)
 
-    omega_names = ['beta', 'gamma', 'log_both', 'log_scale', 'psi', 'rho', 'zeta']
+    omega_names = ['beta', 'gamma', 'log_both', 'log_scale', 'psi', 'logit_rho', 'zeta']
 
     covariance = reduced_form_cov.loc[omega_names, omega_names].sort_index(axis=0).sort_index(axis=1)
 
