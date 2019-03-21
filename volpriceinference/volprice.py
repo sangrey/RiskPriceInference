@@ -448,7 +448,9 @@ def vol_moments(vol_data, log_both, log_scale, logit_rho):
     x = vol_data.values[:-1]
     y = vol_data.values[1:]
 
-    return pd.DataFrame(np.squeeze(compute_vol_moments(x, y, log_both=log_both, log_scale=log_scale, logit_rho=logit_rho)).T)
+    moments = np.squeeze(compute_vol_moments(x, y, log_both=log_both, log_scale=log_scale, logit_rho=logit_rho)).T  
+
+    return pd.DataFrame(moments, columns=['log_both', 'log_scale', 'logit_rho'])
 
 
 def vol_moments_grad(vol_data, log_both, log_scale, logit_rho):
@@ -462,7 +464,7 @@ def vol_moments_grad(vol_data, log_both, log_scale, logit_rho):
 
 def compute_init_constants(vol_data):
     """
-    Compute some guesses for the volatlity paramters that we can use to initialize the optimization.
+    Compute guesses for the volatlity paramters that we use to initialize the optimization.
 
     Paramters
     -------
@@ -475,11 +477,11 @@ def compute_init_constants(vol_data):
     """
     model = tsa.AR(vol_data).fit(maxlag=1)
     intercept, persistence = model.params
-    error_var = model.sigma2
 
     init_constants = {'log_both': np.log(intercept)}
-    init_constants['log_scale'] = np.log(error_var / (intercept + (2 * persistence * np.mean(vol_data))))
-    init_constants['logit_rho'] = persistence
+    init_constants['log_scale'] = max(np.log(np.var(vol_data) * (1 - persistence**2) 
+                                             / (2 * np.mean(vol_data) + intercept)), -10)
+    init_constants['logit_rho'] = special.logit(persistence)
 
     return init_constants
 
