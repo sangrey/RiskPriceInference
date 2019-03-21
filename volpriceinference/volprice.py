@@ -527,9 +527,6 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     cov : ndarray
 
     """
-    if bounds is None:
-        bounds = [(-8, 2), (None, None), (0, 1)]
-
     if options is None:
         options = {'maxiter': 200}
 
@@ -538,8 +535,6 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     x0 = list(init_constants.values())
 
     initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0, options=options)
-    # ,
-                              # bounds=bounds)
 
     if not initial_result['success']:
         logging.warning(initial_result)
@@ -551,8 +546,11 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
                          axis=0)
     weight_matrix = np.linalg.pinv(moment_cov)
 
-    final_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
-                            x0=initial_result.x, method="L-BFGS-B", options=options) #bounds=bounds, options=options)
+    final_result = minimize(lambda x: compute_mean_square(x, vol_data,
+                                                          vol_moments,
+                                                          weight_matrix),
+                            x0=initial_result.x, method="L-BFGS-B",
+                            options=options) 
 
     if not final_result['success']:
         logging.warning(final_result)
