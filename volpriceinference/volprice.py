@@ -20,14 +20,14 @@ _x, _y, beta, gamma, psi = sym.symbols('_x _y beta gamma psi', real=True, positi
 logit_rho, log_scale, log_both, zeta = sym.symbols('logit_rho log_scale log_both zeta', real=True, positive=True)
 theta, pi, phi, pi1, pi2, theta1, theta2, phi1, phi2 = sym.symbols('theta pi phi pi1 pi2 theta1 theta2 phi1 phi2')
 
-_logit = sym.log(_x) - sym.log(1 - _x)
-_logistic = 1 / (1 + sym.exp(-1 * _x)) 
-
 #  We define the functions that specify the model.
+_logit = sym.log(_x) - sym.log(1 - _x)
+_logistic = 1 / (1 + sym.exp(-1 * _x))
+
 _psi_sym = (phi / sym.sqrt(2 * sym.exp(log_scale))) - (1 - phi**2) / 2 + (1 - phi**2) * theta
 _theta_sym = sym.solveset(psi - _psi_sym, theta).args[0]
 _B_func_in = 1 + sym.exp(log_scale) * _x
-_A_func = _logistic.xreplace({_x:logit_rho}) * _x / _B_func_in
+_A_func = _logistic.xreplace({_x: logit_rho}) * _x / _B_func_in
 _C_func = psi * _x - ((1 - phi**2) / 2) * _x**2
 _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
              _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})).xreplace({psi: _psi_sym})
@@ -35,9 +35,9 @@ _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
 # We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
 # be positive.
 _constraint_sym = _B_func_in.xreplace({_x: pi + _C_func}).xreplace({psi: _psi_sym})
-_gamma_sym = sym.exp(log_both - log_scale) * (sym.log(_constraint_sym.xreplace({_x: theta-1})) -
-                                   sym.log(_constraint_sym.xreplace({_x: theta})))
-_constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta-1}),
+_gamma_sym = sym.exp(log_both - log_scale) * (sym.log(_constraint_sym.xreplace({_x: theta - 1})) -
+                                              sym.log(_constraint_sym.xreplace({_x: theta})))
+_constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta - 1}),
                             modules='numpy')
 _constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta}),
                             modules='numpy')
@@ -48,7 +48,8 @@ compute_beta = sym.lambdify((log_scale, phi, pi, logit_rho, theta), _beta_sym, m
 compute_psi = sym.lambdify((log_scale, phi, logit_rho, theta), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
-compute_theta = sym.lambdify((psi, logit_rho, log_scale, zeta), _theta_sym.xreplace({phi: sym.Min(0, -sym.sqrt(1 - zeta))}),
+compute_theta = sym.lambdify((psi, logit_rho, log_scale, zeta),
+                             _theta_sym.xreplace({phi: sym.Min(0, -sym.sqrt(1 - zeta))}),
                              modules='numpy')
 _pi_from_gamma_in = _B_func_in.xreplace({_x: pi + _C_func})
 _pi_from_gamma = sym.powsimp(sym.expand(sym.solveset(sym.exp(gamma / sym.exp(log_both - log_scale)) -
@@ -74,21 +75,13 @@ _link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi,
 
 # We define the moments used to estimate the volatility paramters.
 _mean = _logistic.xreplace({_x: logit_rho}) * _x + sym.exp(log_both)
-_var = 2 * sym.exp(log_scale) * _logistic.xreplace({_x:logit_rho}) * _x + sym.exp(log_scale + log_both)
-
-# # These are from the derivation of sigma_4_variance notebook.
-# I think there's a decen chance they're wrong.
-# _fourth_moment = 6 * sym.exp(3 * log_scale) * (sym.exp(log_scale + log_both)  + 4 * _logistic.xreplace({_x:logit_rho}) * _x)
-# _second_moment = sym.exp(log_scale) * (sym.exp(log_scale + log_both) + 2 * _logistic.xreplace({_x:logit_rho}) * _x)
-# _fourth_power_variance = sym.factor(_fourth_moment - _second_moment**2) 
+_var = 2 * sym.exp(log_scale) * _logistic.xreplace({_x: logit_rho}) * _x + sym.exp(log_scale + log_both)
 
 # I now compute the heteroskedasticity-adjusted moments.
-_row1 = (_y - _mean)  # * _var**(-.5) 
-_row3 = ((_y - _mean)**2 - _var) #* (_fourth_power_variance**2)**(-1/4)
+_row1 = (_y - _mean)
+_row3 = ((_y - _mean)**2 - _var)
 
-# _vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row1 * _x**2])
-_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x])
-
+_vol_moments = sym.Matrix([_row1, _row1 * _x, _row3, _row3 * _x, _row1 * _x**2])
 
 compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, logit_rho], _vol_moments, modules='numpy')
 compute_vol_moments_grad = sym.lambdify([_x, _y, log_both, log_scale, logit_rho],
@@ -101,10 +94,10 @@ _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, ga
 
 _link_grad_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_grad_sym[-1, :],
                               modules='numpy')
-_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_grad_sym,
-                              modules='numpy')
-_link_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_grad_sym[-2:, :],
-                              modules='numpy')
+_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
+                              _link_grad_sym, modules='numpy')
+_link_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
+                              _link_grad_sym[-2:, :], modules='numpy')
 _link_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                               _link_grad_sym[1:, :], modules='numpy')
 
@@ -129,16 +122,16 @@ _link_grad_right = _link_grad_sym.xreplace({pi: pi2, theta: theta2, phi: phi2})
 _cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, gamma, log_both, log_scale, logit_rho, zeta, omega_cov),
                                _link_grad_left[-1, :] * omega_cov * _link_grad_right[-1, :].T, modules='numpy')
 
-_cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1,  phi2, pi2, theta2, psi, beta, gamma,
+_cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, gamma,
                                 log_both, log_scale, logit_rho, zeta, omega_cov),
                                _link_grad_left * omega_cov * _link_grad_right.T, modules='numpy')
 
-_cov_kernel_in2 = sym.lambdify((phi1, theta1,  phi2, theta2, psi, beta, gamma,
+_cov_kernel_in2 = sym.lambdify((phi1, theta1, phi2, theta2, psi, beta, gamma,
                                 log_both, log_scale, logit_rho, zeta, omega_cov),
                                _link_grad_left[-2:, :] * omega_cov *
                                _link_grad_right[-2:, :].T, modules='numpy')
 
-_cov_kernel_in3 = sym.lambdify((phi1, pi1, theta1,  phi2, pi2, theta2, psi,
+_cov_kernel_in3 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi,
                                 beta, gamma, log_both, log_scale, logit_rho, zeta,
                                 omega_cov), _link_grad_left[1:, :] * omega_cov
                                * _link_grad_right[1:, :].T, modules='numpy')
@@ -157,17 +150,39 @@ def constraint(prices, omega, case=1):
     return np.minimum(constraint1, constraint2)
 
 
+def compute_moments(log_both, logit_rho, log_scale, phi, pi, theta):
+    """Compute the means and variances implied by the paramters."""
+    rho = special.expit(logit_rho)
+
+    vol_mean = np.exp(log_both) / (1 - rho)
+    vol_var = ((2 * np.exp(log_scale) * rho * vol_mean + np.exp(log_scale)**2
+                * np.exp(log_both - log_scale)) / (1 - rho**2))
+
+    psi = compute_psi(logit_rho=logit_rho, log_scale=log_scale, phi=phi, theta=theta)
+    beta = compute_beta(logit_rho=logit_rho, log_scale=log_scale, phi=phi, pi=pi, theta=theta)
+    gamma = compute_gamma(log_both=log_both, logit_rho=logit_rho,
+                          log_scale=log_scale, phi=phi, pi=pi, theta=theta)
+
+    return_mean = psi * vol_mean + beta * vol_mean + gamma
+    return_var = psi**2 * vol_var + beta**2 * vol_var + (1 - phi**2) * vol_mean
+
+    return {'return_mean': return_mean, 'return_var': return_var, 'vol_mean': vol_mean, 'vol_var': vol_var}
+
+
 def compute_constraint_prices(omega, omega_cov, bounds, case):
     """Compute the slackness in the nonlinear constraint."""
     phi_init = -np.sqrt(1 - omega['zeta']) if omega['zeta'] < 1 else 0
-    theta_init = compute_theta(psi=omega['psi'], log_scale=omega['log_scale'], logit_rho=omega['logit_rho'], zeta=omega['zeta'])
+    theta_init = compute_theta(psi=omega['psi'], log_scale=omega['log_scale'],
+                               logit_rho=omega['logit_rho'], zeta=omega['zeta'])
 
     vals = -1 * stats.truncexpon.rvs(loc=-bounds[1][1], b=-bounds[1][0], size=50)
     if case != 0 and case != 2:
         arg_list = [(val, _qlr_in([phi_init, val, theta_init], omega, omega_cov, case=case)) for val in vals]
 
-        pi_est = compute_pi(log_both=omega['log_both'], gamma=omega['gamma'], psi=omega['psi'], logit_rho=omega['logit_rho'],
-                            log_scale=omega['log_scale'], theta=theta_init, phi=phi_init)
+        pi_est = compute_pi(log_both=omega['log_both'], gamma=omega['gamma'],
+                            psi=omega['psi'], logit_rho=omega['logit_rho'],
+                            log_scale=omega['log_scale'], theta=theta_init,
+                            phi=phi_init)
         if np.isfinite(pi_est):
             arg_list.append((pi_est, _qlr_in([phi_init, pi_est, theta_init], omega, omega_cov, case=case)))
 
@@ -216,7 +231,7 @@ def compute_hac_num_lags(data, kernel="parzen"):
     # This is Andrews (1991) Eq. 6.4.
     slopes_and_vars = []
     for _, col in data.items():
-    
+
         data_in = col.to_frame()
         data_in.columns = ['name']
         model = tsa.AR(data_in).fit(maxlag=1)
@@ -382,7 +397,7 @@ def simulate_autoregressive_gamma(log_both=0, logit_rho=0, log_scale=0, initial_
     """
     # If initial_point is not specified, we start at the unconditional mean.
 
-    initial_point = ((sym.exp(log_both)) / (1 - logit_rho) if initial_point is None
+    initial_point = ((sym.exp(log_both)) / (1 - special.expit(logit_rho)) if initial_point is None
                      else initial_point)
 
     draws = _simulate_autoregressive_gamma(delta=np.exp(log_both - log_scale), rho=special.expit(logit_rho),
@@ -420,7 +435,7 @@ def simulate_data(theta=1, pi=0, logit_rho=0, log_scale=0, log_both=0, phi=0, in
 
     """
     vol_data = simulate_autoregressive_gamma(logit_rho=logit_rho, log_scale=log_scale, log_both=log_both,
-                                             initial_point=initial_point, time_dim=time_dim+1,
+                                             initial_point=initial_point, time_dim=time_dim + 1,
                                              start_date=pd.to_datetime(start_date) - pd.Timedelta('1 day'))
 
     gamma_val = compute_gamma(logit_rho=logit_rho, log_scale=log_scale, log_both=log_both, pi=pi, theta=theta, phi=phi)
@@ -429,7 +444,8 @@ def simulate_data(theta=1, pi=0, logit_rho=0, log_scale=0, log_both=0, phi=0, in
 
     if case == 1:
         price_in = (phi, pi, theta)
-        if constraint(prices=price_in, omega={'psi': psi_val, 'logit_rho': logit_rho, 'log_scale': log_scale}, case=case) < 0:
+        if constraint(prices=price_in, omega={'psi': psi_val,
+                                              'logit_rho': logit_rho, 'log_scale': log_scale}, case=case) < 0:
             raise ValueError(f"""The set of paramters given conflict with each other. No process exists with those
                              paramters. You might want to make the volatility price smaller in magnitude.""")
 
@@ -448,16 +464,15 @@ def vol_moments(vol_data, log_both, log_scale, logit_rho):
     x = vol_data.values[:-1]
     y = vol_data.values[1:]
 
-    moments = np.squeeze(compute_vol_moments(x, y, log_both=log_both, log_scale=log_scale, logit_rho=logit_rho)).T  
+    moments = np.squeeze(compute_vol_moments(x, y, log_both=log_both, log_scale=log_scale, logit_rho=logit_rho)).T
 
-    return pd.DataFrame(moments, columns=['log_both', 'log_scale', 'logit_rho'])
+    return pd.DataFrame(moments)
 
 
 def vol_moments_grad(vol_data, log_both, log_scale, logit_rho):
     """Compute the jacobian of the volatility moments."""
-
     grad = np.mean([compute_vol_moments_grad(x, y, log_both=log_both, log_scale=log_scale, logit_rho=logit_rho)
-                    for x, y in zip(vol_data.values[:-1],vol_data.values[1:])], axis=0)
+                    for x, y in zip(vol_data.values[:-1], vol_data.values[1:])], axis=0)
 
     return pd.DataFrame(grad, columns=['log_both', 'log_scale', 'logit_rho'])
 
@@ -478,10 +493,13 @@ def compute_init_constants(vol_data):
     model = tsa.AR(vol_data).fit(maxlag=1)
     intercept, persistence = model.params
 
-    init_constants = {'log_both': np.log(intercept)}
-    init_constants['log_scale'] = max(np.log(np.var(vol_data) * (1 - persistence**2) 
-                                             / (2 * np.mean(vol_data) + intercept)), -10)
-    init_constants['logit_rho'] = special.logit(persistence)
+    init_constants = {'log_both': max(np.log(intercept), -10)}
+    init_constants['log_scale'] = max(np.log(np.var(vol_data)
+                                             * (1 - persistence**2))
+                                      - np.log(2 * persistence *
+                                               np.mean(vol_data) + intercept),
+                                      -10)
+    init_constants['logit_rho'] = max(special.logit(persistence), -10)
 
     return init_constants
 
@@ -511,14 +529,14 @@ def compute_mean_square(x, data, func, weight=None):
     return np.asscalar(func_data @ weight @ func_data.T)
 
 
-def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
+def compute_vol_gmm(vol_data, init_constants=None, bounds=None, options=None):
     """
     Use GMM to compute the volatility paramters and their asymptotic covariance matrix.
 
     Paramters
     ---------
     vol_data : pandas series
-    init_constants : dict
+    init_constants : dict, None
         This must contain initial guesses for the paramters as values and their names as keys.
     bounds : list, optional
     options: dict, optional
@@ -532,36 +550,41 @@ def compute_vol_gmm(vol_data, init_constants, bounds=None, options=None):
     if options is None:
         options = {'maxiter': 200}
 
-    init_constants = OrderedDict(sorted(init_constants.items(), key=lambda t: t[0]))
+    if init_constants is None:
+        init_constants = compute_init_constants(vol_data)
 
     x0 = list(init_constants.values())
+    init_constants = OrderedDict(sorted(init_constants.items(), key=lambda t: t[0]))
 
-    initial_result = minimize(lambda x: compute_mean_square(x, vol_data, vol_moments), x0=x0, options=options)
+    initial_result = minimize(
+        lambda x: vol_data.shape[0]**2 * compute_mean_square(x, vol_data, vol_moments),
+        x0=x0, options=options)
 
     if not initial_result['success']:
         logging.warning(initial_result)
 
-    vol_moments_data = vol_moments(vol_data, *initial_result.x)
-    num_lags = compute_hac_num_lags(vol_moments_data, kernel='parzen')
-    win = windows.parzen(M=num_lags, sym=True) / np.sum(windows.parzen(M=num_lags, sym=True))
-    moment_cov = np.mean([(x.T * win).dot(x) for x in sliding_window_view(vol_moments_data, window=len(win))], 
-                         axis=0)
-    weight_matrix = np.linalg.pinv(moment_cov)
+    vol_moments_data1 = vol_moments(vol_data, *initial_result.x)
+    num_lags = compute_hac_num_lags(vol_moments_data1, kernel='parzen')
+    win = windows.parzen(M=2 * num_lags, sym=True) / np.sum(windows.parzen(M=2 * num_lags, sym=True))
+    sliding_it1 = sliding_window_view(vol_moments_data1, window=len(win))
+    moment_cov1 = np.mean([(x.T * win).dot(x) for x in sliding_it1], axis=0)
+    weight_matrix = np.linalg.pinv(moment_cov1)
 
-    final_result = minimize(lambda x: compute_mean_square(x, vol_data,
-                                                          vol_moments,
-                                                          weight_matrix),
-                            x0=initial_result.x, method="L-BFGS-B",
-                            options=options) 
+    final_result = minimize(
+        lambda x: compute_mean_square(x, vol_data, vol_moments, weight_matrix),
+        x0=initial_result.x, method="L-BFGS-B", options=options
+    )
 
     if not final_result['success']:
         logging.warning(final_result)
 
     estimates = {key: val for key, val in zip(init_constants.keys(), final_result.x)}
-
-    weight_matrix = np.linalg.pinv(vol_moments(vol_data, **estimates).cov())
+    vol_moments_data2 = vol_moments(vol_data, *final_result.x)
+    sliding_it2 = sliding_window_view(vol_moments_data2, window=len(win))
+    moment_cov2 = np.mean([(x.T * win).dot(x) for x in sliding_it2], axis=0)
     moment_derivative = vol_moments_grad(vol_data, **estimates)
-    cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ weight_matrix @ moment_derivative),
+
+    cov = pd.DataFrame(np.linalg.pinv(moment_derivative.T @ np.linalg.solve(moment_cov2, moment_derivative)),
                        columns=list(init_constants.keys()), index=list(init_constants.keys()))
 
     if not final_result.success:
