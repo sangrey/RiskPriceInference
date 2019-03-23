@@ -8,6 +8,7 @@
 \usepackage[autopunct=true, hyperref=true, doi=false, isbn=false, natbib=true, 
 url=false, eprint=false, style=chicago-authordate]{biblatex} 
 \addbibresource{risk_bibliography.bib}
+\setbeamercovered{invisible}
 
 \let\emph\relax 
 \DeclareTextFontCommand{\emph}{\color{DarkGreen} \bfseries}
@@ -149,23 +150,24 @@ url=false, eprint=false, style=chicago-authordate]{biblatex}
         \multicolumn{2}{l}{\emph{--} $\displaystyle M_{t, t+1}(\rpi, \rkappa) = \exp\left(m_0 + m_1 \sigma^2_t - \rpi \sigma^2_{t+1} - \rkappa r_{t+1}\right)$.} \\ 
         \multicolumn{2}{l}{} \\
 %
+        \toprule
+        \multicolumn{2}{c}{\only<2->{Reduced-Form Model}} \\ 
         \toprule 
-        \multicolumn{2}{c}{Reduced-Form Model} \\
-        \toprule \\
 %
-        $\sigma^2_{t+1}$ follows a conditional autoregressive gamma process: & $r_{t+1}$ follows a conditionally Gaussian process: \\
+        \only<2->{$\sigma^2_{t+1}$ follows a conditional autoregressive gamma process:} & \only<3>{$r_{t+1}$ follows a conditionally Gaussian process:} \\
 %
-        \midrule \\
+        \only<2->{\\[-\normalbaselineskip] \midrule} \\
 %
-        $\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $. & 
-        $\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right]$  \\ 
-        &\qquad $ \displaystyle = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$. \\ 
+        \only<2->{$\displaystyle \E\left[\exp(-x \sigma^2_{t+1}) \mvert \F_t\right] = \exp(-A(x) \sigma^2_{t} - B(x)) $.} & 
+        \only<3>{$\displaystyle \E\left[\exp(-x r_{t+1} \mvert \F_t, \sigma^2_{t+1} \right]$}  \\ 
+        & \only<3>{\qquad $ \displaystyle = \exp(-C(x) \sigma^2_{t+1} - D(x) \sigma^2_t - E(x))$.} \\ 
 %
-        $\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$. & $\displaystyle C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $. \\
+        \only<2->{$\displaystyle A(x) \coloneqq \frac{\rho x}{1 + c x}$.} & \only<3>{$\displaystyle C(x) \coloneqq \psi x - \frac{1-\phi^2}{2} x^2 $.} \\
 %
-        $\displaystyle B(x) \coloneqq \delta \log(1 + c x)$. & $\displaystyle D(x) \coloneqq \beta x$. \\
+        \only<2->{$\displaystyle B(x) \coloneqq \delta \log(1 + c x)$.} & \only<3>{$\displaystyle D(x) \coloneqq \beta x$.} \\
 %
-        &  $\displaystyle E(x) \coloneqq \gamma x$.  \\
+                                                                           &  \only<3>{$\displaystyle E(x) \coloneqq \gamma x$.}  \\
+        \bottomrule
 %
     \end{tabularx}
 \end{frame}
@@ -284,7 +286,8 @@ x_{t} \coloneqq \frac{1}{\sigma_{t+1}} \begin{pmatrix} 1 & \sigma_{t}^{2} & \sig
     \end{block}
  
     \vfill
-%    
+    \pause
+%
     \begin{block}{Residual Process}
     %
         \begin{equation*}
@@ -378,8 +381,8 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
      \begin{tabularx}{.6\textwidth}{X X c X X}
     
       \toprule
-      \midrule
       \multicolumn{5}{c}{Parameter Values used by \textcite{han2018leverage}} \\
+      \midrule
       $\delta$ & $\rho$ & $c$ & $\rpi$ & $\rkappa$ \\
       \midrule
       0.6475  & 0.50  & \num[scientific-notation=true]{.00394128} & -10 & 1.7680 \\
@@ -485,10 +488,10 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
             & {$r_{t+1}$} & {$\sigma^2_{t+1}$} \\
             \midrule
             Mean & 0.023421 & 5.621287 \\
-            \rowcolor{gray!30}
+            \rowcolor{DarkGreen!20}
             Standard Deviation & 2.350165 & 14.458446\\
             Skewness & -0.312 & 12.209 \\
-            \rowcolor{gray!30}
+            \rowcolor{DarkGreen!20}
             Kurtosis & 10.055 & 240.401 \\
             Correlation & \multicolumn{2}{c}{\num{-0.024379}} \\
             \bottomrule
@@ -503,7 +506,7 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
     \begin{minipage}{.49\textwidth}
         \begin{table}[htb]
             \centering
-            Selected Reduced-Form Parameters
+            Volatility Paramters 
         
             \bigskip
             \sisetup{
@@ -528,7 +531,7 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
             & {Point Estimate} & \multicolumn{2}{c}{ 95 \% Confidence Interval} \\
             \midrule
             $c$     & 6.0678 & 3.47006  & 10.6103 \\
-            \rowcolor{gray!30}
+            \rowcolor{DarkGreen!20}
             $\delta$  & 0.40814 & 0.2663 & 0.408137969 \\
             $\rho$   & 0.517097 & 0.29481863 & 0.739181 \\
             \bottomrule 
@@ -567,7 +570,7 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
             & \multicolumn{2}{c}{95 \% Confidence Interval} \\
             \midrule
             $\phi$   & -0.20 & -0.10    \\
-            \rowcolor{gray!30}
+            \rowcolor{DarkGreen!20}
             $\rpi$    & -0.02778 & 0.00   \\
             $\rkappa$   & 0.333 & 0.3778  \\
             \bottomrule 
