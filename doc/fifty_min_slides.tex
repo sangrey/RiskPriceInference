@@ -9,6 +9,11 @@
 url=false, eprint=false, style=chicago-authordate]{biblatex} 
 \addbibresource{risk_bibliography.bib}
 \setbeamercovered{invisible}
+\usepackage{tikz, pgf}
+\usetikzlibrary{fit, shapes.geometric}
+\usetikzlibrary{calc, babel}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{positioning}
 
 \let\emph\relax 
 \DeclareTextFontCommand{\emph}{\color{DarkGreen} \bfseries}
@@ -588,8 +593,12 @@ Obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted $c_{1-
     	
     	\centering
     	\label{fig:confidence_region}
+        \begin{tikzpicture}
+            \node(a) [anchor=south] at (0,0) {\includegraphics[width=.5\textwidth, height=.4\textwidth]{confidence_region_2.pdf}};
+            \node[circle, below right = -.35cm and -.25\textwidth of a, fill=white, anchor=north, minimum size = 1cm] {$\rpi$};
+            \node[circle, below left = -.27\textwidth and .15cm of a, fill=white, anchor=north, minimum size = 1cm] {$\rkappa$};
+        \end{tikzpicture}      
     	
-    	\includegraphics[width=.5\textwidth]{confidence_region_2.pdf}
     \end{figure}
 
 \end{frame}
