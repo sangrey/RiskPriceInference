@@ -860,7 +860,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
 
 def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0, theta_max=2,
-                      phi_dim=20, use_tqdm=True, case=1):
+                      phi_dim=20, phi_min=-.9, phi_max=0, use_tqdm=True, case=1):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -884,6 +884,10 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
         The maximum grid point for the equity price
     phi_dim: positive scalar, optional
         THe number of gridpoints in the phi dimension.
+    phi_min : scalar, optional
+        The minimum leverage value
+    phi_max : scalar, optional
+        The maximum leverage value
     use_tqdm : bool, optional
         Whehter to use tqdm.
 
@@ -892,7 +896,7 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
     draws_df : dataframe
 
     """
-    it = product(np.linspace(-.9, 0, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
+    it = product(np.linspace(phi_min, phi_max, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
                  np.linspace(theta_min, theta_max, theta_dim))
 
     qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, case=case)
@@ -910,7 +914,7 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
 
 
 def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_max=0, theta_min=0,
-                    theta_max=2, phi_dim=20, innov_dim=10, use_tqdm=True, alpha=.05, case=1):
+                    theta_max=2, phi_dim=20, phi_min=-.9, phi_max=0, innov_dim=10, use_tqdm=True, alpha=.05, case=1):
     """
     Compute the qlr statistics and organizes them into a dataframe.
 
@@ -920,8 +924,6 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
         estimates
     omega_cov : dataframe
         estimates' covariance matrix.
-    phi_dim : positive scalar, optional
-        The number of gridpoints for phi.
     theta_dim : positive scalar, optional
         The number of grid points for the equity price.
     pi_dim : positive scalar, optional
@@ -930,6 +932,12 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
         The minimum grid point for the volatility price
     pi_max : scalar, optional
         The maximum grid point for the volatility price
+    phi_dim : positive scalar, optional
+        The number of gridpoints for phi.
+    phi_min : scalar, optional
+        The minimum leverage value
+    phi_max : scalar, optional
+        The maximum leverage value
     theta_min : scalar, optional
         The minimum grid point for the equity price
     theta_max : scalar, optional
@@ -944,7 +952,7 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
     draws_df : dataframe
 
     """
-    it = product(np.linspace(-.9, 0, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
+    it = product(np.linspace(phi_min, phi_max, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
                  np.linspace(theta_min, theta_max, theta_dim))
 
     qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha, case=case)
@@ -1003,8 +1011,10 @@ def compute_strong_id(omega, omega_cov, bounds=None, case=1):
     # We use this ordering because pi is earlier than theta in the alphabet.
     names = compute_names(case)
 
-    return_cov = pd.DataFrame(outer_bread_inv @ outer_bread.T @ inner_cov @ outer_bread @ outer_bread_inv.T,
-                              columns=names, index=names).sort_index(axis=0).sort_index(axis=1)
+    cov_arr = np.array(outer_bread_inv @ outer_bread.T @ inner_cov 
+                       @ outer_bread @ outer_bread_inv.T) 
+    return_cov = pd.DataFrame(cov_arr, columns=names,
+                              index=names).sort_index(axis=0).sort_index(axis=1)
 
     return {name: val for name, val in zip(names, rtn_prices)}, return_cov
 
