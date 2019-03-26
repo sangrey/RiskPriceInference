@@ -769,7 +769,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=xo, method='SLSQP', 
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=x0, method='SLSQP', 
                                constraints=constraint_dict, bounds=bounds)
 
     if not minimize_result['success']:
