@@ -759,13 +759,17 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
 
     """
     bounds = bounds if bounds is not None else compute_bounds(case)
+
+    low_bounds, high_bounds = np.array(bounds).T
+    x0 = np.random.uniform(low_bounds, high_bounds) 
+
     constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
 
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=true_prices, method='SLSQP',
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=xo, method='SLSQP', 
                                constraints=constraint_dict, bounds=bounds)
 
     if not minimize_result['success']:
@@ -806,6 +810,8 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     """
     bounds = bounds if bounds is not None else compute_bounds(case)
     constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
+    low_bounds, high_bounds = np.array(bounds).T
+    x0 = np.random.uniform(low_bounds, high_bounds) 
 
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
@@ -841,7 +847,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
         return returnval
 
     results = np.array([qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
-                                                                         x0=true_prices, method='SLSQP',
+                                                                         x0=x0, method='SLSQP',
                                                                          constraints=constraint_dict,
                                                                          bounds=bounds).fun for innov in
                         innovations])
@@ -899,6 +905,11 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
     it = product(np.linspace(phi_min, phi_max, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
                  np.linspace(theta_min, theta_max, theta_dim))
 
+    if case == 1:
+        bounds = [(phi_min, phi_max), (pi_min, pi_max), (theta_min, theta_max)]
+    else:
+        raise NotImplementedError("We currenlty only compute bounds for case 1.")
+
     qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, case=case)
 
     with Pool(8) as pool:
@@ -954,6 +965,10 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
     """
     it = product(np.linspace(phi_min, phi_max, phi_dim), np.linspace(pi_min, pi_max, pi_dim),
                  np.linspace(theta_min, theta_max, theta_dim))
+    if case == 1:
+        bounds = [(phi_min, phi_max), (pi_min, pi_max), (theta_min, theta_max)]
+    else:
+        raise NotImplementedError("We currenlty only compute bounds for case 1.")
 
     qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha, case=case)
 
