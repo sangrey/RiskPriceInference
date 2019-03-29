@@ -22,7 +22,7 @@ The rest of the paper is organized as follows. \Cref{sec:model} provides the mod
 \Cref{sec:simulation} show that the method works well in simulation, and \Cref{sec:empirical} applies the methods to data on the S\&P 500 providing estimates of the risk prices. \Cref{sec:risk_conclusion} concludes. 
 Proofs are given in the appendix.
 
-\section{The Model}\label{sec:model}
+\section{Model}\label{sec:model}
 
 This section provides a parametric structural model with stochastic volatility, following \textcite{han2018leverage}. They extend the discrete-time exponentially-affine model of \textcite{darolles2006structural}, and their model is a natural discrete-time analog of the \textcite{heston1993closedform} model. We specify this model using a stochastic discount factor (SDF), also called the pricing kernel, and the physical measure, which gives the joint distribution of the return and volatility dynamics.\footnote{The risk-neutral measure is unobserved due to the lack of option data.} We first define the SDF and parameterize it as an exponential affine function with unknown parameters. We then provide parametric distribution for the physical measure. 
   
@@ -145,7 +145,7 @@ We first explore restrictions implied by the pricing equation $\E[ M_{t,t+1}\exp
 
 \begin{lemma}
     \label{Lemma m0 and m1}
-    Given the parameterization in the model, the pricing equation \newline $\E[M_{t,t+1}\exp (r_{t+1}) \ivert \F_{t}]=1$ implies that 
+    Given the parameterization in the model, the pricing equation \newline $\E[M_{t,t+1}\exp (r_{t+1}) \ivert \F_{t}]=1$ implies that\footnote{\Cref{proof:lemma_m0_and_m1}}
 %
     \begin{align*}
         m_{0} &= E(\kappa )+B\left( \pi +C\left( \kappa \right) \right) , \\
@@ -332,7 +332,7 @@ The following lemma provides the asymptotic distribution of the reduced-form par
 
 \begin{lemma}
 \label{Lemma Reduce}
-Suppose \Cref{assump:R} holds. The following results hold uniformly over $P\in \mathcal{P}$.
+Suppose \Cref{assump:R} holds. The following results hold uniformly over $P\in \mathcal{P}$.\footnote{\Cref{proof:lemma_reduce}}
 
     \begin{equation*} 
         \xi _{T}:=\Omega ^{-1/2}T^{-1/2}(\widehat{\omega } -\omega _{0})\rightarrow _{d}\xi \sim N(0,I), \text{  where } \Omega =\mathcal{B}V \mathcal{B}^{\prime }, 
@@ -444,7 +444,7 @@ The following conditions hold over $P\in \mathcal{P},$ for any $\theta $ in its 
     Suppose \cref{assump:R} and \cref{assump:S} hold. Then, 
 %
     \begin{equation*} 
-        \underset{T\rightarrow \infty }{\lim \inf }\underset{P\in \mathcal{P}}{\inf }\Pr \left( \theta _{0}\in CS_{T}\right) \geq 1-\alpha .
+        \underset{T\rightarrow \infty }{\lim \inf }\underset{P\in \mathcal{P}}{\inf }\Pr \left( \theta _{0}\in CS_{T}\right) \geq 1-\alpha .\footnote{\Cref{proof:lemma_CS}}
     \end{equation*}
 \end{theorem}
 
