@@ -761,7 +761,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     bounds = bounds if bounds is not None else compute_bounds(case)
 
     low_bounds, high_bounds = np.array(bounds).T
-    x0 = np.random.uniform(low_bounds, high_bounds) 
+    x0 = np.random.uniform(low_bounds, high_bounds)
 
     constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
 
@@ -769,7 +769,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=x0, method='SLSQP', 
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=x0, method='SLSQP',
                                constraints=constraint_dict, bounds=bounds)
 
     if not minimize_result['success']:
@@ -786,7 +786,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     return tuple(true_prices) + (returnval,)
 
 
-def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None, case=1):
+def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None, case=1, use_tqdm=True):
     """
     Simulate the qlr_stat given the omega_estimates and covariance matrix, redrawing the error.
 
@@ -802,6 +802,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     bounds : iterable of tuples, optional
     alpha : scalar in (0,1), optional
         If alpha is none return all the draws otherwise return the (1-alpha) precentile.
+    use_tqdm : bool
 
     Returns
     ------
@@ -811,7 +812,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     bounds = bounds if bounds is not None else compute_bounds(case)
     constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
     low_bounds, high_bounds = np.array(bounds).T
-    x0 = np.random.uniform(low_bounds, high_bounds) 
+    x0 = np.random.uniform(low_bounds, high_bounds)
 
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
@@ -846,11 +847,15 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
         return returnval
 
+    if use_tqdm:
+        innov_it = tqdm.tqdm_notebook(innovations)
+    else:
+        innov_it = innovations
+
     results = np.array([qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
                                                                          x0=x0, method='SLSQP',
                                                                          constraints=constraint_dict,
-                                                                         bounds=bounds).fun for innov in
-                        innovations])
+                                                                         bounds=bounds).fun for innov in innov_it])
 
     results[results <= 0] = 0
 
@@ -910,12 +915,14 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
     else:
         raise NotImplementedError("We currenlty only compute bounds for case 1.")
 
-    qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, case=case)
+    qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, case=case, bounds=bounds)
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in, it), total=pi_dim * theta_dim *
-                                            phi_dim, leave=False))
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in,
+                                                                it),
+                                            total=pi_dim * theta_dim * phi_dim,
+                                            leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
@@ -970,12 +977,16 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
     else:
         raise NotImplementedError("We currenlty only compute bounds for case 1.")
 
-    qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov, innov_dim=innov_dim, alpha=alpha, case=case)
+    qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov,
+                         bounds=bounds, innov_dim=innov_dim, alpha=alpha,
+                         case=case, use_tqdm=use_tqdm)
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in, it), total=pi_dim * theta_dim *
-                                            phi_dim, leave=False))
+            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in,
+                                                                it),
+                                            total=pi_dim * theta_dim * phi_dim,
+                                            leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_sim_in, it))
 
@@ -1026,8 +1037,8 @@ def compute_strong_id(omega, omega_cov, bounds=None, case=1):
     # We use this ordering because pi is earlier than theta in the alphabet.
     names = compute_names(case)
 
-    cov_arr = np.array(outer_bread_inv @ outer_bread.T @ inner_cov 
-                       @ outer_bread @ outer_bread_inv.T) 
+    cov_arr = np.array(outer_bread_inv @ outer_bread.T @ inner_cov
+                       @ outer_bread @ outer_bread_inv.T)
     return_cov = pd.DataFrame(cov_arr, columns=names,
                               index=names).sort_index(axis=0).sort_index(axis=1)
 
