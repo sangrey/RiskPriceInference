@@ -12,7 +12,7 @@ from collections import OrderedDict
 from functools import partial
 from itertools import product
 from libvolpriceinference import _simulate_autoregressive_gamma
-import tqdm
+from tqdm.auto import tqdm
 from multiprocessing import Pool
 
 # We define some functions
@@ -848,7 +848,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
         return returnval
 
     if use_tqdm:
-        innov_it = tqdm.tqdm_notebook(innovations)
+        innov_it = tqdm(innovations)
     else:
         innov_it = innovations
 
@@ -919,10 +919,8 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_stat_in,
-                                                                it),
-                                            total=pi_dim * theta_dim * phi_dim,
-                                            leave=False))
+            draws = list(tqdm(pool.imap_unordered(qlr_stat_in, it),
+                              total=pi_dim * theta_dim * phi_dim, leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
@@ -983,10 +981,8 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
 
     with Pool(8) as pool:
         if use_tqdm:
-            draws = list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_sim_in,
-                                                                it),
-                                            total=pi_dim * theta_dim * phi_dim,
-                                            leave=False))
+            draws = list(tqdm(pool.imap_unordered(qlr_sim_in, it), total=pi_dim
+                              * theta_dim * phi_dim, leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_sim_in, it))
 
@@ -1149,8 +1145,9 @@ def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use
 
     with Pool(8) as pool:
         if use_tqdm:
-            results = pd.DataFrame(list(tqdm.tqdm_notebook(pool.imap_unordered(qlr_reject_in, est_arr),
-                                                           total=len(est_arr))))
+            results = pd.DataFrame(list(tqdm(pool.imap_unordered(qlr_reject_in,
+                                                                 est_arr),
+                                             total=len(est_arr))))
         else:
             results = pd.DataFrame(list(pool.imap_unordered(qlr_reject_in, est_arr)))
 
