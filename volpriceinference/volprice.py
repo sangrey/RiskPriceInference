@@ -848,7 +848,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
         return returnval
 
     if use_tqdm:
-        innov_it = tqdm(innovations)
+        innov_it = tqdm(innovations, leave=False)
     else:
         innov_it = innovations
 
