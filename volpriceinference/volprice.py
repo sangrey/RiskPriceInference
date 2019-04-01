@@ -924,7 +924,9 @@ def compute_qlr_stats(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
-    draws_df = pd.DataFrame.from_records(draws, columns=['phi', 'pi', 'theta', 'qlr'])
+    param_idx = ['phi', 'pi', 'theta']
+    draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
+                                         ['qlr']).sort_values(by=param_idx)
 
     return draws_df
 
@@ -986,9 +988,40 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
         else:
             draws = list(pool.imap_unordered(qlr_sim_in, it))
 
-    draws_df = pd.DataFrame.from_records(draws, columns=['phi', 'pi', 'theta', 'qlr'])
+    param_idx = ['phi', 'pi', 'theta']
+    draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
+                                         ['qlr']).sort_values(by=param_idx)
 
     return draws_df
+
+
+def merge_draws_and_sims(qlr_stats, qlr_draws):
+    """
+    Merge the two sets using the parameter values as a multiindex.
+
+    Parameters
+    ---------
+    qlr_stats : dataframe
+    qlr_draws : dataframe
+
+    Returns
+    ------
+    merged_values : dataframe
+
+    """
+    param_idx = ['phi', 'pi', 'theta']
+    close_enough = np.allclose(qlr_stats[param_idx], qlr_draws[param_idx])
+
+    if not close_enough:
+        raise RuntimeError('The indices are not the same!!!')
+
+    else:
+        qlr_stats[param_idx] = qlr_draws[param_idx]
+
+    merged_values = pd.merge(qlr_stats, qlr_draws, left_on=param_idx,
+                             right_on=param_idx, suffixes=['_draws', '_stats'])
+
+    return merged_values
 
 
 def compute_strong_id(omega, omega_cov, bounds=None, case=1):
