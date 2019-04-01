@@ -850,7 +850,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     if use_tqdm:
         # This hack gets tqdm to print in a multiprocessing environment. 
         # It is taken from https://github.com/tqdm/tqdm/issues/485
-        print(' ', end='', flush=True)
+        print('\u200b', end='', flush=True)
         innov_it = tqdm(innovations, leave=False)
     else:
         innov_it = innovations
