@@ -758,10 +758,12 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     scalar
 
     """
-    bounds = bounds if bounds is not None else compute_bounds(case)
+    # bounds = bounds if bounds is not None else compute_bounds(case)
 
     low_bounds, high_bounds = np.array(bounds).T
     x0 = np.random.uniform(low_bounds, high_bounds)
+    x0[1] = (np.clip((1 - omega['zeta'])**.5, bounds[1][0], bounds[1][1]) 
+             if omega['zeta'] < 1 else bounds[1][1])
 
     constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
 
@@ -769,8 +771,8 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=x0, method='SLSQP',
-                               constraints=constraint_dict, bounds=bounds)
+    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=x0, method='L-BFGS-B',
+                               bounds=bounds)
 
     if not minimize_result['success']:
         logging.warning(minimize_result)
