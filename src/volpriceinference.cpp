@@ -7,12 +7,13 @@
 #include <pybind11/stl.h>
 #include "pybind11/operators.h"
 #include <pybind11/iostream.h>
-
+#include <arma_wrapper.h>
 
 namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace std::string_literals;
 using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;                                               
+using aw::dmat;
 
 /* 
  * Initializes a random generator in a thread_save way to be used globally througout the entire library. 
@@ -71,6 +72,17 @@ std::vector<double> threadsafe_gaussian_rvs(size_t time_dim) {
     }
     
     return return_draws;
+}
+
+
+dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale
+        double psi, double log_rho, double zeta) {
+
+
+    dmat returnmat = arma::zeros<dmat>(4,3);
+    returmat(0,0) = 1;
+
+
 }
 
 

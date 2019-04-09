@@ -13,7 +13,7 @@ from functools import partial
 from itertools import product
 from libvolpriceinference import _simulate_autoregressive_gamma
 from tqdm.auto import tqdm
-from multiprocessing import Pool, freeze_support
+from multiprocessing import Pool
 
 # We define some functions
 _x, _y, beta, gamma, psi = sym.symbols('_x _y beta gamma psi', real=True, positive=True)
@@ -824,30 +824,27 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     link_true = compute_link(true_prices, omega, case=case)
     cov_params_true = partial(covariance_kernel, prices2=true_prices, omega=omega, omega_cov=omega_cov, case=case)
 
-    def project_resid(prices):
-        link_in = compute_link(prices, omega, case=case)
-        return np.ravel(link_in - cov_params_true(prices) @ np.linalg.solve(cov_true_true, link_true))
-
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=cov_true_true, size=innov_dim)
 
-    def link_star(prices, innov):
-        return project_resid(prices) + cov_params_true(prices) @ np.linalg.solve(cov_true_true,
-                                                                                 np.atleast_1d(innov))
-
     def qlr_in_star(prices, innov):
-        link_in = link_star(prices=prices, innov=innov)
-        cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
-
         try:
+            link1 = compute_link(prices, omega, case=case)
+
+            diff = np.atleast_1d(innov) - link1
+            weighted_diff = (cov_params_true(prices) @ np.linalg.solve(cov_true_true, diff))
+            link_in = np.ravel(link1 + weighted_diff)  
+
+            cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
+
             # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
-            returnval = np.asscalar(link_in.T @ np.linalg.pinv(cov_prices) @ link_in)
-        except np.linalg.LinAlgError:
+            return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))
+
+        except FloatingPointError:
             # If we get a matrix algebra error in the previous expression we set the value of the link function to
             # infinity.
-            returnval = np.inf
+            return np.inf
 
-        return returnval
 
     if use_tqdm:
         # This hack gets tqdm to print in a multiprocessing environment. 
@@ -857,19 +854,32 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     else:
         innov_it = innovations
 
-    results = np.array([qlr_in_star(true_prices, innov=innov) - minimize(lambda x: qlr_in_star(x, innov=innov),
-                                                                         x0=x0, method='SLSQP',
-                                                                         constraints=constraint_dict,
-                                                                         bounds=bounds).fun for innov in innov_it])
+    with np.errstate(invalid='raise'):
 
-    results[results <= 0] = 0
+        def minimized(innov):
+            try:
+                result_in =  minimize(qlr_in_star, args=(innov,), x0=x0,
+                                      method='L-BFGS-B', options={'maxiter': 500},
+                                      bounds=bounds)
+                if result_in.success:
+                    return result_in.fun
+                else:
+                    # We throw out the result if the minimization fails.
+                    return np.inf  
+            except FloatingPointError:
+                return np.inf 
 
+        results = np.array([qlr_in_star(true_prices, innov=innov) - minimized(innov) for innov in innov_it])
+
+        results[results <= 0] = np.inf 
+    
     if alpha is None:
         return results
+
     else:
         # We replace all of the error values with zero because if we a lot of them we want to reject. We do not
         # always reject because we are only redrawing part of the variation.
-        returnval = np.percentile([val if np.isfinite(val) else 0 for val in results], 100 * (1 - alpha),
+        returnval = np.percentile([val for val in results if np.isfinite(val)], 100 * (1 - alpha), 
                                   interpolation='lower')
 
         return tuple(true_prices) + (returnval,)
@@ -986,16 +996,23 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
                          bounds=bounds, innov_dim=innov_dim, alpha=alpha,
                          case=case, use_tqdm=use_tqdm)
 
-    with Pool(8) as pool:
-        if use_tqdm:
-            draws = list(tqdm(pool.imap_unordered(qlr_sim_in, it), total=pi_dim
-                              * theta_dim * phi_dim, leave=False))
-        else:
-            draws = list(pool.imap_unordered(qlr_sim_in, it))
-
     param_idx = ['phi', 'pi', 'theta']
-    draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
-                                         ['qlr']).sort_values(by=param_idx)
+    # with Pool(8) as pool:
+    draws = []
+    opts = {'total': pi_dim * theta_dim * phi_dim, 'leave':False}
+
+    if use_tqdm:
+        for draw in tqdm(map(qlr_sim_in, it), **opts):
+            draws.append(draw)
+            draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
+                                                 ['qlr']).sort_values(by=param_idx)
+            filename1 = f"../results/qlr_draws_on_data_{innov_dim}" 
+            filename2 = "_smaller_region_flattened.tmp.json""" 
+            draws_df.to_json(filename1 + filename2) 
+    else:
+        draws = list(pool.imap_unordered(qlr_sim_in, it))
+        draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
+                                                 ['qlr']).sort_values(by=param_idx)
 
     return draws_df
 
