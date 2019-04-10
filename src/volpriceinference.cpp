@@ -96,10 +96,16 @@ double A_func(double x, double logit_rho, double log_scale) {
 
 }
 
-/* double A_prime(double x, double logit_rho, double log_scale) { */
+double A_prime(double x, double logit_rho, double log_scale) {
     
+    double scale =  std::exp(log_scale);
+    double rho = logistic(logit_rho); 
+    double numerator = rho * (1 + scale * x) - scale * rho * x;
+    double denominator = (1 + scale * x) * (1 + scale * x):
 
-/* } */
+    return numerator / denominator;
+
+}
 
 double B_func(double x, double log_both, double log_scale) { 
 
@@ -137,7 +143,7 @@ double link3(double theta, double log_scale, double phi) {
 
     double val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta
 
-    return val
+    return val;
 }
 
 double link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double psi, double logit_rho, double zeta) {
@@ -148,7 +154,7 @@ double link_total(double phi, double pi, double theta, double beta, double gamma
     double zeta_diff = 1 - (zeta + phi * phi);
 
 
-    dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff{;
+    dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff};
     return dmat;
 
 }
