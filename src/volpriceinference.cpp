@@ -14,6 +14,7 @@ using namespace pybind11::literals;
 using namespace std::string_literals;
 using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;                                               
 using aw::dmat;
+using aw::dvec;
 
 double logistic(double x) {
 
@@ -159,7 +160,7 @@ double B_diff2(double x, double log_both, double log_scale) {
 
 double B_diff3(double x, double log_both, double log_scale) {
 
-    double diff1 = -1.0 * std::exp(log_btoh - log_scale);
+    double diff1 = -1.0 * std::exp(log_both - log_scale);
     double diff2 = x  / (1 + std::exp(log_scale) * x);
 
     return std::exp(log_both - log_scale) * diff2 + std::log(1 + std::exp(log_scale) * x) * diff1; 
@@ -172,7 +173,7 @@ double C_func(double x, double phi, double psi) {
 
 }
 
-double C_diff3(double x, double phi, double psi) {
+double C_diff3(double x) {
 
     return x;
 
@@ -185,6 +186,15 @@ double link1(double pi, double phi, double theta, double logit_rho, double log_s
 
     return val1 - val2;
 
+}
+
+dvec link1_gradient(double pi, double phi, double theta, double logit_rho, double log_scale, double psi) {
+
+    double link1_d_logit_rho = A_diff2(pi + C_func(theta-1, phi, psi), logit_rho, log_scale); 
+
+    dvec gradient{link1_d_logit_rho};
+
+    return gradient;
 }
 
 double link2(double pi, double phi, double theta, double log_both, double log_scale, double psi) {
@@ -202,7 +212,8 @@ double link3(double theta, double log_scale, double phi) {
     return val;
 }
 
-dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double logit_rho, double psi, double zeta) {
+dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale,
+        double logit_rho, double psi, double zeta) {
 
     double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
     double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
