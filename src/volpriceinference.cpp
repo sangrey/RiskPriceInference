@@ -229,9 +229,17 @@ std::tuple<double, double, double> link_2_gradient(double pi, double phi, double
 
 double link3(double theta, double phi, double log_scale) { 
 
-    double val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta;
+    /* We simplify the function using properties of the exponential function. */
+    double val = (phi / std::sqrt(2.0)) *  std::exp(-.5 * log_scale) 
+        - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta;
 
     return val;
+}
+
+double link3_gradient(double theta, double phi, double log_scale) {
+
+    return (phi / std::sqrt(2.0)) * std::exp(-.5 * log_scale)  * -.5;
+
 }
 
 dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale,
