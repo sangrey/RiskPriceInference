@@ -113,11 +113,24 @@ double A_diff_logitRho(double x, double logit_rho, double log_scale) {
     double scale =  std::exp(log_scale);
 
     /* The derivative of the logistic function satisfies f'(x) = f(x) ( 1 - f(x))  */
-   double val = logistic(logit_rho) * ( 1 - logistic(logit_rho))  / ( 1 + scale * x); 
+    double val = logistic(logit_rho) * ( 1 - logistic(logit_rho))  / ( 1 + scale * x); 
 
-   return val;
+    return val;
 
 }
+
+double A_diff_logScale(double x, double logit_rho, double log_scale) {
+    /* Compute the derivatiive of the A function with respecto to log_scale */
+    
+    double rho = logistic(logit_rho);
+
+    double numerator =  rho * x * std::exp(log_scale) * x;
+    denominator_in =  1 + std::exp(log_scale) * x;
+
+    return -1.0 * numerator / (denominator_in * denominator_in);
+
+}
+
 
 double B_func(double x, double log_both, double log_scale) { 
 
@@ -125,6 +138,15 @@ double B_func(double x, double log_both, double log_scale) {
     double scale =  std::exp(log_scale);
 
     return delta * std::log(1 + scale * x);
+}
+
+double B_prime(double x, double log_both, double log_scale) {
+
+    double delta = std::exp(log_both - log_scale);
+    double scale =  std::exp(log_scale);
+   
+    return (delta / (1 + scale * x)) * scale;
+
 }
 
 double C_func(double x, double phi, double psi) {
@@ -167,7 +189,7 @@ double link_total(double phi, double pi, double theta, double beta, double gamma
 
     dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff};
 
-    return dmat;
+    return returnmat;
 
 }
 
