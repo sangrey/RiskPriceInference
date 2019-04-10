@@ -115,7 +115,7 @@ double A_diff2(double x, double logit_rho, double log_scale) {
     double scale =  std::exp(log_scale);
 
     /* The derivative of the logistic function satisfies f'(x) = f(x) ( 1 - f(x))  */
-    double val = logistic(logit_rho) * (1 - logistic(logit_rho))  * (1 + scale * x); 
+    double val = logistic(logit_rho) * (1 - logistic(logit_rho))  / (1 + scale * x); 
 
     return val;
 
@@ -327,9 +327,11 @@ PYBIND11_MODULE(libvolpriceinference, m) {
             "psi"_a, "zeta"_a); 
 
     m.def("link_jacobian", &link_jacobian, stream_redirect(),
-            "This function computes the jacobian of the link function.",
-            "phi"_a, "pi"_a, "theta"_a, "log_both"_a,  "log_scale"_a,  "logit_rho"_a, 
-            "psi"_a); 
+            "This function computes the jacobian of the link function.", "phi"_a, "pi"_a, "theta"_a, "log_both"_a,
+            "log_scale"_a,  "logit_rho"_a, "psi"_a); 
 
+    m.def("A_diff2", &A_diff2, stream_redirict(), 
+        "This function computes the derivative of A() with respect to logit_rho", "x"_a, "logit_rho"_a, 
+        "log_scale"_a);
 
 }
