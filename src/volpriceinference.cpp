@@ -96,7 +96,8 @@ double A_func(double x, double logit_rho, double log_scale) {
 
 }
 
-double A_prime(double x, double logit_rho, double log_scale) {
+double A_diff1(double x, double logit_rho, double log_scale) {
+    /* Compute the derivatiive of the A function with respecto to x. */
     
     double scale =  std::exp(log_scale);
     double rho = logistic(logit_rho); 
@@ -107,8 +108,8 @@ double A_prime(double x, double logit_rho, double log_scale) {
 
 }
 
-double A_diff_logitRho(double x, double logit_rho, double log_scale) {
-    /* Compute the derivatiive of the A function with respecto to logit_rho */
+double A_diff2(double x, double logit_rho, double log_scale) {
+    /* Compute the derivatiive of the A function with respecto to logit_rho. */
     
     double scale =  std::exp(log_scale);
 
@@ -119,13 +120,13 @@ double A_diff_logitRho(double x, double logit_rho, double log_scale) {
 
 }
 
-double A_diff_logScale(double x, double logit_rho, double log_scale) {
-    /* Compute the derivatiive of the A function with respecto to log_scale */
+double A_diff3(double x, double logit_rho, double log_scale) {
+    /* Compute the derivatiive of the A function with respecto to log_scale. */
     
     double rho = logistic(logit_rho);
 
     double numerator =  rho * x * std::exp(log_scale) * x;
-    denominator_in =  1 + std::exp(log_scale) * x;
+    double denominator_in =  1 + std::exp(log_scale) * x;
 
     return -1.0 * numerator / (denominator_in * denominator_in);
 
@@ -133,6 +134,7 @@ double A_diff_logScale(double x, double logit_rho, double log_scale) {
 
 
 double B_func(double x, double log_both, double log_scale) { 
+    /* Compute the B_func in the accompanying paper. */
 
     double delta = std::exp(log_both - log_scale);
     double scale =  std::exp(log_scale);
@@ -140,7 +142,8 @@ double B_func(double x, double log_both, double log_scale) {
     return delta * std::log(1 + scale * x);
 }
 
-double B_prime(double x, double log_both, double log_scale) {
+double B_diff1(double x, double log_both, double log_scale) {
+    /* Compute the derivative of the B_func with respect to the first argument. */
 
     double delta = std::exp(log_both - log_scale);
     double scale =  std::exp(log_scale);
@@ -180,7 +183,7 @@ double link3(double theta, double log_scale, double phi) {
     return val;
 }
 
-double link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double psi, double logit_rho, double zeta) {
+dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double psi, double logit_rho, double zeta) {
 
     double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
     double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
