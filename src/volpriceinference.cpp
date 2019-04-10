@@ -162,10 +162,15 @@ double B_diff2(double x, double log_both, double log_scale) {
 
 double B_diff3(double x, double log_both, double log_scale) {
 
-    double diff1 = -1.0 * std::exp(log_both - log_scale);
-    double diff2 = x  / (1 + std::exp(log_scale) * x);
+    double scale =  std::exp(log_scale);
 
-    return std::exp(log_both - log_scale) * diff2 + std::log(1 + std::exp(log_scale) * x) * diff1; 
+    double val1 = std::exp(log_both - log_scale);
+    double val2 = std::log(1 + scale * x):
+
+    double diff1 = -1.0 * val1;
+    double diff2 = x / (1 + scale * x);
+
+    return val1 * diff2 + val2 * diff1;
 }
 
 double C_func(double x, double phi, double psi) {
@@ -213,7 +218,7 @@ double link2(double pi, double phi, double theta, double log_both, double log_sc
     return val1 - val2;
 }
 
-std::tuple<double, double, double> link_2_gradient(double pi, double phi, double theta, double log_both, 
+std::tuple<double, double, double> link2_gradient(double pi, double phi, double theta, double log_both, 
         double log_scale, double psi) {
 
     double d_log_both = B_diff2(pi + C_func(theta-1, phi, psi), log_both, log_scale) - 
@@ -272,7 +277,7 @@ dmat link_jacobian(double phi, double pi, double theta, double log_both, double 
 
 
     // Calculate the second row. //
-    auto [link2_log_both, link2_log_scale, link2_psi] = link_2_gradient(pi, phi, theta, log_both, log_scale, psi); 
+    auto [link2_log_both, link2_log_scale, link2_psi] = link2_gradient(pi, phi, theta, log_both, log_scale, psi); 
 
     returnmat(1,1) = 1; 
     returnmat(1,2) = -1 * link2_log_both;
