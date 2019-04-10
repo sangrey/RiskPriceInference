@@ -90,18 +90,18 @@ double A_func(double x, double logit_rho, double log_scale) {
     double scale =  std::exp(log_scale);
     double rho = logistic(logit_rho); 
 
-    double val = rho * x / (1 + std::exp(log_scale) * x);
+    double val = rho * x / (1 + scale * x);
 
     return val;
 
 }
 
-double B_func(double x, double log_both, double log_scale, double phi, double psi) { 
+double B_func(double x, double log_both, double log_scale) { 
 
     double delta = std::exp(log_both - log_scale);
     double scale =  std::exp(log_scale);
 
-    return scale * std::log(1 + scale * x);
+    return delta * std::log(1 + scale * x);
 }
 
 double C_func(double x, double phi, double psi) {
@@ -114,13 +114,13 @@ double C_func(double x, double phi, double psi) {
 
 double link1(double pi, double theta, double log_both, double log_scale, double phi, double psi) {
 
-    double val1 = B_func(pi + C_func(theta - 1, phi, psi), log_both, log_scale, phi, psi);
-    double val2 = B_func(pi + C_func(theta, phi, psi), log_both, log_scale, phi, psi);
+    double val1 = B_func(pi + C_func(theta - 1, phi, psi), log_both, log_scale);
+    double val2 = B_func(pi + C_func(theta, phi, psi), log_both, log_scale);
 
     return val1 - val2;
 }
 
-double link2(double pi, double theta, double logit_rho, double log_scale, phi, psi) {
+double link2(double pi, double theta, double logit_rho, double log_scale, double phi, double psi) {
 
     double val1 = A_func(pi + C_func(theta - 1, phi, psi), logit_rho, log_scale);
     double val2 = A_func(pi + C_func(theta, phi, psi), logit_rho, log_scale);
@@ -159,7 +159,7 @@ PYBIND11_MODULE(libvolpriceinference, m) {
             "x"_a, "logit_rho"_a, "log_scale"_a);
 
     m.def("B_func", &B_func, stream_redirect(), "This function computes function B() in the accompanying paper.",
-            "x"_a, "log_both"_a, "log_scale"_a, "phi"_a, "psi"_a);
+            "x"_a, "log_both"_a, "log_scale"_a);
 
     m.def("C_func", &C_func, stream_redirect(), "This function computes function C() in the accompanying paper.",
             "x"_a, "phi"_a, "psi"_a);
