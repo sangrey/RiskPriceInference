@@ -106,7 +106,7 @@ double B_func(double x, double log_both, double log_scale) {
 
 double C_func(double x, double phi, double psi) {
 
-    double val = psi * x - ((1 - phi**2) / 2.0) * x * x;
+    double val = psi * x - ((1 - phi * phi) / 2.0) * x * x;
     return val;
 
 }
