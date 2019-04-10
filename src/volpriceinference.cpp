@@ -167,11 +167,9 @@ double B_diff3(double x, double log_both, double log_scale) {
     // The std::exp(log_both) term arises because the exp(log_scale) terms cancel. 
     double part1 = x / (1 + std::exp(log_scale) * x) * std::exp(log_both);
 
-    double val2 = std::log(1 + std::exp(log_scale) * x);
+    double part2 = -1.0 * B_func(x, log_both, log_scale);
 
-    double diff1 = -1.0 * val1;
-
-    return part1 + val2 * diff1;
+    return part1 + part2;
 }
 
 double C_func(double x, double phi, double psi) {
