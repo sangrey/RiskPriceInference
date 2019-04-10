@@ -17,15 +17,16 @@ requirements:
     - python 
     - numpy 
     - pybind11 2.2
+    - arma_wrapper 0.08
   run:
     - {{pin_compatible('numpy')}}
     - scipy
     - pandas 
+    - armadillo
     - statsmodels
     - sympy
     - tqdm
     - cdpm >=0.10
-
 
 test:
   source_files:
