@@ -218,16 +218,16 @@ std::tuple<double, double, double> link_2_gradient(double pi, double phi, double
                         B_diff2(pi + C_func(theta, phi, psi), log_both, log_scale);
       
     double d_log_scale = B_diff3(pi + C_func(theta-1, phi, psi), log_both, log_scale) - 
-                               B_diff3(pi + C_func(theta, phi, psi), log_both, log_scale);
+                         B_diff3(pi + C_func(theta, phi, psi), log_both, log_scale);
 
-    double d_psi = B_diff1(pi + C_func(theta-1, phi, psi), logit_rho, log_both) * C_diff3(theta-1) - 
-                  - B_diff1(pi + C_func(theta, phi, psi), logit_rho, log_both) * C_diff3(theta); 
+    double d_psi = B_diff1(pi + C_func(theta-1, phi, psi), log_both, log_scale) * C_diff3(theta-1) - 
+                   B_diff1(pi + C_func(theta, phi, psi), log_both, log_scale) * C_diff3(theta); 
 
     return std::make_tuple(d_log_both, d_log_scale, d_psi);
 
 }
 
-double link3(double theta, double log_scale, double phi) { 
+double link3(double theta, double phi, double log_scale) { 
 
     double val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta;
 
@@ -239,7 +239,7 @@ dmat link_total(double phi, double pi, double theta, double beta, double gamma, 
 
     double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
     double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
-    double psi_diff = psi - link3(theta, log_scale, phi);
+    double psi_diff = psi - link3(theta, phi, log_scale);
     double zeta_diff = 1 - (zeta + phi * phi);
 
     dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff};
@@ -291,7 +291,7 @@ PYBIND11_MODULE(libvolpriceinference, m) {
 
     m.def("link3", &link3, stream_redirect(), 
             "This function computes function the second link function in the accompanying paper.",
-            "theta"_a, "log_scale"_a, "phi"_a);
+            "theta"_a, "phi"_a, "log_scale"_a);
 
     m.def("link_total", &link_total, stream_redirect(),
             "This function computes the link function.",
