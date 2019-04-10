@@ -14,6 +14,17 @@ using namespace std::string_literals;
 using stream_redirect = py::call_guard<py::scoped_ostream_redirect>;                                               
 using aw::dmat;
 
+double logistic(double x) {
+
+    return 1.0 / (1 + std::exp(-x));
+}
+
+double logit(double x) {
+
+    return std::log(x)  - std::log1p(-x); 
+}
+
+
 /* 
  * Initializes a random generator in a thread_save way to be used globally througout the entire library. 
  */
@@ -73,24 +84,64 @@ std::vector<double> threadsafe_gaussian_rvs(size_t time_dim) {
     return return_draws;
 }
 
+double A_func(double x, double logit_rho, double log_scale) {
 
-def B_func(double x, double phi, double psi, double log_scale) {
+    double scale =  std::exp(log_scale);
+    double rho = logistic(logit_rho); 
 
+    double val = rho * x / (1 + std::exp(log_scale) * x);
+
+    return val;
+
+}
+
+double B_func(double x, double log_both, double log_scale, double phi, double psi) { 
+
+    double delta = std::exp(log_both - log_scale);
+    double scale =  std::exp(log_scale);
+
+    return scale * std::log(1 + scale * x);
+}
+
+double C_func(double x, double phi, double psi) {
+
+    double val = psi * x - ((1 - phi**2) / 2.0) * x * x;
+    return val;
 
 }
 
-dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale
-        double psi, double log_rho, double zeta) {
 
+double link1(double pi, double theta, double log_both, double log_scale, double phi, double psi) {
 
-    _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale,
-                                                                        psi, logit_rho, zeta])])))
-    dmat returnmat = arma::zeros<dmat>(4,7);
-    returmat(0,0) = 1;
+    double val1 = B_func(pi + C_func(theta - 1, phi, psi), log_both, log_scale, phi, psi);
+    double val2 = B_func(pi + C_func(theta, phi, psi), log_both, log_scale, phi, psi);
 
+    return val1 - val2;
+}
 
+double link2(double pi, double theta, double logit_rho, double log_scale, phi, psi) {
+
+    double val1 = A_func(pi + C_func(theta - 1, phi, psi), logit_rho, log_scale);
+    double val2 = A_func(pi + C_func(theta, phi, psi), logit_rho, log_scale);
+
+    return val1 - val2;
 
 }
+
+
+
+/* dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale */
+/*         double psi, double log_rho, double zeta) { */
+
+
+/*     _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale, */
+/*                                                                         psi, logit_rho, zeta])]))) */
+/*     dmat returnmat = arma::zeros<dmat>(4,7); */
+/*     returmat(0,0) = 1; */
+
+
+
+/* } */
 
 
 PYBIND11_MODULE(libvolpriceinference, m) {
@@ -102,5 +153,22 @@ PYBIND11_MODULE(libvolpriceinference, m) {
     m.def("_threadsafe_gaussian_rvs", &threadsafe_gaussian_rvs, stream_redirect(), 
           "This function provides a vector of Gaussian random variates that are drawn in a thread safe manner.",
           "time_dim"_a=100); 
+
+    m.def("A_func", &A_func, stream_redirect(), "This function computes function A() in the accompanying paper.",
+            "x"_a, "logit_rho"_a, "log_scale"_a);
+
+    m.def("B_func", &B_func, stream_redirect(), "This function computes function B() in the accompanying paper.",
+            "x"_a, "log_both"_a, "log_scale"_a, "phi"_a, "psi"_a);
+
+    m.def("C_func", &C_func, stream_redirect(), "This function computes function C() in the accompanying paper.",
+            "x"_a, "phi"_a, "psi"_a);
+
+    m.def("link1", &link1, stream_redirect(), 
+            "This function computes function the first link function in the accompanying paper.",
+            "pi"_a, "theta"_a, "log_both"_a, "log_scale"_a, "phi"_a, "psi"_a);
+
+    m.def("link2", &link1, stream_redirect(), 
+            "This function computes function the second link function in the accompanying paper.",
+            "pi"_a, "theta"_a, "log_rho"_a, "log_scale"_a, "phi"_a, "psi"_a);
 
 }

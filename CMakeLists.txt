@@ -44,7 +44,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC -fdiagnostics-color=always)
 
 message(STATUS "The build type is ${CMAKE_BUILD_TYPE}")                                                        
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")                                                                      
-    set(MY_RELEASE_COMPILE_OPTIONS -mtune=native -mfpmath=sse -funroll-loops)
+    set(MY_RELEASE_COMPILE_OPTIONS -mtune=native -mfpmath=sse -funroll-loops, -ffast-math)
     target_compile_options(${PROJECT_NAME} PUBLIC ${MY_RELEASE_COMPILE_OPTIONS})                                      
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")                                                                         
     set(MY_DEBUG_COMPILE_OPTIONS -Wpedantic -Werror -Wall -Wextra)
