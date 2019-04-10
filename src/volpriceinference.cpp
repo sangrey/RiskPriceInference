@@ -156,21 +156,22 @@ double B_diff1(double x, double log_both, double log_scale) {
 }
 
 double B_diff2(double x, double log_both, double log_scale) { 
+    /* Compute the derivative of B w.r.t. log_both */
 
     return B_func(x, log_both, log_scale);
 }
 
 double B_diff3(double x, double log_both, double log_scale) {
+    /* Compute the derivative of B w.r.t. log_scale */
 
-    double scale =  std::exp(log_scale);
+    // The std::exp(log_both) term arises because the exp(log_scale) terms cancel. 
+    double part1 = x / (1 + std::exp(log_scale) * x) * std::exp(log_both);
 
-    double val1 = std::exp(log_both - log_scale);
-    double val2 = std::log(1 + scale * x);
+    double val2 = std::log(1 + std::exp(log_scale) * x);
 
     double diff1 = -1.0 * val1;
-    double diff2 = x / (1 + scale * x);
 
-    return val1 * diff2 + val2 * diff1;
+    return part1 + val2 * diff1;
 }
 
 double C_func(double x, double phi, double psi) {
@@ -341,7 +342,7 @@ PYBIND11_MODULE(libvolpriceinference, m) {
         "This function computes the derivative of A() with respect to logit_rho", "x"_a, "logit_rho"_a, 
         "log_scale"_a);
 
-    m.def("B_diff2", &B_diff3, stream_redirect(), 
+    m.def("B_diff3", &B_diff3, stream_redirect(), 
         "This function computes the derivative of B() with respect to log_scale", "x"_a, "log_both"_a, 
         "log_scale"_a);
 
