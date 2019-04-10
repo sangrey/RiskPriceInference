@@ -256,18 +256,29 @@ dmat link_total(double phi, double pi, double theta, double beta, double gamma, 
 
 }
 
-dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale
+dmat link_grad_sym(double phi, double pi, double theta, double log_both, double log_scale,
         double psi, double logit_rho, double zeta) {
 
 
     /* _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale, */
     /*                                                                     psi, logit_rho, zeta])]))) */
     dmat returnmat = arma::zeros<dmat>(4,7);
-    returmat(0,0) = 1;
+
+    // Calculate the first row.
     auto [link1_logit_rho, link1_log_scale, link1_psi] = link1_gradient(pi, phi, theta, logit_rho, log_scale, psi); 
-    returnmat(0, 3) = link1_log_scale;
-    returnmat(0,4) = link1_psi;
-    returnmat(0, 5) = link1_logit_rho; 
+    returnmat(0,0) = 1;
+    returnmat(0, 3) = -1 * link1_log_scale;
+    returnmat(0,4) = -1 * link1_psi;
+    returnmat(0, 5) = -1 * link1_logit_rho; 
+
+
+    // Calculate the second row. //
+    auto [link2_log_both, link2_log_scale, link2_psi] link_2_gradient(pi, phi, theta, log_both, log_scale, psi); 
+
+    returnmat(1,1) = 1; 
+    returnmat(1,2) = -1 * link2_log_both;
+    returnmat(1,3) = -1 * link2_log_scale;
+    returnmat(1,4) = -1 * link2_psi;
 
     return returnmat;
 }
