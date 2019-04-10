@@ -330,7 +330,7 @@ PYBIND11_MODULE(libvolpriceinference, m) {
             "This function computes the jacobian of the link function.", "phi"_a, "pi"_a, "theta"_a, "log_both"_a,
             "log_scale"_a,  "logit_rho"_a, "psi"_a); 
 
-    m.def("A_diff2", &A_diff2, stream_redirict(), 
+    m.def("A_diff2", &A_diff2, stream_redirect(), 
         "This function computes the derivative of A() with respect to logit_rho", "x"_a, "logit_rho"_a, 
         "log_scale"_a);
 
