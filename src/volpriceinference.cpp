@@ -257,7 +257,7 @@ dmat link_total(double phi, double pi, double theta, double beta, double gamma, 
 }
 
 dmat link_grad_sym(double phi, double pi, double theta, double log_both, double log_scale,
-        double psi, double logit_rho, double zeta) {
+        double psi, double logit_rho) {
 
 
     /* _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale, */
@@ -273,12 +273,15 @@ dmat link_grad_sym(double phi, double pi, double theta, double log_both, double 
 
 
     // Calculate the second row. //
-    auto [link2_log_both, link2_log_scale, link2_psi] link_2_gradient(pi, phi, theta, log_both, log_scale, psi); 
+    auto [link2_log_both, link2_log_scale, link2_psi] = link_2_gradient(pi, phi, theta, log_both, log_scale, psi); 
 
     returnmat(1,1) = 1; 
     returnmat(1,2) = -1 * link2_log_both;
     returnmat(1,3) = -1 * link2_log_scale;
     returnmat(1,4) = -1 * link2_psi;
+
+    // Calculate the fourth row.
+    returnmat(3,6) = -1; 
 
     return returnmat;
 }
