@@ -341,4 +341,8 @@ PYBIND11_MODULE(libvolpriceinference, m) {
         "This function computes the derivative of A() with respect to logit_rho", "x"_a, "logit_rho"_a, 
         "log_scale"_a);
 
+    m.def("B_diff2", &B_diff3, stream_redirect(), 
+        "This function computes the derivative of B() with respect to log_scale", "x"_a, "log_both"_a, 
+        "log_scale"_a);
+
 }
