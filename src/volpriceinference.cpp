@@ -194,13 +194,13 @@ std::tuple<double, double, double> link1_gradient(double pi, double phi, double 
         double log_scale, double psi) {
 
     double d_logit_rho = A_diff2(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) - 
-                               A_diff2(pi + C_func(theta, phi, psi), logit_rho, log_scale);
+                         A_diff2(pi + C_func(theta, phi, psi), logit_rho, log_scale);
 
     double d_log_scale = A_diff3(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) - 
-                               A_diff3(pi + C_func(theta, phi, psi), logit_rho, log_scale);
+                         A_diff3(pi + C_func(theta, phi, psi), logit_rho, log_scale);
 
     double d_psi = A_diff1(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) * C_diff3(theta-1) - 
-                  - A_diff1(pi + C_func(theta, phi, psi), logit_rho, log_scale) * C_diff3(theta);  
+                   A_diff1(pi + C_func(theta, phi, psi), logit_rho, log_scale) * C_diff3(theta);  
 
     return std::make_tuple(d_logit_rho, d_log_scale, d_psi);
 }
