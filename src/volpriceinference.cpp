@@ -197,8 +197,8 @@ std::tuple<double, double, double> link1_gradient(double pi, double phi, double 
     double d_log_scale = A_diff3(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) - 
                                A_diff3(pi + C_func(theta, phi, psi), logit_rho, log_scale);
 
-    double d_psi = A_diff1(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) * C_diff3(theta-1, phi, psi) - 
-                  - A_diff1(pi + C_func(theta, phi, psi), logit_rho, log_scale) * C_diff3(theta, phi, psi) - 
+    double d_psi = A_diff1(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) * C_diff3(theta-1) - 
+                  - A_diff1(pi + C_func(theta, phi, psi), logit_rho, log_scale) * C_diff3(theta);  
 
     return std::make_tuple(d_logit_rho, d_log_scale, d_psi);
 }
@@ -211,7 +211,21 @@ double link2(double pi, double phi, double theta, double log_both, double log_sc
     return val1 - val2;
 }
 
-/* std::tuple<double, double, double> link_2_gradient(double pi, double phi, double theta, double log_both, double log_scale, double psi) */
+std::tuple<double, double, double> link_2_gradient(double pi, double phi, double theta, double log_both, 
+        double log_scale, double psi) {
+
+    double d_log_both = B_diff2(pi + C_func(theta-1, phi, psi), log_both, log_scale) - 
+                        B_diff2(pi + C_func(theta, phi, psi), log_both, log_scale);
+      
+    double d_log_scale = B_diff3(pi + C_func(theta-1, phi, psi), log_both, log_scale) - 
+                               B_diff3(pi + C_func(theta, phi, psi), log_both, log_scale);
+
+    double d_psi = B_diff1(pi + C_func(theta-1, phi, psi), logit_rho, log_both) * C_diff3(theta-1) - 
+                  - B_diff1(pi + C_func(theta, phi, psi), logit_rho, log_both) * C_diff3(theta); 
+
+    return std::make_tuple(d_log_both, d_log_scale, d_psi);
+
+}
 
 double link3(double theta, double log_scale, double phi) { 
 
