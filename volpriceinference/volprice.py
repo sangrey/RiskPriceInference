@@ -12,6 +12,7 @@ from collections import OrderedDict
 from functools import partial
 from itertools import product
 from libvolpriceinference import _simulate_autoregressive_gamma
+from libvolpriceinference import link_total, link_jacobian
 from tqdm.auto import tqdm
 from multiprocessing import Pool
 
@@ -32,13 +33,10 @@ _C_func = psi * _x - ((1 - phi**2) / 2) * _x**2
 
 _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
              _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})}))
-# _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
-#              _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})).xreplace({psi: _psi_sym})
 
 # We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
 # be positive.
 _constraint_sym = _B_func_in.xreplace({_x: pi + _C_func})
-# _constraint_sym = _B_func_in.xreplace({_x: pi + _C_func}).xreplace({psi: _psi_sym})
 _gamma_sym = sym.exp(log_both - log_scale) * (sym.log(_constraint_sym.xreplace({_x: theta - 1})) -
                                               sym.log(_constraint_sym.xreplace({_x: theta})))
 _constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta - 1}),
@@ -67,16 +65,6 @@ compute_pi = sym.lambdify((gamma, log_both, log_scale, phi, psi, logit_rho, thet
 _link_sym = sym.powsimp(sym.expand(sym.Matrix([beta - _beta_sym, gamma - _gamma_sym, psi - _psi_sym,
                                                1 - (zeta + phi**2)])))
 
-_link_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym[-1],
-                         modules='numpy')
-_link_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym,
-                         modules='numpy')
-_link_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym[-2:],
-                         modules='numpy')
-_link_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_sym[1:],
-                         modules='numpy')
-
-
 # We define the moments used to estimate the volatility paramters.
 _mean = _logistic.xreplace({_x: logit_rho}) * _x + sym.exp(log_both)
 _var = 2 * sym.exp(log_scale) * _logistic.xreplace({_x: logit_rho}) * _x + sym.exp(log_scale + log_both)
@@ -95,15 +83,6 @@ compute_vol_moments_grad = sym.lambdify([_x, _y, log_both, log_scale, logit_rho]
 # Define the gradient of the link function with respect to the reduced form paramters.
 _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale,
                                                                         psi, logit_rho, zeta])])))
-
-_link_grad_in0 = sym.lambdify((phi, beta, gamma, log_both, log_scale, psi, logit_rho, zeta), _link_grad_sym[-1, :],
-                              modules='numpy')
-_link_grad_in1 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
-                              _link_grad_sym, modules='numpy')
-_link_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
-                              _link_grad_sym[-2:, :], modules='numpy')
-_link_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
-                              _link_grad_sym[1:, :], modules='numpy')
 
 omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
 
@@ -319,34 +298,18 @@ def compute_bounds(case):
 
 def compute_link(prices, omega, case):
     """Compute the link function."""
-    if case == 0:
-        compute_link_in = _link_in0
-    elif case == 1:
-        compute_link_in = _link_in1
-    elif case == 2:
-        compute_link_in = _link_in2
-    elif case == 3:
-        compute_link_in = _link_in3
-    else:
+    if case != 1:
         raise NotImplementedError
 
-    return np.ravel(compute_link_in(*prices, **omega))
+    return link_total(*prices, **omega)
 
 
 def compute_link_grad(prices, omega, case):
     """Compute the gradient of the link function with respect to the reduced-form paramters."""
-    if case == 0:
-        compute_link_grad_in = _link_grad_in0
-    elif case == 1:
-        compute_link_grad_in = _link_grad_in1
-    elif case == 2:
-        compute_link_grad_in = _link_grad_in2
-    elif case == 3:
-        compute_link_grad_in = _link_grad_in3
-    else:
+    if case != 1:
         raise NotImplementedError
 
-    return compute_link_grad_in(*prices, **omega)
+    return link_jacobian(*prices, **omega)
 
 
 def compute_link_price_grad(prices, omega, case):
@@ -766,7 +729,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
 
     low_bounds, high_bounds = np.array(bounds).T
     x0 = np.random.uniform(low_bounds, high_bounds)
-    x0[1] = (np.clip((1 - omega['zeta'])**.5, bounds[1][0], bounds[1][1]) 
+    x0[1] = (np.clip((1 - omega['zeta'])**.5, bounds[1][0], bounds[1][1])
              if omega['zeta'] < 1 else bounds[1][1])
 
     constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
@@ -825,7 +788,9 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
         return tuple(true_prices) + (0,)
 
     cov_true_true = covariance_kernel(true_prices, true_prices, omega_cov=omega_cov, omega=omega, case=case)
-    link_true = compute_link(true_prices, omega, case=case)
+    # TODO Should I be using this!!!
+
+    # link_true = compute_link(true_prices, omega, case=case)
     cov_params_true = partial(covariance_kernel, prices2=true_prices, omega=omega, omega_cov=omega_cov, case=case)
 
     # Draw the innovation for the moments
@@ -837,7 +802,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
             diff = np.atleast_1d(innov) - link1
             weighted_diff = (cov_params_true(prices) @ np.linalg.solve(cov_true_true, diff))
-            link_in = np.ravel(link1 + weighted_diff)  
+            link_in = np.ravel(link1 + weighted_diff)
 
             cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
 
@@ -849,9 +814,8 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
             # infinity.
             return np.inf
 
-
     if use_tqdm:
-        # This hack gets tqdm to print in a multiprocessing environment. 
+        # This hack gets tqdm to print in a multiprocessing environment.
         # It is taken from https://github.com/tqdm/tqdm/issues/485
         print('\u200b', end='', flush=True)
         innov_it = tqdm(innovations, leave=False)
@@ -862,28 +826,28 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
         def minimized(innov):
             try:
-                result_in =  minimize(qlr_in_star, args=(innov,), x0=x0,
-                                      method='L-BFGS-B', options={'maxiter': 500},
-                                      bounds=bounds)
+                result_in = minimize(qlr_in_star, args=(innov,), x0=x0,
+                                     method='L-BFGS-B', options={'maxiter': 500},
+                                     bounds=bounds)
                 if result_in.success:
                     return result_in.fun
                 else:
                     # We throw out the result if the minimization fails.
-                    return np.inf  
+                    return np.inf
             except FloatingPointError:
-                return np.inf 
+                return np.inf
 
         results = np.array([qlr_in_star(true_prices, innov=innov) - minimized(innov) for innov in innov_it])
 
-        results[results <= 0] = np.inf 
-    
+        results[results <= 0] = np.inf
+
     if alpha is None:
         return results
 
     else:
         # We replace all of the error values with zero because if we a lot of them we want to reject. We do not
         # always reject because we are only redrawing part of the variation.
-        returnval = np.percentile([val for val in results if np.isfinite(val)], 100 * (1 - alpha), 
+        returnval = np.percentile([val for val in results if np.isfinite(val)], 100 * (1 - alpha),
                                   interpolation='lower')
 
         return tuple(true_prices) + (returnval,)
@@ -1001,22 +965,23 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
                          case=case, use_tqdm=use_tqdm)
 
     param_idx = ['phi', 'pi', 'theta']
+    # TODO Start using pool again
     # with Pool(8) as pool:
     draws = []
-    opts = {'total': pi_dim * theta_dim * phi_dim, 'leave':False}
+    opts = {'total': pi_dim * theta_dim * phi_dim, 'leave': False}
 
     if use_tqdm:
         for draw in tqdm(map(qlr_sim_in, it), **opts):
             draws.append(draw)
             draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
                                                  ['qlr']).sort_values(by=param_idx)
-            filename1 = f"../results/qlr_draws_on_data_{innov_dim}" 
-            filename2 = "_smaller_region_flattened.tmp.json""" 
-            draws_df.to_json(filename1 + filename2) 
-    else:
-        draws = list(pool.imap_unordered(qlr_sim_in, it))
-        draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
-                                                 ['qlr']).sort_values(by=param_idx)
+            filename1 = f"../results/qlr_draws_on_data_{innov_dim}"
+            filename2 = "_smaller_region_flattened.tmp.json"""
+            draws_df.to_json(filename1 + filename2)
+    # else:
+    #     draws = list(pool.imap_unordered(qlr_sim_in, it))
+    #     draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
+    #                                          ['qlr']).sort_values(by=param_idx)
 
     return draws_df
 
