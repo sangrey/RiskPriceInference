@@ -1,5 +1,6 @@
-####### Dropbox ######
-.dropbox
+############ Results Folder ##############
+results/*
+
 
 #############Server Batch files ###############
 */estimation_wrapper.sh.* # THe Log files 
@@ -9,7 +10,7 @@
 *.tmp.csv
 *.tmp.h5
 *delete*
-*.tmp*
+*.tmp.*
 
 ##########Files That Are To Large ##########
 *.hdf

@@ -38,6 +38,7 @@ test:
       - python >=3.6
       - pytest 
       - flake8
+      - hypothesis
 
 about:
   home: https://gitlab.com/sangrey/RiskPriceInference
