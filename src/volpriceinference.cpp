@@ -111,16 +111,7 @@ double C_func(double x, double phi, double psi) {
 
 }
 
-
-double link1(double pi, double theta, double log_both, double log_scale, double phi, double psi) {
-
-    double val1 = B_func(pi + C_func(theta - 1, phi, psi), log_both, log_scale);
-    double val2 = B_func(pi + C_func(theta, phi, psi), log_both, log_scale);
-
-    return val1 - val2;
-}
-
-double link2(double pi, double theta, double logit_rho, double log_scale, double phi, double psi) {
+double link1(double pi, double theta, double logit_rho, double log_scale, double phi, double psi) {
 
     double val1 = A_func(pi + C_func(theta - 1, phi, psi), logit_rho, log_scale);
     double val2 = A_func(pi + C_func(theta, phi, psi), logit_rho, log_scale);
@@ -128,6 +119,15 @@ double link2(double pi, double theta, double logit_rho, double log_scale, double
     return val1 - val2;
 
 }
+
+double link2(double pi, double theta, double log_both, double log_scale, double phi, double psi) {
+
+    double val1 = B_func(pi + C_func(theta - 1, phi, psi), log_both, log_scale);
+    double val2 = B_func(pi + C_func(theta, phi, psi), log_both, log_scale);
+
+    return val1 - val2;
+}
+
 
 
 
@@ -166,10 +166,10 @@ PYBIND11_MODULE(libvolpriceinference, m) {
 
     m.def("link1", &link1, stream_redirect(), 
             "This function computes function the first link function in the accompanying paper.",
-            "pi"_a, "theta"_a, "log_both"_a, "log_scale"_a, "phi"_a, "psi"_a);
+            "pi"_a, "theta"_a, "logit_rho"_a, "log_scale"_a, "phi"_a, "psi"_a);
 
-    m.def("link2", &link1, stream_redirect(), 
+    m.def("link2", &link2, stream_redirect(), 
             "This function computes function the second link function in the accompanying paper.",
-            "pi"_a, "theta"_a, "log_rho"_a, "log_scale"_a, "phi"_a, "psi"_a);
+            "pi"_a, "theta"_a, "log_both"_a, "log_scale"_a, "phi"_a, "psi"_a);
 
 }
