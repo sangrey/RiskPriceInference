@@ -73,18 +73,18 @@ def test_link_total(phi, pi, theta, beta, gamma, log_both, log_scale, logit_rho,
         assert np.allclose(np.ravel(val1), np.ravel(val2), rtol=1e-3, equal_nan=True), \
             f"The two implementations return different values: {val1} and {val2}"
 
-@given(phi_floats, negative_floats, positive_floats, log_floats, log_floats, finite_floats, finite_floats)
-@settings(deadline=1000, max_examples=10)
-def test_link_gradient(phi, pi, theta, log_both, log_scale, logit_rho, psi):
-    """ Ensure the two implementations have the same link function gradient gradientsss. """
+# @given(phi_floats, negative_floats, positive_floats, log_floats, log_floats, finite_floats, finite_floats)
+# @settings(deadline=1000, max_examples=10)
+# def test_link_gradient(phi, pi, theta, log_both, log_scale, logit_rho, psi):
+#     """ Ensure the two implementations have the same link function gradient gradientsss. """
     
-    args = {vl.volprice.phi: phi, vl.volprice.pi: pi, vl.volprice.theta: theta, vl.volprice.log_both:log_both, 
-            vl.volprice.log_scale: log_scale, vl.volprice.logit_rho: logit_rho, vl.volprice.psi : psi}
+#     args = {vl.volprice.phi: phi, vl.volprice.pi: pi, vl.volprice.theta: theta, vl.volprice.log_both:log_both, 
+#             vl.volprice.log_scale: log_scale, vl.volprice.logit_rho: logit_rho, vl.volprice.psi : psi}
                 
-    val1 = np.real(np.array(sym.N(vl.volprice._link_grad_sym.xreplace(args))).astype(np.complex))
-    val2 = vl.link_jacobian(phi=phi, pi=pi, theta=theta, logit_rho=logit_rho,
-                            log_both=log_both, log_scale=log_scale, psi=psi)
+#     val1 = np.real(np.array(sym.N(vl.volprice._link_grad_sym.xreplace(args))).astype(np.complex))
+#     val2 = vl.link_jacobian(phi=phi, pi=pi, theta=theta, logit_rho=logit_rho,
+#                             log_both=log_both, log_scale=log_scale, psi=psi)
 
-    if np.all(np.isfinite(val2)) and np.all(abs(val2) <= 1e4):
-        assert np.allclose(np.ravel(val1), np.ravel(val2), rtol=1e-3, equal_nan=True), \
-            f"The two implementations return different values: {val1} and {val2}"
+#     if np.all(np.isfinite(val2)) and np.all(abs(val2) <= 1e4):
+#         assert np.allclose(np.ravel(val1), np.ravel(val2), rtol=1e-3, equal_nan=True), \
+#             f"The two implementations return different values: {val1} and {val2}"
