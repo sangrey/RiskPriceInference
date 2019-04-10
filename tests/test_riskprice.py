@@ -8,8 +8,8 @@ def test_packages():
     """ Ensure I can import the package. """
     import volpriceinference
 
-finite_floats = st.floats(min_value=-100, max_value=100)
-positive_floats = st.floats(min_value=.1, max_value=100)
+finite_floats = st.floats(min_value=-10, max_value=10)
+positive_floats = st.floats(min_value=.1, max_value=10)
 negative_floats = st.floats(min_value=-10, max_value=-.1)
 phi_floats = st.floats(min_value=-.9, max_value=-.1)
 
@@ -55,5 +55,24 @@ def test_link2(pi, theta, log_both, log_scale, phi, psi):
 
     if np.isfinite(val2):
         assert np.isclose(float(np.real(val1)), float(np.real(val2)), equal_nan=True, rtol=1e-3),\
+            f"The two implementations return different values: {val1} and {val2}"
+
+
+@given(phi_floats, negative_floats, positive_floats, finite_floats, finite_floats, finite_floats, 
+       finite_floats, finite_floats, finite_floats, finite_floats)
+def test_link_total(phi, pi, theta, beta, gamma, log_both, log_scale, logit_rho, psi, zeta):
+    
+    import volpriceinference as vl
+    args = {vl.volprice.phi: phi, vl.volprice.pi: pi, vl.volprice.theta : theta,vl.volprice.beta: beta, 
+            vl.volprice.gamma :gamma, vl.volprice.log_both :log_both, 
+            vl.volprice.log_scale: log_scale, vl.volprice.logit_rho: logit_rho, vl.volprice.psi : psi,
+            vl.volprice.zeta: zeta}
+    
+    val1 =  np.abs(sym.N(vl.volprice._link_sym.xreplace(args))).astype(np.float)
+    val2 = vl.link_total(phi=phi, pi=pi, theta=theta, beta=beta, gamma=gamma, logit_rho=logit_rho, 
+                         log_both=log_both, log_scale=log_scale, psi=psi, zeta=zeta)
+    
+    if np.all(np.isfinite(val2)):
+        assert np.allclose(np.ravel(val1), np.ravel(val2), rtol=1e-3, equal_nan=True), \
             f"The two implementations return different values: {val1} and {val2}"
 

@@ -152,10 +152,29 @@ double B_diff1(double x, double log_both, double log_scale) {
 
 }
 
+double B_diff2(double x, double log_both, double log_scale) { 
+
+    return B_func(x, log_both, log_scale);
+}
+
+double B_diff3(double x, double log_both, double log_scale) {
+
+    double diff1 = -1.0 * std::exp(log_btoh - log_scale);
+    double diff2 = x  / (1 + std::exp(log_scale) * x);
+
+    return std::exp(log_both - log_scale) * diff2 + std::log(1 + std::exp(log_scale) * x) * diff1; 
+}
+
 double C_func(double x, double phi, double psi) {
 
     double val = psi * x - ((1 - phi * phi) / 2.0) * x * x;
     return val;
+
+}
+
+double C_diff3(double x, double phi, double psi) {
+
+    return x;
 
 }
 
@@ -183,16 +202,16 @@ double link3(double theta, double log_scale, double phi) {
     return val;
 }
 
-dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double psi, double logit_rho, double zeta) {
+dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double logit_rho, double psi, double zeta) {
 
-    double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
-    double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
+    double beta_diff = link1(pi, phi, theta, logit_rho, log_scale, psi) - beta; 
+    double gamma_diff = link2(pi, phi, theta, log_both, log_scale, psi) - gamma; 
     double psi_diff = psi - link3(theta, log_scale, phi);
     double zeta_diff = 1 - (zeta + phi * phi);
 
     dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff};
 
-    return returnmat;
+    return returnmat.t();
 
 }
 
@@ -243,7 +262,7 @@ PYBIND11_MODULE(libvolpriceinference, m) {
 
     m.def("link_total", &link_total, stream_redirect(),
             "This function computes the link function.",
-            "phi"_a, "pi"_a, "theta"_a, "beta"_a, "gamma"_a, "log_both"_a,  "log_scale"_a,  "psi"_a,  
-            "logit_rho"_a,  "zeta"_a); 
+            "phi"_a, "pi"_a, "theta"_a, "beta"_a, "gamma"_a, "log_both"_a,  "log_scale"_a,  "logit_rho"_a, 
+            "psi"_a, "zeta"_a); 
 
 }
