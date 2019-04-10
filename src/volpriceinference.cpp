@@ -188,8 +188,8 @@ double link1(double pi, double phi, double theta, double logit_rho, double log_s
 
 }
 
-std::tuple<double, double, double> dvec link1_gradient(double pi, double phi, double theta, double logit_rho, 
-                                                       double log_scale, double psi) {
+std::tuple<double, double, double> link1_gradient(double pi, double phi, double theta, double logit_rho, 
+        double log_scale, double psi) {
 
     double d_logit_rho = A_diff2(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) - 
                                A_diff2(pi + C_func(theta, phi, psi), logit_rho, log_scale);
@@ -210,6 +210,8 @@ double link2(double pi, double phi, double theta, double log_both, double log_sc
 
     return val1 - val2;
 }
+
+/* std::tuple<double, double, double> link_2_gradient(double pi, double phi, double theta, double log_both, double log_scale, double psi) */
 
 double link3(double theta, double log_scale, double phi) { 
 
