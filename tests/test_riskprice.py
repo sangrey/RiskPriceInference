@@ -75,7 +75,7 @@ def test_link_total(phi, pi, theta, beta, gamma, log_both, log_scale, logit_rho,
 
 @given(phi_floats, negative_floats, positive_floats, log_floats, log_floats, finite_floats, finite_floats)
 @settings(deadline=1000, max_examples=10)
-def test_link_total(phi, pi, theta, log_both, log_scale, logit_rho, psi):
+def test_link_gradient(phi, pi, theta, log_both, log_scale, logit_rho, psi):
     """ Ensure the two implementations have the same link function gradient gradientsss. """
     
     args = {vl.volprice.phi: phi, vl.volprice.pi: pi, vl.volprice.theta: theta, vl.volprice.log_both:log_both, 

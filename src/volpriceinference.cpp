@@ -165,7 +165,7 @@ double B_diff3(double x, double log_both, double log_scale) {
     double scale =  std::exp(log_scale);
 
     double val1 = std::exp(log_both - log_scale);
-    double val2 = std::log(1 + scale * x):
+    double val2 = std::log(1 + scale * x);
 
     double diff1 = -1.0 * val1;
     double diff2 = x / (1 + scale * x);
