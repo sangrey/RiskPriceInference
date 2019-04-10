@@ -115,7 +115,9 @@ double A_diff2(double x, double logit_rho, double log_scale) {
     double scale =  std::exp(log_scale);
 
     /* The derivative of the logistic function satisfies f'(x) = f(x) ( 1 - f(x))  */
-    double val = logistic(logit_rho) * (1 - logistic(logit_rho))  / (1 + scale * x); 
+    double numerator = x * std::exp(-1 * logit_rho);
+    double denominator_in = 1 + std::exp(-1 * logit_rho); 
+    double val = numerator / (denominator_in * denominator_in * (1 + scale * x)); 
 
     return val;
 
