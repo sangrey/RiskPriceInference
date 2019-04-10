@@ -96,6 +96,11 @@ double A_func(double x, double logit_rho, double log_scale) {
 
 }
 
+/* double A_prime(double x, double logit_rho, double log_scale) { */
+    
+
+/* } */
+
 double B_func(double x, double log_both, double log_scale) { 
 
     double delta = std::exp(log_both - log_scale);
@@ -130,12 +135,12 @@ double link2(double pi, double phi, double theta, double log_both, double log_sc
 
 double link3(double theta, double log_scale, double phi) { 
 
-    val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta
+    double val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta
 
     return val
 }
 
-double link_total(phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta) {
+double link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double psi, double logit_rho, double zeta) {
 
     double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
     double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
@@ -198,4 +203,10 @@ PYBIND11_MODULE(libvolpriceinference, m) {
     m.def("link3", &link3, stream_redirect(), 
             "This function computes function the second link function in the accompanying paper.",
             "theta"_a, "log_scale"_a, "phi"_a);
+
+    m.def("link_total", &link_total, stream_redirect(),
+            "This function computes the link function.",
+            "phi"_a, "pi"_a, "theta"_a, "beta"_a, "gamma"_a, "log_both"_a,  "log_scale"_a,  "psi"_a,  
+            "logit_rho"_a,  "zeta"_a); 
+
 }
