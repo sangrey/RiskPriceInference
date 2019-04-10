@@ -204,8 +204,8 @@ double link3(double theta, double log_scale, double phi) {
 
 dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale, double logit_rho, double psi, double zeta) {
 
-    double beta_diff = link1(pi, phi, theta, logit_rho, log_scale, psi) - beta; 
-    double gamma_diff = link2(pi, phi, theta, log_both, log_scale, psi) - gamma; 
+    double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
+    double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
     double psi_diff = psi - link3(theta, log_scale, phi);
     double zeta_diff = 1 - (zeta + phi * phi);
 
