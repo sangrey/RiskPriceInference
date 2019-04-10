@@ -101,9 +101,21 @@ double A_prime(double x, double logit_rho, double log_scale) {
     double scale =  std::exp(log_scale);
     double rho = logistic(logit_rho); 
     double numerator = rho * (1 + scale * x) - scale * rho * x;
-    double denominator = (1 + scale * x) * (1 + scale * x):
+    double denominator = (1 + scale * x) * (1 + scale * x);
 
     return numerator / denominator;
+
+}
+
+double A_diff_logitRho(double x, double logit_rho, double log_scale) {
+    /* Compute the derivatiive of the A function with respecto to logit_rho */
+    
+    double scale =  std::exp(log_scale);
+
+    /* The derivative of the logistic function satisfies f'(x) = f(x) ( 1 - f(x))  */
+   double val = logistic(logit_rho) * ( 1 - logistic(logit_rho))  / ( 1 + scale * x); 
+
+   return val;
 
 }
 
@@ -141,7 +153,7 @@ double link2(double pi, double phi, double theta, double log_both, double log_sc
 
 double link3(double theta, double log_scale, double phi) { 
 
-    double val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta
+    double val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta;
 
     return val;
 }
@@ -153,15 +165,9 @@ double link_total(double phi, double pi, double theta, double beta, double gamma
     double psi_diff = psi - link3(theta, log_scale, phi);
     double zeta_diff = 1 - (zeta + phi * phi);
 
-
     dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff};
+
     return dmat;
-
-}
-
-double link4(double zeta) {
-
-    val = _link_sym = 1 - zeta;
 
 }
 
