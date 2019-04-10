@@ -236,7 +236,7 @@ double link3(double theta, double phi, double log_scale) {
     return val;
 }
 
-double link3_gradient(double theta, double phi, double log_scale) {
+double link3_gradient(double phi, double log_scale) {
 
     return (phi / std::sqrt(2.0)) * std::exp(-.5 * log_scale)  * -.5;
 
@@ -256,18 +256,21 @@ dmat link_total(double phi, double pi, double theta, double beta, double gamma, 
 
 }
 
-/* dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale */
-/*         double psi, double log_rho, double zeta) { */
+dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale
+        double psi, double logit_rho, double zeta) {
 
 
-/*     _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale, */
-/*                                                                         psi, logit_rho, zeta])]))) */
-/*     dmat returnmat = arma::zeros<dmat>(4,7); */
-/*     returmat(0,0) = 1; */
+    /* _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale, */
+    /*                                                                     psi, logit_rho, zeta])]))) */
+    dmat returnmat = arma::zeros<dmat>(4,7);
+    returmat(0,0) = 1;
+    auto [link1_logit_rho, link1_log_scale, link1_psi] = link1_gradient(pi, phi, theta, logit_rho, log_scale, psi); 
+    returnmat(0, 3) = link1_log_scale;
+    returnmat(0,4) = link1_psi;
+    returnmat(0, 5) = link1_logit_rho; 
 
-
-
-/* } */
+    return returnmat;
+}
 
 
 PYBIND11_MODULE(libvolpriceinference, m) {
