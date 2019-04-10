@@ -29,12 +29,16 @@ _theta_sym = sym.solveset(psi - _psi_sym, theta).args[0]
 _B_func_in = 1 + sym.exp(log_scale) * _x
 _A_func = _logistic.xreplace({_x: logit_rho}) * _x / _B_func_in
 _C_func = psi * _x - ((1 - phi**2) / 2) * _x**2
+
 _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
-             _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})).xreplace({psi: _psi_sym})
+             _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})}))
+# _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
+#              _A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta})})).xreplace({psi: _psi_sym})
 
 # We create the functions that define the nonlinear constraint implied by the argument of the logarithm needing to
 # be positive.
-_constraint_sym = _B_func_in.xreplace({_x: pi + _C_func}).xreplace({psi: _psi_sym})
+_constraint_sym = _B_func_in.xreplace({_x: pi + _C_func})
+# _constraint_sym = _B_func_in.xreplace({_x: pi + _C_func}).xreplace({psi: _psi_sym})
 _gamma_sym = sym.exp(log_both - log_scale) * (sym.log(_constraint_sym.xreplace({_x: theta - 1})) -
                                               sym.log(_constraint_sym.xreplace({_x: theta})))
 _constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta - 1}),
@@ -44,7 +48,7 @@ _constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_
 
 # We create the link functions.
 compute_gamma = sym.lambdify((log_both, log_scale, phi, pi, logit_rho, theta), _gamma_sym, modules='numpy')
-compute_beta = sym.lambdify((log_scale, phi, pi, logit_rho, theta), _beta_sym, modules='numpy')
+compute_beta = sym.lambdify((log_scale, phi, pi, psi, logit_rho, theta), _beta_sym, modules='numpy')
 compute_psi = sym.lambdify((log_scale, phi, logit_rho, theta), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
@@ -150,7 +154,7 @@ def constraint(prices, omega, case=1):
     return np.minimum(constraint1, constraint2)
 
 
-def compute_moments(log_both, logit_rho, log_scale, phi, pi, theta):
+def compute_moments(log_both, logit_rho, log_scale, phi, pi, theta, psi):
     """Compute the means and variances implied by the paramters."""
     rho = special.expit(logit_rho)
 
@@ -159,7 +163,7 @@ def compute_moments(log_both, logit_rho, log_scale, phi, pi, theta):
                 * np.exp(log_both - log_scale)) / (1 - rho**2))
 
     psi = compute_psi(logit_rho=logit_rho, log_scale=log_scale, phi=phi, theta=theta)
-    beta = compute_beta(logit_rho=logit_rho, log_scale=log_scale, phi=phi, pi=pi, theta=theta)
+    beta = compute_beta(logit_rho=logit_rho, log_scale=log_scale, phi=phi, pi=pi, theta=theta, psi=psi)
     gamma = compute_gamma(log_both=log_both, logit_rho=logit_rho,
                           log_scale=log_scale, phi=phi, pi=pi, theta=theta)
 
@@ -439,7 +443,7 @@ def simulate_data(theta=1, pi=0, logit_rho=0, log_scale=0, log_both=0, phi=0, in
                                              start_date=pd.to_datetime(start_date) - pd.Timedelta('1 day'))
 
     gamma_val = compute_gamma(logit_rho=logit_rho, log_scale=log_scale, log_both=log_both, pi=pi, theta=theta, phi=phi)
-    beta_val = compute_beta(logit_rho=logit_rho, log_scale=log_scale, pi=pi, theta=theta, phi=phi)
+    beta_val = compute_beta(logit_rho=logit_rho, log_scale=log_scale, pi=pi, theta=theta, phi=phi, psi=psi)
     psi_val = compute_psi(logit_rho=logit_rho, log_scale=log_scale, theta=theta, phi=phi)
 
     if case == 1:

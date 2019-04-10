@@ -4,8 +4,7 @@
 #include <random>
 #include <algorithm>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include "pybind11/operators.h"
+#include <pybind11/stl.h> #include "pybind11/operators.h"
 #include <pybind11/iostream.h>
 #include <arma_wrapper.h>
 
@@ -75,12 +74,20 @@ std::vector<double> threadsafe_gaussian_rvs(size_t time_dim) {
 }
 
 
+def B_func(double x, double phi, double psi, double log_scale) {
+
+
+}
+
 dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale
         double psi, double log_rho, double zeta) {
 
 
-    dmat returnmat = arma::zeros<dmat>(4,3);
+    _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale,
+                                                                        psi, logit_rho, zeta])])))
+    dmat returnmat = arma::zeros<dmat>(4,7);
     returmat(0,0) = 1;
+
 
 
 }
