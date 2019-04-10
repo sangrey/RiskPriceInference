@@ -256,12 +256,9 @@ dmat link_total(double phi, double pi, double theta, double beta, double gamma, 
 
 }
 
-dmat link_grad_sym(double phi, double pi, double theta, double log_both, double log_scale,
-        double psi, double logit_rho) {
+dmat link_jacobian(double phi, double pi, double theta, double log_both, double log_scale, double logit_rho,
+        double psi) {
 
-
-    /* _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale, */
-    /*                                                                     psi, logit_rho, zeta])]))) */
     dmat returnmat = arma::zeros<dmat>(4,7);
 
     // Calculate the first row.
@@ -280,6 +277,12 @@ dmat link_grad_sym(double phi, double pi, double theta, double log_both, double 
     returnmat(1,3) = -1 * link2_log_scale;
     returnmat(1,4) = -1 * link2_psi;
 
+
+    // Calculate the third row.
+    double link3_log_scale = link3_gradient(phi, log_scale); 
+    returnmat(2,3) = - link3_log_scale;
+    returnmat(2,4) = 1;
+    
     // Calculate the fourth row.
     returnmat(3,6) = -1; 
 
@@ -322,5 +325,11 @@ PYBIND11_MODULE(libvolpriceinference, m) {
             "This function computes the link function.",
             "phi"_a, "pi"_a, "theta"_a, "beta"_a, "gamma"_a, "log_both"_a,  "log_scale"_a,  "logit_rho"_a, 
             "psi"_a, "zeta"_a); 
+
+    m.def("link_jacobian", &link_jacobian, stream_redirect(),
+            "This function computes the jacobian of the link function.",
+            "phi"_a, "pi"_a, "theta"_a, "log_both"_a,  "log_scale"_a,  "logit_rho"_a, 
+            "psi"_a); 
+
 
 }
