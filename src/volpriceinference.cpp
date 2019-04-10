@@ -111,7 +111,7 @@ double C_func(double x, double phi, double psi) {
 
 }
 
-double link1(double pi, double theta, double logit_rho, double log_scale, double phi, double psi) {
+double link1(double pi, double phi, double theta, double logit_rho, double log_scale, double psi) {
 
     double val1 = A_func(pi + C_func(theta - 1, phi, psi), logit_rho, log_scale);
     double val2 = A_func(pi + C_func(theta, phi, psi), logit_rho, log_scale);
@@ -120,7 +120,7 @@ double link1(double pi, double theta, double logit_rho, double log_scale, double
 
 }
 
-double link2(double pi, double theta, double log_both, double log_scale, double phi, double psi) {
+double link2(double pi, double phi, double theta, double log_both, double log_scale, double psi) {
 
     double val1 = B_func(pi + C_func(theta - 1, phi, psi), log_both, log_scale);
     double val2 = B_func(pi + C_func(theta, phi, psi), log_both, log_scale);
@@ -128,8 +128,31 @@ double link2(double pi, double theta, double log_both, double log_scale, double 
     return val1 - val2;
 }
 
+double link3(double theta, double log_scale, double phi) { 
+
+    val = (phi / std::sqrt(2.0 * std::exp(log_scale))) - (1 - phi * phi) / 2.0 + (1 - phi * phi) * theta
+
+    return val
+}
+
+double link_total(phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta) {
+
+    double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
+    double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
+    double psi_diff = psi - link3(theta, log_scale, phi);
+    double zeta_diff = 1 - (zeta + phi * phi);
 
 
+    dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff{;
+    return dmat;
+
+}
+
+double link4(double zeta) {
+
+    val = _link_sym = 1 - zeta;
+
+}
 
 /* dmat link_grad_sym(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale */
 /*         double psi, double log_rho, double zeta) { */
@@ -166,10 +189,13 @@ PYBIND11_MODULE(libvolpriceinference, m) {
 
     m.def("link1", &link1, stream_redirect(), 
             "This function computes function the first link function in the accompanying paper.",
-            "pi"_a, "theta"_a, "logit_rho"_a, "log_scale"_a, "phi"_a, "psi"_a);
+            "pi"_a, "phi"_a, "theta"_a, "logit_rho"_a, "log_scale"_a, "psi"_a);
 
     m.def("link2", &link2, stream_redirect(), 
             "This function computes function the second link function in the accompanying paper.",
-            "pi"_a, "theta"_a, "log_both"_a, "log_scale"_a, "phi"_a, "psi"_a);
+            "pi"_a, "phi"_a, "theta"_a, "log_both"_a, "log_scale"_a, "psi"_a);
 
+    m.def("link3", &link3, stream_redirect(), 
+            "This function computes function the second link function in the accompanying paper.",
+            "theta"_a, "log_scale"_a, "phi"_a);
 }
