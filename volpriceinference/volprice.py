@@ -98,14 +98,6 @@ _link_price_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scal
 _link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                                     _link_price_grad_sym[1:, :], modules='numpy')
 
-# I now define the covariance kernel.
-# _link_grad_left = _link_grad_sym.xreplace({pi: pi1, theta: theta1, phi: phi1})
-# _link_grad_right = _link_grad_sym.xreplace({pi: pi2, theta: theta2, phi: phi2})
-
-# _cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, gamma,
-#                                 log_both, log_scale, logit_rho, zeta, omega_cov),
-#                                _link_grad_left * omega_cov * _link_grad_right.T, modules='numpy')
-
 def constraint(prices, omega, case=1):
     """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
     if case == 0 or case == 2:
@@ -687,10 +679,15 @@ def _qlr_in(prices, omega, omega_cov, case):
 
     cov_pi = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
 
-    returnval = np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
+    try:
+        returnval = np.asscalar(link_in.T @ np.linalg.pinv(cov_pi) @ link_in)
+    except np.linalg.LinAlgError:
+        returnval = np.inf
 
     if np.isnan(returnval):
+        logging.warning("_qlr_in found a nan-value")
         returnval = np.inf
+
 
     return returnval
 
@@ -724,6 +721,7 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
 
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
+        logging.warning("We violated the constraint.")
         return tuple(true_prices) + (np.inf,)
 
     minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=x0, method='L-BFGS-B',
@@ -737,13 +735,15 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
     # If the differrence above is not a number, I want the qlr_in(true_prices) to be worse.
     if np.isnan(returnval):
         returnval = np.inf
+        logging.warning("""The differene between the true value and the
+                        minimized function in qlr_stat is not a number""")
     elif returnval < 0:
         returnval = 0
 
     return tuple(true_prices) + (returnval,)
 
 
-def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None, case=1, use_tqdm=True):
+def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None, case=1):
     """
     Simulate the qlr_stat given the omega_estimates and covariance matrix, redrawing the error.
 
@@ -756,17 +756,15 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     omega_cov : dataframe
         omega's covariance matrix.
     true_prices : dict
-    bounds : iterable of tuples, optional
+    bounds : iterable of tuples
     alpha : scalar in (0,1), optional
         If alpha is none return all the draws otherwise return the (1-alpha) precentile.
-    use_tqdm : bool
 
     Returns
     ------
     scalar
 
     """
-    bounds = bounds if bounds is not None else compute_bounds(case)
     constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
     low_bounds, high_bounds = np.array(bounds).T
     x0 = np.random.uniform(low_bounds, high_bounds)
@@ -775,16 +773,21 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         return tuple(true_prices) + (0,)
 
-    cov_true_true = covariance_kernel(true_prices, true_prices, omega_cov=omega_cov, omega=omega, case=case)
-    # TODO Should I be using this!!!
-
-    # link_true = compute_link(true_prices, omega, case=case)
-    cov_params_true = partial(covariance_kernel, prices2=true_prices, omega=omega, omega_cov=omega_cov, case=case)
+    cov_true_true = covariance_kernel(true_prices, true_prices,
+                                      omega_cov=omega_cov, omega=omega,
+                                      case=case)
+    cov_params_true = partial(covariance_kernel, prices2=true_prices,
+                              omega=omega, omega_cov=omega_cov, case=case)
 
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=cov_true_true, size=innov_dim)
 
     def qlr_in_star(prices, innov):
+
+        if not np.all(np.isfinite(prices)):
+            logging.warning(f"prices are {prices}")
+            return np.inf
+
         try:
             link1 = compute_link(prices, omega, case=case)
 
@@ -794,39 +797,43 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
 
             cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
 
-            # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
-            return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))
+            if not np.all(np.isfinite(cov_prices)):
+                logging.warn("The covariance kernel contains NaN")
+                return np.inf
 
+            # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
+            return np.asscalar(link_in.T @ np.linalg.pinv(cov_prices) @ link_in)
+            
         except FloatingPointError:
             # If we get a matrix algebra error in the previous expression we set the value of the link function to
             # infinity.
+            logging.warn("There was a Floating point error in qlr_in_star.")
             return np.inf
-
-    if use_tqdm:
-        # This hack gets tqdm to print in a multiprocessing environment.
-        # It is taken from https://github.com/tqdm/tqdm/issues/485
-        print('\u200b', end='', flush=True)
-        innov_it = tqdm(innovations, leave=False)
-    else:
-        innov_it = innovations
 
     with np.errstate(invalid='raise'):
 
         def minimized(innov):
             try:
                 result_in = minimize(qlr_in_star, args=(innov,), x0=x0,
-                                     method='L-BFGS-B', options={'maxiter': 500},
+                                     method='L-BFGS-B', options={'maxiter': 2500},
                                      bounds=bounds)
                 if result_in.success:
                     return result_in.fun
                 else:
                     # We throw out the result if the minimization fails.
-                    return np.inf
+                    logging.warn(result_in.message)
+                    return result_in.fun
             except FloatingPointError:
+                logging.warn("There was a floating point error inside minimized.")
                 return np.inf
 
-        results = np.array([qlr_in_star(true_prices, innov=innov) - minimized(innov) for innov in innov_it])
+        results = np.array([qlr_in_star(true_prices, innov=innov) - minimized(innov) for innov in innovations])
 
+    results = np.nan_to_num(results)
+
+    if np.any(results <= 0):
+        logging.warning("""Some of the differences between the true and the
+                        minimized value are negative.""")
         results[results <= 0] = np.inf
 
     if alpha is None:
@@ -835,12 +842,10 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     else:
         # We replace all of the error values with zero because if we a lot of them we want to reject. We do not
         # always reject because we are only redrawing part of the variation.
-        if np.any(np.isfinite(results)):
-            returnval = np.percentile([val for val in results if np.isfinite(val)], 100 * (1 - alpha),
-                                  interpolation='lower')
-        else:
-            logging.warning("None of the values are public.")
-            returnval = np.inf
+        returnval = np.percentile(results, 100 * (1 - alpha), interpolation='lower')
+
+        if np.isnan(returnval):
+            raise FloatingPointError("Returnval is not finite.")
 
         return tuple(true_prices) + (returnval,)
 
@@ -950,30 +955,29 @@ def compute_qlr_sim(omega, omega_cov, theta_dim=20, pi_dim=20, pi_min=-20, pi_ma
     if case == 1:
         bounds = [(phi_min, phi_max), (pi_min, pi_max), (theta_min, theta_max)]
     else:
-        raise NotImplementedError("We currenlty only compute bounds for case 1.")
+        raise NotImplementedError("We currently only compute bounds for case 1.")
 
     qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov,
                          bounds=bounds, innov_dim=innov_dim, alpha=alpha,
-                         case=case, use_tqdm=use_tqdm)
+                         case=case)
 
     param_idx = ['phi', 'pi', 'theta']
-    # TODO Start using pool again
-    # with Pool(8) as pool:
-    draws = []
-    opts = {'total': pi_dim * theta_dim * phi_dim, 'leave': False}
+    with Pool(8) as pool:
+        draws = []
+        opts = {'total': pi_dim * theta_dim * phi_dim, 'leave': False}
 
-    if use_tqdm:
-        for draw in tqdm(map(qlr_sim_in, it), **opts):
-            draws.append(draw)
+        if use_tqdm:
+            for draw in tqdm(pool.imap_unordered(qlr_sim_in, it), **opts):
+                draws.append(draw)
+                draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
+                                                     ['qlr']).sort_values(by=param_idx)
+                filename1 = f"../results/qlr_draws_on_data_{innov_dim}"
+                filename2 = "_smaller_region_flattened.tmp.json"""
+                draws_df.to_json(filename1 + filename2)
+        else:
+            draws = list(pool.imap_unordered(qlr_sim_in, it))
             draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
                                                  ['qlr']).sort_values(by=param_idx)
-            filename1 = f"../results/qlr_draws_on_data_{innov_dim}"
-            filename2 = "_smaller_region_flattened.tmp.json"""
-            draws_df.to_json(filename1 + filename2)
-    # else:
-    #     draws = list(pool.imap_unordered(qlr_sim_in, it))
-    #     draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
-    #                                          ['qlr']).sort_values(by=param_idx)
 
     return draws_df
 
@@ -1087,92 +1091,92 @@ def estimate_params_strong_id(data, vol_estimates=None, vol_cov=None, case=1, bo
     return estimates, covariance
 
 
-def compute_qlr_reject(params, true_prices, innov_dim, alpha=None, robust_quantile=True, case=1):
-    """
-    Compute the proportion rejected by the model.
+# def compute_qlr_reject(params, true_prices, innov_dim, alpha=None, robust_quantile=True, case=1):
+#     """
+#     Compute the proportion rejected by the model.
 
-    Paramters
-    --------
-    params: tuple of dict, dataframe
-        The paramter estimates and their covariances.
-    true_prices : iterable of length 2
-        The prices under the null.
-    innov_dim : positive scalar, optional
-        The number of simulations inside the conditional simulation.
-    alpha : scalar in [0,1], optional
-        The signficance level of the test.
+#     Paramters
+#     --------
+#     params: tuple of dict, dataframe
+#         The paramter estimates and their covariances.
+#     true_prices : iterable of length 2
+#         The prices under the null.
+#     innov_dim : positive scalar, optional
+#         The number of simulations inside the conditional simulation.
+#     alpha : scalar in [0,1], optional
+#         The signficance level of the test.
 
-    Returns
-    ------
-    qlr : scalar
-        The QLR statistic
-    qlr__quantile : scalar
-        The weak identificaton robust conditional qlr quantile.
+#     Returns
+#     ------
+#     qlr : scalar
+#         The QLR statistic
+#     qlr__quantile : scalar
+#         The weak identificaton robust conditional qlr quantile.
 
-    """
-    param_est, param_cov = params
-    names = compute_names(case)
-    omega = {name: val for name, val in param_est.items() if name not in names}
-    omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
+#     """
+#     param_est, param_cov = params
+#     names = compute_names(case)
+#     omega = {name: val for name, val in param_est.items() if name not in names}
+#     omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
 
-    qlr = qlr_stat(true_prices=true_prices, omega=omega, omega_cov=omega_cov, case=case)[-1]
+#     qlr = qlr_stat(true_prices=true_prices, omega=omega, omega_cov=omega_cov, case=case)[-1]
 
-    if robust_quantile:
-        qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega, alpha=alpha, omega_cov=omega_cov,
-                               innov_dim=innov_dim, case=case)
-        if alpha is None:
-            return (qlr,) + tuple(qlr_quantile)
-        else:
-            return (qlr, qlr_quantile[-1])
-    else:
-        return qlr
+#     if robust_quantile:
+#         qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega, alpha=alpha, omega_cov=omega_cov,
+#                                innov_dim=innov_dim, case=case)
+#         if alpha is None:
+#             return (qlr,) + tuple(qlr_quantile)
+#         else:
+#             return (qlr, qlr_quantile[-1])
+#     else:
+#         return qlr
 
 
-def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True, robust_quantile=True,
-                             case=1):
-    """
-    Compute the proportion rejected by the model.
+# def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True, robust_quantile=True,
+#                              case=1):
+#     """
+#     Compute the proportion rejected by the model.
 
-    Paramters
-    --------
-    est_arr: iterable of tuple of dict, dataframe
-        The paramter estimates.
-    true_params : dict
-        The value to consider rejecting.
-    alpha : scalar in [0,1], optional
-        The signficance level of the test.
-    innov_dim : positive scalar, optional
-        The number of simulations inside the conditional simulation.
-    use_tqdm : bool, optional
-        Whether to wrap the iterable using tqdm.
-    robust_quantile : bool, optional
-        Whether to compute and return the robust conditional QLR quantiles.
+#     Paramters
+#     --------
+#     est_arr: iterable of tuple of dict, dataframe
+#         The paramter estimates.
+#     true_params : dict
+#         The value to consider rejecting.
+#     alpha : scalar in [0,1], optional
+#         The signficance level of the test.
+#     innov_dim : positive scalar, optional
+#         The number of simulations inside the conditional simulation.
+#     use_tqdm : bool, optional
+#         Whether to wrap the iterable using tqdm.
+#     robust_quantile : bool, optional
+#         Whether to compute and return the robust conditional QLR quantiles.
 
-    Returns
-    ------
-    results : dataframe
-        The QLR statistics, quantiles, and rejection proportions.
+#     Returns
+#     ------
+#     results : dataframe
+#         The QLR statistics, quantiles, and rejection proportions.
 
-    """
-    true_prices = [true_params[name] for name in compute_names(case)]
+#     """
+#     true_prices = [true_params[name] for name in compute_names(case)]
 
-    qlr_reject_in = partial(compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha,
-                            case=case, robust_quantile=robust_quantile)
+#     qlr_reject_in = partial(compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha,
+#                             case=case, robust_quantile=robust_quantile)
 
-    with Pool(8) as pool:
-        if use_tqdm:
-            results = pd.DataFrame(list(tqdm(pool.imap_unordered(qlr_reject_in,
-                                                                 est_arr),
-                                             total=len(est_arr))))
-        else:
-            results = pd.DataFrame(list(pool.imap_unordered(qlr_reject_in, est_arr)))
+#     with Pool(8) as pool:
+#         if use_tqdm:
+#             results = pd.DataFrame(list(tqdm(pool.imap_unordered(qlr_reject_in,
+#                                                                  est_arr),
+#                                              total=len(est_arr))))
+#         else:
+#             results = pd.DataFrame(list(pool.imap_unordered(qlr_reject_in, est_arr)))
 
-    if robust_quantile:
-        results.columns = ['qlr_stat', 'robust_qlr_qauntile']
-        results['robust'] = results.loc[:, 'qlr_stat'] >= results.loc[:, 'robust_qlr_qauntile']
-    else:
-        results.columns = ['qlr_stat']
+#     if robust_quantile:
+#         results.columns = ['qlr_stat', 'robust_qlr_qauntile']
+#         results['robust'] = results.loc[:, 'qlr_stat'] >= results.loc[:, 'robust_qlr_qauntile']
+#     else:
+#         results.columns = ['qlr_stat']
 
-    results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=len(true_prices))
+#     results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=len(true_prices))
 
-    return results
+#     return results
