@@ -295,6 +295,22 @@ dmat link_jacobian(double phi, double pi, double theta, double log_both, double 
     return returnmat;
 }
 
+dmat covariance_kernel(double phi1, double pi1, double theta1, double phi2,
+        double pi2, double theta2, double psi, double beta, double gamma,
+        double log_both, double log_scale, double logit_rho, double zeta, const
+        dmat& omega_cov) {
+
+    dmat link_grad_left = link_jacobian(phi1,  pi1,  theta1,  beta,  gamma,
+            log_both,  log_scale, logit_rho,  psi,  zeta); 
+
+    dmat link_grad_right = link_jacobian(phi2,  pi2,  theta2,  beta,  gamma,
+            log_both,  log_scale, logit_rho,  psi,  zeta); 
+
+    return link_grad_left * omega_cov * link_grad_right.T;
+
+}
+
+
 
 PYBIND11_MODULE(libvolpriceinference, m) {
 
@@ -343,5 +359,12 @@ PYBIND11_MODULE(libvolpriceinference, m) {
     m.def("B_diff3", &B_diff3, stream_redirect(), 
         "This function computes the derivative of B() with respect to log_scale", "x"_a, "log_both"_a, 
         "log_scale"_a);
+
+    m.def("covariance_kernel_in", &covariance_kernel, stream_redirect(), 
+          "This function computes the covariance kernel defined in the accompanying paper", 
+          "phi1"_a, "pi1"_a, "theta1"_a, "phi2"_a, "pi2"_a, "theta2"_a,
+          "psi"_a, "beta"_a, "gamma"_a, "log_both"_a, "log_scale"_a,
+          "logit_rho"_a, "zeta"_a, "const" "omega_cov"_a); 
+
 
 }

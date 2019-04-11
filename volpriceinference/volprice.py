@@ -12,7 +12,7 @@ from collections import OrderedDict
 from functools import partial
 from itertools import product
 from libvolpriceinference import _simulate_autoregressive_gamma
-from libvolpriceinference import link_total, link_jacobian
+from libvolpriceinference import link_total, link_jacobian, covariance_kernel_in
 from tqdm.auto import tqdm
 from multiprocessing import Pool
 
@@ -39,10 +39,10 @@ _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
 _constraint_sym = _B_func_in.xreplace({_x: pi + _C_func})
 _gamma_sym = sym.exp(log_both - log_scale) * (sym.log(_constraint_sym.xreplace({_x: theta - 1})) -
                                               sym.log(_constraint_sym.xreplace({_x: theta})))
-_constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho),
-                            _constraint_sym.xreplace({_x: theta - 1, psi: _psi_sym}), modules='numpy')
-_constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho),
-                            _constraint_sym.xreplace({_x: theta, psi: _psi_sym}), modules='numpy')
+_constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho, psi),
+                            _constraint_sym.xreplace({_x: theta - 1}), modules='numpy')
+_constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho, psi),
+                            _constraint_sym.xreplace({_x: theta}), modules='numpy')
 
 # We create the link functions.
 compute_gamma = sym.lambdify((log_both, log_scale, phi, pi, logit_rho, theta), _gamma_sym, modules='numpy')
@@ -99,26 +99,12 @@ _link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_
                                     _link_price_grad_sym[1:, :], modules='numpy')
 
 # I now define the covariance kernel.
-_link_grad_left = _link_grad_sym.xreplace({pi: pi1, theta: theta1, phi: phi1})
-_link_grad_right = _link_grad_sym.xreplace({pi: pi2, theta: theta2, phi: phi2})
+# _link_grad_left = _link_grad_sym.xreplace({pi: pi1, theta: theta1, phi: phi1})
+# _link_grad_right = _link_grad_sym.xreplace({pi: pi2, theta: theta2, phi: phi2})
 
-_cov_kernel_in0 = sym.lambdify((phi1, phi2, psi, beta, gamma, log_both, log_scale, logit_rho, zeta, omega_cov),
-                               _link_grad_left[-1, :] * omega_cov * _link_grad_right[-1, :].T, modules='numpy')
-
-_cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, gamma,
-                                log_both, log_scale, logit_rho, zeta, omega_cov),
-                               _link_grad_left * omega_cov * _link_grad_right.T, modules='numpy')
-
-_cov_kernel_in2 = sym.lambdify((phi1, theta1, phi2, theta2, psi, beta, gamma,
-                                log_both, log_scale, logit_rho, zeta, omega_cov),
-                               _link_grad_left[-2:, :] * omega_cov *
-                               _link_grad_right[-2:, :].T, modules='numpy')
-
-_cov_kernel_in3 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi,
-                                beta, gamma, log_both, log_scale, logit_rho, zeta,
-                                omega_cov), _link_grad_left[1:, :] * omega_cov
-                               * _link_grad_right[1:, :].T, modules='numpy')
-
+# _cov_kernel_in1 = sym.lambdify((phi1, pi1, theta1, phi2, pi2, theta2, psi, beta, gamma,
+#                                 log_both, log_scale, logit_rho, zeta, omega_cov),
+#                                _link_grad_left * omega_cov * _link_grad_right.T, modules='numpy')
 
 def constraint(prices, omega, case=1):
     """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
@@ -127,8 +113,8 @@ def constraint(prices, omega, case=1):
 
     # This needs to be fixed.
 
-    constraint1 = _constraint1(*prices, logit_rho=omega['logit_rho'], log_scale=omega['log_scale'])
-    constraint2 = _constraint2(*prices, logit_rho=omega['logit_rho'], log_scale=omega['log_scale'])
+    constraint1 = _constraint1(*prices, logit_rho=omega['logit_rho'], log_scale=omega['log_scale'], psi=omega['psi'])
+    constraint2 = _constraint2(*prices, logit_rho=omega['logit_rho'], log_scale=omega['log_scale'], psi=omega['psi'])
 
     return np.minimum(constraint1, constraint2)
 
@@ -335,16 +321,10 @@ def compute_link_price_grad(prices, omega, case):
 
 def covariance_kernel(prices1, prices2, omega, omega_cov, case):
     """Compute the covarinace of the implied gaussian process as a function of the structural paramters."""
-    if case == 0:
-        covariance_kernel_in = _cov_kernel_in0
-    elif case == 1:
-        covariance_kernel_in = _cov_kernel_in1
-    elif case == 2:
-        covariance_kernel_in = _cov_kernel_in2
-    elif case == 3:
-        covariance_kernel_in = _cov_kernel_in3
-    else:
+    if case != 1:
         raise NotImplementedError
+
+    # covariance_kernel_in = _cov_kernel_in1
 
     return covariance_kernel_in(*prices1, *prices2, omega_cov=omega_cov, **omega)
 
@@ -852,8 +832,12 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim=10, alpha=None, bounds=None
     else:
         # We replace all of the error values with zero because if we a lot of them we want to reject. We do not
         # always reject because we are only redrawing part of the variation.
-        returnval = np.percentile([val for val in results if np.isfinite(val)], 100 * (1 - alpha),
+        if np.any(np.isfinite(results)):
+            returnval = np.percentile([val for val in results if np.isfinite(val)], 100 * (1 - alpha),
                                   interpolation='lower')
+        else:
+            logging.warning("None of the values are public.")
+            returnval = np.inf
 
         return tuple(true_prices) + (returnval,)
 
