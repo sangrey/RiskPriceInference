@@ -248,7 +248,7 @@ double link3_gradient(double phi, double log_scale) {
 
 }
 
-dmat link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale,
+dvec link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale,
         double logit_rho, double psi, double zeta) {
 
     double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
@@ -256,9 +256,9 @@ dmat link_total(double phi, double pi, double theta, double beta, double gamma, 
     double psi_diff = psi - link3(theta, phi, log_scale);
     double zeta_diff = 1 - (zeta + phi * phi);
 
-    dmat returnmat{beta_diff, gamma_diff, psi_diff, zeta_diff};
+    dvec returnvec{beta_diff, gamma_diff, psi_diff, zeta_diff};
 
-    return returnmat.t();
+    return returnvec;
 
 }
 

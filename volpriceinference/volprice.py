@@ -309,7 +309,12 @@ def compute_link_grad(prices, omega, case):
     if case != 1:
         raise NotImplementedError
 
-    return link_jacobian(*prices, **omega)
+    result = link_jacobian(phi=prices[0], pi=prices[1], theta=prices[2],
+                           log_both=omega['log_both'],
+                           log_scale=omega['log_scale'],
+                           logit_rho=omega['logit_rho'], psi=omega['psi'])
+
+    return result
 
 
 def compute_link_price_grad(prices, omega, case):
