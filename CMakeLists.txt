@@ -62,8 +62,7 @@ if(NOT CLANG_TIDY_EXE)
 else()
   message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
   set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=boost.*, bugprone.*, cppcoregidelines.*, llvm.*, modernize.*,  \
-misc.*, clang-analyzer.*, mpi.*, performance.*, portability.*, readability.*, \ 
--warnings-as-errors, -clang-analyzer-alpha.*")
+misc.*, clang-analyzer.*, mpi.*, performance.*, portability.*, readability.*, -clang-analyzer-alpha.*")
 
 endif()
 
