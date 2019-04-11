@@ -324,9 +324,12 @@ def covariance_kernel(prices1, prices2, omega, omega_cov, case):
     if case != 1:
         raise NotImplementedError
 
-    # covariance_kernel_in = _cov_kernel_in1
-
-    return covariance_kernel_in(*prices1, *prices2, omega_cov=omega_cov, **omega)
+    result = covariance_kernel_in(*prices1, *prices2, psi=omega['psi'],
+                                  log_both=omega['log_both'],
+                                  log_scale=omega['log_scale'],
+                                  logit_rho=omega['logit_rho'],
+                                  omega_cov=omega_cov) 
+    return result 
 
 
 def simulate_autoregressive_gamma(log_both=0, logit_rho=0, log_scale=0, initial_point=None, time_dim=100,
