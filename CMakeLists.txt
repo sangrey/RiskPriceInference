@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.8)
 project("lib$ENV{PKG_NAME}" VERSION $ENV{PKG_VERSION} LANGUAGES CXX)
 
 # Setup global options.
@@ -15,6 +15,7 @@ string(REPLACE "." "" FORMATTED_PY_VER "$ENV{PY_VER}")
 set(PKG_VERSION "$ENV{GIT_DESCRIBE_TAG}-py${FORMATTED_PY_VER}_$ENV{GIT_DESCRIBE_NUMBER}")
 
 find_package(pybind11 REQUIRED)
+find_package(Armadillo REQUIRED)
 find_package(NumPy REQUIRED) 
 find_package(OpenMP)                                                                                               
 
@@ -50,3 +51,26 @@ elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(MY_DEBUG_COMPILE_OPTIONS -Wpedantic -Werror -Wall -Wextra)
     target_compile_options(${PROJECT_NAME} PRIVATE ${MY_DEBUG_COMPILE_OPTIONS})                                      
 endif()      
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ${ARMADILLO_LIBRARIES})
+
+# Call Clang-Tidy
+find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
+
+if(NOT CLANG_TIDY_EXE)
+  message(STATUS "clang-tidy not found.")
+else()
+  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+  set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=boost.*, bugprone.*, cppcoregidelines.*, llvm.*, modernize.*,  \
+misc.*, clang-analyzer.*, mpi.*, performance.*, portability.*, readability.*, \ 
+-warnings-as-errors, -clang-analyzer-alpha.*")
+
+endif()
+
+if(CLANG_TIDY_EXE)
+  set_target_properties(
+    ${PROJECT_NAME} PROPERTIES
+    CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+  )
+endif()
+
