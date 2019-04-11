@@ -4,3 +4,9 @@ numpy:
 python:
     - 3.7
 
+armadillo:
+    - 9
+
+arma_wrapper:
+    - 0.10
+

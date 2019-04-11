@@ -11,18 +11,19 @@ source:
 
 requirements:
   build: 
-    - cmake >=3.3
+    - cmake >=3.8
     - {{compiler('cxx')}}
   host:
-    - python 
-    - numpy 
+    - python {{python}}
+    - numpy {{numpy}}
+    - arma_wrapper {{arma_wrapper}}
+    - armadillo {{armadillo}}
     - pybind11 2.2
-    - arma_wrapper 0.08
   run:
     - {{pin_compatible('numpy')}}
+    - {{pin_compatible('armadillo')}}
     - scipy
     - pandas 
-    - armadillo
     - statsmodels
     - sympy
     - tqdm
@@ -35,14 +36,14 @@ test:
       - python -m pytest tests/test_riskprice.py
       - python -m flake8 --max-line-length=120 volpriceinference/volprice.py 
   requires:
-      - python >=3.6
+      - python {{python}}
       - pytest 
       - flake8
       - hypothesis
 
 about:
   home: https://gitlab.com/sangrey/RiskPriceInference
-  license: Apache 2.0
+  license: APACHE
   license_file: LICENSE
   summary: > 
     This package contains files that are used to estimate and simulate volatlity risk prices in a way that is
