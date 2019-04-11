@@ -779,6 +779,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None, case=1
     cov_params_true = partial(covariance_kernel, prices2=true_prices,
                               omega=omega, omega_cov=omega_cov, case=case)
 
+    link_true = compute_link(true_prices, omega, case=case)
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=cov_true_true, size=innov_dim)
 
@@ -790,10 +791,11 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None, case=1
 
         try:
             link1 = compute_link(prices, omega, case=case)
+            residual = (link1 - cov_params_true(prices) @
+                        np.linalg.solve(cov_true_true, link_true))
 
-            diff = np.atleast_1d(innov) - link1
-            weighted_diff = (cov_params_true(prices) @ np.linalg.solve(cov_true_true, diff))
-            link_in = np.ravel(link1 + weighted_diff)
+            link_in = (residual + cov_params_true(prices) @
+                       np.linalg.solve(cov_true_true, innov))
 
             cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
 
@@ -814,9 +816,15 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None, case=1
 
         def minimized(innov):
             try:
-                result_in = minimize(qlr_in_star, args=(innov,), x0=x0,
+                result1 = minimize(qlr_in_star, args=(innov,), x0=true_prices,
                                      method='L-BFGS-B', options={'maxiter': 2500},
                                      bounds=bounds)
+                result2 = minimize(qlr_in_star, args=(innov,), x0=x0,
+                                     method='L-BFGS-B', options={'maxiter': 2500},
+                                     bounds=bounds)
+
+                result_in = result1 if result1.fun <= result2.fun else result2
+
                 if result_in.success:
                     return result_in.fun
                 else:
@@ -827,14 +835,14 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None, case=1
                 logging.warn("There was a floating point error inside minimized.")
                 return np.inf
 
-        results = np.array([qlr_in_star(true_prices, innov=innov) - minimized(innov) for innov in innovations])
+        results_out = np.array([qlr_in_star(true_prices, innov) - minimized(innov) for innov in innovations])
 
-    results = np.nan_to_num(results)
+    results = np.nan_to_num(results_out)
 
-    if np.any(results <= 0):
+    if np.any(results < 0):
         logging.warning("""Some of the differences between the true and the
                         minimized value are negative.""")
-        results[results <= 0] = np.inf
+        results[results <= 0] = 0
 
     if alpha is None:
         return results
