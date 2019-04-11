@@ -1,9 +1,9 @@
-import volpriceinference as vl
 """Ensures that we have the correct implmentation of the model's functions."""
 import sympy as sym
 from hypothesis import given, settings, strategies as st
 import numpy as np
 import pytest
+import volpriceinference as vl
 pytestmark = pytest.mark.filterwarnings("ignore:.*U.*mode is deprecated:DeprecationWarning")
 
 

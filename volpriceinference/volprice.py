@@ -98,6 +98,7 @@ _link_price_grad_in2 = sym.lambdify((phi, theta, beta, gamma, log_both, log_scal
 _link_price_grad_in3 = sym.lambdify((phi, pi, theta, beta, gamma, log_both, log_scale, psi, logit_rho, zeta),
                                     _link_price_grad_sym[1:, :], modules='numpy')
 
+
 def constraint(prices, omega, case=1):
     """Compute the constraint implied by logarithm's argument in the second link function being postiive."""
     if case == 0 or case == 2:
@@ -320,8 +321,8 @@ def covariance_kernel(prices1, prices2, omega, omega_cov, case):
                                   log_both=omega['log_both'],
                                   log_scale=omega['log_scale'],
                                   logit_rho=omega['logit_rho'],
-                                  omega_cov=omega_cov) 
-    return result 
+                                  omega_cov=omega_cov)
+    return result
 
 
 def simulate_autoregressive_gamma(log_both=0, logit_rho=0, log_scale=0, initial_point=None, time_dim=100,
@@ -688,7 +689,6 @@ def _qlr_in(prices, omega, omega_cov, case):
         logging.warning("_qlr_in found a nan-value")
         returnval = np.inf
 
-
     return returnval
 
 
@@ -803,7 +803,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None, case=1
 
             # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
             return np.asscalar(link_in.T @ np.linalg.pinv(cov_prices) @ link_in)
-            
+
         except FloatingPointError:
             # If we get a matrix algebra error in the previous expression we set the value of the link function to
             # infinity.
@@ -1089,94 +1089,3 @@ def estimate_params_strong_id(data, vol_estimates=None, vol_cov=None, case=1, bo
                                   how='outer').sort_index(axis=1).sort_index(axis=0)
 
     return estimates, covariance
-
-
-# def compute_qlr_reject(params, true_prices, innov_dim, alpha=None, robust_quantile=True, case=1):
-#     """
-#     Compute the proportion rejected by the model.
-
-#     Paramters
-#     --------
-#     params: tuple of dict, dataframe
-#         The paramter estimates and their covariances.
-#     true_prices : iterable of length 2
-#         The prices under the null.
-#     innov_dim : positive scalar, optional
-#         The number of simulations inside the conditional simulation.
-#     alpha : scalar in [0,1], optional
-#         The signficance level of the test.
-
-#     Returns
-#     ------
-#     qlr : scalar
-#         The QLR statistic
-#     qlr__quantile : scalar
-#         The weak identificaton robust conditional qlr quantile.
-
-#     """
-#     param_est, param_cov = params
-#     names = compute_names(case)
-#     omega = {name: val for name, val in param_est.items() if name not in names}
-#     omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
-
-#     qlr = qlr_stat(true_prices=true_prices, omega=omega, omega_cov=omega_cov, case=case)[-1]
-
-#     if robust_quantile:
-#         qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega, alpha=alpha, omega_cov=omega_cov,
-#                                innov_dim=innov_dim, case=case)
-#         if alpha is None:
-#             return (qlr,) + tuple(qlr_quantile)
-#         else:
-#             return (qlr, qlr_quantile[-1])
-#     else:
-#         return qlr
-
-
-# def compute_robust_rejection(est_arr, true_params, alpha=.05, innov_dim=100, use_tqdm=True, robust_quantile=True,
-#                              case=1):
-#     """
-#     Compute the proportion rejected by the model.
-
-#     Paramters
-#     --------
-#     est_arr: iterable of tuple of dict, dataframe
-#         The paramter estimates.
-#     true_params : dict
-#         The value to consider rejecting.
-#     alpha : scalar in [0,1], optional
-#         The signficance level of the test.
-#     innov_dim : positive scalar, optional
-#         The number of simulations inside the conditional simulation.
-#     use_tqdm : bool, optional
-#         Whether to wrap the iterable using tqdm.
-#     robust_quantile : bool, optional
-#         Whether to compute and return the robust conditional QLR quantiles.
-
-#     Returns
-#     ------
-#     results : dataframe
-#         The QLR statistics, quantiles, and rejection proportions.
-
-#     """
-#     true_prices = [true_params[name] for name in compute_names(case)]
-
-#     qlr_reject_in = partial(compute_qlr_reject, true_prices=true_prices, innov_dim=innov_dim, alpha=alpha,
-#                             case=case, robust_quantile=robust_quantile)
-
-#     with Pool(8) as pool:
-#         if use_tqdm:
-#             results = pd.DataFrame(list(tqdm(pool.imap_unordered(qlr_reject_in,
-#                                                                  est_arr),
-#                                              total=len(est_arr))))
-#         else:
-#             results = pd.DataFrame(list(pool.imap_unordered(qlr_reject_in, est_arr)))
-
-#     if robust_quantile:
-#         results.columns = ['qlr_stat', 'robust_qlr_qauntile']
-#         results['robust'] = results.loc[:, 'qlr_stat'] >= results.loc[:, 'robust_qlr_qauntile']
-#     else:
-#         results.columns = ['qlr_stat']
-
-#     results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=len(true_prices))
-
-#     return results
