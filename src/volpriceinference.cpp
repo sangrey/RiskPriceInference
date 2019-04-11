@@ -305,7 +305,7 @@ dmat covariance_kernel(double phi1, double pi1, double theta1, double phi2,
     dmat link_grad_right = link_jacobian(phi2,  pi2,  theta2, log_both,
             log_scale, logit_rho,  psi); 
 
-    return link_grad_left * omega_cov * link_grad_right.T;
+    return link_grad_left * omega_cov * link_grad_right.t();
 
 }
 
