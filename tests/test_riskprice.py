@@ -1,10 +1,10 @@
+import volpriceinference as vl
 """Ensures that we have the correct implmentation of the model's functions."""
 import sympy as sym
 from hypothesis import given, settings, strategies as st
 import numpy as np
 import pytest
 pytestmark = pytest.mark.filterwarnings("ignore:.*U.*mode is deprecated:DeprecationWarning")
-import volpriceinference as vl
 
 
 finite_floats = st.floats(min_value=-10, max_value=10)

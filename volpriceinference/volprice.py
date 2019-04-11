@@ -39,10 +39,10 @@ _beta_sym = (_A_func.xreplace({_x: pi + _C_func.xreplace({_x: theta - 1})}) -
 _constraint_sym = _B_func_in.xreplace({_x: pi + _C_func})
 _gamma_sym = sym.exp(log_both - log_scale) * (sym.log(_constraint_sym.xreplace({_x: theta - 1})) -
                                               sym.log(_constraint_sym.xreplace({_x: theta})))
-_constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta - 1}),
-                            modules='numpy')
-_constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho), _constraint_sym.xreplace({_x: theta}),
-                            modules='numpy')
+_constraint1 = sym.lambdify((phi, pi, theta, log_scale, logit_rho),
+                            _constraint_sym.xreplace({_x: theta - 1, psi: _psi_sym}), modules='numpy')
+_constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho),
+                            _constraint_sym.xreplace({_x: theta, psi: _psi_sym}), modules='numpy')
 
 # We create the link functions.
 compute_gamma = sym.lambdify((log_both, log_scale, phi, pi, logit_rho, theta), _gamma_sym, modules='numpy')
