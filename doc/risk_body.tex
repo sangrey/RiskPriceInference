@@ -1,29 +1,31 @@
 
 \section{Introduction}
 
-A fundamental question in finance is how investors optimally trade off risk and return. Economic theories predict investors demand a higher return as compensation for bearing more risk. Hence, we should expect a positive relationship between the mean and volatility of returns. Some seminal early papers proposed a static trade-off between risk and expected return, most notably the capital asset pricing model (CAPM) of \textcites{sharpe1964capital,lintner1965security}. In practice, volatility varies over time. Consequently, a significant strand of the recent literature examines the dynamic tradeoff between volatility and returns, including structural stochastic volatility models  \parencites{christoffersen2013capturing, bansal2014volatility, dewbecker2017price}.  In nonlinear models such as these, investors care not just about how an asset's returns co-move with the volatility but also care how they co-move with changes in volatility. 
+A fundamental question in finance is how investors optimally trade off risk and return. Economic theory predicts investors demand a higher return as compensation for bearing more risk. Hence, we should expect a positive relationship between the mean and volatility of returns. Some seminal early papers proposed a static trade-off between risk and expected return, most notably the capital asset pricing model (CAPM) of \textcites{sharpe1964capital,lintner1965security}. In practice, volatility varies over time. Consequently, a significant strand of the recent literature examines the dynamic tradeoff between volatility and returns, including structural stochastic volatility models  such as \textcites{christoffersen2013capturing, bansal2014volatility, dewbecker2017price}.  In nonlinear models like these, investors care not just about how an asset's returns co-move with the volatility but also care how they co-move with changes in volatility. 
 
-In structural stochastic volatility models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the market return risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. We adopt the discrete-time exponentially affine model of \textcite{han2018leverage}, who represent the market return risk price and the volatility risk price by two structural parameters. In this model,  \textcite{han2018leverage} establish the significant result that the identification of the volatility risk price depends on a substantial leverage effect, which is the negative contemporaneous correlation between returns and volatility. 
+In these structural stochastic volatility models, changes in volatility affect risk premia through two channels: (1) the investor's willingness to tolerate high volatility in order to get high expected returns as measured by the market return risk price, and (2) the investor’s direct aversion to changes in future volatility as measured by the volatility risk price. We adopt the discrete-time exponentially affine model of \textcite{han2018leverage}, who represent the market return risk price and the volatility risk price by two structural parameters. In this model,  \textcite{han2018leverage} establish the significant result that the identification of the volatility risk price depends on a substantial leverage effect, which is the negative contemporaneous correlation between returns and volatility. 
 
 Although the leverage effect is theoretically less than zero, it is difficult to quantify empirically, and its estimate usually is small \parencites{aitsahalia2013leverage}. When the leverage effect is small, the data only provide a limited amount of information about the volatility risk, compared to the finite-sample noise in the data. This low signal-to-noise ratio,  as modeled by weak identification, invalidates standard inference based on the generalized method of moments (GMM) estimator; see \textcites{stock2000GMM,andrews2012estimation}.
 
 We provide an identification-robust confidence set for the structural parameters that measure the market return risk price, the volatility risk price, and the leverage effect. 
-The robust confidence set provides correct asymptotic coverage, uniformly over a large set of models that allow for any magnitude of the leverage effect. This uniform validity is crucial for the confidence set to have good finite-sample coverage \parencites{mikusheva2007uniform, andrews2010asymptotic}. In contrast, standard confidence sets based on the GMM estimator and its asymptotic normality do not have uniform validity in the presence of a small leverage effect. This issue affects all of the structural parameters because they are estimated simultaneously.
+The robust confidence set provides correct asymptotic coverage, uniformly over a large set of models and allows for any magnitude of the leverage effect. This uniform validity is crucial for the confidence set to have good finite-sample coverage \parencites{mikusheva2007uniform, andrews2010asymptotic}. In contrast, standard confidence sets based on the GMM estimator and its asymptotic normality do not have uniform validity in the presence of a small leverage effect. This issue affects all of the structural parameters because they are estimated simultaneously.
 
-We achieve robust inference in two steps. First, we establish a minimum distance criterion using link functions between the structural parameters and a set of reduced-form parameters that determine the joint distribution of the return and volatility. The structural model implies that the link functions are zero when evaluated at the true values of the structural parameters and the reduced-form parameters. Identification and estimation of these reduced form parameters are standard and are not affected by the presence of a small leverage effect. However, the link functions are almost flat in one of the structural parameters when the leverage effect is small, resulting in weak identification. Second, given this minimum distance criterion, we invert the conditional quasi-likelihood ratio (QLR) test by \textcite{andrews2016conditional} to construct a robust confidence set. The key feature of this test is that it treats the flat link functions as an infinite dimensional nuisance parameter. The critical value is constructed by conditioning on a sufficient statistic for this nuisance parameter, and it is known to yield a valid test regardless of the nuisance parameter. \Textcite{andrews2016conditional} develop this test in a GMM framework. We show it works in the minimum distance context here and provide conditions for its asymptotic validity. For practitioners, we provide a detailed algorithm for the construction of this simulation-based robust confidence set.
-
-
-Our paper relates to the empirical analysis of the effect of volatility on risk premia. As \textcite{lettau2010measuring} mention,  the evidence here is inconclusive. \textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there, bali2006there, ludvigson2007empirical} find a positive relationship, while \textcites{campbell1987stock, breen1989economic, pagan1991nonparametric, whitelaw1994time, brandt2004relationship} find a negative relationship. Also, some papers use both a market return risk factor and a variance risk factor to explain the risk premia dynamics, including \textcites{christoffersen2013capturing, feunou2014risk, dewbecker2017price}. In related strand of the literature, \textcite{bollerslev2008risk, drechsler2011whats} document a substantial positive variance risk premium. We We contribute to this literature by providing the first method for making valid inference for the market return risk price and the volatility risk price. This new confidence set not only allows for both effects but also takes into account the potential identification issue.
-
-%TODO Edit this.
-To have a non-linear relationship between changes in volatility and expected returns, we need either volatility of volatility (as used by \textcite{drechsler2011whats}) or jumps (as used by \textcite{drechsler2014uncertainty}).   Since we are working in discrete-time, it is far more natural to work volatility than with jumps. 
-%TODO Not sure we should say this.
-This is because discontinuities are not well-defined in discrete-time; all functions are continuous in the discrete-topology. The most straightforward models  with that allow for closed-form expressions for the risk-prices are exponentially-affine (not affine) models. This is why they are frequently used  in the option-pricing literature.  In order to avoid complicating the analysis, we use such a model. We focus on the time-series behavior of the index because as a complement to, not a subtitle to, estimating the risk prices from cross-sectional or options pricing data. Using market-level variation over time to examine this non-linear relationship is a common approach in the literature, used by both the variance-premium literature and \textcite{han2018leverage}.  It is not obvious how to map a non-linear model for risk in the market return into a cross-sectional model of risk prices. In addition, since these risk prices are so fundamental to investors' preferences, there is certainly room for both approaches.
+We achieve robust inference in two steps. First, we establish a minimum distance criterion using link functions between the structural parameters and a set of reduced-form parameters that determine the joint distribution of the return and volatility. The structural model implies that the link functions are zero when evaluated at the true values of the structural parameters and the reduced-form parameters. Identification and estimation of these reduced form parameters are standard and are not affected by the presence of a small leverage effect. However, the link functions are almost flat in one of the structural parameters when the leverage effect is small, resulting in weak identification. Second, given this minimum distance criterion, we invert the conditional quasi-likelihood ratio (QLR) test by \textcite{andrews2016conditional} to construct a robust confidence set. The key feature of this test is that it treats the flat link functions as an infinite-dimensional nuisance parameter. The critical value is constructed by conditioning on a sufficient statistic for this nuisance parameter, and it is known to yield a valid test regardless of the nuisance parameter's value. \Textcite{andrews2016conditional} develop this test in a GMM framework. We show it works in minimum distance contexts such as the one considered here and provide conditions for its asymptotic validity. For practitioners, we provide a detailed algorithm for the construction of this simulation-based robust confidence set.
 
 
-The weak identification issue studied in this paper is relevant in many economic applications, ranging from linear instrumental variable models \parencite{staiger1997instrumental} to nonlinear structural models \parencites{mavroeidis2014empirical, andrews2015maximum}. This paper is the first one to study this issue in structural asset pricing models with stochastic volatility. \Textcite{moreira2003conditional} introduces the conditional inference approach to the linear instrumental variable model creating the conditional likelihood-ratio (CLR) test, and \textcite{kleibergen2005testing} applies it to the nonlinear GMM problem.  \Textcites{magnusson2010identification, magnusson2010inference} extend \gentextcite{kleibergen2005testing} results to the minimum-distance case.  The key issue with these papers is that they rely exclusively upon local behavior of the moment-conditions. This is inherently under-powered in some situations. \Textcite{andrews2016conditional} resolve this issue by developing a global approach in the GMM case by proposing conditional inference for nonlinear GMM problems with an infinite-dimensional nuisance parameter. Their method is known to be most-powerful in some special cases.  We develop a global weak-identification robust inference method for minimum distance estimation by extending \textcite{andrews2016conditional}. We bear the same relationship to  \textcites{magnusson2010identification, magnusson2010inference} that \textcite{andrews2016conditional} bears to \textcite{kleibergen2005testing}.  We also extend the scope of the application of these weak-identification robust methods to a new type of asset pricing model with substantial non-linearity and heteroskedasticity. 
+Our empirical results relates to the empirical analysis of the effect of volatility on risk premia. As \textcite{lettau2010measuring} mention,  the evidence here is inconclusive. \textcites{bollerslev1988capital, harvey1989timevarying, ghysels2005there, bali2006there, ludvigson2007empirical} find a positive relationship, while \textcites{campbell1987stock, breen1989economic, pagan1991nonparametric, whitelaw1994time, brandt2004relationship} find a negative relationship. Also, some papers use both a market return risk factor and a variance risk factor to explain the risk premia dynamics, including \textcites{christoffersen2013capturing, feunou2014risk, dewbecker2017price}. In related strand of the literature, \textcite{bollerslev2008risk, drechsler2011whats} document a substantial positive variance risk premium. We contribute to this literature by providing the first method for making valid inference for the market return risk price and the volatility risk price. This new confidence set not only allows for both effects but also takes into account the potential identification issue.
 
-The rest of the paper is organized as follows. \Cref{sec:model} provides the model and its parameterization. \Cref{sec:ilnk functions} provides model-implied restrictions and use them to derive the link function. \Cref{sec:robust inference} provides the asymptotic distribution of the reduced-form parameter and robust inference for the structural parameter. A detailed algorithm to construct the robust confidence set is given in \cref{sec:conditional QLR}. 
+To have a non-linear relationship between changes in volatility and expected returns, we need either volatility of volatility (as used by \textcite{drechsler2011whats}) or jumps (as used by \textcite{drechsler2014uncertainty}).   Since we are working in discrete-time, it is far more natural to work volatility than with jumps. This is because discontinuities are not well-defined in discrete-time; all functions are continuous in the discrete-topology. The most straightforward models that allow for closed-form expressions for the risk prices are exponentially-affine (not affine) models. This is why they are frequently used  in the option-pricing literature.  In order to avoid complicating the analysis, we use such a model. We focus on the time-series behavior of the index because as a complement to, not a subtitle to, estimating the risk prices from cross-sectional or options pricing data. Using market-level variation over time to examine this non-linear relationship is a common approach in the literature, used by both the variance-premium literature and \textcite{han2018leverage}.  
+
+%QUESTION: does the validity of cross-sectional asset pricing risk prices rely upon linearity?
+%It is not obvious how to map a non-linear model for risk in the market return into a cross-sectional model of risk prices. In addition, since these risk prices are so fundamental to investors' preferences, there is certainly room for both approaches.
+
+
+The weak identification issue studied in this paper is relevant in many economic applications, ranging from linear instrumental variable models \parencite{staiger1997instrumental} to nonlinear structural models \parencites{mavroeidis2014empirical, andrews2015maximum}. This paper is the first one to study this issue in structural asset pricing models with stochastic volatility. 
+
+\Textcite{moreira2003conditional} introduces the conditional inference approach to the linear instrumental variable model creating the conditional likelihood-ratio (CLR) test, and \textcite{kleibergen2005testing} applies it to the nonlinear GMM problem.  \Textcites{magnusson2010identification, magnusson2010inference} extend \gentextcite{kleibergen2005testing} results to the minimum-distance case.  The key issue with these papers is that they rely exclusively upon local behavior of the moment-conditions. This is inherently under-powered in some environments. \Textcite{andrews2016conditional} resolve this issue by developing a global approach in the GMM case by proposing conditional inference for nonlinear GMM problems with an infinite-dimensional nuisance parameter. Their method is known to be the most-powerful in some special cases.  We develop a global weak-identification robust inference method for minimum distance estimation by extending \textcite{andrews2016conditional}. We bear the same relationship to  \textcites{magnusson2010identification, magnusson2010inference} that \textcite{andrews2016conditional} bears to \textcite{kleibergen2005testing}.  We also extend the scope of the application of these weak-identification robust methods to a new type of asset pricing model with substantial non-linearity and heteroskedasticity. 
+
+The rest of the paper is organized as follows. \Cref{sec:model} provides the model and its parameterization. \Cref{sec:ilnk functions} provides model-implied restrictions and use them to derive the link function. \Cref{sec:robust inference} provides the asymptotic distribution of the reduced-form parameter and robust confidence sets for the structural parameter. A detailed algorithm to construct the robust confidence set is given in \cref{sec:conditional QLR}. 
 \Cref{sec:simulation} show that the method works well in simulation, and \Cref{sec:empirical} applies the methods to data on the S\&P 500 providing estimates of the risk prices. \Cref{sec:risk_conclusion} concludes. 
 Proofs are given in the appendix.
 
@@ -50,7 +52,7 @@ The prices of all assets satisfy the following asset pricing equation in terms o
 
 We start by parameterizing the SDF by the exponential affine model. Let $\pi$ be the price of volatility risk and $\kappa$ be the market return risk price. They are both considered as structural parameters.
 
-\begin{definition}{Parameterize the Stochastic Discount Factor}
+\begin{definition}{Parameterizing the Stochastic Discount Factor}
  \label{defn:SDF}
 %
  \begin{equation}
@@ -58,9 +60,7 @@ We start by parameterizing the SDF by the exponential affine model. Let $\pi$ be
  \end{equation}
 \end{definition}
 
-Throughout we assume that the two risks that command nonzero prices are the market return risk price and the volatility risk price. Consequently, we only use variation in the first two moments of the data to estimate these parameters. 
-
-% If higher moments, such as skewness and kurtosis are also priced factors, as in \textcites{harvey2000conditional, conrad2012exante, chang2013market}, our model is misspecified. However, as we only use information 
+Throughout we assume that the two risks that command nonzero prices are the market return risk price and the volatility risk price. These two risks are closely related to the first two moments of $r_{t+1}$. Consequently, we only use variation in the first two moments of the data to estimate these parameters. 
 
 \subsection{Parameterizing the Volatility and Return Dynamics}
 
@@ -101,7 +101,7 @@ In this specification, $\rho$ is a persistence parameter, $c$ is a scale paramet
     \end{align}
 \end{remark}
 
-Next, we model the return dynamics. Similar to the volatility dynamics, the distribution of $r_t$ given $\sigma^2_{t+1}$ and $\sigma^2_{t}$ is specified in terms of the Laplace transform:
+Next, we model the return dynamics. Similar to the volatility dynamics, the distribution of $r_t$ given both $\sigma^2_{t+1}$ and $\sigma^2_{t}$ is specified in terms of the Laplace transform:
 %
 \begin{equation}
     \label{eqn:return_laplace_transform}
@@ -110,7 +110,7 @@ Next, we model the return dynamics. Similar to the volatility dynamics, the dist
 %
 for all $x \in \R$. The function $C(x)$, $D(x)$, and $E(x)$ are parameterized as follows such that the return has a conditional Gaussian distribution.
 
-\begin{definition}{Parameterize the Return Dynamics}
+\begin{definition}{Parameterizing the Return Dynamics}
     \label{defn:physical_return_dynamics}
     \begin{align}
         C(x) &\coloneqq \psi x - \frac{1 - \phi^2}{2} x^2,\\
@@ -135,18 +135,18 @@ Under this specification, we have the following representation of the conditiona
 \end{remark}
 
 
-The parameter $\phi$ represents the leverage effect because it measures the return volatility reduction after conditioning on the volatility path. 
+The parameter $\phi$ represents the leverage effect because it measures the reduction in return's volatility caused by conditioning on the volatility path. 
 
 \section{Link Functions}\label{sec:ilnk functions}
 
 So far, we have introduced the following parameters: $(m_{0},m_{1},\kappa ,\pi )$ in SDF, $(\rho ,c,\delta)$ for the volatility dynamics, and $(\psi ,\beta ,\gamma ,\phi )$ for the return dynamics. Next, we explore restrictions among these parameters that are consistent with this model. In other words, not all of these parameters can change freely under the structural model.
 
-We use these restrictions to construct link functions between a set of reduced-form parameters and a set of structural parameters. These link functions play an important role on separating the regularly behaved reduced-form parameters from the structural parameters. They also are used to conduct identification robust inference for the structural parameters based on a minimum distance criterion.
+We use these restrictions to construct link functions between a set of reduced-form parameters and a set of structural parameters. These link functions play an important role in separating the regularly behaved reduced-form parameters from the structural parameters. They also are used to conduct identification robust inference for the structural parameters based on a minimum distance criterion.
 All of these restrictions are also imposed in the GMM estimation in \textcite{han2018leverage}. However, because the volatility risk price is weakly identified, they calibrate it instead of estimating it. Given this calibrated value, they proceed to estimate all other parameters with GMM. 
 
 \subsection{Pricing Equation Restrictions}
 
-We first explore restrictions implied by the pricing equation $\E[ M_{t,t+1}\exp (r_{t+1}) \ivert \F_{t}]=1$. We start with a simple result stating that the constants $m_{0}$ and $m_{1}$ are normalization constants implied by all the other parameters. Thus, $m_{0}$ and $m_{1}$ are not free parameters to be estimated. Instead, they should take the value given below, once other parameters are specified. These restrictions on $m_{0}$ and $m_{1}$ are obtained by applying the restriction $\mathbb{E[} M_{t,t+1}\exp (r_{t+1})|\mathcal{F}_{t}]=1$ to the risk free asset. Applying the same argument to any other asset, we also obtain another set of two restrictions, which can be written in terms of the coefficients $\beta $ and $ \gamma $ under the linear form of $D(x)$ and $E(x)$.
+We first explore restrictions implied by the pricing equation $\E[ M_{t,t+1}\exp (r_{t+1}) \ivert \F_{t}]=1$. We start with a simple result stating that the constants $m_{0}$ and $m_{1}$ are normalization constants implied by all the other parameters. Thus, $m_{0}$ and $m_{1}$ are not free parameters to be estimated. Instead, they should take the values given below, once other parameters are specified. These restrictions on $m_{0}$ and $m_{1}$ are obtained by applying the restriction $\mathbb{E[} M_{t,t+1}\exp (r_{t+1})|\mathcal{F}_{t}]=1$ to the risk free asset. Applying the same argument to any other asset, we also obtain another set of two restrictions, which can be written in terms of the coefficients $\beta $ and $ \gamma $ under the linear form of $D(x)$ and $E(x)$.
 
 \begin{lemma}
     \label{Lemma m0 and m1}
@@ -166,7 +166,7 @@ We first explore restrictions implied by the pricing equation $\E[ M_{t,t+1}\exp
     \end{align*}
 \end{lemma}
 
-The two equalities on $\beta $ and $\gamma $ link them to the market return risk price, $\kappa$, and the volatility risk price, $\pi$,  through the functions $A(\cdot),B(\cdot ),C(\cdot ),$ which also involve parameters $(\rho ,c,\delta ,\psi ,\phi ).$ We treat these two equalities as link functions in the minimum distance criterion specified below.
+The two equalities on $\beta $ and $\gamma $ link them to the market return risk price, $\kappa$, and the volatility risk price, $\pi$,  through the functions $A(\cdot),B(\cdot ),C(\cdot ),$ which also involve the parameters $(\rho, c,\delta, \psi, \phi).$ We treat these two equalities as link functions in the minimum distance criterion specified below.
 
 \subsection{Leverage Effect Restrictions}\label{sec:leverage effect restrict}
 
@@ -204,19 +204,22 @@ The second part is the traditional Jensen effect term that arises from taking ex
 
 Because $\phi$ is the leverage effect parameter, we group it together with market return risk price, $\kappa$, and the volatility risk price, $\pi$, and call $ \theta \coloneqq (\kappa ,\pi ,\phi )^{\prime}$ structural parameters. These structural parameters are estimated by restrictions from this structural model. In contrast, the other parameters in the conditional mean and variance of the return and volatility, see \cref{remark:vol_moment_conditions} and \cref{remark:return_moment_conditions}, are simply estimated using these moments, without any model restrictions. As such, we call them the reduced-form parameters. Because $1-\phi ^{2}$ shows up in the conditional variance of $r_{t+1},$ see \cref{eqn:rtn_cond_vol}, we define $\zeta =1-\phi ^{2}$ as a reduced-form parameter and link it to the structural parameter $\phi$ through this relationship. To sum up, the reduced-form parameters are $\omega \coloneqq (\rho, c,\delta, \psi, \beta, \gamma, \zeta )^{\prime }$.
 
-Using $\zeta $ as a reduced-form parameter has the additional benefit of avoiding estimating $\phi$ directly. Estimating $\phi $ when its true value is close to 0 results in an estimator with a non-standard asymptotic distribution due to the boundary constraint. The inference procedure below does not require estimation of $\phi$ and is uniform over $\phi$ even if its true value is on or close to the boundary $0$.
+Using $\zeta $ as a reduced-form parameter has the additional benefit of avoiding estimating $\phi$ directly. Estimating $\phi $ when its true value is close to 0 results in an estimator with a non-standard asymptotic distribution due to the boundary constraint. The inference procedure below does not require estimation of $\phi$ and is uniform over $\phi$ even if its true value is on or close to the boundary $0$. It is worth noting that this boundary condition gives us additional information in estimating $\phi$ in some cases. The estimator for $\phi$ may converge quite rapidly; however, it is almost certainly not asymptotically approximately Gaussian. In addition, we cannot recover asymptotic Gaussianity by removing this constraint. Even though, $\phi$ could conceivably be greater than $0$, $\phi^2$ cannot conceivably be  less than $0$. The $\phi$ parameter enters the last link in \cref{eqn:link_function_g} through $\phi^2$.
+This is where the non-standard behavior arises. Economically, we saying that the variance of $r_{t+1}$ must reduce when we condition on more information. Although, this is clearly in population, it may not hold for the sample variances.
 
 The link functions between the structural parameter $\theta$ and the reduced-form parameter $\omega $ are collected together in
 %
 \begin{equation}
+    \label{eqn:link_function_g}
    g(\theta, \omega) = 
 %
     \begin{pmatrix}
         \gamma - [B\left( \pi +C\left( \kappa -1\right) \right) -B\left( \pi +C\left( \kappa \right) \right)] \\ 
         \beta - [A\left( \pi +C\left( \kappa -1\right) \right) -A\left( \pi +C\left( \kappa \right) \right)] \\ 
-        \psi -(1-\phi ^{2})\kappa +\frac{1}{2}(1-\phi ^{2})-1/(2c)^{1/2}\phi  \\ \zeta -\left( 1-\phi ^{2}\right) 
+        \psi -(1-\phi ^{2})\kappa +\frac{1}{2}(1-\phi ^{2})-1/(2c)^{1/2}\phi  \\ 
+        \zeta -\left( 1-\phi ^{2}\right) 
     \end{pmatrix}.
-\end{equation}%
+\end{equation}
 %
 For the inference problem studied below, we know $g(\theta _{0},\omega_{0})=0$ when evaluated at the true value of $\theta $ and $\omega .$
 
@@ -231,7 +234,7 @@ One of the important contributions of \textcite{han2018leverage} is to establish
 Clearly, the strength of identification is governed by the strength of the leverage effect.
 In other words, we need $\phi \neq 0$ to identify the volatility risk price $\pi$.
 
-Even if $\phi \neq 0$, we do not know it. In practice, with a finite-sample size and different types of noise in the data, such as measurement errors and omitted variables, a substantial leverage effect is required to obtain a standard identification situation where the noise in the data is negligible compared to the information to identify $\pi$. However, if only a small leverage effect is found, as in \textcites{bandi2012timevarying, aitsahalia2013leverage}, or the magnitude of the leverage effect is completely unknown, an identification robust procedure is needed to conduct inference in this problem. We provide such a procedure now.
+Even if $\phi \neq 0$, we do not know it. In practice, with a finite-sample size and different types of noise in the data, such as measurement errors and omitted variables, a substantial leverage effect is required to obtain a standard identification situation where the noise in the data is negligible compared to the information to identify $\pi$. However, if only a small leverage effect is found, as in \textcites{bandi2012timevarying, aitsahalia2013leverage}, or the magnitude of the leverage effect is completely unknown, an identification robust procedure is needed to conduct inference in this problem. In addition, standard minimum-distance estimators do not provide valid inference when some of the first-stage parameters are either asymptotically non-Gaussian or the link functions are ill-behaved. In our case, we should not expect $\phi$ to be asymptotically Gaussian even though it is well identified. We provide a procedure that is robust to both non-standard issues now.
 
 \section{Robust Inference for Risk Prices}\label{sec:robust inference}
 
@@ -264,7 +267,7 @@ and $\omega _{10}$ represents the true value of $\omega _{1}$. The two-step GMM 
     \widehat{\omega }_{1}=\underset{\omega _{1}\in O_{1}}{\arg \min }\left( T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})\right) ^{\prime }\widehat{V}_{1}\left( T^{-1}\sum_{t=1}^{T}h_{t}(\omega _{1})\right) ,
 \end{equation}%
 %
-where $\widehat{V}_{1}$ is a consistent estimator of $V_{1}=\sum_{m=-\infty }^{\infty }\Cov[h_{t}(\omega _{10}),h_{t+m}(\omega _{10})].$
+where $\widehat{V}_{1}$ is a consistent estimator of $V_{1} \coloneqq \sum_{m=-\infty }^{\infty }\Cov[h_{t}(\omega _{10}),h_{t+m}(\omega _{10})].$
 
 We estimate $\omega _{2}$ by the generalized least squares (GLS) estimator because the conditional mean of $r_{t+1}$ is a linear function of the conditioning variable $\sigma _{t}^{2}$ and $\sigma _{t+1}^{2}$ and the conditional variance is proportional to $\sigma _{t+1}^{2}.$ The GLS estimator of $\omega _{2}$ is
 %
@@ -274,7 +277,7 @@ We estimate $\omega _{2}$ by the generalized least squares (GLS) estimator becau
     x_{t} &= \sigma _{t+1}^{-1}(1,\sigma _{t}^{2},\sigma _{t+1}^{2})^{\prime } \text{ and }y_{t}=\sigma _{t+1}^{-1}r_{t+1}.  \label{omega 2 est}
 \end{align}
 %
-We estimate $\omega _{3}$ by the sample variance estimator
+We estimate $\omega _{3}$ by the sample variance estimator:
 %
 \begin{equation}
     \label{omega 3 est}
@@ -314,7 +317,7 @@ Let $\widehat{V}$ denote a heteroskedasticity and autocorrelation consistent (HA
     %
         \item $V^{-1/2}\{T^{-1/2}(\sum_{t=1}^{T}f_{t}(\omega _{0})-\E[f_{t}(\omega _{0}){]\} \rightarrow }_{d}N(0,I)$ and $\widehat{V} -V\rightarrow _{p}0.$
     %
-        \item $C^{-1}\leq \lambda_{\min }(A)\leq \lambda_{\max }(A)\leq C$ for $A=V,\E[H_{t}\left( \omega _{1,0}\right) ^{\prime }H_{t}\left( \omega _{1,0}\right) ]),\E[x_{t}x_{t}^{\prime }],\E[ z_{t}z_{t}^{\prime }],$ where $z_{t}=(1,\sigma _{t}^{2},\sigma _{t}^{4})^{\prime }.$
+        \item $C^{-1}\leq \lambda_{\min }(A)\leq \lambda_{\max }(A)\leq C$ for $A=V,\E[H_{t}\left( \omega _{1,0}\right) ^{\prime }H_{t}\left( \omega _{1,0}\right) ]),\E[x_{t}x_{t}^{\prime }],\E[ z_{t}z_{t}^{\prime }],$ where $z_{t}=(1,\sigma _{t}^{2},\sigma _{t}^{4})^{\prime}$.\footnote{We use $\lambda(\mathrm{matrix})$ to denote the eigenvalue of the matrix.}
     %
     \end{enumerate}
 \end{assumpR}
@@ -332,7 +335,7 @@ Let $H(\omega _{1})=\mathbb{E[}H_{t}(\omega _{1})]$ and $\overline{H}(\omega _{1
     \label{Fhat}
 \end{align}
 %
-The following lemma provides the asymptotic distribution of the reduced-form parameter and a consistent estimator of its asymptotic covariance. Note that we put the asymptotic covariance on the left side of the convergence to allow the distribution of the data to change with sample size $T$.
+The following lemma provides the asymptotic distribution of the reduced-form parameter and a consistent estimator of its asymptotic covariance. Note, we put the asymptotic covariance on the left side of the convergence to allow the distribution of the data to change with sample size $T$.
 
 \begin{lemma}
 \label{Lemma Reduce}
@@ -452,12 +455,12 @@ The following conditions hold over $P\in \mathcal{P},$ for any $\theta $ in its 
     \end{equation*}
 \end{theorem}
 
-This Lemma states that the confidence set constructed by the conditional QLR\ test has correct asymptotic size. Uniformity is important for this confidence set to cover the true parameter with a probability close to $1-\alpha $ in finite-samples. This uniform result is established over a parameter space $\mathcal{P}$ that allows for weak identification of the structural parameter $\theta$.
+This theorem states that the confidence set constructed by the conditional QLR\ test has correct asymptotic size. Uniformity is important for this confidence set to cover the true parameter with a probability close to $1-\alpha $ in finite-samples. This uniform result is established over a parameter space $\mathcal{P}$ that allows for weak identification of the structural parameter $\theta$.
 
 
 \section{Simulations}\label{sec:simulation}
 
-In this section, we investigate the finite-sample performance of the proposed test and show that the asymptotic approximations derived above work well in practice. We also compare it with the standard test that assumes all parameters are strongly identified. The standard test is known to be invalid under weak identification but its degree of distortion is unknown without simulation. We simulate the data with the parametric model above where the true values of the parameters are given in \cref{tbl:simulationParameters} based on the estimates in \textcite{han2018leverage}. To investigate the robustness of the procedure with respect to various identification strengths, we vary both $\phi$ and $T$. Specifically, we consider $\phi \in \lbrace -0.40, -0.10, -0.01 \rbrace$ and $T \in \lbrace 2,000; 10,000 \rbrace$. The number of data points in the empirical section is $3,700$. 
+In this section, we investigate the finite-sample performance of the proposed test and show that the asymptotic approximations derived above work well in practice. We also compare it with the standard test that assumes all parameters are strongly identified. The standard test is known to be invalid under weak identification but its degree of distortion is unknown in general. We simulate the data with the parametric model above where the true values of the parameters are given in \cref{tbl:simulationParameters} based on the values used by \textcite{han2018leverage}. To investigate the robustness of the procedure with respect to various identification strengths, we vary both $\phi$ and $T$. Specifically, we consider $\phi \in \lbrace -0.40, -0.10, -0.01 \rbrace$ and $T \in \lbrace 2,000; 10,000 \rbrace$. The number of data points in the empirical section is $3,700$. 
 
 \begin{table}[htb]
  
@@ -480,7 +483,7 @@ In this section, we investigate the finite-sample performance of the proposed te
 \end{table}
 
  
-To avoid boundary issues with respect to the estimate of $c$ and $\delta$ in finite-sample, we reparameterize the moment conditions and link functions in terms of $\log(c)$ and $\log(c) + \log(\delta)$. This reparameterization forces them to be positive. We find that the resulting estimates for the transformed reduced-form parameters are better approximated by the Gaussian distribution for a given finite sample. 
+To avoid boundary issues with respect to the estimate of $c$ and $\delta$ in finite-sample, we reparameterize the moment conditions and link functions in terms of $\log(c)$,  $\log(c) + \log(\delta)$, and $\logit(\rho)$. This reparameterization forces the scale parameters to be positive and $\rho$ to lie in $(0,1)$. We find that the resulting estimates for the transformed reduced-form parameters are better approximated by the Gaussian distribution for a given finite sample. 
 
 %Since the transformation is bijection, we can invert it to obtain confidence intervals for the original parameters. I do not see adding it here is necessary becasue we our goal is not to construct CI for c and delta. 
 
@@ -509,7 +512,7 @@ To show the effect of various identification strength, we first vary the true va
 \end{figure}
 
 
-Next, we study the finite-sample size of in the standard QLR test and the proposed conditional QLR test for a joint test for the three structural parameters. The nominal level of the test is \SI{5}{\percent}. The critical value of the standard QLR test is the \SI{95}{\percent} quantile of the chi-square distribution with $3$ degree of freedom. The critical value of the conditional QLR test is obtained by the stimulation-based procedure in \cref{alg:constructing_the_cs}, with \num{1000} simulation repetitions to approximate the quantile of the conditional distribution. The finite-sample size is based on \num{250} simulation repetitions.
+Next, we study the finite-sample size of in the standard QLR test and the proposed conditional QLR test for a joint test for the three structural parameters. The nominal level of the test is \SI{5}{\percent}. The critical value of the standard QLR test is the \SI{95}{\percent} quantile of the $\chi^2$-distribution with $3$ degree of freedom. The critical value of the conditional QLR test is obtained by the stimulation-based procedure in \cref{alg:constructing_the_cs}, with \num{1000} simulation repetitions to approximate the quantile of the conditional distribution. The finite-sample size is based on \num{250} simulation repetitions.
 
 The standard test is no longer valid under weak identification because the QLR statistic does not have a chi-square distribution in this case. However, it is not clear whether the standard QLR test under-rejects or over-rejects in finite-sample and how large is the difference from \SI{5}{\percent}. 
 
@@ -546,9 +549,9 @@ Simulation results show that the standard QLR test under-rejects in finite-sampl
 
 \section{Data and Empirical Results}\label{sec:empirical}
 
-For the empirical application, we use the daily return on the S\&P 500 for $r_{t+1}$ and the associated realized volatility computed with high-frequency data for $\sigma^2_{t+1}$. The data is obtained from SPY (SPDR S\&P 500 ETF Trust), an exchange-traded fund that mimics the S\&P 500. This gives us a market index whose risk is not easily diversifiable and can be used to estimate the prices of risk that investors face in practice. We use the procedure \textcite{sangrey2018jumps} develops to estimate the integrated total volatility, the instantaneous expectation of the price variance. This measure reduces to the integrated diffusion volatility if prices have continuous paths and it works well in the presence of market microstructure noise.
+For the empirical application, we use the daily return on the S\&P 500 for $r_{t+1}$ and the associated realized volatility computed with high-frequency data for $\sigma^2_{t+1}$. The data is obtained from SPY (SPDR S\&P 500 ETF Trust), an exchange-traded fund that mimics the S\&P 500. This gives us a market index whose risk is not easily diversifiable and can be used to estimate the prices of risk that investors face in practice. We use the procedure \textcite{sangrey2018jumps} develops to estimate the integrated total volatility, i.e, the instantaneous expectation of the price variance. This measure reduces to the integrated diffusion volatility if prices have continuous paths and it works well in the presence of market microstructure noise.
 
-Since SPY is one of the most liquid assets traded, we can choose the frequency at which we sample the underlying price. To balance market-microstructure noise, computational cost, and efficiency of the resultant estimators, we sample at the \num{1} second frequency. The data starts in 2003 and ends in September 2017. Since the asset is only traded during business hours, this leads to \num{3713} days of data with an average of approximately \num{24000} observations per day. We compute $r_{t+1}$ as the daily return from the open to the close of the market, the interval over which we can estimate the volatility. This avoids specifying the relationship between overnight and intra-day returns. We preprocess the data using the pre-averaging approach as in \textcites{podolskij2009bipower, aitsahalia2012testing}. 
+Since SPY is one of the most liquid assets traded, we can choose the frequency at which we sample the underlying price. To balance market-microstructure noise, computational cost, and efficiency of the resultant estimators, we sample at the \num{1}-second frequency. We annualize the data by multiplying $r_{t+1}$ by \num{252} and $\sigma^2_{t+1}$ by $252^2$. The data starts in 2003 and ends in September 2017. Since the asset is only traded during business hours, this leads to \num{3713} days of data with an average of approximately \num{24000} observations per day. We compute $r_{t+1}$ as the daily return from the open to the close of the market, the interval over which we can estimate the volatility. This avoids specifying the relationship between overnight and intra-day returns. We preprocess the data using the pre-averaging approach as in \textcites{podolskij2009bipower, aitsahalia2012testing}. 
 
 %I do not see this is necessary to provide these details. This procedure is known not to affect the consistency of the estimation procedure. The basic idea is rather simple. We average the price over a small interval to remove the noise. If we pick the rates at which we shrink the interval appropriately and thereby balance smoothing away the noise and allowing the volatility to vary intraday, the estimators are consistent.
 
@@ -608,7 +611,7 @@ To see how the data move over time, we plot their time series in  \cref{risk_fig
 
 \end{table}
 
-We now report the estimates and confidence intervals for the reduced-form parameters $c, \delta$, and $\rho$. The confidence intervals reported here use the Gaussian limiting theory, i.e., the point estimates $\pm 1.96$ standard errors. We first obtain confidence intervals for $\log(c)$ and $\log(c) + \log(\delta)$, and transform them into confidence intervals for $c$ and $\delta$.  We create the confidence interval for $\rho$ by inverting  the interval for $\mathrm{logit}(\rho)$.
+We now report the estimates and confidence intervals for the reduced-form parameters $c, \delta$, and $\rho$. The confidence intervals reported here use the Gaussian limiting theory, i.e., the point estimates $\pm 1.96$ standard errors. We first obtain confidence intervals for $\log(c)$ and $\log(c) + \log(\delta)$, and transform them into confidence intervals for $c$ and $\delta$.  Similarly, we create the confidence interval for $\rho$ by inverting  the interval for $\logit(\rho)$.
 
 \begin{table}[htb]
   \caption{Parameters that Govern the Volatility Process} 
@@ -689,7 +692,7 @@ For confidence intervals of the three structural parameters, we first compute th
 \end{figure}
 
 
-The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ at the \SI{5}{\percent} level. We cannot, however, reject the null hypotheses that $\pi = 0$ or that $\kappa = 0$. Although the projection procedure leads to conservative subvector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear to be quite informative. The risk price associated with the market return lies in $(0.00, 2.67)$ with at least \SI{95}{\percent} probability. The volatility risk price lies in $(-10.67, 0.00))$ with at least \SI{95}{\percent} probability. Our estimates for both parameters are reasonable given other values that previous authors have found, especially the ones that are larger in magnitude. \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. Surprisingly, we cannot  reject zero for either value.
+The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ at the \SI{5}{\percent} level. We cannot, however, reject the null hypotheses that $\pi = 0$ or that $\kappa = 0$. Although the projection procedure leads to conservative subvector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear to be quite informative. The risk price associated with the market return lies in $(0.00, 2.67)$ with at least \SI{95}{\percent} probability. The volatility risk price lies in $(-10.67, 0.00))$ with at least \SI{95}{\percent} probability. Our confidence intervals for both parameters are reasonable given other values that previous authors have found. Although, previous estimates usually lie close to the side of the confidence interval that has the larger magnitude. For example, \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. Surprisingly, we cannot  reject zero for either value.
 
 % We're both using data on the S&P 500. We are processing the data differently, but if you  actually want to believe our estimates you have to believe our data processing is reasonable. 
 %We use a different data set and process the data differently from those in Han2018. Is this comparision still meaningful? 
@@ -707,7 +710,7 @@ The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_re
 \section{Conclusion}\label{sec:risk_conclusion}
 
 
-In structural stochastic volatility models as the one developed here, changes in the volatility affect returns through two channels. On the one hand, investors are willing to tolerate high volatility to get high expected returns as measured by the price of market return risk. On the other hand, investors are directly averse to changes in future volatility, as measured by the price of volatility risk. \Textcite{han2018leverage} shows how to disentangle these two channels by exploiting information arising from the leverage effect in an exponentially-affine pricing model. However, standard inference for this structural model is invalid because the volatility risk price is only weakly identified when the leverage effect is mild. This paper propose an identification robust inference procedure that provides reliable confidence sets for the risk prices regardless of the magnitude of the leverage effect. We take this procedure to the data on the S\&P 500. The robust inference procedure provides reliable yet informative confidence intervals for the risk prices associated with the market return and the volatility. 
+In structural stochastic volatility models as the one considered here, changes in the volatility affect returns through two channels. On the one hand, investors are willing to tolerate high volatility to get high expected returns as measured by the price of market return risk. On the other hand, investors are directly averse to changes in future volatility, as measured by the price of volatility risk. \Textcite{han2018leverage} shows how to disentangle these two channels by exploiting information arising from the leverage effect in an exponentially-affine pricing model. However, standard inference for this structural model is invalid because the volatility risk price is only weakly identified when the leverage effect is mild. This paper propose an identification robust inference procedure that provides reliable confidence sets for the risk prices regardless of the magnitude of the leverage effect. We take this procedure to the data on the S\&P 500. The robust inference procedure provides reliable yet informative confidence intervals for the risk prices associated with the market return and the volatility. 
 
 
 
