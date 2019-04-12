@@ -681,7 +681,7 @@ def _qlr_in(prices, omega, omega_cov, case):
     cov_pi = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega, case=case)
 
     try:
-        returnval = np.asscalar(link_in.T @ np.linalg.pinv(cov_pi) @ link_in)
+        returnval = np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
     except np.linalg.LinAlgError:
         returnval = np.inf
 
@@ -690,6 +690,53 @@ def _qlr_in(prices, omega, omega_cov, case):
         returnval = np.inf
 
     return returnval
+
+
+def _minimize_function_multiple_x0(func_to_minimize, x0, omega, bounds, true_prices):
+
+    phi_init = (np.clip(-(1 - omega['zeta'])**.5, bounds[0][0], bounds[0][1])
+                if omega['zeta'] < 1 else bounds[0][1])
+
+    minimize_result = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
+                               bounds=bounds, options={'maxiter': 2500})
+
+    x0[0] = phi_init
+
+    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
+                         bounds=bounds, options={'maxiter': 2500})
+
+    if result_in.fun <= minimize_result.fun:
+        minimize_result = result_in
+
+    x0 = np.asarray(true_prices)
+
+    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
+                         bounds=bounds, options={'maxiter': 2500})
+
+    if result_in.fun <= minimize_result.fun:
+        minimize_result = result_in
+
+    x0[0] = phi_init
+
+    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
+                         bounds=bounds, options={'maxiter': 2500})
+
+    if result_in.fun <= minimize_result.fun:
+        minimize_result = result_in
+
+    x0[1] = max(bounds[1])
+    x0[2] = min(bounds[2])
+
+    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
+                         bounds=bounds, options={'maxiter': 2500})
+
+    if result_in.fun <= minimize_result.fun:
+        minimize_result = result_in
+
+    if not minimize_result['success']:
+        logging.warning(minimize_result)
+
+    return minimize_result
 
 
 def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
@@ -714,21 +761,21 @@ def qlr_stat(true_prices, omega, omega_cov, bounds=None, case=1):
 
     low_bounds, high_bounds = np.array(bounds).T
     x0 = np.random.uniform(low_bounds, high_bounds)
-    x0[1] = (np.clip((1 - omega['zeta'])**.5, bounds[1][0], bounds[1][1])
-             if omega['zeta'] < 1 else bounds[1][1])
 
-    constraint_dict, init = compute_constraint_prices(omega=omega, omega_cov=omega_cov, bounds=bounds, case=case)
+    constraint_dict, init = compute_constraint_prices(omega=omega,
+                                                      omega_cov=omega_cov,
+                                                      bounds=bounds, case=case)
 
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega, case=case) < 0:
         logging.warning("We violated the constraint.")
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov, case=case), x0=x0, method='L-BFGS-B',
-                               bounds=bounds)
+    func_to_minimize = partial(_qlr_in, omega=omega, omega_cov=omega_cov, case=case)
 
-    if not minimize_result['success']:
-        logging.warning(minimize_result)
+    minimize_result = _minimize_function_multiple_x0(func_to_minimize, x0,
+                                                     omega, bounds,
+                                                     true_prices)
 
     returnval = _qlr_in(true_prices, omega, omega_cov, case=case) - minimize_result.fun
 
@@ -804,33 +851,24 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None, case=1
                 return np.inf
 
             # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
-            return np.asscalar(link_in.T @ np.linalg.pinv(cov_prices) @ link_in)
+            return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))
 
-        except FloatingPointError:
+        except FloatingPointError and np.linalg.LinAlgError:
             # If we get a matrix algebra error in the previous expression we set the value of the link function to
             # infinity.
-            logging.warn("There was a Floating point error in qlr_in_star.")
+            logging.warn("There was either a Floating point error or a linear algebra error in qlr_in_star.")
             return np.inf
 
     with np.errstate(invalid='raise'):
 
         def minimized(innov):
             try:
-                result1 = minimize(qlr_in_star, args=(innov,), x0=true_prices,
-                                     method='L-BFGS-B', options={'maxiter': 2500},
-                                     bounds=bounds)
-                result2 = minimize(qlr_in_star, args=(innov,), x0=x0,
-                                     method='L-BFGS-B', options={'maxiter': 2500},
-                                     bounds=bounds)
+                result = _minimize_function_multiple_x0(
+                    lambda x: qlr_in_star(x, innov), x0, omega, bounds,
+                    true_prices)
 
-                result_in = result1 if result1.fun <= result2.fun else result2
+                return result.fun
 
-                if result_in.success:
-                    return result_in.fun
-                else:
-                    # We throw out the result if the minimization fails.
-                    logging.warn(result_in.message)
-                    return result_in.fun
             except FloatingPointError:
                 logging.warn("There was a floating point error inside minimized.")
                 return np.inf
