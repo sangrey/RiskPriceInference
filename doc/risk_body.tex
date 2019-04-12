@@ -601,21 +601,17 @@ To see how the data move over time, we plot their time series in  \cref{risk_fig
       Standard Deviation & 2.350165 & 14.458446\\
       Skewness & -0.312 & 12.209 \\
       \rowcolor{gray!20}
-      Kurtosis & 10.055 & 240.401 \\
+      Kurtosis & 13.066 & 243.401 \\
       Correlation & \multicolumn{2}{c}{\num{-0.024379}} \\
     \bottomrule
   \end{tabularx}
 
 \end{table}
 
-We now report the estimates and confidence intervals for the reduced-form parameters $c, \delta$, and $\rho$. The confidence intervals reported here use the Gaussian limiting theory, i.e., the point estimates $\pm 1.96$ standard errors. We first obtain confidence intervals for $\log(c)$ and $\log(c) + \log(\delta)$, and transform them into confidence intervals for $c$ and $\delta$. 
-
-%\footnote{Note, We are not saying that $c$ and $\delta$ are Gaussian distributed, nor are we making any first-order approximations.} I do not see this is helpful in clarification.
-
-%***I do not agree with this statement. For the minimum distance estimate, the other reduced-form paramters play the same role. We have to first estimate all of them and then the simulated critical value is baased on the joint distribution of all the reduced-form paramters. I do not see why c, delta, rho are different from the rest. I think we should report all of them or none of them.We do not report the other reduced-form parameters because they are artifacts of our estimation procedure and are not required to simulate from the model. 
+We now report the estimates and confidence intervals for the reduced-form parameters $c, \delta$, and $\rho$. The confidence intervals reported here use the Gaussian limiting theory, i.e., the point estimates $\pm 1.96$ standard errors. We first obtain confidence intervals for $\log(c)$ and $\log(c) + \log(\delta)$, and transform them into confidence intervals for $c$ and $\delta$.  We create the confidence interval for $\rho$ by inverting  the interval for $\mathrm{logit}(\rho)$.
 
 \begin{table}[htb]
-  \caption{Reduced-Form Parameters Necessary to Fully Specify the Model} 
+  \caption{Parameters that Govern the Volatility Process} 
   \label{tbl:reduced_form_parameters}
 
     \centering
@@ -639,10 +635,10 @@ We now report the estimates and confidence intervals for the reduced-form parame
     \toprule
     & {Point Estimate} & \multicolumn{2}{c}{\SI{95}{\percent} Confidence Interval} \\
     \midrule
-    $c$     & 6.0678 & 3.47006  & 10.6103 \\
+    $c$     & 3.0668 & 1.384 2 & 6.7946 \\
     \rowcolor{gray!20}
-    $\delta$  & 0.40814 & 0.2663 & 0.408137969 \\
-    $\rho$   & 0.517097 & 0.29481863 & 0.739181 \\
+    $\delta$  & 37.981 & 17.6528 & 81.718 \\
+    $\rho$   & 0.77107 & 0.6747 & 0.8454 \\
     \bottomrule 
   \end{tabularx}
 \end{table}
@@ -669,16 +665,16 @@ For confidence intervals of the three structural parameters, we first compute th
         table-alignment         = center,
     }
 
-    \begin{tabularx}{.4\textwidth}{X | S >{{(}} S[table-space-text-pre={(}] <{{,\,}}
+    \begin{tabularx}{.4\textwidth}{X | >{{(}} S[table-space-text-pre={(}] <{{,\,}}
       S[table-space-text-pre={\hspace{-1.5cm}}] <{{)}}}
 %
     \toprule
     & \multicolumn{2}{c}{\SI{95}{\percent} Confidence Interval} \\
     \midrule
-    $\phi$   & -0.20 & -0.10    \\
+    $\phi$   & -0.35 & -0.25 \\
     \rowcolor{gray!20}
-    $\pi$    & -0.02778 & 0.00   \\
-    $\kappa$   & 0.333 & 0.3778  \\
+    $\pi$    & -10.6667 & 0.00  \\
+    $\kappa$   & 0. 000 & 2.6667 \\
     \bottomrule 
   \end{tabularx}
 \end{table}
@@ -689,11 +685,11 @@ For confidence intervals of the three structural parameters, we first compute th
 	\caption{Confidence Set for Risk Prices}
 	\label{fig:confidence_region}
 	
-	\includegraphics[width=.5\textwidth]{confidence_region_2.pdf}
+	\includegraphics[width=.5\textwidth]{confidence_region_500.pdf}
 \end{figure}
 
 
-The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ at the \SI{5}{\percent} level. We cannot, however, reject the null hypothesis $\pi = 0$. Although the projection procedure leads to conservative subvector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear to be quite informative. The risk price associated with the market return lies in $(0.33, 0.38)$ with at least \SI{95}{\percent} probability. The volatility risk price is quite small in magnitude, lying in $(-0.03, 0.00)$ with at least \SI{95}{\percent} probability. The point estimates for $\phi, \pi$, and $\kappa$ reported by \textcite{han2018leverage} lie outside our confidence intervals for each of the parameters. They calibrate $\pi = -10$ and then estimate the remaining parameters. This calibrated value of $\pi$ is quite far from its robust confidence interval we construct.
+The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ at the \SI{5}{\percent} level. We cannot, however, reject the null hypotheses that $\pi = 0$ or that $\kappa = 0$. Although the projection procedure leads to conservative subvector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear to be quite informative. The risk price associated with the market return lies in $(0.00, 2.67)$ with at least \SI{95}{\percent} probability. The volatility risk price lies in $(-10.67, 0.00))$ with at least \SI{95}{\percent} probability. Our estimates for both parameters are reasonable given other values that previous authors have found, especially the ones that are larger in magnitude. \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. Surprisingly, we cannot  reject zero for either value.
 
 % We're both using data on the S&P 500. We are processing the data differently, but if you  actually want to believe our estimates you have to believe our data processing is reasonable. 
 %We use a different data set and process the data differently from those in Han2018. Is this comparision still meaningful? 
