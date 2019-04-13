@@ -42,11 +42,11 @@ def test_B_func(log_both, log_scale, x):
 
 @given(negative_floats, positive_floats, log_floats, log_floats, phi_floats, finite_floats)
 @settings(max_examples=20)
-def test_link2(pi, theta, log_both, log_scale, phi, psi):
-    """Ensure the two implmentation fo the link2 function return the same value."""
+def test_compute_gamma(pi, theta, log_both, log_scale, phi, psi):
+    """Ensure the two implmentation fo the compute_gamma function return the same value."""
     val1 = sym.N(vl.volprice._gamma_sym.replace(vl.theta, theta).replace(vl.pi, pi).replace(
         vl.log_both, log_both)).replace(vl.log_scale, log_scale).replace(vl.phi, phi).replace(vl.psi, psi)
-    val2 = vl.link2(pi=pi, theta=theta, log_both=log_both, log_scale=log_scale, phi=phi, psi=psi)
+    val2 = vl.compute_gamma(pi=pi, theta=theta, log_both=log_both, log_scale=log_scale, phi=phi, psi=psi)
 
     if np.isfinite(val2):
         assert np.isclose(float(np.real(val1)), float(np.real(val2)), equal_nan=True, rtol=1e-3),\

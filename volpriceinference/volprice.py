@@ -695,19 +695,9 @@ def _qlr_in(prices, omega, omega_cov, case):
 
 def _minimize_function_multiple_x0(func_to_minimize, x0, omega, bounds, true_prices):
 
-    phi_init = (np.clip(-(1 - omega['zeta'])**.5, bounds[0][0], bounds[0][1])
-                if omega['zeta'] < 1 else bounds[0][1])
 
     minimize_result = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
                                bounds=bounds, options={'maxiter': 2500})
-
-    x0[0] = phi_init
-
-    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
-                         bounds=bounds, options={'maxiter': 2500})
-
-    if result_in.fun <= minimize_result.fun:
-        minimize_result = result_in
 
     x0 = np.asarray(true_prices)
 
@@ -717,13 +707,8 @@ def _minimize_function_multiple_x0(func_to_minimize, x0, omega, bounds, true_pri
     if result_in.fun <= minimize_result.fun:
         minimize_result = result_in
 
-    x0[0] = phi_init
-
-    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
-                         bounds=bounds, options={'maxiter': 2500})
-
-    if result_in.fun <= minimize_result.fun:
-        minimize_result = result_in
+    x0[0] = (np.clip(-(1 - omega['zeta'])**.5, bounds[0][0], bounds[0][1])
+                if omega['zeta'] < 1 else bounds[0][1])
 
     x0[1] = max(bounds[1])
     x0[2] = min(bounds[2])
