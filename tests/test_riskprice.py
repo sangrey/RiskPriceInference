@@ -15,7 +15,7 @@ log_floats = st.floats(min_value=-5, max_value=2)
 
 # Define the gradient of the link function with respect to the reduced form paramters.
 _link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([
-    vl.volprices._link_sym.jacobian([vl.beta, vl.gamma, vl.log_both, vl.log_scale, vl.logit_rho, vl.psi, vl.zeta])])))
+    vl.volprice._link_sym.jacobian([vl.beta, vl.gamma, vl.log_both, vl.log_scale, vl.logit_rho, vl.psi, vl.zeta])])))
 
 # omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
 
