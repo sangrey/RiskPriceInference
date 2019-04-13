@@ -13,6 +13,12 @@ negative_floats = st.floats(min_value=-10, max_value=-.1)
 phi_floats = st.floats(min_value=-.9, max_value=-.1)
 log_floats = st.floats(min_value=-5, max_value=2)
 
+# Define the gradient of the link function with respect to the reduced form paramters.
+_link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([
+    vl.volprices._link_sym.jacobian([vl.beta, vl.gamma, vl.log_both, vl.log_scale, vl.logit_rho, vl.psi, vl.zeta])])))
+
+# omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
+
 
 @given(finite_floats, log_floats, positive_floats)
 @settings(max_examples=20)
@@ -79,7 +85,7 @@ def test_link_gradient(phi, pi, theta, log_both, log_scale, logit_rho, psi):
     args = {vl.volprice.phi: phi, vl.volprice.pi: pi, vl.volprice.theta: theta, vl.volprice.log_both: log_both,
             vl.volprice.log_scale: log_scale, vl.volprice.logit_rho: logit_rho, vl.volprice.psi: psi}
 
-    val1 = np.real(np.array(sym.N(vl.volprice._link_grad_sym.xreplace(args))).astype(np.complex))
+    val1 = np.real(np.array(sym.N(_link_grad_sym.xreplace(args))).astype(np.complex))
     val2 = vl.link_jacobian(phi=phi, pi=pi, theta=theta, logit_rho=logit_rho,
                             log_both=log_both, log_scale=log_scale, psi=psi)
 

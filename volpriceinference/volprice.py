@@ -81,13 +81,6 @@ compute_vol_moments = sym.lambdify([_x, _y, log_both, log_scale, logit_rho], _vo
 compute_vol_moments_grad = sym.lambdify([_x, _y, log_both, log_scale, logit_rho],
                                         _vol_moments.jacobian([log_both, log_scale, logit_rho]), modules='numpy')
 
-
-# Define the gradient of the link function with respect to the reduced form paramters.
-_link_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([beta, gamma, log_both, log_scale,
-                                                                        psi, logit_rho, zeta])])))
-
-omega_cov = sym.MatrixSymbol('omega_cov', _link_grad_sym.shape[1], _link_grad_sym.shape[1])
-
 # Define the gradient of the link function with respect to the structural paramters.
 _link_price_grad_sym = sym.powsimp(sym.expand(sym.Matrix([_link_sym.jacobian([phi, pi, theta])])))
 
@@ -810,7 +803,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
                 logging.warn("There was a floating point error inside minimized.")
                 return np.inf
 
-        results_out = (_qlr_in(true_prices, omega, omega_cov)  -
+        results_out = (_qlr_in(true_prices, omega, omega_cov) -
                        np.array([minimized(innov) for innov in innovations]))
 
     results = np.nan_to_num(results_out)
