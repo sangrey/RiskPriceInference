@@ -17,14 +17,6 @@ set(PKG_VERSION "$ENV{GIT_DESCRIBE_TAG}-py${FORMATTED_PY_VER}_$ENV{GIT_DESCRIBE_
 find_package(pybind11 REQUIRED)
 find_package(Armadillo REQUIRED)
 find_package(NumPy REQUIRED) 
-find_package(OpenMP)                                                                                               
-
-if (OPENMP_FOUND)                                                                                                  
-    message(STATUS "Adding the OpenMP flags.")                                                                     
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")                                                        
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")                                                  
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}") 
-endif()    
 
 set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/volpriceinference.cpp")
 

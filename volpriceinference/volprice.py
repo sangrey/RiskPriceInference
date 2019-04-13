@@ -12,7 +12,8 @@ from collections import OrderedDict
 from functools import partial
 from itertools import product
 from libvolpriceinference import _simulate_autoregressive_gamma
-from libvolpriceinference import link_total, link_jacobian, covariance_kernel_in
+from libvolpriceinference import link_total, link_jacobian, _covariance_kernel
+from libvolpriceinference import compute_beta, compute_gamma, compute_psi
 from tqdm.auto import tqdm
 from multiprocessing import Pool
 
@@ -45,9 +46,9 @@ _constraint2 = sym.lambdify((phi, pi, theta, log_scale, logit_rho, psi),
                             _constraint_sym.xreplace({_x: theta}), modules='numpy')
 
 # We create the link functions.
-compute_gamma = sym.lambdify((log_both, log_scale, phi, pi, logit_rho, theta), _gamma_sym, modules='numpy')
-compute_beta = sym.lambdify((log_scale, phi, pi, psi, logit_rho, theta), _beta_sym, modules='numpy')
-compute_psi = sym.lambdify((log_scale, phi, logit_rho, theta), _psi_sym, modules='numpy')
+# compute_gamma = sym.lambdify((log_both, log_scale, phi, pi, logit_rho, theta), _gamma_sym, modules='numpy')
+# compute_beta = sym.lambdify((log_scale, phi, pi, psi, logit_rho, theta), _beta_sym, modules='numpy')
+# compute_psi = sym.lambdify((log_scale, phi, logit_rho, theta), _psi_sym, modules='numpy')
 
 # We create a function to initialize the paramters with reasonable guesses in the optimization algorithms.
 compute_theta = sym.lambdify((psi, logit_rho, log_scale, zeta),
@@ -317,7 +318,7 @@ def covariance_kernel(prices1, prices2, omega, omega_cov, case):
     if case != 1:
         raise NotImplementedError
 
-    result = covariance_kernel_in(*prices1, *prices2, psi=omega['psi'],
+    result = _covariance_kernel(*prices1, *prices2, psi=omega['psi'],
                                   log_both=omega['log_both'],
                                   log_scale=omega['log_scale'],
                                   logit_rho=omega['logit_rho'],

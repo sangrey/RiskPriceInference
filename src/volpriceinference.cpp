@@ -185,7 +185,7 @@ double C_diff3(double x) {
 
 }
 
-double link1(double pi, double phi, double theta, double logit_rho, double log_scale, double psi) {
+double compute_beta(double pi, double phi, double theta, double logit_rho, double log_scale, double psi) {
 
     double val1 = A_func(pi + C_func(theta - 1, phi, psi), logit_rho, log_scale);
     double val2 = A_func(pi + C_func(theta, phi, psi), logit_rho, log_scale);
@@ -194,7 +194,7 @@ double link1(double pi, double phi, double theta, double logit_rho, double log_s
 
 }
 
-std::tuple<double, double, double> link1_gradient(double pi, double phi, double theta, double logit_rho, 
+std::tuple<double, double, double> beta_gradient(double pi, double phi, double theta, double logit_rho, 
         double log_scale, double psi) {
 
     double d_logit_rho = A_diff2(pi + C_func(theta-1, phi, psi), logit_rho, log_scale) - 
@@ -209,7 +209,7 @@ std::tuple<double, double, double> link1_gradient(double pi, double phi, double 
     return std::make_tuple(d_logit_rho, d_log_scale, d_psi);
 }
 
-double link2(double pi, double phi, double theta, double log_both, double log_scale, double psi) {
+double compute_gamma(double pi, double phi, double theta, double log_both, double log_scale, double psi) {
 
     double val1 = B_func(pi + C_func(theta - 1, phi, psi), log_both, log_scale);
     double val2 = B_func(pi + C_func(theta, phi, psi), log_both, log_scale);
@@ -217,7 +217,7 @@ double link2(double pi, double phi, double theta, double log_both, double log_sc
     return val1 - val2;
 }
 
-std::tuple<double, double, double> link2_gradient(double pi, double phi, double theta, double log_both, 
+std::tuple<double, double, double> gamma_gradient(double pi, double phi, double theta, double log_both, 
         double log_scale, double psi) {
 
     double d_log_both = B_diff2(pi + C_func(theta-1, phi, psi), log_both, log_scale) - 
@@ -233,7 +233,7 @@ std::tuple<double, double, double> link2_gradient(double pi, double phi, double 
 
 }
 
-double link3(double theta, double phi, double log_scale) { 
+double compute_psi(double theta, double phi, double log_scale) { 
 
     /* We simplify the function using properties of the exponential function. */
     double val = (phi / std::sqrt(2.0)) *  std::exp(-.5 * log_scale) 
@@ -242,7 +242,7 @@ double link3(double theta, double phi, double log_scale) {
     return val;
 }
 
-double link3_gradient(double phi, double log_scale) {
+double psi_gradient(double phi, double log_scale) {
 
     return (phi / std::sqrt(2.0)) * std::exp(-.5 * log_scale)  * -.5;
 
@@ -251,9 +251,9 @@ double link3_gradient(double phi, double log_scale) {
 dvec link_total(double phi, double pi, double theta, double beta, double gamma, double log_both, double log_scale,
         double logit_rho, double psi, double zeta) {
 
-    double beta_diff = beta - link1(pi, phi, theta, logit_rho, log_scale, psi); 
-    double gamma_diff = gamma - link2(pi, phi, theta, log_both, log_scale, psi); 
-    double psi_diff = psi - link3(theta, phi, log_scale);
+    double beta_diff = beta - compute_beta(pi, phi, theta, logit_rho, log_scale, psi); 
+    double gamma_diff = gamma - compute_gamma(pi, phi, theta, log_both, log_scale, psi); 
+    double psi_diff = psi - compute_psi(theta, phi, log_scale);
     double zeta_diff = 1 - (zeta + phi * phi);
 
     dvec returnvec{beta_diff, gamma_diff, psi_diff, zeta_diff};
@@ -268,25 +268,25 @@ dmat link_jacobian(double phi, double pi, double theta, double log_both, double 
     dmat returnmat = arma::zeros<dmat>(4,7);
 
     // Calculate the first row.
-    auto [link1_logit_rho, link1_log_scale, link1_psi] = link1_gradient(pi, phi, theta, logit_rho, log_scale, psi); 
+    auto [beta_logit_rho, beta_log_scale, beta_psi] = beta_gradient(pi, phi, theta, logit_rho, log_scale, psi); 
     returnmat(0,0) = 1;
-    returnmat(0, 3) = -1 * link1_log_scale;
-    returnmat(0,4) = -1 * link1_psi;
-    returnmat(0, 5) = -1 * link1_logit_rho; 
+    returnmat(0, 3) = -1 * beta_log_scale;
+    returnmat(0,4) = -1 * beta_psi;
+    returnmat(0, 5) = -1 * beta_logit_rho; 
 
 
     // Calculate the second row. //
-    auto [link2_log_both, link2_log_scale, link2_psi] = link2_gradient(pi, phi, theta, log_both, log_scale, psi); 
+    auto [gamma_log_both, gamma_log_scale, gamma_psi] = gamma_gradient(pi, phi, theta, log_both, log_scale, psi); 
 
     returnmat(1,1) = 1; 
-    returnmat(1,2) = -1 * link2_log_both;
-    returnmat(1,3) = -1 * link2_log_scale;
-    returnmat(1,4) = -1 * link2_psi;
+    returnmat(1,2) = -1 * gamma_log_both;
+    returnmat(1,3) = -1 * gamma_log_scale;
+    returnmat(1,4) = -1 * gamma_psi;
 
 
     // Calculate the third row.
-    double link3_log_scale = link3_gradient(phi, log_scale); 
-    returnmat(2,3) = - link3_log_scale;
+    double psi_log_scale = psi_gradient(phi, log_scale); 
+    returnmat(2,3) = - psi_log_scale;
     returnmat(2,4) = 1;
     
     // Calculate the fourth row.
@@ -330,15 +330,15 @@ PYBIND11_MODULE(libvolpriceinference, m) {
     m.def("C_func", &C_func, stream_redirect(), "This function computes function C() in the accompanying paper.",
             "x"_a, "phi"_a, "psi"_a);
 
-    m.def("link1", &link1, stream_redirect(), 
+    m.def("compute_beta", &compute_beta, stream_redirect(), 
             "This function computes function the first link function in the accompanying paper.",
             "pi"_a, "phi"_a, "theta"_a, "logit_rho"_a, "log_scale"_a, "psi"_a);
 
-    m.def("link2", &link2, stream_redirect(), 
+    m.def("compute_gamma", &compute_gamma, stream_redirect(), 
             "This function computes function the second link function in the accompanying paper.",
             "pi"_a, "phi"_a, "theta"_a, "log_both"_a, "log_scale"_a, "psi"_a);
 
-    m.def("link3", &link3, stream_redirect(), 
+    m.def("compute_psi", &compute_psi, stream_redirect(), 
             "This function computes function the second link function in the accompanying paper.",
             "theta"_a, "phi"_a, "log_scale"_a);
 
@@ -359,7 +359,7 @@ PYBIND11_MODULE(libvolpriceinference, m) {
         "This function computes the derivative of B() with respect to log_scale", "x"_a, "log_both"_a, 
         "log_scale"_a);
 
-    m.def("covariance_kernel_in", &covariance_kernel, stream_redirect(), 
+    m.def("_covariance_kernel", &covariance_kernel, stream_redirect(), 
           "This function computes the covariance kernel defined in the accompanying paper", 
           "phi1"_a, "pi1"_a, "theta1"_a, "phi2"_a, "pi2"_a, "theta2"_a,
           "log_both"_a, "log_scale"_a, "logit_rho"_a, "omega_cov"_a, "psi"_a); 
