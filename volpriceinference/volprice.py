@@ -810,7 +810,8 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
                 logging.warn("There was a floating point error inside minimized.")
                 return np.inf
 
-        results_out = np.array([qlr_in_star(true_prices, innov) - minimized(innov) for innov in innovations])
+        results_out = (_qlr_in(true_prices, omega, omega_cov)  -
+                       np.array([minimized(innov) for innov in innovations]))
 
     results = np.nan_to_num(results_out)
 
