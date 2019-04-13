@@ -233,7 +233,7 @@ std::tuple<double, double, double> gamma_gradient(double pi, double phi, double 
 
 }
 
-double compute_psi(double theta, double phi, double log_scale) { 
+double compute_psi(double phi, double theta, double log_scale) { 
 
     /* We simplify the function using properties of the exponential function. */
     double val = (phi / std::sqrt(2.0)) *  std::exp(-.5 * log_scale) 
@@ -253,7 +253,7 @@ dvec link_total(double phi, double pi, double theta, double beta, double gamma, 
 
     double beta_diff = beta - compute_beta(pi, phi, theta, logit_rho, log_scale, psi); 
     double gamma_diff = gamma - compute_gamma(pi, phi, theta, log_both, log_scale, psi); 
-    double psi_diff = psi - compute_psi(theta, phi, log_scale);
+    double psi_diff = psi - compute_psi(phi, theta, log_scale);
     double zeta_diff = 1 - (zeta + phi * phi);
 
     dvec returnvec{beta_diff, gamma_diff, psi_diff, zeta_diff};
@@ -270,9 +270,9 @@ dmat link_jacobian(double phi, double pi, double theta, double log_both, double 
     // Calculate the first row.
     auto [beta_logit_rho, beta_log_scale, beta_psi] = beta_gradient(pi, phi, theta, logit_rho, log_scale, psi); 
     returnmat(0,0) = 1;
-    returnmat(0, 3) = -1 * beta_log_scale;
-    returnmat(0,4) = -1 * beta_psi;
-    returnmat(0, 5) = -1 * beta_logit_rho; 
+    returnmat(0,3) = -1 * beta_log_scale;
+    returnmat(0,4) = -1 * beta_logit_rho; 
+    returnmat(0,5) = -1 * beta_psi;
 
 
     // Calculate the second row. //
@@ -281,13 +281,13 @@ dmat link_jacobian(double phi, double pi, double theta, double log_both, double 
     returnmat(1,1) = 1; 
     returnmat(1,2) = -1 * gamma_log_both;
     returnmat(1,3) = -1 * gamma_log_scale;
-    returnmat(1,4) = -1 * gamma_psi;
+    returnmat(1,5) = -1 * gamma_psi;
 
 
     // Calculate the third row.
     double psi_log_scale = psi_gradient(phi, log_scale); 
     returnmat(2,3) = - psi_log_scale;
-    returnmat(2,4) = 1;
+    returnmat(2,5) = 1;
     
     // Calculate the fourth row.
     returnmat(3,6) = -1; 
@@ -340,7 +340,7 @@ PYBIND11_MODULE(libvolpriceinference, m) {
 
     m.def("compute_psi", &compute_psi, stream_redirect(), 
             "This function computes function the second link function in the accompanying paper.",
-            "theta"_a, "phi"_a, "log_scale"_a);
+            "phi"_a, "theta"_a, "log_scale"_a);
 
     m.def("link_total", &link_total, stream_redirect(),
             "This function computes the link function.",
