@@ -617,11 +617,23 @@ def _qlr_in(prices, omega, omega_cov):
 
     link_in = compute_link(prices=prices, omega=omega)
 
-    cov_pi = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega)
+    if not np.all(np.isfinite(prices)):
+        logging.warning(f"prices are {prices}")
+        return np.inf
 
     try:
-        returnval = np.asscalar(link_in.T @ np.linalg.solve(cov_pi, link_in))
-    except np.linalg.LinAlgError:
+        cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov,
+                                       omega=omega)
+
+        if not np.all(np.isfinite(cov_prices)):
+            logging.warn("The covariance kernel contains NaN")
+            returnval = np.inf
+        else:
+            # We do not need to pre-multiply by $T$ because we are using scaled
+            # versions of the covariances.
+            returnval = np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))
+
+    except FloatingPointError and np.linalg.LinAlgError:
         returnval = np.inf
 
     if np.isnan(returnval):
@@ -631,18 +643,57 @@ def _qlr_in(prices, omega, omega_cov):
     return returnval
 
 
-def _minimize_function_multiple_x0(func_to_minimize, x0, omega, bounds, true_prices):
+def _qlr_in_star(prices, innov, omega, omega_cov, true_prices):
 
-    minimize_result = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
+    link_true = compute_link(true_prices, omega)
+    cov_params_true = partial(covariance_kernel, prices2=true_prices,
+                              omega=omega, omega_cov=omega_cov)
+    cov_true_true = cov_params_true(true_prices)
+
+    if not np.all(np.isfinite(prices)):
+        logging.warning(f"prices are {prices}")
+        return np.inf
+
+    try:
+        link1 = compute_link(prices, omega)
+
+        # We condition on the residual process.
+        residual = (link1 - cov_params_true(prices) @
+                    np.linalg.solve(cov_true_true, link_true))
+
+        # Instead of multpining by the inverse of cov_true_true, we just use
+        # i.i.d innovations.
+        link2 = residual + cov_params_true(prices) @ innov
+
+        cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov,
+                                       omega=omega)
+
+        if not np.all(np.isfinite(cov_prices)):
+            logging.warn("The covariance kernel contains NaN")
+            returnval = np.inf
+
+        else:
+
+            # We do not need to pre-multiply by $T$ because we are using scaled
+            # versions of the covariances.
+            returnval = np.asscalar(link2.T @ np.linalg.solve(cov_prices, link2))
+
+    except FloatingPointError and np.linalg.LinAlgError:
+        # If we get a matrix algebra error in the previous expression we set
+        # the value of the link function to infinity.
+        logging.warn("""There was either a Floating point error or a linear
+                     algebra error in _qlr_in_star.""")
+        returnval = np.inf
+
+    return returnval
+
+
+def _minimize_multiple_x0(qlr_func, x0, omega, omega_cov, bounds, **kwargs):
+
+    _qlr_func = partial(qlr_func, omega=omega, omega_cov=omega_cov, **kwargs)
+
+    minimize_result = minimize(_qlr_func, x0=x0, method='L-BFGS-B',
                                bounds=bounds, options={'maxiter': 2500})
-
-    x0 = np.asarray(true_prices)
-
-    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
-                         bounds=bounds, options={'maxiter': 2500})
-
-    if result_in.fun <= minimize_result.fun:
-        minimize_result = result_in
 
     x0[0] = (np.clip(-(1 - omega['zeta'])**.5, bounds[0][0], bounds[0][1]) if
              omega['zeta'] < 1 else bounds[0][1])
@@ -650,8 +701,8 @@ def _minimize_function_multiple_x0(func_to_minimize, x0, omega, bounds, true_pri
     x0[1] = max(bounds[1])
     x0[2] = min(bounds[2])
 
-    result_in = minimize(func_to_minimize, x0=x0, method='L-BFGS-B',
-                         bounds=bounds, options={'maxiter': 2500})
+    result_in = minimize(_qlr_func, x0=x0, method='L-BFGS-B', bounds=bounds,
+                         options={'maxiter': 2500})
 
     if result_in.fun <= minimize_result.fun:
         minimize_result = result_in
@@ -696,11 +747,9 @@ def qlr_stat(true_prices, omega, omega_cov, bounds):
         logging.warning("We violated the constraint.")
         return tuple(true_prices) + (np.inf,)
 
-    func_to_minimize = partial(_qlr_in, omega=omega, omega_cov=omega_cov)
-
-    minimize_result = _minimize_function_multiple_x0(func_to_minimize, x0,
-                                                     omega, bounds_in,
-                                                     true_prices)
+    minimize_result = _minimize_multiple_x0(_qlr_in, x0=x0, omega=omega,
+                                            omega_cov=omega_cov,
+                                            bounds=bounds_in)
 
     returnval = _qlr_in(true_prices, omega, omega_cov) - minimize_result.fun
 
@@ -741,72 +790,28 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
                  (bounds['pi']['min'], bounds['pi']['max']),
                  (bounds['theta']['min'], bounds['theta']['max'])]
 
-    constraint_dict, init = compute_constraint_prices(omega=omega,
-                                                      omega_cov=omega_cov,
-                                                      bounds=bounds)
     low_bounds, high_bounds = np.array(bounds_in).T
     x0 = np.random.uniform(low_bounds, high_bounds)
 
+    constraint_dict, init = compute_constraint_prices(omega=omega,
+                                                      omega_cov=omega_cov,
+                                                      bounds=bounds)
+
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega) < 0:
-        return tuple(true_prices) + (0,)
+        logging.warning("We violated the constraint.")
+        return tuple(true_prices) + (np.inf,)
 
-    cov_true_true = covariance_kernel(true_prices, true_prices,
-                                      omega_cov=omega_cov, omega=omega)
-    cov_params_true = partial(covariance_kernel, prices2=true_prices,
-                              omega=omega, omega_cov=omega_cov)
-
-    link_true = compute_link(true_prices, omega)
     # Draw the innovation for the moments
-    innovations = stats.multivariate_normal.rvs(cov=cov_true_true, size=innov_dim)
+    innovations = stats.multivariate_normal.rvs(cov=np.eye(4), size=innov_dim)
 
-    def qlr_in_star(prices, innov):
+    results_out = [_minimize_multiple_x0(_qlr_in_star, x0=x0, omega=omega,
+                                         omega_cov=omega_cov, bounds=bounds_in,
+                                         true_prices=true_prices,
+                                         innov=innov).fun
+                   for innov in innovations]
 
-        if not np.all(np.isfinite(prices)):
-            logging.warning(f"prices are {prices}")
-            return np.inf
-
-        try:
-            link1 = compute_link(prices, omega)
-            residual = (link1 - cov_params_true(prices) @
-                        np.linalg.solve(cov_true_true, link_true))
-
-            link_in = (residual + cov_params_true(prices) @
-                       np.linalg.solve(cov_true_true, innov))
-
-            cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov, omega=omega)
-
-            if not np.all(np.isfinite(cov_prices)):
-                logging.warn("The covariance kernel contains NaN")
-                return np.inf
-
-            # We do not need to pre-multiply by $T$ because we are using scaled versions of the covariances.
-            return np.asscalar(link_in.T @ np.linalg.solve(cov_prices, link_in))
-
-        except FloatingPointError and np.linalg.LinAlgError:
-            # If we get a matrix algebra error in the previous expression we set the value of the link function to
-            # infinity.
-            logging.warn("There was either a Floating point error or a linear algebra error in qlr_in_star.")
-            return np.inf
-
-    with np.errstate(invalid='raise'):
-
-        def minimized(innov):
-            try:
-                result = _minimize_function_multiple_x0(
-                    lambda x: qlr_in_star(x, innov), x0, omega, bounds_in,
-                    true_prices)
-
-                return result.fun
-
-            except FloatingPointError:
-                logging.warn("There was a floating point error inside minimized.")
-                return np.inf
-
-        results_out = (_qlr_in(true_prices, omega, omega_cov) -
-                       np.array([minimized(innov) for innov in innovations]))
-
-    results = np.nan_to_num(results_out)
+    results = _qlr_in(true_prices, omega, omega_cov) - np.nan_to_num(np.array(results_out))
 
     if np.any(results < 0):
         logging.warning("""Some of the differences between the true and the
@@ -988,15 +993,9 @@ def compute_strong_id(omega, omega_cov, bounds):
     low_bounds, high_bounds = np.array(bounds_in).T
     x0 = np.random.uniform(low_bounds, high_bounds)
 
-    func_to_minimize = partial(_qlr_in, omega=omega, omega_cov=omega_cov)
-
-    minimize_result = _minimize_function_multiple_x0(func_to_minimize, x0=x0,
-                                                     omega=omega, bounds=bounds_in,
-                                                     true_prices=init)
-
-    # minimize_result = minimize(lambda x: _qlr_in(x, omega, omega_cov,
-    # ), x0=init, method='SLSQP', constraints=constraint_dict,
-    # bounds=bounds_in) rtn_prices = minimize_result.x
+    minimize_result = _minimize_multiple_x0(_qlr_in, x0=x0, omega=omega,
+                                            omega_cov=omega_cov,
+                                            bounds=bounds_in)
 
     rtn_prices = minimize_result.x
 
