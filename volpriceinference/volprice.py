@@ -855,20 +855,19 @@ def compute_qlr_stats(omega, omega_cov, bounds, use_tqdm=True):
 
     """
     it = product(np.linspace(bounds['phi']['min'], bounds['phi']['max'],
-                             bounds['phi']['dim']),
+                             num=bounds['phi']['dim']),
                  np.linspace(bounds['pi']['min'], bounds['pi']['max'],
-                             bounds['pi']['dim']),
+                             num=bounds['pi']['dim']),
                  np.linspace(bounds['theta']['min'], bounds['theta']['max'],
-                             bounds['theta']['dim']))
+                             num=bounds['theta']['dim']))
 
-    qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov)
+    qlr_stat_in = partial(qlr_stat, omega=omega, omega_cov=omega_cov, bounds=bounds)
 
     with Pool(8) as pool:
         if use_tqdm:
             draws = list(tqdm(pool.imap_unordered(qlr_stat_in, it),
-                              total=bounds['pi']['dim'] *
-                              bounds['theta']['dim'] * bounds['theta']['dim'],
-                              leave=False))
+                              total=bounds['pi']['dim'] * bounds['phi']['dim']
+                              * bounds['theta']['dim'], leave=False))
         else:
             draws = list(pool.imap_unordered(qlr_stat_in, it))
 
@@ -902,11 +901,11 @@ def compute_qlr_sim(omega, omega_cov, bounds, innov_dim=10, use_tqdm=True, alpha
 
     """
     it = product(np.linspace(bounds['phi']['min'], bounds['phi']['max'],
-                             bounds['phi']['dim']),
+                             num=bounds['phi']['dim']),
                  np.linspace(bounds['pi']['min'], bounds['pi']['max'],
-                             bounds['pi']['dim']),
+                             num=bounds['pi']['dim']),
                  np.linspace(bounds['theta']['min'], bounds['theta']['max'],
-                             bounds['theta']['dim']))
+                             num=bounds['theta']['dim']))
 
     qlr_sim_in = partial(qlr_sim, omega=omega, omega_cov=omega_cov,
                          bounds=bounds, innov_dim=innov_dim, alpha=alpha)
@@ -914,7 +913,7 @@ def compute_qlr_sim(omega, omega_cov, bounds, innov_dim=10, use_tqdm=True, alpha
     param_idx = ['phi', 'pi', 'theta']
     with Pool(8) as pool:
         draws = []
-        opts = {'total': bounds['pi']['dim'] * bounds['theta']['dim'] *
+        opts = {'total': bounds['pi']['dim'] * bounds['phi']['dim'] *
                 bounds['theta']['dim'], 'leave': False}
 
         if use_tqdm:
