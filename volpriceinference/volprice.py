@@ -688,29 +688,38 @@ def _qlr_in_star(prices, innov, omega, omega_cov, true_prices):
     return returnval
 
 
-def _minimize_multiple_x0(qlr_func, x0, omega, omega_cov, bounds, **kwargs):
+def _minimize_multiple_x0(qlr_func, init1, init2, omega, omega_cov, bounds, **kwargs):
+
+    bounds_in = [(bounds['phi']['min'], bounds['phi']['max']),
+                 (bounds['pi']['min'], bounds['pi']['max']),
+                 (bounds['theta']['min'], bounds['theta']['max'])]
 
     _qlr_func = partial(qlr_func, omega=omega, omega_cov=omega_cov, **kwargs)
 
-    minimize_result = minimize(_qlr_func, x0=x0, method='L-BFGS-B',
-                               bounds=bounds, options={'maxiter': 2500})
+    if omega['zeta'] < 1:
+        phi_init = np.clip(-(1 - omega['zeta'])**.5, bounds['phi']['min'], bounds['phi']['max'])
+    else:
+        phi_init = np.clip(-.3, bounds['phi']['min'], bounds['phi']['max'])
 
-    x0[0] = (np.clip(-(1 - omega['zeta'])**.5, bounds[0][0], bounds[0][1]) if
-             omega['zeta'] < 1 else bounds[0][1])
+    pi_init1 = np.clip(0, bounds['pi']['min'], bounds['pi']['max'])
+    pi_init2 = np.clip(-20, bounds['pi']['min'], bounds['pi']['max'])
+    theta_init = np.clip(.5, bounds['theta']['min'], bounds['theta']['max'])
 
-    x0[1] = max(bounds[1])
-    x0[2] = min(bounds[2])
+    try_vals = [init1, init2, [phi_init] + list(init1[1:]), [phi_init] + list(init2[1:]),
+                [phi_init, pi_init1, theta_init], [phi_init, pi_init2, theta_init]]
 
-    result_in = minimize(_qlr_func, x0=x0, method='L-BFGS-B', bounds=bounds,
-                         options={'maxiter': 2500})
+    results = [minimize(_qlr_func, x0=np.array(x0), method='L-BFGS-B',
+                        bounds=bounds_in, options={'maxiter': 2500}) for x0 in
+               try_vals]
 
-    if result_in.fun <= minimize_result.fun:
-        minimize_result = result_in
-
-    if not minimize_result['success']:
-        logging.warning(minimize_result)
+    minimize_result = min(results, key=lambda x: x.fun)
 
     return minimize_result
+
+
+def ar_stat(true_prices, omega, omega_cov):
+    """Compute the Anderson-Rubin Statistic."""
+    return true_prices + (_qlr_in(prices=true_prices, omega=omega, omega_cov=omega_cov),)
 
 
 def qlr_stat(true_prices, omega, omega_cov, bounds):
@@ -747,9 +756,9 @@ def qlr_stat(true_prices, omega, omega_cov, bounds):
         logging.warning("We violated the constraint.")
         return tuple(true_prices) + (np.inf,)
 
-    minimize_result = _minimize_multiple_x0(_qlr_in, x0=x0, omega=omega,
-                                            omega_cov=omega_cov,
-                                            bounds=bounds_in)
+    minimize_result = _minimize_multiple_x0(_qlr_in, init1=x0,
+                                            init2=true_prices, omega=omega,
+                                            omega_cov=omega_cov, bounds=bounds)
 
     returnval = _qlr_in(true_prices, omega, omega_cov) - minimize_result.fun
 
@@ -805,8 +814,9 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=np.eye(4), size=innov_dim)
 
-    results_out = [_minimize_multiple_x0(_qlr_in_star, x0=x0, omega=omega,
-                                         omega_cov=omega_cov, bounds=bounds_in,
+    results_out = [_minimize_multiple_x0(_qlr_in_star, init1=x0,
+                                         init2=true_prices, omega=omega,
+                                         omega_cov=omega_cov, bounds=bounds,
                                          true_prices=true_prices,
                                          innov=innov).fun
                    for innov in innovations]
@@ -880,7 +890,7 @@ def compute_qlr_stats(omega, omega_cov, bounds, use_tqdm=True):
 
 def compute_qlr_sim(omega, omega_cov, bounds, innov_dim=10, use_tqdm=True, alpha=.05):
     """
-    Compute the qlr statistics and organizes them into a dataframe.
+    Compute the qlr statistics and organize them into a dataframe.
 
     Paramters
     --------
@@ -932,6 +942,52 @@ def compute_qlr_sim(omega, omega_cov, bounds, innov_dim=10, use_tqdm=True, alpha
     return draws_df
 
 
+def compute_ar_stats(omega, omega_cov, bounds, use_tqdm=True):
+    """
+    Compute the Anderson-Rubin statistics and organize them into a dataframe.
+
+    Paramters
+    --------
+    omega : dict
+        estimates
+    omega_cov : dataframe
+        estimates' covariance matrix.
+    bounds : dict of dict
+        The bounds on the structural paramters
+    innov_dim : scalar, optional
+        The number of draws to inside the simulation.
+    use_tqdm : bool, optional
+        Whehter to use tqdm.
+
+    Returns
+    ------
+    draws_df : dataframe
+
+    """
+    it = product(np.linspace(bounds['phi']['min'], bounds['phi']['max'],
+                             num=bounds['phi']['dim']),
+                 np.linspace(bounds['pi']['min'], bounds['pi']['max'],
+                             num=bounds['pi']['dim']),
+                 np.linspace(bounds['theta']['min'], bounds['theta']['max'],
+                             num=bounds['theta']['dim']))
+
+    qlr_stat_in = partial(ar_stat, omega=omega, omega_cov=omega_cov)
+
+    with Pool(8) as pool:
+        if use_tqdm:
+            draws = list(tqdm(pool.imap_unordered(qlr_stat_in, it),
+                              total=bounds['pi']['dim'] * bounds['phi']['dim']
+                              * bounds['theta']['dim'], leave=False))
+        else:
+            draws = list(pool.imap_unordered(qlr_stat_in, it))
+
+    param_idx = ['phi', 'pi', 'theta']
+    draws_df = pd.DataFrame.from_records(draws, columns=param_idx +
+                                         ['AR']).sort_values(by=param_idx)
+
+    return draws_df
+
+
 def merge_draws_and_sims(qlr_stats, qlr_draws):
     """
     Merge the two sets using the parameter values as a multiindex.
@@ -947,7 +1003,8 @@ def merge_draws_and_sims(qlr_stats, qlr_draws):
 
     """
     param_idx = ['phi', 'pi', 'theta']
-    close_enough = np.allclose(qlr_stats[param_idx], qlr_draws[param_idx])
+    close_enough = np.allclose(qlr_stats[param_idx].sort_values(by=param_idx),
+                               qlr_draws[param_idx].sort_values(by=param_idx))
 
     if not close_enough:
         raise RuntimeError('The indices are not the same!!!')
@@ -955,8 +1012,10 @@ def merge_draws_and_sims(qlr_stats, qlr_draws):
     else:
         qlr_stats[param_idx] = qlr_draws[param_idx]
 
-    merged_values = pd.merge(qlr_stats, qlr_draws, left_on=param_idx,
-                             right_on=param_idx, suffixes=['_draws', '_stats'])
+    merged_values = pd.merge(qlr_stats.sort_values(by=param_idx),
+                             qlr_draws.sort_values(by=param_idx),
+                             left_on=param_idx, right_on=param_idx,
+                             suffixes=['_draws', '_stats'])
 
     return merged_values
 
@@ -992,9 +1051,9 @@ def compute_strong_id(omega, omega_cov, bounds):
     low_bounds, high_bounds = np.array(bounds_in).T
     x0 = np.random.uniform(low_bounds, high_bounds)
 
-    minimize_result = _minimize_multiple_x0(_qlr_in, x0=x0, omega=omega,
-                                            omega_cov=omega_cov,
-                                            bounds=bounds_in)
+    minimize_result = _minimize_multiple_x0(_qlr_in, init1=x0, init2=init,
+                                            omega=omega, omega_cov=omega_cov,
+                                            bounds=bounds)
 
     rtn_prices = minimize_result.x
 
