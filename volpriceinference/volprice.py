@@ -702,8 +702,17 @@ def _minimize_multiple_x0(qlr_func, init1, init2, omega, omega_cov, bounds, **kw
         phi_init = np.clip(-.3, bounds['phi']['min'], bounds['phi']['max'])
 
     pi_init1 = np.clip(0, bounds['pi']['min'], bounds['pi']['max'])
-    pi_init2 = np.clip(-20, bounds['pi']['min'], bounds['pi']['max'])
-    theta_init = np.clip(.5, bounds['theta']['min'], bounds['theta']['max'])
+    # pi_init2 = np.clip(-20, bounds['pi']['min'], bounds['pi']['max'])
+    theta_init = np.clip(compute_theta(psi=omega['psi'],
+                                       log_scale=omega['log_scale'],
+                                       logit_rho=omega['logit_rho'],
+                                       zeta=omega['zeta']),
+                         bounds['theta']['min'], bounds['theta']['max'])
+
+    pi_init2 = compute_pi(log_both=omega['log_both'], gamma=omega['gamma'],
+                          psi=omega['psi'], logit_rho=omega['logit_rho'],
+                          log_scale=omega['log_scale'], theta=theta_init,
+                          phi=phi_init)
 
     try_vals = [init1, init2, [phi_init] + list(init1[1:]), [phi_init] + list(init2[1:]),
                 [phi_init, pi_init1, theta_init], [phi_init, pi_init2, theta_init]]
@@ -814,14 +823,14 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=np.eye(4), size=innov_dim)
 
-    results_out = [_minimize_multiple_x0(_qlr_in_star, init1=x0,
+    results_out = [innov.dot(innov) - _minimize_multiple_x0(_qlr_in_star, init1=x0,
                                          init2=true_prices, omega=omega,
                                          omega_cov=omega_cov, bounds=bounds,
                                          true_prices=true_prices,
                                          innov=innov).fun
                    for innov in innovations]
 
-    results = _qlr_in(true_prices, omega, omega_cov) - np.nan_to_num(np.array(results_out))
+    results = np.nan_to_num(np.array(results_out))
 
     if np.any(results < 0):
         logging.warning("""Some of the differences between the true and the
