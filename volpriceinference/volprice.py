@@ -701,21 +701,20 @@ def _minimize_multiple_x0(qlr_func, init1, init2, omega, omega_cov, bounds, **kw
     else:
         phi_init = np.clip(-.3, bounds['phi']['min'], bounds['phi']['max'])
 
-    pi_init1 = np.clip(0, bounds['pi']['min'], bounds['pi']['max'])
-    # pi_init2 = np.clip(-20, bounds['pi']['min'], bounds['pi']['max'])
     theta_init = np.clip(compute_theta(psi=omega['psi'],
                                        log_scale=omega['log_scale'],
                                        logit_rho=omega['logit_rho'],
                                        zeta=omega['zeta']),
                          bounds['theta']['min'], bounds['theta']['max'])
 
-    pi_init2 = compute_pi(log_both=omega['log_both'], gamma=omega['gamma'],
-                          psi=omega['psi'], logit_rho=omega['logit_rho'],
-                          log_scale=omega['log_scale'], theta=theta_init,
-                          phi=phi_init)
+    pi_init = np.clip(compute_pi(log_both=omega['log_both'],
+                                 gamma=omega['gamma'], psi=omega['psi'],
+                                 logit_rho=omega['logit_rho'],
+                                 log_scale=omega['log_scale'],
+                                 theta=theta_init, phi=phi_init),
+                      bounds['pi']['min'], bounds['pi']['max'])
 
-    try_vals = [init1, init2, [phi_init] + list(init1[1:]), [phi_init] + list(init2[1:]),
-                [phi_init, pi_init1, theta_init], [phi_init, pi_init2, theta_init]]
+    try_vals = [init1, init2, [phi_init, pi_init, theta_init]]
 
     results = [minimize(_qlr_func, x0=np.array(x0), method='L-BFGS-B',
                         bounds=bounds_in, options={'maxiter': 2500}) for x0 in
@@ -818,7 +817,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
     # If we violate the contraint, we want to always reject.
     if constraint_dict['fun'](true_prices, omega=omega) < 0:
         logging.warning("We violated the constraint.")
-        return tuple(true_prices) + (np.inf,)
+        return tuple(true_prices) + (0,)
 
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=np.eye(4), size=innov_dim)
@@ -844,9 +843,6 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
         # We replace all of the error values with zero because if we a lot of them we want to reject. We do not
         # always reject because we are only redrawing part of the variation.
         returnval = np.percentile(results, 100 * (1 - alpha), interpolation='lower')
-
-        if np.isnan(returnval):
-            raise FloatingPointError("Returnval is not finite.")
 
         return tuple(true_prices) + (returnval,)
 
@@ -1024,7 +1020,7 @@ def merge_draws_and_sims(qlr_stats, qlr_draws):
     merged_values = pd.merge(qlr_stats.sort_values(by=param_idx),
                              qlr_draws.sort_values(by=param_idx),
                              left_on=param_idx, right_on=param_idx,
-                             suffixes=['_draws', '_stats'])
+                             suffixes=['_stats', '_draws'])
 
     return merged_values
 
