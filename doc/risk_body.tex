@@ -277,7 +277,7 @@ We estimate $\omega _{2}$ by the generalized least squares (GLS) estimator becau
     x_{t} &= \sigma _{t+1}^{-1}(1,\sigma _{t}^{2},\sigma _{t+1}^{2})^{\prime } \text{ and }y_{t}=\sigma _{t+1}^{-1}r_{t+1}.  \label{omega 2 est}
 \end{align}
 %
-We estimate $\omega _{3}$ by the sample variance estimator:
+We estimate $\omega_{3}$ by the sample variance estimator:
 %
 \begin{equation}
     \label{omega 3 est}
@@ -375,7 +375,7 @@ The identification strength of $\theta _{0}$ is determined by the function $ T^{
 We construct a confidence set for $\theta \in \Theta \coloneqq [0, M_1] \times [-M_2, 0] \times [1 - \epsilon, 0]$ by inverting the test $ H_{0}: \theta =\theta_{0}$ vs $H_{1}: \theta \neq \theta _{0}$, where $M_1$ and $M_2$ are large positive constants and $\epsilon$ is a small positive constant. The test statistic is a QLR statistic that takes the form
 %
 \begin{equation}
-    QLR(\theta _{0}) \coloneqq T\widehat{g}(\theta _{0})^{\prime }\widehat{\Sigma} (\theta _{0},\theta _{0})^{-1}\widehat{g}(\theta _{0})-\underset{\theta \in \Theta }{\min }T\widehat{g}(\theta )^{\prime }\widehat{\Sigma } (\theta ,\theta )^{-1}\widehat{g}(\theta ),  
+    QLR(\theta _{0}) \coloneqq T\widehat{g}(\theta _{0})^{\prime}\widehat{\Sigma} (\theta _{0},\theta _{0})^{-1}\widehat{g}(\theta _{0})-\underset{\theta \in \Theta }{\min }T\widehat{g}(\theta )^{\prime }\widehat{\Sigma } (\theta ,\theta )^{-1}\widehat{g}(\theta ),  
     \label{QLR stat}
 \end{equation}
 %
@@ -393,13 +393,13 @@ The limiting distributions of $\widehat{r}(\theta )$ and $\widehat{g} (\theta _{
 Specifically, we obtain the $1-\alpha $ conditional quantile of the QLR statistic, denoted by $c_{1-\alpha }(r,\theta _{0}),$ as follows. For $b=1,\ldots,B$, we take independent draws $\eta _{b}^{\ast }\sim N(0,\widehat{\Sigma }(\theta _{0},\theta _{0}))$ and produce a simulated process, 
 %
 \begin{equation}
-    g_{b}^{\ast }(\theta ) \coloneqq \widehat{r}(\theta )+\widehat{\Sigma }(\theta ,\theta _{0})\widehat{\Sigma }(\theta _{0},\theta _{0})^{-1}\eta _{b}^{\ast},
+    g_{b}^{\ast }(\theta ) \coloneqq \widehat{r}(\theta ) + \widehat{\Sigma }(\theta ,\theta _{0})\widehat{\Sigma }(\theta _{0},\theta _{0})^{-1}\eta _{b}^{\ast},
 \end{equation}
 %
 and a simulated statistic,
 %
 \begin{equation}
-    QLR_{b}^{\ast }(\theta _{0}) \coloneqq T\widehat{g}(\theta _{0})^{\prime }\widehat{\Sigma }(\theta _{0},\theta _{0})^{-1}\widehat{g}(\theta _{0})-\underset{\theta \in \Pi }{\min }Tg_b^{\ast }(\theta )^{\prime }\widehat{\Sigma } (\theta ,\theta )^{-1}g_{b}^{\ast }(\theta ).
+    QLR_{b}^{\ast }(\theta _{0}) \coloneqq T  {\eta_{b}^{\ast}}^{\prime} \widehat{\Sigma} (\theta _{0},\theta _{0})^{-1} \eta_{b}^{\ast} -   \underset{\theta \in \Pi }{\min }Tg_b^{\ast }(\theta )^{\prime }\widehat{\Sigma } (\theta ,\theta )^{-1}g_{b}^{\ast }(\theta ).
 \end{equation}
 %
 Let $b_{0}=\lceil (1-\alpha )B\rceil ,$ the smallest integer greater than or equal to $(1-\alpha )B$. Then the critical value $c_{1-\alpha }(r,\theta _{0})$ is the $b_{0}^{th}$ smallest value among $\{QLR_{b}^{\ast },b=1,\ldots,B\}$.
@@ -485,8 +485,6 @@ In this section, we investigate the finite-sample performance of the proposed te
  
 To avoid boundary issues with respect to the estimate of $c$ and $\delta$ in finite-sample, we reparameterize the moment conditions and link functions in terms of $\log(c)$,  $\log(c) + \log(\delta)$, and $\logit(\rho)$. This reparameterization forces the scale parameters to be positive and $\rho$ to lie in $(0,1)$. We find that the resulting estimates for the transformed reduced-form parameters are better approximated by the Gaussian distribution for a given finite sample. 
 
-%Since the transformation is bijection, we can invert it to obtain confidence intervals for the original parameters. I do not see adding it here is necessary becasue we our goal is not to construct CI for c and delta. 
-
 To show the effect of various identification strength, we first vary the true value of $\phi$ and plot the distribution of $\widehat{\pi}$ in \cref{fig:sim_parameter_estimates}. The reported result is based on $10,000$ observations and \num{250} simulation repetitions. The black lines in the middle of the figures are the true parameter values. The parameter space for $\pi$ is $[-20, 0]$. The estimators sometimes pile up at the boundaries of the parameter space. As expected, this simulation shows that the Gaussian distribution does not approximate the finite-sample distribution of the estimator well under weak identification. 
 
 
@@ -496,19 +494,30 @@ To show the effect of various identification strength, we first vary the true va
   \label{fig:sim_parameter_estimates}
 
 
-  \begin{subfigure}[t]{.32\textwidth}
-    \caption[phi = -0.40]{$\phi = -0.40$}
-    \includegraphics[width=\textwidth, height=\textwidth]{pi_est_250_-0_point_4.pdf}
+  \begin{subfigure}[t]{.48\textwidth}
+    \caption[pi with phi = -0.40]{$\pi$ with $\phi = -0.40$}
+    \includegraphics[width=\textwidth, height=.7\textwidth]{pi_est_1800_minus_0_point_40.pdf}
   \end{subfigure}
-  \begin{subfigure}[t]{.32\textwidth}
-    \caption[phi = -0.10]{$\phi = -0.10$}
-    \includegraphics[width=\textwidth, height=\textwidth]{pi_est_250_-0_point_1.pdf}
+%
+  \hfill
+%
+  \begin{subfigure}[t]{.48\textwidth}
+    \caption[pi with phi = -0.01]{$\pi$ with $\phi = -0.01$}
+    \includegraphics[width=\textwidth, height=.7\textwidth]{pi_est_1800_minus_0_point_01.pdf}
   \end{subfigure}
-  \begin{subfigure}[t]{.32\textwidth}
-    \caption[phi = -0.01]{$\phi = -0.01$}
-    \includegraphics[width=\textwidth, height=\textwidth]{pi_est_250_-0_point_01.pdf}
+%
+  \begin{subfigure}[b]{.48\textwidth}
+    \caption[theta with phi = -0.40]{$\theta$ with $\phi = -0.40$}
+    \includegraphics[width=\textwidth, height=.7\textwidth]{theta_est_1800_minus_0_point_40.pdf}
   \end{subfigure}
-
+%
+  \hfill
+%
+  \begin{subfigure}[b]{.48\textwidth}
+    \caption[theta with phi = -0.01]{$\theta$ with $\phi = -0.01$}
+    \includegraphics[width=\textwidth, height=.7\textwidth]{theta_est_1800_minus_0_point_01.pdf}
+  \end{subfigure}
+%
 \end{figure}
 
 
@@ -545,7 +554,7 @@ The standard test is no longer valid under weak identification because the QLR s
 
 \end{table}
 
-Simulation results show that the standard QLR test under-rejects in finite-sample. This is most severe when the identification is weak, i.e., for $\phi=-0.01$, the rejection rate is \SI{2.4}{\percent} and \SI{1.7}{\percent} for the two sample sizes considered, for a \SI{5}{\percent} test. The implication is that the confidence set obtained by inverting the standard test could be much larger than necessary. The conditional QLR test is much less conservative than the standard test. For the two sample sizes considered, the finite-sample reject rate ranges from \SI{4.9}{\percent} to \SI{6.7}{\percent} for a \SI{5}{\percent} test. 
+Simulation results show that the standard QLR test under-rejects in finite-sample. This is most severe when the identification is weak, i.e., for $\phi=-0.01$, the rejection rate is \SI{2.4}{\percent} and \SI{1.7}{\percent} for the two sample sizes considered, for a \SI{5}{\percent} test.\footnote{Note, because the DGP  is highly heteroskedastic and nonlinear, there is no reason to expect the finite-sample behavior of the tests to be monotonic.} The implication is that the confidence set obtained by inverting the standard test could be much larger than necessary. The conditional QLR test is much less conservative than the standard test. For the two sample sizes considered, the finite-sample reject rate ranges from \SI{4.9}{\percent} to \SI{6.7}{\percent} for a \SI{5}{\percent} test. 
 
 \section{Data and Empirical Results}\label{sec:empirical}
 
@@ -646,7 +655,7 @@ We now report the estimates and confidence intervals for the reduced-form parame
   \end{tabularx}
 \end{table}
 
-For confidence intervals of the three structural parameters, we first compute their joint confidence set based on the conditional QLR test and then project it to each of the component. We also plot a joint confidence sets for the two risk prices, after projecting out $\phi$. 
+For confidence intervals of the three structural parameters, we first compute their joint confidence set based on the conditional QLR test and then project it to each of the component. We also plot a joint confidence sets for the two risk prices, after projecting out $\phi$. We use 1,800 simulations to compute the quantile for the QLR statistic.
 
 
 \begin{table}[htb]
@@ -674,25 +683,42 @@ For confidence intervals of the three structural parameters, we first compute th
     \toprule
     & \multicolumn{2}{c}{\SI{95}{\percent} Confidence Interval} \\
     \midrule
-    $\phi$   & -0.35 & -0.25 \\
+    $\phi$   & -0.3333 & -0.26667 \\
     \rowcolor{gray!20}
-    $\pi$    & -10.6667 & 0.00  \\
-    $\kappa$   & 0. 000 & 2.6667 \\
+    $\pi$    & -23.741935 & -1.032258 \\
+    $\kappa$   & 0.000 & 2.000 \\
     \bottomrule 
   \end{tabularx}
 \end{table}
 
 \begin{figure}[htb]
-	
-	\centering
-	\caption{Confidence Set for Risk Prices}
+  
+  \caption{Confidence Set for Risk Prices}
+
+  \begin{subfigure}[t]{.32\textwidth}
 	\label{fig:confidence_region}
+        \caption{Proposed}
 	
-	\includegraphics[width=.5\textwidth]{confidence_region_1000.pdf}
+	\includegraphics[width=\textwidth, height=\textwidth]{qlr_confidence_region_1800.pdf}
+  \end{subfigure}
+%
+  \begin{subfigure}[t]{.32\textwidth}
+    \caption{Anderson-Rubin}
+    \includegraphics[width=\textwidth, height=\textwidth]{ar_confidence_region_1800.pdf}
+  \end{subfigure}
+%
+  \begin{subfigure}[t]{.32\textwidth}
+    \caption{Standard}
+    \includegraphics[width=\textwidth, height=\textwidth]{standard_confidence_region.pdf}
+  \end{subfigure}
+
 \end{figure}
 
 
-The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ at the \SI{5}{\percent} level. We cannot, however, reject the null hypotheses that $\pi = 0$ or that $\kappa = 0$. Although the projection procedure leads to conservative subvector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear to be quite informative. The risk price associated with the market return lies in $(0.00, 2.67)$ with at least \SI{95}{\percent} probability. The volatility risk price lies in $(-10.67, 0.00))$ with at least \SI{95}{\percent} probability. Our confidence intervals for both parameters are reasonable given other values that previous authors have found. Although, previous estimates usually lie close to the side of the confidence interval that has the larger magnitude. For example, \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. Surprisingly, we cannot  reject zero for either value.
+
+The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ and the null hypothesis that $\pi = 0$, at the \SI{5}{\percent} level. We cannot reject that $\pi$ equals zero using the Anderson-Rubin statistic. The standard confidence interval, which is likely not valid, is of approximately the same magnitude. Because we have both issues with weak identification and boundary issues, there is not a priori reason to expect it to be either larger or smaller than the valid confidence sets.  
+
+We cannot reject the null hypotheses that $\kappa = 0$. This should not be particularly surprising given the difficulty in precisely estimating this parameter documented in the previous literature, \parencites{lettau2010measuring}. Although the projection procedure can lead to conservative sub-vector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear to be quite informative. The risk price associated with the market return is covered by $(0.00, 2.00)$ with at least \SI{95}{\percent} probability. The volatility risk price is covered by $(-23.75, -1.03))$ with at least \SI{95}{\percent} probability. Our confidence intervals for both parameters are reasonable given other values that previous authors have found. For example, \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. 
 
 % We're both using data on the S&P 500. We are processing the data differently, but if you  actually want to believe our estimates you have to believe our data processing is reasonable. 
 %We use a different data set and process the data differently from those in Han2018. Is this comparision still meaningful? 
