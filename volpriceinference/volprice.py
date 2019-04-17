@@ -822,11 +822,14 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=np.eye(4), size=innov_dim)
 
-    results_out = [innov.dot(innov) - _minimize_multiple_x0(_qlr_in_star, init1=x0,
-                                         init2=true_prices, omega=omega,
-                                         omega_cov=omega_cov, bounds=bounds,
-                                         true_prices=true_prices,
-                                         innov=innov).fun
+    results_out = [innov.dot(innov) - _minimize_multiple_x0(_qlr_in_star,
+                                                            init1=x0,
+                                                            init2=true_prices,
+                                                            omega=omega,
+                                                            omega_cov=omega_cov,
+                                                            bounds=bounds,
+                                                            true_prices=true_prices,
+                                                            innov=innov).fun
                    for innov in innovations]
 
     results = np.nan_to_num(np.array(results_out))
