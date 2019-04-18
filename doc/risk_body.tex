@@ -714,6 +714,23 @@ For confidence intervals of the three structural parameters, we first compute th
 \end{figure}
 
 
+% We also plot contour plots for both the conditional QLR quantile and the QLR statistic. We do this to aid in interpreting \cref{fig:confidence_region}. We do this by choosing the minimal (maximal) value of the statistic (quantile) for each ($\kappa, \pi$) pair. By defining it this way, \Cref{fig:confidence_region} is simply the region where the statistic exceeds the quantile. As we can see in these graphs both graphs are relatively smooth and likely uni-modal. 
+
+% \begin{figure}[htb]
+  
+%   \caption{Contour Plots}
+
+%   \begin{subfigure}[t]{.32\textwidth}
+%     \caption{Anderson-Rubin}
+%     \includegraphics[width=\textwidth, height=\textwidth]{ar_confidence_region_1800.pdf}
+%   \end{subfigure}
+% %
+%   \begin{subfigure}[t]{.32\textwidth}
+%     \caption{Standard}
+%     \includegraphics[width=\textwidth, height=\textwidth]{standard_confidence_region.pdf}
+%   \end{subfigure}
+
+% \end{figure}
 
 The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ and the null hypothesis that $\pi = 0$, at the \SI{5}{\percent} level. We cannot reject that $\pi$ equals zero using the Anderson-Rubin statistic. The standard confidence interval, which is likely not valid, is of approximately the same magnitude. Because we have both issues with weak identification and boundary issues, there is not a priori reason to expect it to be either larger or smaller than the valid confidence sets.  
 
