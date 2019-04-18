@@ -726,8 +726,25 @@ def _minimize_multiple_x0(qlr_func, init1, init2, omega, omega_cov, bounds, **kw
 
 
 def ar_stat(true_prices, omega, omega_cov):
-    """Compute the Anderson-Rubin Statistic."""
-    return true_prices + (_qlr_in(prices=true_prices, omega=omega, omega_cov=omega_cov),)
+    """
+    Compute the Anderson-Rubin Statistic.
+
+    Paramters
+    --------
+    true_prices : dict
+    omega : dict
+        Paramter estimates
+    omega_cov : dataframe
+        omega's covariance matrix.
+
+    Returns
+    ------
+    scalar
+
+    """
+    ar_stat = _qlr_in(prices=true_prices, omega=omega, omega_cov=omega_cov)
+
+    return true_prices + (ar_stat,)
 
 
 def qlr_stat(true_prices, omega, omega_cov, bounds):
@@ -745,7 +762,8 @@ def qlr_stat(true_prices, omega, omega_cov, bounds):
 
     Returns
     ------
-    scalar
+    tuple
+        The tuple contains the true_prices and the qlr_statistic
 
     """
     bounds_in = [(bounds['phi']['min'], bounds['phi']['max']),
