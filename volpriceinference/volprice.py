@@ -865,7 +865,9 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
         # always reject because we are only redrawing part of the variation.
         returnval = np.percentile(results, 100 * (1 - alpha), interpolation='lower')
 
-        return tuple(true_prices) + (returnval,)
+        # The quantile of the conditional qlr  is strictly less than the
+        # quantile of innov.dot(innov), which is the AR-Statistic.
+        return tuple(true_prices) + (min(returnval, stats.chi2.ppf(df=4, q=1-alpha)),)
 
 
 def compute_qlr_stats(omega, omega_cov, bounds, use_tqdm=True):
