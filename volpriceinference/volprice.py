@@ -259,11 +259,13 @@ def compute_link_price_grad(prices, omega):
 
 def covariance_kernel(prices1, prices2, omega, omega_cov):
     """Compute the covarinace of the implied gaussian process as a function of the structural paramters."""
+    cov = omega_cov.sort_index(axis=0).sort_index(axis=1)
+
     result = _covariance_kernel(*prices1, *prices2, psi=omega['psi'],
                                 log_both=omega['log_both'],
                                 log_scale=omega['log_scale'],
                                 logit_rho=omega['logit_rho'],
-                                omega_cov=omega_cov)
+                                omega_cov=cov)
     return result
 
 
@@ -649,6 +651,7 @@ def _qlr_in_star(prices, innov, omega, omega_cov, true_prices):
     cov_params_true = partial(covariance_kernel, prices2=true_prices,
                               omega=omega, omega_cov=omega_cov)
     cov_true_true = cov_params_true(true_prices)
+    innov2 = np.linalg.cholesky(cov_true_true) @ innov
 
     if not np.all(np.isfinite(prices)):
         logging.warning(f"prices are {prices}")
@@ -663,7 +666,8 @@ def _qlr_in_star(prices, innov, omega, omega_cov, true_prices):
 
         # Instead of multpining by the inverse of cov_true_true, we just use
         # i.i.d innovations.
-        link2 = residual + cov_params_true(prices) @ innov
+        link2 = (residual + cov_params_true(prices) @
+                 np.linalg.inv(cov_true_true) @ innov2)
 
         cov_prices = covariance_kernel(prices, prices, omega_cov=omega_cov,
                                        omega=omega)
@@ -683,6 +687,10 @@ def _qlr_in_star(prices, innov, omega, omega_cov, true_prices):
         # the value of the link function to infinity.
         logging.warn("""There was either a Floating point error or a linear
                      algebra error in _qlr_in_star.""")
+        returnval = np.inf
+
+    if np.isnan(returnval):
+        logging.warning("_qlr_in_star found a nan-value")
         returnval = np.inf
 
     return returnval
@@ -837,6 +845,7 @@ def qlr_sim(true_prices, omega, omega_cov, innov_dim, bounds, alpha=None):
         logging.warning("We violated the constraint.")
         return tuple(true_prices) + (0,)
 
+    omega_cov = omega_cov.sort_index(axis=0).sort_index(axis=1)
     # Draw the innovation for the moments
     innovations = stats.multivariate_normal.rvs(cov=np.eye(4), size=innov_dim)
 
@@ -1168,19 +1177,23 @@ def compute_qlr_reject(params, true_prices, innov_dim, bounds, alpha=None,
 
     """
     param_est, param_cov = params
-    names = compute_names()
-    omega = {name: val for name, val in param_est.items() if name not in names}
-    omega_cov = param_cov.query('index not in @names').T.query('index not in @names').T
+    rf_names = ['beta', 'gamma', 'log_both', 'log_scale', 'logit_rho', 'psi',
+                'zeta']
+    omega_in = pd.Series(param_est).loc[rf_names].to_dict()
+    omega_cov_in = param_cov.loc[rf_names,
+                                 rf_names].sort_index(axis=0).sort_index(axis=1)
 
-    qlr = qlr_stat(true_prices=true_prices, omega=omega, omega_cov=omega_cov,
-                   bounds=bounds)[-1]
+    qlr = qlr_stat(true_prices=true_prices, bounds=bounds,
+                   omega_cov=omega_cov_in, omega=omega_in)[-1]
+    ar_stat = _qlr_in(prices=true_prices, omega=omega_in,
+                      omega_cov=omega_cov_in)
 
     if robust_quantile:
-        qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega,
-                               alpha=alpha, omega_cov=omega_cov,
+        qlr_quantile = qlr_sim(true_prices=true_prices, omega=omega_in,
+                               alpha=alpha, omega_cov=omega_cov_in,
                                innov_dim=innov_dim, bounds=bounds)
         if alpha is None:
-            return (qlr,) + tuple(qlr_quantile)
+            return (qlr, ar_stat) + tuple(qlr_quantile)
         else:
             return (qlr, qlr_quantile[-1])
     else:
@@ -1236,6 +1249,7 @@ def compute_robust_rejection(est_arr, true_params, bounds, alpha=.05,
     else:
         results.columns = ['qlr_stat']
 
-    results['standard'] = results.loc[:, 'qlr_stat'] >= stats.chi2.ppf(1 - alpha, df=len(true_prices))
+    results['standard'] = (results.loc[:, 'qlr_stat']
+                           >= stats.chi2.ppf(1 - alpha, df=len(true_prices)))
 
     return results

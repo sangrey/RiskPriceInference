@@ -519,8 +519,8 @@ To show the effect of various identification strength, we first vary the true va
 %
 \end{figure}
 
-
-Next, we study the finite-sample size of in the standard QLR test and the proposed conditional QLR test for a joint test for the three structural parameters. The nominal level of the test is \SI{5}{\percent}. The critical value of the standard QLR test is the \SI{95}{\percent} quantile of the $\chi^2$-distribution with $3$ degree of freedom. The critical value of the conditional QLR test is obtained by the stimulation-based procedure in \cref{alg:constructing_the_cs}, with \num{1000} simulation repetitions to approximate the quantile of the conditional distribution. The finite-sample size is based on \num{250} simulation repetitions.
+% Increase the number of simulations
+Next, we study the finite-sample size of in the standard QLR test and the proposed conditional QLR test for a joint test for the three structural parameters. The nominal level of the test is \SI{5}{\percent}. The critical value of the standard QLR test is the \SI{95}{\percent} quantile of the $\chi^2$-distribution with $3$ degree of freedom. The critical value of the conditional QLR test is obtained by the stimulation-based procedure in \cref{alg:constructing_the_cs}, with \num{250} simulation repetitions to approximate the quantile of the conditional distribution. The finite-sample size is based on \num{250} simulation repetitions.
 
 The standard test is no longer valid under weak identification because the QLR statistic does not have a chi-square distribution in this case. However, it is not clear whether the standard QLR test under-rejects or over-rejects in finite-sample and how large is the difference from \SI{5}{\percent}. 
 
@@ -536,7 +536,7 @@ The standard test is no longer valid under weak identification because the QLR s
   round-precision=2,
  }
  
- \begin{tabularx}{.7\textwidth}{X | S S | S S}
+ \begin{tabularx}{.7\textwidth}{X | S   S | S <{{\%}} S <{{\%}}}
 %
   \toprule
   & {Standard} & {Proposed} & {Standard} & {Proposed} \\
@@ -544,9 +544,9 @@ The standard test is no longer valid under weak identification because the QLR s
   \midrule
   $\phi$ & \multicolumn{2}{c}{$T$ = 2,000} & \multicolumn{2}{c}{$T$ = 10,000} \\
   \midrule
-  -0.01  & 2.4   & 5.2  & 1.7 & 5.6   \\
-  -0.10  & 3.3   & 6.7  & 2.6 & 6.2   \\
-  -0.40  & 3.0   & 2.2  & 3.4 & 4.9   \\
+  -0.01  & & & 1.60  &  4.40 \\
+  -0.10  &   &   & &   \\
+  -0.40  &   &   & &   \\
   \bottomrule
 
  \end{tabularx}
