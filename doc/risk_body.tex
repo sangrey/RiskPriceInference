@@ -522,7 +522,7 @@ To show the effect of various identification strength, we first vary the true va
 % Increase the number of simulations
 Next, we study the finite-sample size of in the standard QLR test and the proposed conditional QLR test for a joint test for the three structural parameters. The nominal level of the test is \SI{5}{\percent}. The critical value of the standard QLR test is the \SI{95}{\percent} quantile of the $\chi^2$-distribution with $3$ degree of freedom. The critical value of the conditional QLR test is obtained by the stimulation-based procedure in \cref{alg:constructing_the_cs}, with \num{250} simulation repetitions to approximate the quantile of the conditional distribution. The finite-sample size is based on \num{250} simulation repetitions.
 
-The standard test is no longer valid under weak identification because the QLR statistic does not have a chi-square distribution in this case. However, it is not clear whether the standard QLR test under-rejects or over-rejects in finite-sample and how large is the difference from \SI{5}{\percent}. 
+The standard test is no longer valid under weak identification because the QLR statistic does not have a $\chi^2$-distribution in this case. However, it is not clear whether the standard QLR test under-rejects or over-rejects in finite-sample and how large is the difference from \SI{5}{\percent}. 
 
 
 \begin{table}[htb]
@@ -536,7 +536,7 @@ The standard test is no longer valid under weak identification because the QLR s
   round-precision=2,
  }
  
- \begin{tabularx}{.7\textwidth}{X | S   S | S <{{\,\%}} S <{{\,\%}}}
+ \begin{tabularx}{.7\textwidth}{X | S  <{{\,\%}} S <{{\,\%}} | S <{{\,\%}} S <{{\,\%}}}
 %
   \toprule
   & {Standard} & {Proposed} & {Standard} & {Proposed} \\
@@ -546,22 +546,20 @@ The standard test is no longer valid under weak identification because the QLR s
   \midrule
   -0.01  & & & 1.60  &  4.40 \\
   % -0.10  &   &   & &   \\
-  -0.40  &   &   &  6.00 & 6.40  \\
+  -0.40  &  2.40  & 5.60  &  6.00 & 6.40  \\
   \bottomrule
 
  \end{tabularx}
 
 \end{table}
 
-Simulation results show that the standard QLR test under-rejects in finite-sample. This is most severe when the identification is weak, i.e., for $\phi=-0.01$, the rejection rate is \SI{2.4}{\percent} and \SI{1.7}{\percent} for the two sample sizes considered, for a \SI{5}{\percent} test.\footnote{Note, because the DGP  is highly heteroskedastic and nonlinear, there is no reason to expect the finite-sample behavior of the tests to be monotonic.} The implication is that the confidence set obtained by inverting the standard test could be much larger than necessary. The conditional QLR test is much less conservative than the standard test. For the two sample sizes considered, the finite-sample reject rate ranges from \SI{4.9}{\percent} to \SI{6.7}{\percent} for a \SI{5}{\percent} test. 
+Simulation results show that the standard QLR test under-rejects in finite-sample. This is most severe when the identification is weak, e.g., for $\phi=-0.01$ and $T = 10,000$, the rejection rate is \SI{1.6}{\percent}. If we have enough data and $\phi$ is large enough in magnitude, the standard test static does okay. However, this is not the empirically relevant case.  The proposed test, however, has approximately uniform  coverage and, hence, is much more trustworthy.
 
 \section{Data and Empirical Results}\label{sec:empirical}
 
 For the empirical application, we use the daily return on the S\&P 500 for $r_{t+1}$ and the associated realized volatility computed with high-frequency data for $\sigma^2_{t+1}$. The data is obtained from SPY (SPDR S\&P 500 ETF Trust), an exchange-traded fund that mimics the S\&P 500. This gives us a market index whose risk is not easily diversifiable and can be used to estimate the prices of risk that investors face in practice. We use the procedure \textcite{sangrey2018jumps} develops to estimate the integrated total volatility, i.e, the instantaneous expectation of the price variance. This measure reduces to the integrated diffusion volatility if prices have continuous paths and it works well in the presence of market microstructure noise.
 
 Since SPY is one of the most liquid assets traded, we can choose the frequency at which we sample the underlying price. To balance market-microstructure noise, computational cost, and efficiency of the resultant estimators, we sample at the \num{1}-second frequency. We annualize the data by multiplying $r_{t+1}$ by \num{252} and $\sigma^2_{t+1}$ by $252^2$. The data starts in 2003 and ends in September 2017. Since the asset is only traded during business hours, this leads to \num{3713} days of data with an average of approximately \num{24000} observations per day. We compute $r_{t+1}$ as the daily return from the open to the close of the market, the interval over which we can estimate the volatility. This avoids specifying the relationship between overnight and intra-day returns. We preprocess the data using the pre-averaging approach as in \textcites{podolskij2009bipower, aitsahalia2012testing}. 
-
-%I do not see this is necessary to provide these details. This procedure is known not to affect the consistency of the estimation procedure. The basic idea is rather simple. We average the price over a small interval to remove the noise. If we pick the rates at which we shrink the interval appropriately and thereby balance smoothing away the noise and allowing the volatility to vary intraday, the estimators are consistent.
 
 \begin{figure}[htb]
 
@@ -654,41 +652,30 @@ We now report the estimates and confidence intervals for the reduced-form parame
   \end{tabularx}
 \end{table}
 
-For confidence intervals of the three structural parameters, we first compute their joint confidence set based on the conditional QLR test and then project it to each of the component. We also plot a joint confidence sets for the two risk prices, after projecting out $\phi$. We use 1,800 simulations to compute the quantile for the QLR statistic.
-
+For confidence intervals of the three structural parameters, we first compute their joint confidence set based on the conditional QLR test and then project it to each of the components. We also plot a joint confidence sets for the two risk prices, after projecting out $\phi$. We use 1,800 simulations to compute the quantile for the QLR statistic.\footnote{ We plot contour plots for both the conditional QLR quantile and the QLR statistic in the appendix to aid in interpreting \cref{fig:confidence_region}. In particular, the disconnectedness in \cref{fig:confidence_region} is coming from the multi-modality of the statistic. The conditional quantile is actually quite smooth.  We do this by choosing the minimal (maximal) value of the statistic (quantile) for each ($\kappa, \pi$) pair. If the $\phi$ estimate were independent of the other parameters' estimates,  \cref{fig:confidence_region} would simply be the region where the statistic exceeds the quantile. We deal with the multi-modality of the posterior by using both a random initialization, the true value under the null hypothesis, and a closed-form guess computed by using a subset of the moment conditions. We then use the minimum value computed from these three minimizations. Other initialization procedures do not qualitatively affect the results.}
 
 \begin{table}[htb]
   \caption{Structural Parameters} 
   \label{tbl:structural_param_estimates}
 
   \centering
-    \sisetup{
-        detect-mode,
-        tight-spacing           = true,
-        group-digits            = false,
-        input-symbols           = {(}{)},
-        input-open-uncertainty  = ,
-        input-close-uncertainty = ,
-        round-mode              = places,
-        round-precision         = 2,
-        table-align-text-pre    = false,
-        table-align-text-post   = false,
-        table-alignment         = center,
-    }
 
-    \begin{tabularx}{.4\textwidth}{X | >{{(}} S[table-space-text-pre={(}] <{{,\,}}
-      S[table-space-text-pre={\hspace{-1.5cm}}] <{{)}}}
+  \begin{tabularx}{.4\textwidth}{X | c } 
 %
     \toprule
-    & \multicolumn{2}{c}{\SI{95}{\percent} Confidence Interval} \\
+    & \SI{95}{\percent} Confidence Interval \\
     \midrule
-    $\phi$   & -0.3333 & -0.26667 \\
+    $\phi$      & (-0.33, -0.27) \\
     \rowcolor{gray!20}
-    $\pi$    & -23.741935 & -1.032258 \\
-    $\kappa$   & 0.000 & 2.000 \\
+    $\pi$       & (-30.97,  0.00)  \\
+    $\kappa$    & (0.00, 2.00) \\
     \bottomrule 
   \end{tabularx}
 \end{table}
+
+
+The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$. We cannot, however, reject the hypothesis that $\pi = 0$ at the \SI{5}{\percent} level. The standard confidence interval, which is likely not valid, has approximately the same area. Because we have both issues with weak identification and boundary issues, there is not a priori reason to expect it to be either larger or smaller than the valid confidence sets. It does allow for much larger magnitudes of $\pi$.
+
 
 \begin{figure}[htb]
   
@@ -698,12 +685,12 @@ For confidence intervals of the three structural parameters, we first compute th
 	\label{fig:confidence_region}
         \caption{Proposed}
 	
-	\includegraphics[width=\textwidth, height=\textwidth]{qlr_confidence_region_1800.pdf}
+	\includegraphics[width=\textwidth, height=\textwidth]{qlr_confidence_region_500.pdf}
   \end{subfigure}
 %
   \begin{subfigure}[t]{.32\textwidth}
     \caption{Anderson-Rubin}
-    \includegraphics[width=\textwidth, height=\textwidth]{ar_confidence_region_1800.pdf}
+    \includegraphics[width=\textwidth, height=\textwidth]{ar_confidence_region_500.pdf}
   \end{subfigure}
 %
   \begin{subfigure}[t]{.32\textwidth}
@@ -714,39 +701,7 @@ For confidence intervals of the three structural parameters, we first compute th
 \end{figure}
 
 
-% We also plot contour plots for both the conditional QLR quantile and the QLR statistic. We do this to aid in interpreting \cref{fig:confidence_region}. We do this by choosing the minimal (maximal) value of the statistic (quantile) for each ($\kappa, \pi$) pair. By defining it this way, \Cref{fig:confidence_region} is simply the region where the statistic exceeds the quantile. As we can see in these graphs both graphs are relatively smooth and likely uni-modal. 
-
-% \begin{figure}[htb]
-  
-%   \caption{Contour Plots}
-
-%   \begin{subfigure}[t]{.32\textwidth}
-%     \caption{Anderson-Rubin}
-%     \includegraphics[width=\textwidth, height=\textwidth]{ar_confidence_region_1800.pdf}
-%   \end{subfigure}
-% %
-%   \begin{subfigure}[t]{.32\textwidth}
-%     \caption{Standard}
-%     \includegraphics[width=\textwidth, height=\textwidth]{standard_confidence_region.pdf}
-%   \end{subfigure}
-
-% \end{figure}
-
-The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$ and the null hypothesis that $\pi = 0$, at the \SI{5}{\percent} level. We cannot reject that $\pi$ equals zero using the Anderson-Rubin statistic. The standard confidence interval, which is likely not valid, is of approximately the same magnitude. Because we have both issues with weak identification and boundary issues, there is not a priori reason to expect it to be either larger or smaller than the valid confidence sets.  
-
-We cannot reject the null hypotheses that $\kappa = 0$. This should not be particularly surprising given the difficulty in precisely estimating this parameter documented in the previous literature, \parencites{lettau2010measuring}. Although the projection procedure can lead to conservative sub-vector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear to be quite informative. The risk price associated with the market return is covered by $(0.00, 2.00)$ with at least \SI{95}{\percent} probability. The volatility risk price is covered by $(-23.75, -1.03))$ with at least \SI{95}{\percent} probability. Our confidence intervals for both parameters are reasonable given other values that previous authors have found. For example, \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. 
-
-% We're both using data on the S&P 500. We are processing the data differently, but if you  actually want to believe our estimates you have to believe our data processing is reasonable. 
-%We use a different data set and process the data differently from those in Han2018. Is this comparision still meaningful? 
-
-%I do not see the following discussion provides more informaiton than their calibraiton is bad, which is already stated above. Also, we do not provide an estimate. Conversely, our estimates do not lie outside their confidence intervals. Even though our estimation procedure for the parameters individually is conservative, as induced by the projection above, our estimates are still more precise in practice. This difference is likely a result of our estimation procedure more effectively using the information about the various parameters jointly, which their partially calibrated model is incapable of doing.
-
-%The main issue with the confidence intervals in \cref{tbl:structural_param_estimates} is that they are conservative because we go from joint inference to sub-vector inference by using an inherently conservative projection-based procedure. Plots of confidence set in three dimensions are not particularly easy to understand, and so we 
-
-%We do impose that kappa is greater than 0. 
-
-%The set is on pi and kappa. We did not impose any constraints on kappa. It is worth noting that except for $\pi < 0$, the constraints on the possible values of the parameters do not bind in practice. Also, as the conditional densities are likely not Gaussian, there is no reason to assume that the confidence sets should be elliptical, and even though the projection procedure is conservative, our confidence set is still quite small. We do not appear to be losing much precision.
-
+We cannot reject the null hypotheses that $\kappa = 0$. This should not be particularly surprising given the difficulty in precisely estimating this parameter documented in the previous literature, \parencites{lettau2010measuring}. We can reject the hypothesis that both $\kappa = \pi = 0$. The procedure can determine that investors demand compensation for risk, just not what combination of risks they demand compensation for.  Although the projection procedure can lead to conservative sub-vector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear relatively informative. The risk price associated with the market return is covered by $(0.00, 2.00)$ with at least \SI{95}{\percent} probability. The volatility risk price is covered by $(-30.97, 0.00))$ with at least \SI{95}{\percent} probability. Our confidence intervals for both parameters are reasonable given other values that previous authors have found. For example, \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. 
 
 
 \section{Conclusion}\label{sec:risk_conclusion}
