@@ -536,15 +536,15 @@ The standard test is no longer valid under weak identification because the QLR s
   round-precision=2,
  }
  
- \begin{tabularx}{.7\textwidth}{X | S  <{{\,\%}} S <{{\,\%}} | S <{{\,\%}} S <{{\,\%}}}
+ \begin{tabularx}{.7\textwidth}{X | S  S | S S }
 %
   \toprule
-  & {Standard} & {Proposed} & {Standard} & {Proposed} \\
+  & {Standard \%} & {Proposed \%} & {Standard \%} & {Proposed \%} \\
   
   \midrule
   $\phi$ & \multicolumn{2}{c}{$T$ = 2,000} & \multicolumn{2}{c}{$T$ = 10,000} \\
   \midrule
-  -0.01  & & & 1.60  &  4.40 \\
+  -0.01  & 2.00 & 5.20 & 1.60  &  4.40 \\
   % -0.10  &   &   & &   \\
   -0.40  &  2.40  & 5.60  &  6.00 & 6.40  \\
   \bottomrule
@@ -652,7 +652,9 @@ We now report the estimates and confidence intervals for the reduced-form parame
   \end{tabularx}
 \end{table}
 
-For confidence intervals of the three structural parameters, we first compute their joint confidence set based on the conditional QLR test and then project it to each of the components. We also plot a joint confidence sets for the two risk prices, after projecting out $\phi$. We use 1,800 simulations to compute the quantile for the QLR statistic.\footnote{ We plot contour plots for both the conditional QLR quantile and the QLR statistic in the appendix to aid in interpreting \cref{fig:confidence_region}. In particular, the disconnectedness in \cref{fig:confidence_region} is coming from the multi-modality of the statistic. The conditional quantile is actually quite smooth.  We do this by choosing the minimal (maximal) value of the statistic (quantile) for each ($\kappa, \pi$) pair. If the $\phi$ estimate were independent of the other parameters' estimates,  \cref{fig:confidence_region} would simply be the region where the statistic exceeds the quantile. We deal with the multi-modality of the posterior by using both a random initialization, the true value under the null hypothesis, and a closed-form guess computed by using a subset of the moment conditions. We then use the minimum value computed from these three minimizations. Other initialization procedures do not qualitatively affect the results.}
+For confidence intervals of the three structural parameters, we first compute their joint confidence set based on the conditional QLR test and then project it to each of the components. We also plot a joint confidence sets for the two risk prices, after projecting out $\phi$. We use 1,800 simulations to compute the quantile for the QLR statistic.
+
+% \footnote{ We plot contour plots for both the conditional QLR quantile and the QLR statistic in the appendix to aid in interpreting \cref{fig:confidence_region}. In particular, the disconnectedness in \cref{fig:confidence_region} is coming from the multi-modality of the statistic. The conditional quantile is actually quite smooth.  We do this by choosing the minimal (maximal) value of the statistic (quantile) for each ($\kappa, \pi$) pair. If the $\phi$ estimate were independent of the other parameters' estimates,  \cref{fig:confidence_region} would simply be the region where the statistic exceeds the quantile. We deal with the multi-modality of the posterior by using both a random initialization, the true value under the null hypothesis, and a closed-form guess computed by using a subset of the moment conditions. We then use the minimum value computed from these three minimizations. Other initialization procedures do not qualitatively affect the results.}
 
 \begin{table}[htb]
   \caption{Structural Parameters} 
@@ -674,34 +676,37 @@ For confidence intervals of the three structural parameters, we first compute th
 \end{table}
 
 
-The results in \cref{tbl:structural_param_estimates} and \cref{fig:confidence_region} have a few notable features. First, we can reject the null hypothesis $\phi = 0$. We cannot, however, reject the hypothesis that $\pi = 0$ at the \SI{5}{\percent} level. The standard confidence interval, which is likely not valid, has approximately the same area. Because we have both issues with weak identification and boundary issues, there is not a priori reason to expect it to be either larger or smaller than the valid confidence sets. It does allow for much larger magnitudes of $\pi$.
-
-
-\begin{figure}[htb]
-  
-  \caption{Confidence Set for Risk Prices}
-
-  \begin{subfigure}[t]{.32\textwidth}
-	\label{fig:confidence_region}
-        \caption{Proposed}
-	
-	\includegraphics[width=\textwidth, height=\textwidth]{qlr_confidence_region_500.pdf}
-  \end{subfigure}
+The results in \cref{tbl:structural_param_estimates}.
+% and \cref{fig:confidence_region}
+have a few notable features. 
+First, we can reject the null hypothesis $\phi = 0$. We cannot, however, reject the hypothesis that $\pi = 0$ at the \SI{5}{\percent} level. 
+% The standard confidence interval, which is likely not valid, has approximately the same area. Because we have both issues with weak identification and boundary issues, there is not a priori reason to expect it to be either larger or smaller than the valid confidence sets. It does allow for much larger magnitudes of $\pi$.
+% \begin{figure}[htb]
+%  
+%   \caption{Confidence Set for Risk Prices}
 %
-  \begin{subfigure}[t]{.32\textwidth}
-    \caption{Anderson-Rubin}
-    \includegraphics[width=\textwidth, height=\textwidth]{ar_confidence_region_500.pdf}
-  \end{subfigure}
+%   \begin{subfigure}[t]{.32\textwidth}
+% 	\label{fig:confidence_region}
+%         \caption{Proposed}	
+% 	\includegraphics[width=\textwidth, height=\textwidth]{qlr_confidence_region_500.pdf}
+%   \end{subfigure}
+% %
+%   \begin{subfigure}[t]{.32\textwidth}
+%     \caption{Anderson-Rubin}
+%     \includegraphics[width=\textwidth, height=\textwidth]{ar_confidence_region_500.pdf}
+%   \end{subfigure}
+% %
+%   \begin{subfigure}[t]{.32\textwidth}
+%     \caption{Standard}
+%     \includegraphics[width=\textwidth, height=\textwidth]{standard_confidence_region.pdf}
+%   \end{subfigure}
 %
-  \begin{subfigure}[t]{.32\textwidth}
-    \caption{Standard}
-    \includegraphics[width=\textwidth, height=\textwidth]{standard_confidence_region.pdf}
-  \end{subfigure}
-
-\end{figure}
-
-
-We cannot reject the null hypotheses that $\kappa = 0$. This should not be particularly surprising given the difficulty in precisely estimating this parameter documented in the previous literature, \parencites{lettau2010measuring}. We can reject the hypothesis that both $\kappa = \pi = 0$. The procedure can determine that investors demand compensation for risk, just not what combination of risks they demand compensation for.  Although the projection procedure can lead to conservative sub-vector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear relatively informative. The risk price associated with the market return is covered by $(0.00, 2.00)$ with at least \SI{95}{\percent} probability. The volatility risk price is covered by $(-30.97, 0.00))$ with at least \SI{95}{\percent} probability. Our confidence intervals for both parameters are reasonable given other values that previous authors have found. For example, \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. 
+% \end{figure}
+We cannot reject the null hypotheses that $\kappa = 0$. This should not be particularly surprising given the difficulty in precisely estimating this parameter documented in the previous literature, \parencites{lettau2010measuring}. Although not recorded on the table, we can reject the hypothesis that both $\kappa = \pi = 0$. The procedure can determine that investors demand compensation for risk, just not what combination of risks they demand compensation for.  
+%
+% Although the projection procedure can lead to conservative sub-vector confidence sets whose coverage could be larger than \SI{95}{\percent}, the confidence set in \cref{fig:confidence_region} appear relatively informative. 
+%
+The risk price associated with the market return is covered by $(0.00, 2.00)$ with at least \SI{95}{\percent} probability. The volatility risk price is covered by $(-30.97, 0.00))$ with at least \SI{95}{\percent} probability. Our confidence intervals for both parameters are reasonable given other values that previous authors have found. For example, \Textcite{han2018leverage} preferred a value of $\pi = -10$, for example. 
 
 
 \section{Conclusion}\label{sec:risk_conclusion}
